@@ -1,0 +1,300 @@
+const { Ship, NPC, CombatLog, User, Sector, sequelize } = require('../models');
+const config = require('../config');
+const maintenanceService = require('./maintenanceService');
+const shipDesignerService = require('./shipDesignerService');
+
+/**
+ * Calculate damage with variance
+ */
+const calculateDamage = (attackPower, defenseRating) => {
+  const baseDamage = Math.max(config.combat.minDamage, attackPower - defenseRating);
+  const variance = 0.2; // ±20% variance
+  const multiplier = 1 + (Math.random() * variance * 2 - variance);
+  return Math.floor(baseDamage * multiplier);
+};
+
+/**
+ * Check for critical hit
+ */
+const checkCriticalHit = () => {
+  return Math.random() < config.combat.criticalHitChance;
+};
+
+/**
+ * Apply damage to target (shields first, then hull)
+ */
+const applyDamage = (target, damage) => {
+  let remainingDamage = damage;
+  const shieldPenetration = Math.floor(damage * config.combat.shieldPenetration);
+  
+  // Some damage bypasses shields
+  if (shieldPenetration > 0 && target.hull_points > 0) {
+    target.hull_points = Math.max(0, target.hull_points - shieldPenetration);
+    remainingDamage -= shieldPenetration;
+  }
+  
+  // Remaining damage hits shields first
+  if (target.shield_points > 0) {
+    const shieldDamage = Math.min(target.shield_points, remainingDamage);
+    target.shield_points -= shieldDamage;
+    remainingDamage -= shieldDamage;
+  }
+  
+  // Leftover hits hull
+  if (remainingDamage > 0) {
+    target.hull_points = Math.max(0, target.hull_points - remainingDamage);
+  }
+  
+  return damage;
+};
+
+/**
+ * Calculate flee chance based on speed difference
+ */
+const calculateFleeChance = (attacker, defender) => {
+  const speedDiff = attacker.speed - defender.speed;
+  return Math.min(0.9, Math.max(0.1, config.combat.fleeChanceBase + speedDiff * config.combat.fleeChancePerSpeedDiff));
+};
+
+/**
+ * Execute a single combat round
+ */
+const executeCombatRound = (attacker, defender, roundNum) => {
+  const round = { round: roundNum, actions: [] };
+  
+  // Attacker attacks
+  let attackerDamage = calculateDamage(attacker.attack_power, defender.defense_rating);
+  const attackerCrit = checkCriticalHit();
+  if (attackerCrit) attackerDamage = Math.floor(attackerDamage * config.combat.criticalHitMultiplier);
+  
+  const actualAttackerDamage = applyDamage(defender, attackerDamage);
+  round.actions.push({
+    actor: 'attacker',
+    action: 'attack',
+    damage: actualAttackerDamage,
+    critical: attackerCrit,
+    target_shields: defender.shield_points,
+    target_hull: defender.hull_points
+  });
+  
+  // Check if defender destroyed
+  if (defender.hull_points <= 0) {
+    round.defender_destroyed = true;
+    return round;
+  }
+  
+  // Defender counter-attacks
+  let defenderDamage = calculateDamage(defender.attack_power, attacker.defense_rating);
+  const defenderCrit = checkCriticalHit();
+  if (defenderCrit) defenderDamage = Math.floor(defenderDamage * config.combat.criticalHitMultiplier);
+  
+  const actualDefenderDamage = applyDamage(attacker, defenderDamage);
+  round.actions.push({
+    actor: 'defender',
+    action: 'attack',
+    damage: actualDefenderDamage,
+    critical: defenderCrit,
+    target_shields: attacker.shield_points,
+    target_hull: attacker.hull_points
+  });
+  
+  if (attacker.hull_points <= 0) {
+    round.attacker_destroyed = true;
+  }
+  
+  return round;
+};
+
+/**
+ * Initiate combat between player ship and NPC
+ */
+const attackNPC = async (userId, shipId, npcId) => {
+  const t = await sequelize.transaction();
+  try {
+    const ship = await Ship.findOne({
+      where: { ship_id: shipId, owner_user_id: userId, is_active: true },
+      transaction: t, lock: t.LOCK.UPDATE
+    });
+    if (!ship) throw Object.assign(new Error('Ship not found'), { statusCode: 404 });
+    if (ship.in_combat) throw Object.assign(new Error('Ship already in combat'), { statusCode: 400 });
+
+    const npc = await NPC.findOne({
+      where: { npc_id: npcId, is_alive: true },
+      transaction: t, lock: t.LOCK.UPDATE
+    });
+    if (!npc) throw Object.assign(new Error('Target not found'), { statusCode: 404 });
+    if (ship.current_sector_id !== npc.current_sector_id) {
+      throw Object.assign(new Error('Target not in same sector'), { statusCode: 400 });
+    }
+
+    // Execute combat
+    const combatRounds = [];
+    let totalAttackerDamage = 0, totalDefenderDamage = 0;
+    
+    // Create combat state objects
+    const attackerState = {
+      hull_points: ship.hull_points,
+      shield_points: ship.shield_points,
+      attack_power: ship.attack_power,
+      defense_rating: ship.defense_rating,
+      speed: ship.speed
+    };
+    const defenderState = {
+      hull_points: npc.hull_points,
+      shield_points: npc.shield_points,
+      attack_power: npc.attack_power,
+      defense_rating: npc.defense_rating,
+      speed: npc.speed
+    };
+
+    for (let i = 1; i <= config.combat.maxRoundsPerBattle; i++) {
+      const round = executeCombatRound(attackerState, defenderState, i);
+      combatRounds.push(round);
+
+      // Safely accumulate damage from combat actions
+      if (round.actions && round.actions[0]) {
+        totalAttackerDamage += round.actions[0].damage;
+      }
+      if (round.actions && round.actions[1]) {
+        totalDefenderDamage += round.actions[1].damage;
+      }
+
+      if (round.attacker_destroyed || round.defender_destroyed) break;
+    }
+
+    // Determine winner
+    let winner = null;
+    if (defenderState.hull_points <= 0) winner = 'attacker';
+    else if (attackerState.hull_points <= 0) winner = 'defender';
+    else winner = 'draw';
+
+    // Calculate rewards
+    let creditsLooted = 0, experienceGained = 0;
+    if (winner === 'attacker') {
+      creditsLooted = npc.credits_carried;
+      experienceGained = npc.experience_value;
+
+      // Update NPC
+      await npc.update({
+        is_alive: false,
+        hull_points: 0,
+        respawn_at: new Date(Date.now() + 5 * 60 * 1000) // 5 min respawn
+      }, { transaction: t });
+
+      // Award player
+      const user = await User.findByPk(userId, { transaction: t, lock: t.LOCK.UPDATE });
+      await user.update({ credits: user.credits + creditsLooted }, { transaction: t });
+    }
+
+    // Update ship state
+    await ship.update({
+      hull_points: Math.max(0, attackerState.hull_points),
+      shield_points: Math.max(0, attackerState.shield_points),
+      in_combat: false
+    }, { transaction: t });
+
+    // If player ship destroyed
+    if (winner === 'defender') {
+      await ship.update({ is_active: false }, { transaction: t });
+    }
+
+    // Apply component degradation from combat and recalculate ship stats
+    await maintenanceService.degradeComponents(shipId, combatRounds.length, t);
+    await shipDesignerService.recalculateShipStats(ship, t);
+
+    // Create combat log
+    const combatLog = await CombatLog.create({
+      attacker_ship_id: shipId,
+      defender_npc_id: npcId,
+      sector_id: ship.current_sector_id,
+      combat_type: 'PVE',
+      rounds_fought: combatRounds.length,
+      winner_type: winner,
+      attacker_damage_dealt: totalAttackerDamage,
+      defender_damage_dealt: totalDefenderDamage,
+      attacker_hull_remaining: attackerState.hull_points,
+      defender_hull_remaining: defenderState.hull_points,
+      credits_looted: creditsLooted,
+      experience_gained: experienceGained,
+      combat_rounds: combatRounds
+    }, { transaction: t });
+
+    await t.commit();
+
+    return {
+      success: true,
+      combat_log_id: combatLog.combat_log_id,
+      winner,
+      rounds: combatRounds.length,
+      credits_looted: creditsLooted,
+      experience_gained: experienceGained,
+      ship_status: {
+        hull: attackerState.hull_points,
+        shields: attackerState.shield_points,
+        destroyed: winner === 'defender'
+      },
+      target_status: {
+        hull: defenderState.hull_points,
+        shields: defenderState.shield_points,
+        destroyed: winner === 'attacker'
+      }
+    };
+  } catch (error) {
+    await t.rollback();
+    throw error;
+  }
+};
+
+/**
+ * Attempt to flee from combat
+ */
+const fleeFromCombat = async (userId, shipId) => {
+  const ship = await Ship.findOne({
+    where: { ship_id: shipId, owner_user_id: userId, is_active: true }
+  });
+  if (!ship) throw Object.assign(new Error('Ship not found'), { statusCode: 404 });
+
+  // For simplicity, flee is always available outside active combat
+  // In real-time combat, this would check combat state
+  const fleeChance = config.combat.fleeChanceBase + (ship.speed * config.combat.fleeChancePerSpeedDiff);
+  const fled = Math.random() < fleeChance;
+
+  return { success: fled, message: fled ? 'Escaped successfully' : 'Failed to escape' };
+};
+
+/**
+ * Get combat history for a player
+ */
+const getCombatHistory = async (userId, limit = 20) => {
+  const ships = await Ship.findAll({ where: { owner_user_id: userId }, attributes: ['ship_id'] });
+  const shipIds = ships.map(s => s.ship_id);
+
+  const logs = await CombatLog.findAll({
+    where: {
+      [require('sequelize').Op.or]: [
+        { attacker_ship_id: shipIds },
+        { defender_ship_id: shipIds }
+      ]
+    },
+    include: [
+      { model: NPC, as: 'defenderNpc', attributes: ['name', 'npc_type'] },
+      { model: Sector, as: 'sector', attributes: ['name'] }
+    ],
+    order: [['created_at', 'DESC']],
+    limit
+  });
+
+  return logs;
+};
+
+module.exports = {
+  calculateDamage,
+  checkCriticalHit,
+  applyDamage,
+  calculateFleeChance,
+  executeCombatRound,
+  attackNPC,
+  fleeFromCombat,
+  getCombatHistory
+};
+

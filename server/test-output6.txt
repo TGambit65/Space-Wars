@@ -1,0 +1,488 @@
+﻿  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ≡ƒôí add observability to secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ≡ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+node : PASS tests/services/portService.test.js
+At line:1 char:1
++ node node_modules/jest/bin/jest.js tests/services --verbose 2>&1 | Ou ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (P    ASS 
+tests/services/portService.test.js:Str    ing) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandErr    or
+ 
+  Port Service
+    getPortById
+      ΓêÜ should return port details (15 ms)
+      ΓêÜ should include sector information (4 ms)
+      ΓêÜ should throw error for non-existent port (5 ms)
+      ΓêÜ should include port commodities (6 ms)
+    getPortWithPrices
+      ΓêÜ should return port with commodities list (5 ms)
+      ΓêÜ should include price information for each commodity (5 ms)
+      ΓêÜ should include commodity details (4 ms)
+    getPortsBySector
+      ΓêÜ should return ports in the sector (7 ms)
+      ΓêÜ should include port type info (5 ms)
+      ΓêÜ should return empty array for sector with no ports (31 ms)
+    getPortWithPrices advanced
+      ΓêÜ should return port with port_id and name (4 ms)
+      ΓêÜ should calculate dynamic prices (5 ms)
+    updatePortCommodityQuantity
+      ΓêÜ should update commodity quantity (130 ms)
+      ΓêÜ should not go below zero (113 ms)
+      ΓêÜ should not exceed max quantity (100 ms)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: Γ£à audit secrets and track compliance: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+PASS tests/services/pricingService.test.js
+  Pricing Service
+    calculateBuyPrice
+      ΓêÜ should return higher price when stock is low
+      ΓêÜ should return base price with spread adjustment when stock is at 50%
+      ΓêÜ should apply port modifier
+      ΓêÜ should clamp prices to min/max multipliers
+      ΓêÜ should return rounded integer (1 ms)
+    calculateSellPrice
+      ΓêÜ should return higher price when stock is low (scarcity)
+      ΓêÜ should be higher than buy price (spread) (1 ms)
+    calculateTotalWithTax
+      ΓêÜ should calculate correct subtotal
+      ΓêÜ should calculate correct tax amount
+      ΓêÜ should calculate correct total (subtotal + tax)
+      ΓêÜ should handle zero tax rate
+      ΓêÜ should round tax to nearest integer
+    calculateSaleRevenue
+      ΓêÜ should calculate correct subtotal (1 ms)
+      ΓêÜ should deduct tax from total (seller pays tax)
+      ΓêÜ should handle zero tax rate
+    getPriceInfo
+      ΓêÜ should return price info object
+      ΓêÜ should return null buy_price when port does not buy
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 16 sectors (4x4 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 16 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 16 sectors, 26 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 16 sectors (4x4 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 16 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 16 sectors, 26 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 16 sectors (4x4 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 16 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 16 sectors, 26 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 16 sectors (4x4 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 16 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 16 sectors, 26 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 100 sectors (10x10 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 100 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 100 sectors, 207 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Γ£ô Seeded 28 commodities
+
+      at log (src/services/universeGenerator.js:199:11)
+
+  console.log
+    Γ£ô Seeded 28 commodities
+
+      at log (src/services/universeGenerator.js:199:11)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Γ£ô Seeded 28 commodities
+
+      at log (src/services/universeGenerator.js:199:11)
+
+  console.log
+    Γ£ô Generated 15 ports
+
+      at log (src/services/universeGenerator.js:259:11)
+
+  console.log
+    Γ£ô Full universe generation complete
+
+      at log (src/services/universeGenerator.js:333:13)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Γ£ô Seeded 28 commodities
+
+      at log (src/services/universeGenerator.js:199:11)
+
+  console.log
+    Γ£ô Generated 15 ports
+
+      at log (src/services/universeGenerator.js:259:11)
+
+  console.log
+    Γ£ô Full universe generation complete
+
+      at log (src/services/universeGenerator.js:333:13)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+PASS tests/services/universeGenerator.test.js
+  Universe Generator
+    generateUniverse
+      ΓêÜ should generate the specified number of sectors (94 ms)
+      ΓêÜ should create connections between sectors (125 ms)
+      ΓêÜ should create unique sector names (153 ms)
+      ΓêÜ should assign coordinates to all sectors (140 ms)
+      ΓêÜ should produce deterministic results with same seed (230 ms)
+      ΓêÜ should assign sector types based on distance from center (248 ms)
+    seedCommodities
+      ΓêÜ should create all configured commodities (118 ms)
+      ΓêÜ should include essential commodities (101 ms)
+    generateFullUniverse
+      ΓêÜ should generate sectors, commodities, and ports (315 ms)
+      ΓêÜ should create port commodities (442 ms)
+    getStartingSector
+      ΓêÜ should return a Core sector (202 ms)
+      ΓêÜ should return a sector with connections (156 ms)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ≡ƒôí add observability to secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+PASS tests/services/tradeService.test.js
+  Trade Service
+    getShipCargo
+      ΓêÜ should return ship cargo details (8 ms)
+      ΓêÜ should calculate used and free capacity (3 ms)
+      ΓêÜ should throw error for non-existent ship (2 ms)
+    buyCommodity
+      ΓêÜ should successfully buy commodities (173 ms)
+      ΓêÜ should deduct credits from user (159 ms)
+      ΓêÜ should add cargo to ship (289 ms)
+      ΓêÜ should reduce port stock (171 ms)
+      ΓêÜ should create transaction record (160 ms)
+      ΓêÜ should fail with insufficient credits (138 ms)
+      ΓêÜ should fail with insufficient cargo space (138 ms)
+      ΓêÜ should fail when ship is not in port sector (182 ms)
+    sellCommodity
+      ΓêÜ should successfully sell commodities (179 ms)
+      ΓêÜ should add credits to user (minus tax) (223 ms)
+      ΓêÜ should remove cargo from ship (177 ms)
+      ΓêÜ should fail with insufficient cargo (132 ms)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.info
+    [AUTH] Successful login for user: dabedbea-9bf6-44fe-b527-47bf7cb0047b from IP: unknown
+
+      at Object.info [as loginUser] (src/services/authService.js:118:11)
+
+  console.info
+    [AUTH] Successful login for user: dabedbea-9bf6-44fe-b527-47bf7cb0047b from IP: unknown
+
+      at Object.info [as loginUser] (src/services/authService.js:118:11)
+
+  console.warn
+    [AUTH] Failed login attempt for user: dabedbea-9bf6-44fe-b527-47bf7cb0047b from IP: unknown
+
+    [0m [90m 106 |[39m   [36mif[39m ([33m![39misValid) {
+     [90m 107 |[39m     [90m// Log failed attempt (wrong password)[39m
+    [31m[1m>[22m[39m[90m 108 |[39m     console[33m.[39mwarn([32m`[AUTH] Failed login attempt for user: ${user.user_id} from IP: ${clientIp}`[39m)[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m 109 |[39m     [36mconst[39m error [33m=[39m [36mnew[39m [33mError[39m([32m'Invalid credentials'[39m)[33m;[39m
+     [90m 110 |[39m     error[33m.[39mstatusCode [33m=[39m [35m401[39m[33m;[39m
+     [90m 111 |[39m     [36mthrow[39m error[33m;[39m[0m
+
+      at Object.warn [as loginUser] (src/services/authService.js:108:13)
+      at Object.<anonymous> (tests/services/authService.test.js:95:7)
+
+  console.warn
+    [AUTH] Failed login attempt for non-existent user: nonexistent from IP: unknown
+
+    [0m [90m  95 |[39m   [36mif[39m ([33m![39muser) {
+     [90m  96 |[39m     [90m// Log failed attempt (user not found) - same message to prevent enumeration[39m
+    [31m[1m>[22m[39m[90m  97 |[39m     console[33m.[39mwarn([32m`[AUTH] Failed login attempt for non-existent user: ${username} from IP: ${clientIp}`[39m)[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m  98 |[39m     [36mconst[39m error [33m=[39m [36mnew[39m [33mError[39m([32m'Invalid credentials'[39m)[33m;[39m
+     [90m  99 |[39m     error[33m.[39mstatusCode [33m=[39m [35m401[39m[33m;[39m
+     [90m 100 |[39m     [36mthrow[39m error[33m;[39m[0m
+
+      at Object.warn [as loginUser] (src/services/authService.js:97:13)
+      at Object.<anonymous> (tests/services/authService.test.js:100:7)
+
+  console.info
+    [AUTH] Successful login for user: dabedbea-9bf6-44fe-b527-47bf7cb0047b from IP: unknown
+
+      at Object.info [as loginUser] (src/services/authService.js:118:11)
+
+PASS tests/services/authService.test.js
+  Auth Service
+    registerUser
+      ΓêÜ should register a new user successfully (154 ms)
+      ΓêÜ should create a default ship for new user (140 ms)
+      ΓêÜ should fail with duplicate username (154 ms)
+      ΓêÜ should fail with duplicate email (143 ms)
+      ΓêÜ should hash the password (231 ms)
+      ΓêÜ should give starting credits to new user (135 ms)
+    loginUser
+      ΓêÜ should login with valid credentials (89 ms)
+      ΓêÜ should return valid JWT token (110 ms)
+      ΓêÜ should fail with wrong password (72 ms)
+      ΓêÜ should fail with non-existent user (3 ms)
+      ΓêÜ should update last_login timestamp (191 ms)
+    getUserProfile
+      ΓêÜ should get user profile by id (11 ms)
+      ΓêÜ should throw error for non-existent user (5 ms)
+    generateToken
+      ΓêÜ should generate a valid JWT token (137 ms)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ≡ƒùé∩╕Å backup and recover secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+PASS tests/services/shipService.test.js
+  Ship Service
+    getUserShips
+      ΓêÜ should return all ships owned by user (6 ms)
+      ΓêÜ should include current sector info (3 ms)
+      ΓêÜ should return empty array for user with no ships (101 ms)
+    getShipById
+      ΓêÜ should return ship details (4 ms)
+      ΓêÜ should throw error for non-existent ship (2 ms)
+      ΓêÜ should throw error when accessing another user's ship (97 ms)
+    moveShip
+      ΓêÜ should move ship to connected sector (193 ms)
+      ΓêÜ should consume fuel on movement (165 ms)
+      ΓêÜ should fail when moving to non-connected sector (125 ms)
+      ΓêÜ should fail when out of fuel (133 ms)
+      ΓêÜ should fail when ship is already in target sector (133 ms)
+    getAdjacentSectors
+      ΓêÜ should return adjacent sectors (7 ms)
+      ΓêÜ should include connection details (9 ms)
+    isAdjacent
+      ΓêÜ should return true for connected sectors (5 ms)
+      ΓêÜ should return false for non-connected sectors (3 ms)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  override existing env vars with { override: true }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+PASS tests/services/sectorService.test.js
+  Sector Service
+    getSectorById
+      ΓêÜ should return sector details (7 ms)
+      ΓêÜ should include connected sectors (4 ms)
+      ΓêÜ should throw error for non-existent sector (1 ms)
+    getConnectedSectors
+      ΓêÜ should return all directly connected sectors (3 ms)
+      ΓêÜ should return sector details for each connection (2 ms)
+      ΓêÜ should return empty array for isolated sector (33 ms)
+    getAllSectors
+      ΓêÜ should return all sectors (2 ms)
+      ΓêÜ should support pagination (4 ms)
+    getSectorMap
+      ΓêÜ should return sector map data (4 ms)
+      ΓêÜ should include coordinates for each sector (3 ms)
+    isConnected
+      ΓêÜ should return true for connected sectors (2 ms)
+      ΓêÜ should return false for non-connected sectors (1 ms)
+      ΓêÜ should return false for same sector (1 ms)
+    searchSectors
+      ΓêÜ should find sectors by name (2 ms)
+      ΓêÜ should return empty for no matches (2 ms)
+
+Test Suites: 7 passed, 7 total
+Tests:       103 passed, 103 total
+Snapshots:   0 total
+Time:        21.869 s
+Ran all test suites matching tests/services.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect 
+async operations that kept running after all tests finished?

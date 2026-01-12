@@ -1,0 +1,912 @@
+﻿  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ≡ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.warn
+    [AUTH] Failed login attempt for non-existent user: logintest from IP: ::ffff:127.0.0.1
+
+    [0m [90m  95 |[39m   [36mif[39m ([33m![39muser) {
+     [90m  96 |[39m     [90m// Log failed attempt (user not found) - same message to prevent enumeration[39m
+    [31m[1m>[22m[39m[90m  97 |[39m     console[33m.[39mwarn([32m`[AUTH] Failed login attempt for non-existent user: ${username} from IP: ${clientIp}`[39m)[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m  98 |[39m     [36mconst[39m error [33m=[39m [36mnew[39m [33mError[39m([32m'Invalid credentials'[39m)[33m;[39m
+     [90m  99 |[39m     error[33m.[39mstatusCode [33m=[39m [35m401[39m[33m;[39m
+     [90m 100 |[39m     [36mthrow[39m error[33m;[39m[0m
+
+      at Object.warn [as loginUser] (src/services/authService.js:97:13)
+      at login (src/controllers/authController.js:44:20)
+
+  console.error
+    Error: Error: Invalid credentials
+        at Object.loginUser (D:\Projects\Space-Wars\server\src\services\authService.js:98:19)
+        at login (D:\Projects\Space-Wars\server\src\controllers\authController.js:44:20) {
+      statusCode: 401
+    }
+
+    [0m [90m 1 |[39m [36mconst[39m errorHandler [33m=[39m (err[33m,[39m req[33m,[39m res[33m,[39m next) [33m=>[39m {
+     [90m 2 |[39m   [90m// Log full error server-side (not exposed to client in production)[39m
+    [31m[1m>[22m[39m[90m 3 |[39m   console[33m.[39merror([32m'Error:'[39m[33m,[39m err)[33m;[39m
+     [90m   |[39m           [31m[1m^[22m[39m
+     [90m 4 |[39m
+     [90m 5 |[39m   [36mconst[39m isProduction [33m=[39m process[33m.[39menv[33m.[39m[33mNODE_ENV[39m [33m===[39m [32m'production'[39m[33m;[39m
+     [90m 6 |[39m[0m
+
+      at error (src/middleware/errorHandler.js:3:11)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at next (src/controllers/authController.js:52:5)
+
+  console.warn
+    [AUTH] Failed login attempt for non-existent user: logintest from IP: ::ffff:127.0.0.1
+
+    [0m [90m  95 |[39m   [36mif[39m ([33m![39muser) {
+     [90m  96 |[39m     [90m// Log failed attempt (user not found) - same message to prevent enumeration[39m
+    [31m[1m>[22m[39m[90m  97 |[39m     console[33m.[39mwarn([32m`[AUTH] Failed login attempt for non-existent user: ${username} from IP: ${clientIp}`[39m)[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m  98 |[39m     [36mconst[39m error [33m=[39m [36mnew[39m [33mError[39m([32m'Invalid credentials'[39m)[33m;[39m
+     [90m  99 |[39m     error[33m.[39mstatusCode [33m=[39m [35m401[39m[33m;[39m
+     [90m 100 |[39m     [36mthrow[39m error[33m;[39m[0m
+
+      at Object.warn [as loginUser] (src/services/authService.js:97:13)
+      at login (src/controllers/authController.js:44:20)
+
+  console.error
+    Error: Error: Invalid credentials
+        at Object.loginUser (D:\Projects\Space-Wars\server\src\services\authService.js:98:19)
+        at login (D:\Projects\Space-Wars\server\src\controllers\authController.js:44:20) {
+      statusCode: 401
+    }
+
+    [0m [90m 1 |[39m [36mconst[39m errorHandler [33m=[39m (err[33m,[39m req[33m,[39m res[33m,[39m next) [33m=>[39m {
+     [90m 2 |[39m   [90m// Log full error server-side (not exposed to client in production)[39m
+    [31m[1m>[22m[39m[90m 3 |[39m   console[33m.[39merror([32m'Error:'[39m[33m,[39m err)[33m;[39m
+     [90m   |[39m           [31m[1m^[22m[39m
+     [90m 4 |[39m
+     [90m 5 |[39m   [36mconst[39m isProduction [33m=[39m process[33m.[39menv[33m.[39m[33mNODE_ENV[39m [33m===[39m [32m'production'[39m[33m;[39m
+     [90m 6 |[39m[0m
+
+      at error (src/middleware/errorHandler.js:3:11)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at next (src/controllers/authController.js:52:5)
+
+node : FAIL tests/integration/api.test.js
+At line:1 char:1
++ node node_modules/jest/bin/jest.js --coverage 2>&1 | Out-File -FilePa ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (F    AIL 
+tests/integration/api.test.js:String)     [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandErr    or
+ 
+  API Integration Tests
+    Auth Endpoints
+      POST /api/auth/register
+        ├ù should register a new user (47 ms)
+        ΓêÜ should reject invalid input (7 ms)
+      POST /api/auth/login
+        ├ù should login with valid credentials (21 ms)
+        ΓêÜ should reject invalid credentials (10 ms)
+      GET /api/auth/me
+        ├ù should return current user with valid token (4 ms)
+        ├ù should reject request without token (3 ms)
+    Ship Endpoints
+      GET /api/ships
+        ├ù should return user ships (5 ms)
+      GET /api/ships/:shipId
+        ├ù should return ship details (4 ms)
+    Sector Endpoints
+      GET /api/sectors/:sectorId
+        ΓêÜ should return sector details (15 ms)
+      GET /api/sectors/:sectorId/ports
+        ├ù should return ports in sector (4 ms)
+    Port Endpoints
+      GET /api/ports/:portId
+        ├ù should return port details (4 ms)
+      GET /api/ports/:portId/commodities
+        ├ù should return port commodities (4 ms)
+    Trade Endpoints
+      GET /api/trade/cargo/:shipId
+        ├ù should return ship cargo (16 ms)
+      POST /api/trade/buy
+        ├ù should buy commodities (6 ms)
+
+  ΓùÅ API Integration Tests ΓÇ║ Auth Endpoints ΓÇ║ POST /api/auth/register ΓÇ║ 
+should register a new user
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+    [0m [90m 38 |[39m           [33m.[39msend({ username[33m:[39m 
+[32m'newuser123'[39m[33m,[39m email[33m:[39m 
+[32m'new@test.com'[39m[33m,[39m password[33m:[39m 
+[32m'password123'[39m })[33m;[39m
+     [90m 39 |[39m         
+    [31m[1m>[22m[39m[90m 40 |[39m         
+expect(res[33m.[39mstatus)[33m.[39mtoBe([35m201[39m)[33m;[39m
+     [90m    |[39m                            [31m[1m^[22m[39m
+     [90m 41 |[39m         expect(res[33m.[39mbody[33m.[39msuccess)[33m.
+[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 42 |[39m         expect(res[33m.[39mbody[33m.[39mdata)[33m.[3
+9mtoHaveProperty([32m'token'[39m)[33m;[39m
+     [90m 43 |[39m         expect(res[33m.[39mbody[33m.[39mdata)[33m.[3
+9mtoHaveProperty([32m'user'[39m)[33m;[39m[0m
+
+      at Object.toBe (tests/integration/api.test.js:40:28)
+
+  ΓùÅ API Integration Tests ΓÇ║ Auth Endpoints ΓÇ║ POST /api/auth/login ΓÇ║ 
+should login with valid credentials
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 401
+
+    [0m [90m 65 |[39m           [33m.[39msend({ username[33m:[39m 
+[32m'logintest'[39m[33m,[39m password[33m:[39m [32m'testpass123'[39m 
+})[33m;[39m
+     [90m 66 |[39m         
+    [31m[1m>[22m[39m[90m 67 |[39m         
+expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                            [31m[1m^[22m[39m
+     [90m 68 |[39m         expect(res[33m.[39mbody[33m.[39msuccess)[33m.
+[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 69 |[39m         expect(res[33m.[39mbody[33m.[39mdata)[33m.[3
+9mtoHaveProperty([32m'token'[39m)[33m;[39m
+     [90m 70 |[39m       })[33m;[39m[0m
+
+      at Object.toBe (tests/integration/api.test.js:67:28)
+
+  ΓùÅ API Integration Tests ΓÇ║ Auth Endpoints ΓÇ║ GET /api/auth/me ΓÇ║ should 
+return current user with valid token
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 404
+
+    [0m [90m 85 |[39m           
+[33m.[39m[36mset[39m([32m'Authorization'[39m[33m,[39m [32m`Bearer 
+${testToken}`[39m)[33m;[39m
+     [90m 86 |[39m         
+    [31m[1m>[22m[39m[90m 87 |[39m         
+expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                            [31m[1m^[22m[39m
+     [90m 88 |[39m         expect(res[33m.[39mbody[33m.[39mdata[33m.[39
+muser[33m.[39musername)[33m.[39mtoBe([32m'apiuser'[39m)[33m;[39m
+     [90m 89 |[39m       })[33m;[39m
+     [90m 90 |[39m[0m
+
+      at Object.toBe (tests/integration/api.test.js:87:28)
+
+  ΓùÅ API Integration Tests ΓÇ║ Auth Endpoints ΓÇ║ GET /api/auth/me ΓÇ║ should 
+reject request without token
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 401
+    Received: 404
+
+    [0m [90m 92 |[39m         [36mconst[39m res [33m=[39m 
+[36mawait[39m 
+request(app)[33m.[39m[36mget[39m([32m'/api/auth/me'[39m)[33m;[39m
+     [90m 93 |[39m         
+    [31m[1m>[22m[39m[90m 94 |[39m         
+expect(res[33m.[39mstatus)[33m.[39mtoBe([35m401[39m)[33m;[39m
+     [90m    |[39m                            [31m[1m^[22m[39m
+     [90m 95 |[39m       })[33m;[39m
+     [90m 96 |[39m     })[33m;[39m
+     [90m 97 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/integration/api.test.js:94:28)
+
+  ΓùÅ API Integration Tests ΓÇ║ Ship Endpoints ΓÇ║ GET /api/ships ΓÇ║ should 
+return user ships
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 401
+
+    [0m [90m 104 |[39m           
+[33m.[39m[36mset[39m([32m'Authorization'[39m[33m,[39m [32m`Bearer 
+${testToken}`[39m)[33m;[39m
+     [90m 105 |[39m         
+    [31m[1m>[22m[39m[90m 106 |[39m         
+expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                            [31m[1m^[22m[39m
+     [90m 107 |[39m         expect(res[33m.[39mbody[33m.[39mdata[33m.[3
+9mships)[33m.[39mtoBeInstanceOf([33mArray[39m)[33m;[39m
+     [90m 108 |[39m       })[33m;[39m
+     [90m 109 |[39m     })[33m;[39m[0m
+
+      at Object.toBe (tests/integration/api.test.js:106:28)
+
+  ΓùÅ API Integration Tests ΓÇ║ Ship Endpoints ΓÇ║ GET /api/ships/:shipId ΓÇ║ 
+should return ship details
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 401
+
+    [0m [90m 115 |[39m           
+[33m.[39m[36mset[39m([32m'Authorization'[39m[33m,[39m [32m`Bearer 
+${testToken}`[39m)[33m;[39m
+     [90m 116 |[39m         
+    [31m[1m>[22m[39m[90m 117 |[39m         
+expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                            [31m[1m^[22m[39m
+     [90m 118 |[39m         expect(res[33m.[39mbody[33m.[39mdata[33m.[3
+9mship[33m.[39mname)[33m.[39mtoBe([32m'API Test Ship'[39m)[33m;[39m
+     [90m 119 |[39m       })[33m;[39m
+     [90m 120 |[39m     })[33m;[39m[0m
+
+      at Object.toBe (tests/integration/api.test.js:117:28)
+
+  ΓùÅ API Integration Tests ΓÇ║ Sector Endpoints ΓÇ║ GET 
+/api/sectors/:sectorId/ports ΓÇ║ should return ports in sector
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 404
+
+    [0m [90m 139 |[39m           
+[33m.[39m[36mset[39m([32m'Authorization'[39m[33m,[39m [32m`Bearer 
+${testToken}`[39m)[33m;[39m
+     [90m 140 |[39m         
+    [31m[1m>[22m[39m[90m 141 |[39m         
+expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                            [31m[1m^[22m[39m
+     [90m 142 |[39m         expect(res[33m.[39mbody[33m.[39mdata[33m.[3
+9mports)[33m.[39mtoBeInstanceOf([33mArray[39m)[33m;[39m
+     [90m 143 |[39m       })[33m;[39m
+     [90m 144 |[39m     })[33m;[39m[0m
+
+      at Object.toBe (tests/integration/api.test.js:141:28)
+
+  ΓùÅ API Integration Tests ΓÇ║ Port Endpoints ΓÇ║ GET /api/ports/:portId ΓÇ║ 
+should return port details
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 401
+
+    [0m [90m 152 |[39m           
+[33m.[39m[36mset[39m([32m'Authorization'[39m[33m,[39m [32m`Bearer 
+${testToken}`[39m)[33m;[39m
+     [90m 153 |[39m         
+    [31m[1m>[22m[39m[90m 154 |[39m         
+expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                            [31m[1m^[22m[39m
+     [90m 155 |[39m         expect(res[33m.[39mbody[33m.[39mdata[33m.[3
+9mport[33m.[39mname)[33m.[39mtoBe([32m'API Test Port'[39m)[33m;[39m
+     [90m 156 |[39m       })[33m;[39m
+     [90m 157 |[39m     })[33m;[39m[0m
+
+      at Object.toBe (tests/integration/api.test.js:154:28)
+
+  ΓùÅ API Integration Tests ΓÇ║ Port Endpoints ΓÇ║ GET 
+/api/ports/:portId/commodities ΓÇ║ should return port commodities
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 404
+
+    [0m [90m 163 |[39m           
+[33m.[39m[36mset[39m([32m'Authorization'[39m[33m,[39m [32m`Bearer 
+${testToken}`[39m)[33m;[39m
+     [90m 164 |[39m         
+    [31m[1m>[22m[39m[90m 165 |[39m         
+expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                            [31m[1m^[22m[39m
+     [90m 166 |[39m         expect(res[33m.[39mbody[33m.[39mdata[33m.[3
+9mcommodities)[33m.[39mtoBeInstanceOf([33mArray[39m)[33m;[39m
+     [90m 167 |[39m       })[33m;[39m
+     [90m 168 |[39m     })[33m;[39m[0m
+
+      at Object.toBe (tests/integration/api.test.js:165:28)
+
+  ΓùÅ API Integration Tests ΓÇ║ Trade Endpoints ΓÇ║ GET 
+/api/trade/cargo/:shipId ΓÇ║ should return ship cargo
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 401
+
+    [0m [90m 176 |[39m           
+[33m.[39m[36mset[39m([32m'Authorization'[39m[33m,[39m [32m`Bearer 
+${testToken}`[39m)[33m;[39m
+     [90m 177 |[39m         
+    [31m[1m>[22m[39m[90m 178 |[39m         
+expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                            [31m[1m^[22m[39m
+     [90m 179 |[39m         expect(res[33m.[39mbody[33m.[39mdata)[33m.[
+39mtoHaveProperty([32m'cargo_capacity'[39m)[33m;[39m
+     [90m 180 |[39m       })[33m;[39m
+     [90m 181 |[39m     })[33m;[39m[0m
+
+      at Object.toBe (tests/integration/api.test.js:178:28)
+
+  ΓùÅ API Integration Tests ΓÇ║ Trade Endpoints ΓÇ║ POST /api/trade/buy ΓÇ║ 
+should buy commodities
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 401
+
+    [0m [90m 193 |[39m           })[33m;[39m
+     [90m 194 |[39m         
+    [31m[1m>[22m[39m[90m 195 |[39m         
+expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                            [31m[1m^[22m[39m
+     [90m 196 |[39m         expect(res[33m.[39mbody[33m.[39msuccess)[33m
+.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 197 |[39m       })[33m;[39m
+     [90m 198 |[39m     })[33m;[39m[0m
+
+      at Object.toBe (tests/integration/api.test.js:195:28)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ≡ƒùé∩╕Å backup and recover secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+PASS tests/services/portService.test.js
+  Port Service
+    getPortById
+      ΓêÜ should return port details (12 ms)
+      ΓêÜ should include sector information (6 ms)
+      ΓêÜ should throw error for non-existent port (6 ms)
+      ΓêÜ should include port commodities (6 ms)
+    getPortWithPrices
+      ΓêÜ should return port with commodities list (7 ms)
+      ΓêÜ should include price information for each commodity (5 ms)
+      ΓêÜ should include commodity details (4 ms)
+    getPortsBySector
+      ΓêÜ should return ports in the sector (7 ms)
+      ΓêÜ should include port type info (6 ms)
+      ΓêÜ should return empty array for sector with no ports (30 ms)
+    getPortWithPrices advanced
+      ΓêÜ should return port with port_id and name (4 ms)
+      ΓêÜ should calculate dynamic prices (4 ms)
+    updatePortCommodityQuantity
+      ΓêÜ should update commodity quantity (113 ms)
+      ΓêÜ should not go below zero (140 ms)
+      ΓêÜ should not exceed max quantity (97 ms)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ΓÜÖ∩╕Å  specify custom .env file path with { path: '/custom/path/.env' }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+PASS tests/services/tradeService.test.js
+  Trade Service
+    getShipCargo
+      ΓêÜ should return ship cargo details (12 ms)
+      ΓêÜ should calculate used and free capacity (3 ms)
+      ΓêÜ should throw error for non-existent ship (3 ms)
+    buyCommodity
+      ΓêÜ should successfully buy commodities (153 ms)
+      ΓêÜ should deduct credits from user (196 ms)
+      ΓêÜ should add cargo to ship (165 ms)
+      ΓêÜ should reduce port stock (157 ms)
+      ΓêÜ should create transaction record (186 ms)
+      ΓêÜ should fail with insufficient credits (136 ms)
+      ΓêÜ should fail with insufficient cargo space (146 ms)
+      ΓêÜ should fail when ship is not in port sector (212 ms)
+    sellCommodity
+      ΓêÜ should successfully sell commodities (168 ms)
+      ΓêÜ should add credits to user (minus tax) (166 ms)
+      ΓêÜ should remove cargo from ship (166 ms)
+      ΓêÜ should fail with insufficient cargo (133 ms)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ≡ƒôí add observability to secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  override existing env vars with { override: true }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 16 sectors (4x4 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 16 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 16 sectors, 26 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 16 sectors (4x4 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 16 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 16 sectors, 26 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 16 sectors (4x4 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 16 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 16 sectors, 26 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 16 sectors (4x4 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 16 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 16 sectors, 26 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 100 sectors (10x10 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 100 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 100 sectors, 207 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Γ£ô Seeded 28 commodities
+
+      at log (src/services/universeGenerator.js:199:11)
+
+  console.log
+    Γ£ô Seeded 28 commodities
+
+      at log (src/services/universeGenerator.js:199:11)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Γ£ô Seeded 28 commodities
+
+      at log (src/services/universeGenerator.js:199:11)
+
+  console.log
+    Γ£ô Generated 15 ports
+
+      at log (src/services/universeGenerator.js:259:11)
+
+  console.log
+    Γ£ô Full universe generation complete
+
+      at log (src/services/universeGenerator.js:333:13)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Γ£ô Seeded 28 commodities
+
+      at log (src/services/universeGenerator.js:199:11)
+
+  console.log
+    Γ£ô Generated 15 ports
+
+      at log (src/services/universeGenerator.js:259:11)
+
+  console.log
+    Γ£ô Full universe generation complete
+
+      at log (src/services/universeGenerator.js:333:13)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+PASS tests/services/universeGenerator.test.js
+  Universe Generator
+    generateUniverse
+      ΓêÜ should generate the specified number of sectors (106 ms)
+      ΓêÜ should create connections between sectors (154 ms)
+      ΓêÜ should create unique sector names (135 ms)
+      ΓêÜ should assign coordinates to all sectors (97 ms)
+      ΓêÜ should produce deterministic results with same seed (243 ms)
+      ΓêÜ should assign sector types based on distance from center (303 ms)
+    seedCommodities
+      ΓêÜ should create all configured commodities (123 ms)
+      ΓêÜ should include essential commodities (120 ms)
+    generateFullUniverse
+      ΓêÜ should generate sectors, commodities, and ports (297 ms)
+      ΓêÜ should create port commodities (416 ms)
+    getStartingSector
+      ΓêÜ should return a Core sector (353 ms)
+      ΓêÜ should return a sector with connections (144 ms)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ≡ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.info
+    [AUTH] Successful login for user: 83a28abb-72bc-4ac2-af8d-8279e2b65b86 from IP: unknown
+
+      at Object.info [as loginUser] (src/services/authService.js:118:11)
+
+  console.info
+    [AUTH] Successful login for user: 83a28abb-72bc-4ac2-af8d-8279e2b65b86 from IP: unknown
+
+      at Object.info [as loginUser] (src/services/authService.js:118:11)
+
+  console.warn
+    [AUTH] Failed login attempt for user: 83a28abb-72bc-4ac2-af8d-8279e2b65b86 from IP: unknown
+
+    [0m [90m 106 |[39m   [36mif[39m ([33m![39misValid) {
+     [90m 107 |[39m     [90m// Log failed attempt (wrong password)[39m
+    [31m[1m>[22m[39m[90m 108 |[39m     console[33m.[39mwarn([32m`[AUTH] Failed login attempt for user: ${user.user_id} from IP: ${clientIp}`[39m)[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m 109 |[39m     [36mconst[39m error [33m=[39m [36mnew[39m [33mError[39m([32m'Invalid credentials'[39m)[33m;[39m
+     [90m 110 |[39m     error[33m.[39mstatusCode [33m=[39m [35m401[39m[33m;[39m
+     [90m 111 |[39m     [36mthrow[39m error[33m;[39m[0m
+
+      at Object.warn [as loginUser] (src/services/authService.js:108:13)
+      at Object.<anonymous> (tests/services/authService.test.js:95:7)
+
+  console.warn
+    [AUTH] Failed login attempt for non-existent user: nonexistent from IP: unknown
+
+    [0m [90m  95 |[39m   [36mif[39m ([33m![39muser) {
+     [90m  96 |[39m     [90m// Log failed attempt (user not found) - same message to prevent enumeration[39m
+    [31m[1m>[22m[39m[90m  97 |[39m     console[33m.[39mwarn([32m`[AUTH] Failed login attempt for non-existent user: ${username} from IP: ${clientIp}`[39m)[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m  98 |[39m     [36mconst[39m error [33m=[39m [36mnew[39m [33mError[39m([32m'Invalid credentials'[39m)[33m;[39m
+     [90m  99 |[39m     error[33m.[39mstatusCode [33m=[39m [35m401[39m[33m;[39m
+     [90m 100 |[39m     [36mthrow[39m error[33m;[39m[0m
+
+      at Object.warn [as loginUser] (src/services/authService.js:97:13)
+      at Object.<anonymous> (tests/services/authService.test.js:100:7)
+
+  console.info
+    [AUTH] Successful login for user: 83a28abb-72bc-4ac2-af8d-8279e2b65b86 from IP: unknown
+
+      at Object.info [as loginUser] (src/services/authService.js:118:11)
+
+PASS tests/services/authService.test.js
+  Auth Service
+    registerUser
+      ΓêÜ should register a new user successfully (154 ms)
+      ΓêÜ should create a default ship for new user (141 ms)
+      ΓêÜ should fail with duplicate username (147 ms)
+      ΓêÜ should fail with duplicate email (118 ms)
+      ΓêÜ should hash the password (235 ms)
+      ΓêÜ should give starting credits to new user (134 ms)
+    loginUser
+      ΓêÜ should login with valid credentials (93 ms)
+      ΓêÜ should return valid JWT token (97 ms)
+      ΓêÜ should fail with wrong password (78 ms)
+      ΓêÜ should fail with non-existent user (3 ms)
+      ΓêÜ should update last_login timestamp (252 ms)
+    getUserProfile
+      ΓêÜ should get user profile by id (5 ms)
+      ΓêÜ should throw error for non-existent user (3 ms)
+    generateToken
+      ΓêÜ should generate a valid JWT token (143 ms)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ≡ƒôí add observability to secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+PASS tests/services/shipService.test.js
+  Ship Service
+    getUserShips
+      ΓêÜ should return all ships owned by user (4 ms)
+      ΓêÜ should include current sector info (4 ms)
+      ΓêÜ should return empty array for user with no ships (101 ms)
+    getShipById
+      ΓêÜ should return ship details (5 ms)
+      ΓêÜ should throw error for non-existent ship (2 ms)
+      ΓêÜ should throw error when accessing another user's ship (99 ms)
+    moveShip
+      ΓêÜ should move ship to connected sector (155 ms)
+      ΓêÜ should consume fuel on movement (170 ms)
+      ΓêÜ should fail when moving to non-connected sector (143 ms)
+      ΓêÜ should fail when out of fuel (129 ms)
+      ΓêÜ should fail when ship is already in target sector (104 ms)
+    getAdjacentSectors
+      ΓêÜ should return adjacent sectors (3 ms)
+      ΓêÜ should include connection details (3 ms)
+    isAdjacent
+      ΓêÜ should return true for connected sectors (2 ms)
+      ΓêÜ should return false for non-connected sectors (1 ms)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  override existing env vars with { override: true }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+PASS tests/services/sectorService.test.js
+  Sector Service
+    getSectorById
+      ΓêÜ should return sector details (10 ms)
+      ΓêÜ should include connected sectors (4 ms)
+      ΓêÜ should throw error for non-existent sector (2 ms)
+    getConnectedSectors
+      ΓêÜ should return all directly connected sectors (3 ms)
+      ΓêÜ should return sector details for each connection (4 ms)
+      ΓêÜ should return empty array for isolated sector (43 ms)
+    getAllSectors
+      ΓêÜ should return all sectors (3 ms)
+      ΓêÜ should support pagination (3 ms)
+    getSectorMap
+      ΓêÜ should return sector map data (3 ms)
+      ΓêÜ should include coordinates for each sector (4 ms)
+    isConnected
+      ΓêÜ should return true for connected sectors (4 ms)
+      ΓêÜ should return false for non-connected sectors (2 ms)
+      ΓêÜ should return false for same sector (1 ms)
+    searchSectors
+      ΓêÜ should find sectors by name (3 ms)
+      ΓêÜ should return empty for no matches (2 ms)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ≡ƒùé∩╕Å backup and recover secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+PASS tests/services/pricingService.test.js
+  Pricing Service
+    calculateBuyPrice
+      ΓêÜ should return higher price when stock is low (1 ms)
+      ΓêÜ should return base price with spread adjustment when stock is at 50%
+      ΓêÜ should apply port modifier (1 ms)
+      ΓêÜ should clamp prices to min/max multipliers
+      ΓêÜ should return rounded integer
+    calculateSellPrice
+      ΓêÜ should return higher price when stock is low (scarcity)
+      ΓêÜ should be higher than buy price (spread)
+    calculateTotalWithTax
+      ΓêÜ should calculate correct subtotal
+      ΓêÜ should calculate correct tax amount
+      ΓêÜ should calculate correct total (subtotal + tax)
+      ΓêÜ should handle zero tax rate
+      ΓêÜ should round tax to nearest integer
+    calculateSaleRevenue
+      ΓêÜ should calculate correct subtotal
+      ΓêÜ should deduct tax from total (seller pays tax)
+      ΓêÜ should handle zero tax rate
+    getPriceInfo
+      ΓêÜ should return price info object
+      ΓêÜ should return null buy_price when port does not buy
+
+-----------------------|---------|----------|---------|---------|------------------------------------------------------
+File                   | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                    
+-----------------------|---------|----------|---------|---------|------------------------------------------------------
+All files              |   69.89 |    52.86 |   55.88 |   70.69 |                                                      
+ src                   |    86.2 |       75 |       0 |    86.2 |                                                      
+  app.js               |    86.2 |       75 |       0 |    86.2 | 63-65,74                                             
+ src/config            |   44.44 |       50 |   33.33 |   47.05 |                                                      
+  index.js             |   44.44 |       50 |   33.33 |   47.05 | 8-10,16-22                                           
+ src/controllers       |   27.88 |     10.9 |    9.37 |   28.57 |                                                      
+  authController.js    |   62.96 |    57.14 |   66.66 |   62.96 | 15-24,32,46,57-65                                    
+  portController.js    |      25 |        0 |       0 |      25 | 4-13,18-26,31-40                                     
+  sectorController.js  |    42.5 |    16.66 |      25 |    42.5 | 6-44,52,64,85-88,110,115-136                         
+  shipController.js    |   18.42 |        0 |       0 |   18.42 | 5-16,21-39,44-69,74-96                               
+  tradeController.js   |   14.45 |        0 |       0 |   15.38 | 6-15,20-34,39-53,58-73,78-89,97-131,139-196,204-247  
+ src/middleware        |   55.93 |    51.16 |   66.66 |   57.89 |                                                      
+  auth.js              |   54.28 |    43.75 |     100 |   54.28 | 11,23-36,44-52,67-75                                 
+  errorHandler.js      |   58.33 |    55.55 |      50 |   63.63 | 9-14,23-28,39-40,48,60                               
+ src/models            |     100 |       50 |     100 |     100 |                                                      
+  Commodity.js         |     100 |      100 |     100 |     100 |                                                      
+  Port.js              |     100 |      100 |     100 |     100 |                                                      
+  PortCommodity.js     |     100 |      100 |     100 |     100 |                                                      
+  Sector.js            |     100 |      100 |     100 |     100 |                                                      
+  SectorConnection.js  |     100 |      100 |     100 |     100 |                                                      
+  Ship.js              |     100 |      100 |     100 |     100 |                                                      
+  ShipCargo.js         |     100 |      100 |     100 |     100 |                                                      
+  Transaction.js       |     100 |      100 |     100 |     100 |                                                      
+  User.js              |     100 |       50 |     100 |     100 | 54                                                   
+  index.js             |     100 |      100 |     100 |     100 |                                                      
+ src/routes            |   78.84 |     9.09 |      40 |   78.84 |                                                      
+  auth.js              |     100 |      100 |     100 |     100 |                                                      
+  index.js             |   57.14 |        0 |       0 |   57.14 | 14-41                                                
+  port.js              |   73.68 |       20 |   66.66 |   73.68 | 24-32                                                
+  sector.js            |     100 |      100 |     100 |     100 |                                                      
+  ship.js              |     100 |      100 |     100 |     100 |                                                      
+  trade.js             |   76.19 |        0 |       0 |   76.19 | 9-17                                                 
+ src/services          |   81.57 |     65.5 |   86.27 |   82.56 |                                                      
+  authService.js       |   89.28 |    73.68 |     100 |   89.28 | 42-47,65                                             
+  portService.js       |   63.82 |    42.85 |      75 |   63.04 | 8-23,86-88,121-138,151-153                           
+  pricingService.js    |     100 |    83.33 |     100 |     100 | 124                                                  
+  sectorService.js     |     100 |    81.81 |     100 |     100 | 34-58                                                
+  shipService.js       |   83.87 |    68.42 |   85.71 |   83.87 | 61,109-111,124-126,186-189                           
+  tradeService.js      |   58.82 |       45 |      50 |   62.99 | 54,83,99,102,107,112,185,190,201,204,209,243,266-337 
+  universeGenerator.js |   95.51 |    83.75 |     100 |   95.17 | 153-155,173,232,336-337                              
+-----------------------|---------|----------|---------|---------|------------------------------------------------------
+Test Suites: 1 failed, 7 passed, 8 total
+Tests:       11 failed, 106 passed, 117 total
+Snapshots:   0 total
+Time:        24.09 s, estimated 25 s
+Ran all test suites.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect 
+async operations that kept running after all tests finished?

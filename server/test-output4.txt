@@ -1,0 +1,1656 @@
+﻿  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ≡ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 16 sectors (4x4 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 16 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 16 sectors, 26 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 16 sectors (4x4 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 16 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 16 sectors, 26 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 16 sectors (4x4 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 16 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 16 sectors, 26 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 16 sectors (4x4 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 16 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 16 sectors, 26 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 100 sectors (10x10 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 100 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 100 sectors, 207 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Γ£ô Seeded 28 commodities
+
+      at log (src/services/universeGenerator.js:199:11)
+
+  console.log
+    Γ£ô Seeded 28 commodities
+
+      at log (src/services/universeGenerator.js:199:11)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Γ£ô Seeded 28 commodities
+
+      at log (src/services/universeGenerator.js:199:11)
+
+  console.log
+    Γ£ô Generated 15 ports
+
+      at log (src/services/universeGenerator.js:259:11)
+
+  console.log
+    Γ£ô Full universe generation complete
+
+      at log (src/services/universeGenerator.js:333:13)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Γ£ô Seeded 28 commodities
+
+      at log (src/services/universeGenerator.js:199:11)
+
+  console.log
+    Γ£ô Generated 15 ports
+
+      at log (src/services/universeGenerator.js:259:11)
+
+  console.log
+    Γ£ô Full universe generation complete
+
+      at log (src/services/universeGenerator.js:333:13)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+  console.log
+    Generating universe with 25 sectors (5x5 grid)...
+
+      at log (src/services/universeGenerator.js:60:11)
+
+  console.log
+    Created 25 sectors. Generating connections...
+
+      at log (src/services/universeGenerator.js:100:13)
+
+  console.log
+    Γ£ô Universe generated: 25 sectors, 43 connections
+
+      at log (src/services/universeGenerator.js:149:13)
+
+node : FAIL tests/services/universeGenerator.test.js
+At line:1 char:1
++ node node_modules/jest/bin/jest.js tests/services --verbose 2>&1 | Ou ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (F    AIL 
+tests/serv...nerator.test.js:String) [    ], RemoteException
+    + FullyQualifiedErrorId : NativeCommandErr    or
+ 
+  Universe Generator
+    generateUniverse
+      ΓêÜ should generate the specified number of sectors (107 ms)
+      ΓêÜ should create connections between sectors (123 ms)
+      ΓêÜ should create unique sector names (143 ms)
+      ΓêÜ should assign coordinates to all sectors (121 ms)
+      ΓêÜ should produce deterministic results with same seed (247 ms)
+      ΓêÜ should assign sector types based on distance from center (214 ms)
+    seedCommodities
+      ΓêÜ should create all configured commodities (124 ms)
+      ΓêÜ should include essential commodities (95 ms)
+    generateFullUniverse
+      ΓêÜ should generate sectors, commodities, and ports (329 ms)
+      ΓêÜ should create port commodities (401 ms)
+    getStartingSector
+      ΓêÜ should return a Core sector (204 ms)
+      ├ù should return a sector with connections (166 ms)
+
+  ΓùÅ Universe Generator ΓÇ║ getStartingSector ΓÇ║ should return a sector with 
+connections
+
+
+
+    [0m [90m 150 |[39m       [36mconst[39m sector [33m=[39m 
+[36mawait[39m getStartingSector()[33m;[39m
+     [90m 151 |[39m       
+    [31m[1m>[22m[39m[90m 152 |[39m       [36mconst[39m connections 
+[33m=[39m [36mawait[39m [33mSectorConnection[39m[33m.[39mcount({
+     [90m     |[39m                           [31m[1m^[22m[39m
+     [90m 153 |[39m         where[33m:[39m { from_sector_id[33m:[39m 
+sector[33m.[39msector_id }
+     [90m 154 |[39m       })[33m;[39m
+     [90m 155 |[39m       
+expect(connections)[33m.[39mtoBeGreaterThan([35m0[39m)[33m;[39m[0m
+
+      at Database.<anonymous> 
+(node_modules/sequelize/src/dialects/sqlite/query.js:236:27)
+      at node_modules/sequelize/src/dialects/sqlite/query.js:234:50
+      at Query.run (node_modules/sequelize/src/dialects/sqlite/query.js:234:12)
+      at node_modules/sequelize/src/sequelize.js:650:28
+      at SQLiteQueryInterface.rawSelect 
+(node_modules/sequelize/src/dialects/abstract/query-interface.js:1043:18)
+      at SectorConnection.aggregate 
+(node_modules/sequelize/src/model.js:2067:19)
+      at SectorConnection.count (node_modules/sequelize/src/model.js:2124:20)
+      at Object.<anonymous> (tests/services/universeGenerator.test.js:152:27)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ≡ƒôí add observability to secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.info
+    [AUTH] Successful login for user: 7c0063a8-2324-428f-9d58-2be4714ccaf9 from IP: unknown
+
+      at Object.info [as loginUser] (src/services/authService.js:118:11)
+
+  console.info
+    [AUTH] Successful login for user: 7c0063a8-2324-428f-9d58-2be4714ccaf9 from IP: unknown
+
+      at Object.info [as loginUser] (src/services/authService.js:118:11)
+
+  console.warn
+    [AUTH] Failed login attempt for user: 7c0063a8-2324-428f-9d58-2be4714ccaf9 from IP: unknown
+
+    [0m [90m 106 |[39m   [36mif[39m ([33m![39misValid) {
+     [90m 107 |[39m     [90m// Log failed attempt (wrong password)[39m
+    [31m[1m>[22m[39m[90m 108 |[39m     console[33m.[39mwarn([32m`[AUTH] Failed login attempt for user: ${user.user_id} from IP: ${clientIp}`[39m)[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m 109 |[39m     [36mconst[39m error [33m=[39m [36mnew[39m [33mError[39m([32m'Invalid credentials'[39m)[33m;[39m
+     [90m 110 |[39m     error[33m.[39mstatusCode [33m=[39m [35m401[39m[33m;[39m
+     [90m 111 |[39m     [36mthrow[39m error[33m;[39m[0m
+
+      at Object.warn [as loginUser] (src/services/authService.js:108:13)
+      at Object.<anonymous> (tests/services/authService.test.js:94:7)
+
+  console.warn
+    [AUTH] Failed login attempt for non-existent user: nonexistent from IP: unknown
+
+    [0m [90m  95 |[39m   [36mif[39m ([33m![39muser) {
+     [90m  96 |[39m     [90m// Log failed attempt (user not found) - same message to prevent enumeration[39m
+    [31m[1m>[22m[39m[90m  97 |[39m     console[33m.[39mwarn([32m`[AUTH] Failed login attempt for non-existent user: ${username} from IP: ${clientIp}`[39m)[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m  98 |[39m     [36mconst[39m error [33m=[39m [36mnew[39m [33mError[39m([32m'Invalid credentials'[39m)[33m;[39m
+     [90m  99 |[39m     error[33m.[39mstatusCode [33m=[39m [35m401[39m[33m;[39m
+     [90m 100 |[39m     [36mthrow[39m error[33m;[39m[0m
+
+      at Object.warn [as loginUser] (src/services/authService.js:97:13)
+      at Object.<anonymous> (tests/services/authService.test.js:99:7)
+
+  console.info
+    [AUTH] Successful login for user: 7c0063a8-2324-428f-9d58-2be4714ccaf9 from IP: unknown
+
+      at Object.info [as loginUser] (src/services/authService.js:118:11)
+
+FAIL tests/services/authService.test.js
+  Auth Service
+    registerUser
+      ΓêÜ should register a new user successfully (158 ms)
+      ΓêÜ should create a default ship for new user (131 ms)
+      ├ù should fail with duplicate username (139 ms)
+      ├ù should fail with duplicate email (152 ms)
+      ├ù should hash the password (131 ms)
+      ΓêÜ should give starting credits to new user (132 ms)
+    loginUser
+      ΓêÜ should login with valid credentials (96 ms)
+      ├ù should return valid JWT token (103 ms)
+      ΓêÜ should fail with wrong password (81 ms)
+      ΓêÜ should fail with non-existent user (3 ms)
+      ΓêÜ should update last_login timestamp (197 ms)
+    getUserProfile
+      ΓêÜ should get user profile by id (9 ms)
+      ΓêÜ should throw error for non-existent user (3 ms)
+    generateToken
+      ├ù should generate a valid JWT token (87 ms)
+
+  ΓùÅ Auth Service ΓÇ║ registerUser ΓÇ║ should fail with duplicate username
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "Username already exists"
+    Received message:   "username already exists"
+
+        [0m [90m 23 |[39m   [36mif[39m (existingUser) {
+         [90m 24 |[39m     [36mconst[39m field [33m=[39m 
+existingUser[33m.[39musername [33m===[39m username [33m?[39m 
+[32m'username'[39m [33m:[39m [32m'email'[39m[33m;[39m
+        [31m[1m>[22m[39m[90m 25 |[39m     [36mconst[39m error 
+[33m=[39m [36mnew[39m [33mError[39m([32m`${field} already 
+exists`[39m)[33m;[39m
+         [90m    |[39m                   [31m[1m^[22m[39m
+         [90m 26 |[39m     error[33m.[39mstatusCode [33m=[39m 
+[35m409[39m[33m;[39m
+         [90m 27 |[39m     [36mthrow[39m error[33m;[39m
+         [90m 28 |[39m   }[0m
+
+      at Object.registerUser (src/services/authService.js:25:19)
+      at Object.<anonymous> (tests/services/authService.test.js:46:7)
+      at Object.toThrow (node_modules/expect/build/index.js:2155:20)
+      at Object.toThrow (tests/services/authService.test.js:47:18)
+
+  ΓùÅ Auth Service ΓÇ║ registerUser ΓÇ║ should fail with duplicate email
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "Email already registered"
+    Received message:   "email already exists"
+
+        [0m [90m 23 |[39m   [36mif[39m (existingUser) {
+         [90m 24 |[39m     [36mconst[39m field [33m=[39m 
+existingUser[33m.[39musername [33m===[39m username [33m?[39m 
+[32m'username'[39m [33m:[39m [32m'email'[39m[33m;[39m
+        [31m[1m>[22m[39m[90m 25 |[39m     [36mconst[39m error 
+[33m=[39m [36mnew[39m [33mError[39m([32m`${field} already 
+exists`[39m)[33m;[39m
+         [90m    |[39m                   [31m[1m^[22m[39m
+         [90m 26 |[39m     error[33m.[39mstatusCode [33m=[39m 
+[35m409[39m[33m;[39m
+         [90m 27 |[39m     [36mthrow[39m error[33m;[39m
+         [90m 28 |[39m   }[0m
+
+      at Object.registerUser (src/services/authService.js:25:19)
+      at Object.<anonymous> (tests/services/authService.test.js:53:7)
+      at Object.toThrow (node_modules/expect/build/index.js:2155:20)
+      at Object.toThrow (tests/services/authService.test.js:54:18)
+
+  ΓùÅ Auth Service ΓÇ║ registerUser ΓÇ║ should hash the password
+
+    Illegal arguments: string, undefined
+
+    [0m [90m 60 |[39m       [36mconst[39m user [33m=[39m 
+[36mawait[39m [33mUser[39m[33m.[39mfindOne({ where[33m:[39m { 
+username[33m:[39m [32m'hashuser'[39m } })[33m;[39m
+     [90m 61 |[39m       expect(user[33m.[39mpassword_hash)[33m.[39mnot[
+33m.[39mtoBe([32m'mypassword'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 62 |[39m       expect([36mawait[39m 
+bcrypt[33m.[39mcompare([32m'mypassword'[39m[33m,[39m 
+user[33m.[39mpassword_hash))[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m    |[39m                           [31m[1m^[22m[39m
+     [90m 63 |[39m     })[33m;[39m
+     [90m 64 |[39m
+     [90m 65 |[39m     it([32m'should give starting credits to new 
+user'[39m[33m,[39m [36masync[39m () [33m=>[39m {[0m
+
+      at _async (node_modules/bcryptjs/umd/index.js:305:15)
+      at node_modules/bcryptjs/umd/index.js:335:11
+      at Object.compare (node_modules/bcryptjs/umd/index.js:334:16)
+      at Object.compare (tests/services/authService.test.js:62:27)
+
+  ΓùÅ Auth Service ΓÇ║ loginUser ΓÇ║ should return valid JWT token
+
+    JsonWebTokenError: invalid signature
+
+    [0m [90m 86 |[39m       [36mconst[39m result [33m=[39m 
+[36mawait[39m 
+authService[33m.[39mloginUser([32m'loginuser'[39m[33m,[39m 
+[32m'loginpassword'[39m)[33m;[39m
+     [90m 87 |[39m
+    [31m[1m>[22m[39m[90m 88 |[39m       [36mconst[39m decoded 
+[33m=[39m jwt[33m.[39mverify(result[33m.[39mtoken[33m,[39m 
+process[33m.[39menv[33m.[39m[33mJWT_SECRET[39m [33m||[39m 
+[32m'test-secret-key-for-testing-only'[39m)[33m;[39m
+     [90m    |[39m                           [31m[1m^[22m[39m
+     [90m 89 |[39m       
+expect(decoded)[33m.[39mtoHaveProperty([32m'userId'[39m)[33m;[39m
+     [90m 90 |[39m       expect(decoded[33m.[39musername)[33m.[39mtoBe([
+32m'loginuser'[39m)[33m;[39m
+     [90m 91 |[39m     })[33m;[39m[0m
+
+      at node_modules/jsonwebtoken/verify.js:171:19
+      at getSecret (node_modules/jsonwebtoken/verify.js:97:14)
+      at Object.module.exports [as verify] 
+(node_modules/jsonwebtoken/verify.js:101:10)
+      at Object.verify (tests/services/authService.test.js:88:27)
+
+  ΓùÅ Auth Service ΓÇ║ generateToken ΓÇ║ should generate a valid JWT token
+
+    JsonWebTokenError: invalid signature
+
+    [0m [90m 138 |[39m       [36mconst[39m token [33m=[39m 
+authService[33m.[39mgenerateToken(testUser)[33m;[39m
+     [90m 139 |[39m
+    [31m[1m>[22m[39m[90m 140 |[39m       [36mconst[39m decoded 
+[33m=[39m jwt[33m.[39mverify(token[33m,[39m 
+process[33m.[39menv[33m.[39m[33mJWT_SECRET[39m [33m||[39m 
+[32m'test-secret-key-for-testing-only'[39m)[33m;[39m
+     [90m     |[39m                           [31m[1m^[22m[39m
+     [90m 141 |[39m       
+expect(decoded)[33m.[39mtoHaveProperty([32m'userId'[39m)[33m;[39m
+     [90m 142 |[39m       expect(decoded[33m.[39musername)[33m.[39mtoBe(
+[32m'tokengenuser'[39m)[33m;[39m
+     [90m 143 |[39m     })[33m;[39m[0m
+
+      at node_modules/jsonwebtoken/verify.js:171:19
+      at getSecret (node_modules/jsonwebtoken/verify.js:97:14)
+      at Object.module.exports [as verify] 
+(node_modules/jsonwebtoken/verify.js:101:10)
+      at Object.verify (tests/services/authService.test.js:140:27)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ≡ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+FAIL tests/services/portService.test.js
+  Port Service
+    getPortById
+      ├ù should return port details
+      ├ù should include sector information (1 ms)
+      ├ù should throw error for non-existent port
+      ├ù should throw error for inactive port
+    getPortCommodities
+      ├ù should return list of commodities at port
+      ├ù should include price information for each commodity
+      ├ù should include commodity details
+    getPortsBySector
+      ├ù should return ports in the sector
+      ├ù should only return active ports
+      ├ù should return empty array for sector with no ports
+    getPortWithPrices
+      ├ù should return port with full price info
+      ├ù should calculate dynamic prices
+    updatePortStock
+      ├ù should update commodity quantity
+      ├ù should not go below zero
+      ├ù should not exceed max quantity
+
+  ΓùÅ Port Service ΓÇ║ getPortById ΓÇ║ should return port details
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 21 |[39m     
+     [90m 22 |[39m     [90m// Create test commodity and add to port[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Test 
+Fuel'[39m[33m,[39m base_price[33m:[39m [35m50[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 24 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 25 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m
+     [90m 26 |[39m       max_quantity[33m:[39m 
+[35m1000[39m[33m,[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/portService.test.js:23:21)
+
+  ΓùÅ Port Service ΓÇ║ getPortById ΓÇ║ should include sector information
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 21 |[39m     
+     [90m 22 |[39m     [90m// Create test commodity and add to port[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Test 
+Fuel'[39m[33m,[39m base_price[33m:[39m [35m50[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 24 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 25 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m
+     [90m 26 |[39m       max_quantity[33m:[39m 
+[35m1000[39m[33m,[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/portService.test.js:23:21)
+
+  ΓùÅ Port Service ΓÇ║ getPortById ΓÇ║ should throw error for non-existent port
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 21 |[39m     
+     [90m 22 |[39m     [90m// Create test commodity and add to port[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Test 
+Fuel'[39m[33m,[39m base_price[33m:[39m [35m50[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 24 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 25 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m
+     [90m 26 |[39m       max_quantity[33m:[39m 
+[35m1000[39m[33m,[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/portService.test.js:23:21)
+
+  ΓùÅ Port Service ΓÇ║ getPortById ΓÇ║ should throw error for inactive port
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 21 |[39m     
+     [90m 22 |[39m     [90m// Create test commodity and add to port[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Test 
+Fuel'[39m[33m,[39m base_price[33m:[39m [35m50[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 24 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 25 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m
+     [90m 26 |[39m       max_quantity[33m:[39m 
+[35m1000[39m[33m,[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/portService.test.js:23:21)
+
+  ΓùÅ Port Service ΓÇ║ getPortCommodities ΓÇ║ should return list of 
+commodities at port
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 21 |[39m     
+     [90m 22 |[39m     [90m// Create test commodity and add to port[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Test 
+Fuel'[39m[33m,[39m base_price[33m:[39m [35m50[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 24 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 25 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m
+     [90m 26 |[39m       max_quantity[33m:[39m 
+[35m1000[39m[33m,[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/portService.test.js:23:21)
+
+  ΓùÅ Port Service ΓÇ║ getPortCommodities ΓÇ║ should include price information 
+for each commodity
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 21 |[39m     
+     [90m 22 |[39m     [90m// Create test commodity and add to port[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Test 
+Fuel'[39m[33m,[39m base_price[33m:[39m [35m50[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 24 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 25 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m
+     [90m 26 |[39m       max_quantity[33m:[39m 
+[35m1000[39m[33m,[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/portService.test.js:23:21)
+
+  ΓùÅ Port Service ΓÇ║ getPortCommodities ΓÇ║ should include commodity details
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 21 |[39m     
+     [90m 22 |[39m     [90m// Create test commodity and add to port[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Test 
+Fuel'[39m[33m,[39m base_price[33m:[39m [35m50[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 24 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 25 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m
+     [90m 26 |[39m       max_quantity[33m:[39m 
+[35m1000[39m[33m,[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/portService.test.js:23:21)
+
+  ΓùÅ Port Service ΓÇ║ getPortsBySector ΓÇ║ should return ports in the sector
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 21 |[39m     
+     [90m 22 |[39m     [90m// Create test commodity and add to port[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Test 
+Fuel'[39m[33m,[39m base_price[33m:[39m [35m50[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 24 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 25 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m
+     [90m 26 |[39m       max_quantity[33m:[39m 
+[35m1000[39m[33m,[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/portService.test.js:23:21)
+
+  ΓùÅ Port Service ΓÇ║ getPortsBySector ΓÇ║ should only return active ports
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 21 |[39m     
+     [90m 22 |[39m     [90m// Create test commodity and add to port[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Test 
+Fuel'[39m[33m,[39m base_price[33m:[39m [35m50[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 24 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 25 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m
+     [90m 26 |[39m       max_quantity[33m:[39m 
+[35m1000[39m[33m,[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/portService.test.js:23:21)
+
+  ΓùÅ Port Service ΓÇ║ getPortsBySector ΓÇ║ should return empty array for 
+sector with no ports
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 21 |[39m     
+     [90m 22 |[39m     [90m// Create test commodity and add to port[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Test 
+Fuel'[39m[33m,[39m base_price[33m:[39m [35m50[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 24 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 25 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m
+     [90m 26 |[39m       max_quantity[33m:[39m 
+[35m1000[39m[33m,[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/portService.test.js:23:21)
+
+  ΓùÅ Port Service ΓÇ║ getPortWithPrices ΓÇ║ should return port with full 
+price info
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 21 |[39m     
+     [90m 22 |[39m     [90m// Create test commodity and add to port[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Test 
+Fuel'[39m[33m,[39m base_price[33m:[39m [35m50[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 24 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 25 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m
+     [90m 26 |[39m       max_quantity[33m:[39m 
+[35m1000[39m[33m,[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/portService.test.js:23:21)
+
+  ΓùÅ Port Service ΓÇ║ getPortWithPrices ΓÇ║ should calculate dynamic prices
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 21 |[39m     
+     [90m 22 |[39m     [90m// Create test commodity and add to port[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Test 
+Fuel'[39m[33m,[39m base_price[33m:[39m [35m50[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 24 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 25 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m
+     [90m 26 |[39m       max_quantity[33m:[39m 
+[35m1000[39m[33m,[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/portService.test.js:23:21)
+
+  ΓùÅ Port Service ΓÇ║ updatePortStock ΓÇ║ should update commodity quantity
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 21 |[39m     
+     [90m 22 |[39m     [90m// Create test commodity and add to port[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Test 
+Fuel'[39m[33m,[39m base_price[33m:[39m [35m50[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 24 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 25 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m
+     [90m 26 |[39m       max_quantity[33m:[39m 
+[35m1000[39m[33m,[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/portService.test.js:23:21)
+
+  ΓùÅ Port Service ΓÇ║ updatePortStock ΓÇ║ should not go below zero
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 21 |[39m     
+     [90m 22 |[39m     [90m// Create test commodity and add to port[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Test 
+Fuel'[39m[33m,[39m base_price[33m:[39m [35m50[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 24 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 25 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m
+     [90m 26 |[39m       max_quantity[33m:[39m 
+[35m1000[39m[33m,[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/portService.test.js:23:21)
+
+  ΓùÅ Port Service ΓÇ║ updatePortStock ΓÇ║ should not exceed max quantity
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 21 |[39m     
+     [90m 22 |[39m     [90m// Create test commodity and add to port[39m
+    [31m[1m>[22m[39m[90m 23 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Test 
+Fuel'[39m[33m,[39m base_price[33m:[39m [35m50[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 24 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 25 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m
+     [90m 26 |[39m       max_quantity[33m:[39m 
+[35m1000[39m[33m,[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/portService.test.js:23:21)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+FAIL tests/services/sectorService.test.js
+  Sector Service
+    getSectorById
+      ΓêÜ should return sector details (10 ms)
+      ΓêÜ should include connected sectors (4 ms)
+      ΓêÜ should throw error for non-existent sector (1 ms)
+    getConnectedSectors
+      ΓêÜ should return all directly connected sectors (3 ms)
+      ΓêÜ should return sector details for each connection (4 ms)
+      ΓêÜ should return empty array for isolated sector (46 ms)
+    getAllSectors
+      ├ù should return all sectors (3 ms)
+      ΓêÜ should support pagination (2 ms)
+    getSectorMap
+      ΓêÜ should return sector map data (2 ms)
+      ΓêÜ should include coordinates for each sector (3 ms)
+    isConnected
+      ΓêÜ should return true for connected sectors (2 ms)
+      ΓêÜ should return false for non-connected sectors (1 ms)
+      ΓêÜ should return false for same sector (1 ms)
+    searchSectors
+      ΓêÜ should find sectors by name (2 ms)
+      ΓêÜ should return empty for no matches (2 ms)
+
+  ΓùÅ Sector Service ΓÇ║ getAllSectors ΓÇ║ should return all sectors
+
+    expect(received).toBeInstanceOf(expected)
+
+    Expected constructor: Array
+    Received constructor: Array
+
+    [0m [90m 84 |[39m       [36mconst[39m sectors [33m=[39m 
+[36mawait[39m sectorService[33m.[39mgetAllSectors()[33m;[39m
+     [90m 85 |[39m       
+    [31m[1m>[22m[39m[90m 86 |[39m       
+expect(sectors)[33m.[39mtoBeInstanceOf([33mArray[39m)[33m;[39m
+     [90m    |[39m                       [31m[1m^[22m[39m
+     [90m 87 |[39m       expect(sectors[33m.[39mlength)[33m.[39mtoBeGreat
+erThanOrEqual([35m4[39m)[33m;[39m
+     [90m 88 |[39m     })[33m;[39m
+     [90m 89 |[39m[0m
+
+      at Object.toBeInstanceOf (tests/services/sectorService.test.js:86:23)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ≡ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+FAIL tests/services/tradeService.test.js
+  Trade Service
+    getShipCargo
+      ├ù should return ship cargo details
+      ├ù should calculate used and free capacity
+      ├ù should throw error for non-existent ship
+    buyCommodity
+      ├ù should successfully buy commodities
+      ├ù should deduct credits from user
+      ├ù should add cargo to ship
+      ├ù should reduce port stock
+      ├ù should create transaction record
+      ├ù should fail with insufficient credits
+      ├ù should fail with insufficient cargo space
+      ├ù should fail when ship is not in port sector
+    sellCommodity
+      ├ù should successfully sell commodities
+      ├ù should add credits to user (minus tax)
+      ├ù should remove cargo from ship
+      ├ù should fail with insufficient cargo
+
+  ΓùÅ Trade Service ΓÇ║ getShipCargo ΓÇ║ should return ship cargo details
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 17 |[39m     testShip [33m=[39m [36mawait[39m 
+createTestShip(testUser[33m.[39muser_id[33m,[39m 
+testSector[33m.[39msector_id[33m,[39m { cargo_capacity[33m:[39m 
+[35m100[39m })[33m;[39m
+     [90m 18 |[39m     testPort [33m=[39m [36mawait[39m 
+createTestPort(testSector[33m.[39msector_id[33m,[39m { name[33m:[39m 
+[32m'Trade Port'[39m[33m,[39m tax_rate[33m:[39m [35m0.05[39m 
+})[33m;[39m
+    [31m[1m>[22m[39m[90m 19 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Trade 
+Goods'[39m[33m,[39m base_price[33m:[39m [35m100[39m[33m,[39m 
+volume_per_unit[33m:[39m [35m1[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 20 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 21 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m 
+max_quantity[33m:[39m [35m1000[39m[33m,[39m can_buy[33m:[39m 
+[36mtrue[39m[33m,[39m can_sell[33m:[39m [36mtrue[39m
+     [90m 22 |[39m     })[33m;[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/tradeService.test.js:19:21)
+
+  ΓùÅ Trade Service ΓÇ║ getShipCargo ΓÇ║ should calculate used and free 
+capacity
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 17 |[39m     testShip [33m=[39m [36mawait[39m 
+createTestShip(testUser[33m.[39muser_id[33m,[39m 
+testSector[33m.[39msector_id[33m,[39m { cargo_capacity[33m:[39m 
+[35m100[39m })[33m;[39m
+     [90m 18 |[39m     testPort [33m=[39m [36mawait[39m 
+createTestPort(testSector[33m.[39msector_id[33m,[39m { name[33m:[39m 
+[32m'Trade Port'[39m[33m,[39m tax_rate[33m:[39m [35m0.05[39m 
+})[33m;[39m
+    [31m[1m>[22m[39m[90m 19 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Trade 
+Goods'[39m[33m,[39m base_price[33m:[39m [35m100[39m[33m,[39m 
+volume_per_unit[33m:[39m [35m1[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 20 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 21 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m 
+max_quantity[33m:[39m [35m1000[39m[33m,[39m can_buy[33m:[39m 
+[36mtrue[39m[33m,[39m can_sell[33m:[39m [36mtrue[39m
+     [90m 22 |[39m     })[33m;[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/tradeService.test.js:19:21)
+
+  ΓùÅ Trade Service ΓÇ║ getShipCargo ΓÇ║ should throw error for non-existent 
+ship
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 17 |[39m     testShip [33m=[39m [36mawait[39m 
+createTestShip(testUser[33m.[39muser_id[33m,[39m 
+testSector[33m.[39msector_id[33m,[39m { cargo_capacity[33m:[39m 
+[35m100[39m })[33m;[39m
+     [90m 18 |[39m     testPort [33m=[39m [36mawait[39m 
+createTestPort(testSector[33m.[39msector_id[33m,[39m { name[33m:[39m 
+[32m'Trade Port'[39m[33m,[39m tax_rate[33m:[39m [35m0.05[39m 
+})[33m;[39m
+    [31m[1m>[22m[39m[90m 19 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Trade 
+Goods'[39m[33m,[39m base_price[33m:[39m [35m100[39m[33m,[39m 
+volume_per_unit[33m:[39m [35m1[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 20 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 21 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m 
+max_quantity[33m:[39m [35m1000[39m[33m,[39m can_buy[33m:[39m 
+[36mtrue[39m[33m,[39m can_sell[33m:[39m [36mtrue[39m
+     [90m 22 |[39m     })[33m;[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/tradeService.test.js:19:21)
+
+  ΓùÅ Trade Service ΓÇ║ buyCommodity ΓÇ║ should successfully buy commodities
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 17 |[39m     testShip [33m=[39m [36mawait[39m 
+createTestShip(testUser[33m.[39muser_id[33m,[39m 
+testSector[33m.[39msector_id[33m,[39m { cargo_capacity[33m:[39m 
+[35m100[39m })[33m;[39m
+     [90m 18 |[39m     testPort [33m=[39m [36mawait[39m 
+createTestPort(testSector[33m.[39msector_id[33m,[39m { name[33m:[39m 
+[32m'Trade Port'[39m[33m,[39m tax_rate[33m:[39m [35m0.05[39m 
+})[33m;[39m
+    [31m[1m>[22m[39m[90m 19 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Trade 
+Goods'[39m[33m,[39m base_price[33m:[39m [35m100[39m[33m,[39m 
+volume_per_unit[33m:[39m [35m1[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 20 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 21 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m 
+max_quantity[33m:[39m [35m1000[39m[33m,[39m can_buy[33m:[39m 
+[36mtrue[39m[33m,[39m can_sell[33m:[39m [36mtrue[39m
+     [90m 22 |[39m     })[33m;[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/tradeService.test.js:19:21)
+
+  ΓùÅ Trade Service ΓÇ║ buyCommodity ΓÇ║ should deduct credits from user
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 17 |[39m     testShip [33m=[39m [36mawait[39m 
+createTestShip(testUser[33m.[39muser_id[33m,[39m 
+testSector[33m.[39msector_id[33m,[39m { cargo_capacity[33m:[39m 
+[35m100[39m })[33m;[39m
+     [90m 18 |[39m     testPort [33m=[39m [36mawait[39m 
+createTestPort(testSector[33m.[39msector_id[33m,[39m { name[33m:[39m 
+[32m'Trade Port'[39m[33m,[39m tax_rate[33m:[39m [35m0.05[39m 
+})[33m;[39m
+    [31m[1m>[22m[39m[90m 19 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Trade 
+Goods'[39m[33m,[39m base_price[33m:[39m [35m100[39m[33m,[39m 
+volume_per_unit[33m:[39m [35m1[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 20 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 21 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m 
+max_quantity[33m:[39m [35m1000[39m[33m,[39m can_buy[33m:[39m 
+[36mtrue[39m[33m,[39m can_sell[33m:[39m [36mtrue[39m
+     [90m 22 |[39m     })[33m;[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/tradeService.test.js:19:21)
+
+  ΓùÅ Trade Service ΓÇ║ buyCommodity ΓÇ║ should add cargo to ship
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 17 |[39m     testShip [33m=[39m [36mawait[39m 
+createTestShip(testUser[33m.[39muser_id[33m,[39m 
+testSector[33m.[39msector_id[33m,[39m { cargo_capacity[33m:[39m 
+[35m100[39m })[33m;[39m
+     [90m 18 |[39m     testPort [33m=[39m [36mawait[39m 
+createTestPort(testSector[33m.[39msector_id[33m,[39m { name[33m:[39m 
+[32m'Trade Port'[39m[33m,[39m tax_rate[33m:[39m [35m0.05[39m 
+})[33m;[39m
+    [31m[1m>[22m[39m[90m 19 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Trade 
+Goods'[39m[33m,[39m base_price[33m:[39m [35m100[39m[33m,[39m 
+volume_per_unit[33m:[39m [35m1[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 20 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 21 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m 
+max_quantity[33m:[39m [35m1000[39m[33m,[39m can_buy[33m:[39m 
+[36mtrue[39m[33m,[39m can_sell[33m:[39m [36mtrue[39m
+     [90m 22 |[39m     })[33m;[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/tradeService.test.js:19:21)
+
+  ΓùÅ Trade Service ΓÇ║ buyCommodity ΓÇ║ should reduce port stock
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 17 |[39m     testShip [33m=[39m [36mawait[39m 
+createTestShip(testUser[33m.[39muser_id[33m,[39m 
+testSector[33m.[39msector_id[33m,[39m { cargo_capacity[33m:[39m 
+[35m100[39m })[33m;[39m
+     [90m 18 |[39m     testPort [33m=[39m [36mawait[39m 
+createTestPort(testSector[33m.[39msector_id[33m,[39m { name[33m:[39m 
+[32m'Trade Port'[39m[33m,[39m tax_rate[33m:[39m [35m0.05[39m 
+})[33m;[39m
+    [31m[1m>[22m[39m[90m 19 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Trade 
+Goods'[39m[33m,[39m base_price[33m:[39m [35m100[39m[33m,[39m 
+volume_per_unit[33m:[39m [35m1[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 20 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 21 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m 
+max_quantity[33m:[39m [35m1000[39m[33m,[39m can_buy[33m:[39m 
+[36mtrue[39m[33m,[39m can_sell[33m:[39m [36mtrue[39m
+     [90m 22 |[39m     })[33m;[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/tradeService.test.js:19:21)
+
+  ΓùÅ Trade Service ΓÇ║ buyCommodity ΓÇ║ should create transaction record
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 17 |[39m     testShip [33m=[39m [36mawait[39m 
+createTestShip(testUser[33m.[39muser_id[33m,[39m 
+testSector[33m.[39msector_id[33m,[39m { cargo_capacity[33m:[39m 
+[35m100[39m })[33m;[39m
+     [90m 18 |[39m     testPort [33m=[39m [36mawait[39m 
+createTestPort(testSector[33m.[39msector_id[33m,[39m { name[33m:[39m 
+[32m'Trade Port'[39m[33m,[39m tax_rate[33m:[39m [35m0.05[39m 
+})[33m;[39m
+    [31m[1m>[22m[39m[90m 19 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Trade 
+Goods'[39m[33m,[39m base_price[33m:[39m [35m100[39m[33m,[39m 
+volume_per_unit[33m:[39m [35m1[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 20 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 21 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m 
+max_quantity[33m:[39m [35m1000[39m[33m,[39m can_buy[33m:[39m 
+[36mtrue[39m[33m,[39m can_sell[33m:[39m [36mtrue[39m
+     [90m 22 |[39m     })[33m;[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/tradeService.test.js:19:21)
+
+  ΓùÅ Trade Service ΓÇ║ buyCommodity ΓÇ║ should fail with insufficient credits
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 17 |[39m     testShip [33m=[39m [36mawait[39m 
+createTestShip(testUser[33m.[39muser_id[33m,[39m 
+testSector[33m.[39msector_id[33m,[39m { cargo_capacity[33m:[39m 
+[35m100[39m })[33m;[39m
+     [90m 18 |[39m     testPort [33m=[39m [36mawait[39m 
+createTestPort(testSector[33m.[39msector_id[33m,[39m { name[33m:[39m 
+[32m'Trade Port'[39m[33m,[39m tax_rate[33m:[39m [35m0.05[39m 
+})[33m;[39m
+    [31m[1m>[22m[39m[90m 19 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Trade 
+Goods'[39m[33m,[39m base_price[33m:[39m [35m100[39m[33m,[39m 
+volume_per_unit[33m:[39m [35m1[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 20 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 21 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m 
+max_quantity[33m:[39m [35m1000[39m[33m,[39m can_buy[33m:[39m 
+[36mtrue[39m[33m,[39m can_sell[33m:[39m [36mtrue[39m
+     [90m 22 |[39m     })[33m;[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/tradeService.test.js:19:21)
+
+  ΓùÅ Trade Service ΓÇ║ buyCommodity ΓÇ║ should fail with insufficient cargo 
+space
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 17 |[39m     testShip [33m=[39m [36mawait[39m 
+createTestShip(testUser[33m.[39muser_id[33m,[39m 
+testSector[33m.[39msector_id[33m,[39m { cargo_capacity[33m:[39m 
+[35m100[39m })[33m;[39m
+     [90m 18 |[39m     testPort [33m=[39m [36mawait[39m 
+createTestPort(testSector[33m.[39msector_id[33m,[39m { name[33m:[39m 
+[32m'Trade Port'[39m[33m,[39m tax_rate[33m:[39m [35m0.05[39m 
+})[33m;[39m
+    [31m[1m>[22m[39m[90m 19 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Trade 
+Goods'[39m[33m,[39m base_price[33m:[39m [35m100[39m[33m,[39m 
+volume_per_unit[33m:[39m [35m1[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 20 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 21 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m 
+max_quantity[33m:[39m [35m1000[39m[33m,[39m can_buy[33m:[39m 
+[36mtrue[39m[33m,[39m can_sell[33m:[39m [36mtrue[39m
+     [90m 22 |[39m     })[33m;[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/tradeService.test.js:19:21)
+
+  ΓùÅ Trade Service ΓÇ║ buyCommodity ΓÇ║ should fail when ship is not in port 
+sector
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 17 |[39m     testShip [33m=[39m [36mawait[39m 
+createTestShip(testUser[33m.[39muser_id[33m,[39m 
+testSector[33m.[39msector_id[33m,[39m { cargo_capacity[33m:[39m 
+[35m100[39m })[33m;[39m
+     [90m 18 |[39m     testPort [33m=[39m [36mawait[39m 
+createTestPort(testSector[33m.[39msector_id[33m,[39m { name[33m:[39m 
+[32m'Trade Port'[39m[33m,[39m tax_rate[33m:[39m [35m0.05[39m 
+})[33m;[39m
+    [31m[1m>[22m[39m[90m 19 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Trade 
+Goods'[39m[33m,[39m base_price[33m:[39m [35m100[39m[33m,[39m 
+volume_per_unit[33m:[39m [35m1[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 20 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 21 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m 
+max_quantity[33m:[39m [35m1000[39m[33m,[39m can_buy[33m:[39m 
+[36mtrue[39m[33m,[39m can_sell[33m:[39m [36mtrue[39m
+     [90m 22 |[39m     })[33m;[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/tradeService.test.js:19:21)
+
+  ΓùÅ Trade Service ΓÇ║ sellCommodity ΓÇ║ should successfully sell commodities
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 17 |[39m     testShip [33m=[39m [36mawait[39m 
+createTestShip(testUser[33m.[39muser_id[33m,[39m 
+testSector[33m.[39msector_id[33m,[39m { cargo_capacity[33m:[39m 
+[35m100[39m })[33m;[39m
+     [90m 18 |[39m     testPort [33m=[39m [36mawait[39m 
+createTestPort(testSector[33m.[39msector_id[33m,[39m { name[33m:[39m 
+[32m'Trade Port'[39m[33m,[39m tax_rate[33m:[39m [35m0.05[39m 
+})[33m;[39m
+    [31m[1m>[22m[39m[90m 19 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Trade 
+Goods'[39m[33m,[39m base_price[33m:[39m [35m100[39m[33m,[39m 
+volume_per_unit[33m:[39m [35m1[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 20 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 21 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m 
+max_quantity[33m:[39m [35m1000[39m[33m,[39m can_buy[33m:[39m 
+[36mtrue[39m[33m,[39m can_sell[33m:[39m [36mtrue[39m
+     [90m 22 |[39m     })[33m;[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/tradeService.test.js:19:21)
+
+  ΓùÅ Trade Service ΓÇ║ sellCommodity ΓÇ║ should add credits to user (minus 
+tax)
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 17 |[39m     testShip [33m=[39m [36mawait[39m 
+createTestShip(testUser[33m.[39muser_id[33m,[39m 
+testSector[33m.[39msector_id[33m,[39m { cargo_capacity[33m:[39m 
+[35m100[39m })[33m;[39m
+     [90m 18 |[39m     testPort [33m=[39m [36mawait[39m 
+createTestPort(testSector[33m.[39msector_id[33m,[39m { name[33m:[39m 
+[32m'Trade Port'[39m[33m,[39m tax_rate[33m:[39m [35m0.05[39m 
+})[33m;[39m
+    [31m[1m>[22m[39m[90m 19 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Trade 
+Goods'[39m[33m,[39m base_price[33m:[39m [35m100[39m[33m,[39m 
+volume_per_unit[33m:[39m [35m1[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 20 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 21 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m 
+max_quantity[33m:[39m [35m1000[39m[33m,[39m can_buy[33m:[39m 
+[36mtrue[39m[33m,[39m can_sell[33m:[39m [36mtrue[39m
+     [90m 22 |[39m     })[33m;[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/tradeService.test.js:19:21)
+
+  ΓùÅ Trade Service ΓÇ║ sellCommodity ΓÇ║ should remove cargo from ship
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 17 |[39m     testShip [33m=[39m [36mawait[39m 
+createTestShip(testUser[33m.[39muser_id[33m,[39m 
+testSector[33m.[39msector_id[33m,[39m { cargo_capacity[33m:[39m 
+[35m100[39m })[33m;[39m
+     [90m 18 |[39m     testPort [33m=[39m [36mawait[39m 
+createTestPort(testSector[33m.[39msector_id[33m,[39m { name[33m:[39m 
+[32m'Trade Port'[39m[33m,[39m tax_rate[33m:[39m [35m0.05[39m 
+})[33m;[39m
+    [31m[1m>[22m[39m[90m 19 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Trade 
+Goods'[39m[33m,[39m base_price[33m:[39m [35m100[39m[33m,[39m 
+volume_per_unit[33m:[39m [35m1[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 20 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 21 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m 
+max_quantity[33m:[39m [35m1000[39m[33m,[39m can_buy[33m:[39m 
+[36mtrue[39m[33m,[39m can_sell[33m:[39m [36mtrue[39m
+     [90m 22 |[39m     })[33m;[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/tradeService.test.js:19:21)
+
+  ΓùÅ Trade Service ΓÇ║ sellCommodity ΓÇ║ should fail with insufficient cargo
+
+    SequelizeValidationError: Validation error: Validation isIn on category 
+failed
+
+    [0m [90m 17 |[39m     testShip [33m=[39m [36mawait[39m 
+createTestShip(testUser[33m.[39muser_id[33m,[39m 
+testSector[33m.[39msector_id[33m,[39m { cargo_capacity[33m:[39m 
+[35m100[39m })[33m;[39m
+     [90m 18 |[39m     testPort [33m=[39m [36mawait[39m 
+createTestPort(testSector[33m.[39msector_id[33m,[39m { name[33m:[39m 
+[32m'Trade Port'[39m[33m,[39m tax_rate[33m:[39m [35m0.05[39m 
+})[33m;[39m
+    [31m[1m>[22m[39m[90m 19 |[39m     testCommodity [33m=[39m 
+[36mawait[39m createTestCommodity({ name[33m:[39m [32m'Trade 
+Goods'[39m[33m,[39m base_price[33m:[39m [35m100[39m[33m,[39m 
+volume_per_unit[33m:[39m [35m1[39m })[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 20 |[39m     [36mawait[39m 
+addCommodityToPort(testPort[33m.[39mport_id[33m,[39m 
+testCommodity[33m.[39mcommodity_id[33m,[39m {
+     [90m 21 |[39m       quantity[33m:[39m [35m500[39m[33m,[39m 
+max_quantity[33m:[39m [35m1000[39m[33m,[39m can_buy[33m:[39m 
+[36mtrue[39m[33m,[39m can_sell[33m:[39m [36mtrue[39m
+     [90m 22 |[39m     })[33m;[39m[0m
+
+      at InstanceValidator._validate 
+(node_modules/sequelize/src/instance-validator.js:78:13)
+      at InstanceValidator._validateAndRunHooks 
+(node_modules/sequelize/src/instance-validator.js:111:7)
+      at InstanceValidator.validate 
+(node_modules/sequelize/src/instance-validator.js:93:12)
+      at model.save (node_modules/sequelize/src/model.js:4077:7)
+      at Commodity.create (node_modules/sequelize/src/model.js:2305:12)
+      at Object.<anonymous> (tests/services/tradeService.test.js:19:21)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ≡ƒôí add observability to secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ≡ƒôí add observability to secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+PASS tests/services/shipService.test.js
+  Ship Service
+    getUserShips
+      ΓêÜ should return all ships owned by user (6 ms)
+      ΓêÜ should include current sector info (3 ms)
+      ΓêÜ should return empty array for user with no ships (93 ms)
+    getShipById
+      ΓêÜ should return ship details (4 ms)
+      ΓêÜ should throw error for non-existent ship (2 ms)
+      ΓêÜ should throw error when accessing another user's ship (101 ms)
+    moveShip
+      ΓêÜ should move ship to connected sector (169 ms)
+      ΓêÜ should consume fuel on movement (158 ms)
+      ΓêÜ should fail when moving to non-connected sector (120 ms)
+      ΓêÜ should fail when out of fuel (154 ms)
+      ΓêÜ should fail when ship is already in target sector (185 ms)
+    getAdjacentSectors
+      ΓêÜ should return adjacent sectors (4 ms)
+      ΓêÜ should include connection details (4 ms)
+    isAdjacent
+      ΓêÜ should return true for connected sectors (2 ms)
+      ΓêÜ should return false for non-connected sectors (1 ms)
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: ΓÜÖ∩╕Å  specify custom .env file path with { path: '/custom/path/.env' }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ≡ƒöæ add access controls to secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+FAIL tests/services/pricingService.test.js
+  Pricing Service
+    calculateBuyPrice
+      ΓêÜ should return higher price when stock is low (2 ms)
+      ├ù should return base price approximately when stock is at 50% (2 ms)
+      ΓêÜ should apply port modifier
+      ΓêÜ should clamp prices to min/max multipliers (1 ms)
+      ΓêÜ should return rounded integer (1 ms)
+    calculateSellPrice
+      ΓêÜ should return higher price when stock is low (scarcity) (1 ms)
+      ΓêÜ should be higher than buy price (spread)
+    calculateTotalWithTax
+      ΓêÜ should calculate correct subtotal
+      ΓêÜ should calculate correct tax amount (1 ms)
+      ΓêÜ should calculate correct total (subtotal + tax)
+      ΓêÜ should handle zero tax rate
+      ΓêÜ should round tax to nearest integer (1 ms)
+    calculateSaleRevenue
+      ΓêÜ should calculate correct subtotal
+      ΓêÜ should deduct tax from total (seller pays tax)
+      ΓêÜ should handle zero tax rate (1 ms)
+    getPriceInfo
+      ΓêÜ should return price info object (1 ms)
+      ΓêÜ should return null buy_price when port does not buy (1 ms)
+
+  ΓùÅ Pricing Service ΓÇ║ calculateBuyPrice ΓÇ║ should return base price 
+approximately when stock is at 50%
+
+    expect(received).toBeCloseTo(expected, precision)
+
+    Expected: 100
+    Received: 93
+
+    Expected precision:    -1
+    Expected difference: < 5
+    Received difference:   7
+
+    [0m [90m 20 |[39m       [36mconst[39m price [33m=[39m 
+pricingService[33m.[39mcalculateBuyPrice(basePrice[33m,[39m 
+[35m500[39m[33m,[39m maxQuantity[33m,[39m [35m0[39m)[33m;[39m
+     [90m 21 |[39m       
+    [31m[1m>[22m[39m[90m 22 |[39m       
+expect(price)[33m.[39mtoBeCloseTo(basePrice[33m,[39m 
+[33m-[39m[35m1[39m)[33m;[39m [90m// Within 10 of base[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 23 |[39m     })[33m;[39m
+     [90m 24 |[39m
+     [90m 25 |[39m     it([32m'should apply port modifier'[39m[33m,[39m 
+[36masync[39m () [33m=>[39m {[0m
+
+      at Object.toBeCloseTo (tests/services/pricingService.test.js:22:21)
+
+Test Suites: 6 failed, 1 passed, 7 total
+Tests:       38 failed, 65 passed, 103 total
+Snapshots:   0 total
+Time:        17.368 s
+Ran all test suites matching tests/services.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect 
+async operations that kept running after all tests finished?
