@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
-const { User, Ship, Sector, Commodity, ShipCargo } = require('../models');
+const { User, Ship, Sector, Commodity, ShipCargo, sequelize } = require('../models');
 const { getStartingSector } = require('./universeGenerator');
+const { discoverSectorAndNeighbors } = require('./discoveryService');
 const config = require('../config');
 
 const generateToken = (user) => {
@@ -13,72 +14,97 @@ const generateToken = (user) => {
 };
 
 const registerUser = async (username, email, password) => {
-  // Check if user exists
-  const existingUser = await User.findOne({
-    where: {
-      [Op.or]: [{ username }, { email }]
-    }
-  });
+  const transaction = await sequelize.transaction();
 
-  if (existingUser) {
-    const field = existingUser.username === username ? 'username' : 'email';
-    const error = new Error(`${field} already exists`);
-    error.statusCode = 409;
-    throw error;
-  }
+  try {
+    // Check if user exists
+    const existingUser = await User.findOne({
+      where: {
+        [Op.or]: [{ username }, { email }]
+      },
+      transaction
+    });
 
-  // Create user
-  const user = await User.create({
-    username,
-    email,
-    hashed_password: password
-  });
-
-  // Get starting sector
-  let startingSector = await getStartingSector();
-  
-  if (!startingSector) {
-    // If no starting sector exists, find any sector
-    startingSector = await Sector.findOne();
-    
-    if (!startingSector) {
-      const error = new Error('No sectors available. Universe may not be initialized.');
-      error.statusCode = 500;
+    if (existingUser) {
+      await transaction.rollback();
+      const field = existingUser.username === username ? 'username' : 'email';
+      const error = new Error(`${field} already exists`);
+      error.statusCode = 409;
       throw error;
     }
-  }
 
-  // Create default ship for user (sanitize ship name)
-  const sanitizedUsername = username.replace(/[<>&"']/g, '');
-  const ship = await Ship.create({
-    owner_user_id: user.user_id,
-    current_sector_id: startingSector.sector_id,
-    ship_type: 'Scout',
-    name: `${sanitizedUsername}'s Scout`
-  });
+    console.log(`[AUTH] Creating user ${username}...`);
 
-  // Give starting cargo to new player
-  const startingCargo = config.economy?.startingCargo || {};
-  for (const [commodityName, quantity] of Object.entries(startingCargo)) {
-    const commodity = await Commodity.findOne({ where: { name: commodityName } });
-    if (commodity) {
-      await ShipCargo.create({
-        ship_id: ship.ship_id,
-        commodity_id: commodity.commodity_id,
-        quantity: quantity
-      });
+    // Create user
+    const user = await User.create({
+      username,
+      email,
+      hashed_password: password
+    }, { transaction });
+
+    console.log(`[AUTH] User created: ${user.user_id}. Finding starting sector...`);
+
+    // Get starting sector
+    let startingSector = await getStartingSector();
+
+    if (!startingSector) {
+      // If no starting sector exists, try to find ANY sector
+      startingSector = await Sector.findOne({ transaction });
+
+      if (!startingSector) {
+        throw new Error('No sectors available. Universe not initialized.');
+      }
     }
+
+    console.log(`[AUTH] Starting sector found: ${startingSector.sector_id}. Creating ship...`);
+
+    // Create default ship for user (sanitize ship name)
+    const sanitizedUsername = username.replace(/[<>&"']/g, '');
+    const ship = await Ship.create({
+      owner_user_id: user.user_id,
+      current_sector_id: startingSector.sector_id,
+      ship_type: 'Scout',
+      name: `${sanitizedUsername}'s Scout`
+    }, { transaction });
+
+    console.log(`[AUTH] Ship created: ${ship.ship_id}. Adding starting cargo...`);
+
+    // Give starting cargo to new player
+    const startingCargo = config.economy?.startingCargo || {};
+    for (const [commodityName, quantity] of Object.entries(startingCargo)) {
+      const commodity = await Commodity.findOne({ where: { name: commodityName }, transaction });
+      if (commodity) {
+        await ShipCargo.create({
+          ship_id: ship.ship_id,
+          commodity_id: commodity.commodity_id,
+          quantity: quantity
+        }, { transaction });
+      }
+    }
+
+    // Discover starting sector and neighbors (fog of war)
+    await discoverSectorAndNeighbors(user.user_id, startingSector.sector_id, transaction);
+    console.log(`[AUTH] Starting sector discovered with neighbors`);
+
+    // Generate token
+    const token = generateToken(user);
+
+    await transaction.commit();
+    console.log(`[AUTH] Registration complete for ${username}`);
+
+    return {
+      user: user.toJSON(),
+      ship: ship.toJSON(),
+      startingSector: startingSector.toJSON(),
+      token
+    };
+  } catch (error) {
+    await transaction.rollback();
+    console.error(`[AUTH] Registration failed: ${error.message}`);
+    // Re-throw specific status codes, otherwise 500
+    if (!error.statusCode) error.statusCode = 500;
+    throw error;
   }
-
-  // Generate token
-  const token = generateToken(user);
-
-  return {
-    user: user.toJSON(),
-    ship: ship.toJSON(),
-    startingSector: startingSector.toJSON(),
-    token
-  };
 };
 
 const loginUser = async (username, password, clientIp = 'unknown') => {

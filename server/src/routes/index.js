@@ -8,6 +8,12 @@ const tradeRoutes = require('./trade');
 const shipDesignerRoutes = require('./shipDesignerRoutes');
 const combatRoutes = require('./combatRoutes');
 const npcRoutes = require('./npcRoutes');
+// Phase 4: Planets, Colonization & Crew
+const planetRoutes = require('./planetRoutes');
+const colonyRoutes = require('./colonyRoutes');
+const crewRoutes = require('./crewRoutes');
+// Admin
+const adminRoutes = require('./adminRoutes');
 const { sequelize } = require('../config/database');
 const config = require('../config');
 
@@ -55,6 +61,12 @@ router.use('/trade', tradeRoutes);
 router.use('/designer', shipDesignerRoutes);
 router.use('/combat', combatRoutes);
 router.use('/npcs', npcRoutes);
+// Phase 4: Planets, Colonization & Crew
+router.use('/planets', planetRoutes);
+router.use('/colonies', colonyRoutes);
+router.use('/crew', crewRoutes);
+// Admin
+router.use('/admin', adminRoutes);
 
 module.exports = router;
 

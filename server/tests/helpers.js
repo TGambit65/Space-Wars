@@ -1,7 +1,7 @@
 /**
  * Test helper functions and fixtures
  */
-const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, sequelize } = require('../src/models');
+const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, sequelize } = require('../src/models');
 const authService = require('../src/services/authService');
 const bcrypt = require('bcryptjs');
 
@@ -129,20 +129,117 @@ const addCargoToShip = async (shipId, commodityId, quantity) => {
   });
 };
 
+// ============== Phase 4 Helpers ==============
+
+/**
+ * Create a test planet
+ */
+const createTestPlanet = async (sectorId, overrides = {}) => {
+  const defaults = {
+    sector_id: sectorId,
+    name: `Test Planet ${Date.now()}`,
+    type: 'Terran',
+    size: 5,
+    gravity: 1.0,
+    habitability: 0.8,
+    has_artifact: false,
+    description: 'A test planet'
+  };
+  return Planet.create({ ...defaults, ...overrides });
+};
+
+/**
+ * Create a test planet resource
+ */
+const createTestPlanetResource = async (planetId, overrides = {}) => {
+  const defaults = {
+    planet_id: planetId,
+    resource_type: 'Iron Ore',
+    abundance: 1.5,
+    total_quantity: 10000,
+    extracted_quantity: 0
+  };
+  return PlanetResource.create({ ...defaults, ...overrides });
+};
+
+/**
+ * Create a test colony
+ */
+const createTestColony = async (planetId, userId, overrides = {}) => {
+  const defaults = {
+    planet_id: planetId,
+    user_id: userId,
+    name: `Test Colony ${Date.now()}`,
+    population: 100,
+    infrastructure_level: 1,
+    last_resource_tick: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+    is_active: true
+  };
+  return Colony.create({ ...defaults, ...overrides });
+};
+
+/**
+ * Create a test crew member
+ */
+const createTestCrew = async (portId = null, userId = null, shipId = null, overrides = {}) => {
+  const defaults = {
+    name: `Test Crew ${Date.now()}`,
+    species: 'Human',
+    level: 1,
+    xp: 0,
+    salary: 100,
+    port_id: portId,
+    owner_user_id: userId,
+    current_ship_id: shipId,
+    is_active: true
+  };
+  return Crew.create({ ...defaults, ...overrides });
+};
+
+/**
+ * Create a test artifact
+ */
+const createTestArtifact = async (planetId, overrides = {}) => {
+  const defaults = {
+    name: `Test Artifact ${Date.now()}`,
+    description: 'A mysterious artifact',
+    bonus_type: 'navigation',
+    bonus_value: 0,
+    rarity: 0.1,
+    location_planet_id: planetId,
+    is_discovered: false
+  };
+  return Artifact.create({ ...defaults, ...overrides });
+};
+
 /**
  * Clean all test data
  * Note: SQLite doesn't support TRUNCATE, so we use destroy with where: {}
  */
 const cleanDatabase = async () => {
   // Delete in order to respect foreign key constraints
+  // Phase 4 models first
+  await PlayerDiscovery.destroy({ where: {} });
+  await Artifact.destroy({ where: {} });
+  await Colony.destroy({ where: {} });
+  await Crew.destroy({ where: {} });
+  await PlanetResource.destroy({ where: {} });
+  await Planet.destroy({ where: {} });
+  // Phase 3 models
+  await CombatLog.destroy({ where: {} });
+  await ShipComponent.destroy({ where: {} });
+  await NPC.destroy({ where: {} });
+  // Phase 2 models
   await Transaction.destroy({ where: {} });
   await ShipCargo.destroy({ where: {} });
   await PortCommodity.destroy({ where: {} });
   await Port.destroy({ where: {} });
+  // Core models
   await Ship.destroy({ where: {} });
   await SectorConnection.destroy({ where: {} });
   await Sector.destroy({ where: {} });
   await Commodity.destroy({ where: {} });
+  await Component.destroy({ where: {} });
   await User.destroy({ where: {} });
 };
 
@@ -162,6 +259,8 @@ const generateTestToken = (user) => {
 module.exports = {
   createTestUser, createTestSector, createTestShip, createSectorConnection,
   createTestCommodity, createTestPort, addCommodityToPort, addCargoToShip,
+  // Phase 4 helpers
+  createTestPlanet, createTestPlanetResource, createTestColony, createTestCrew, createTestArtifact,
   cleanDatabase, generateTestToken
 };
 

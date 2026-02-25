@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const npcController = require('../controllers/npcController');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 
 // Apply auth middleware to all routes
 router.use(authMiddleware);
 
-// Get NPCs
+// Get NPCs (any authenticated user)
 router.get('/sector/:sectorId', npcController.getNPCsInSector);
 router.get('/:npcId', npcController.getNPCById);
 
-// Admin endpoints (could add admin middleware)
-router.post('/spawn', npcController.spawnNPC);
-router.post('/respawn', npcController.respawnNPCs);
+// Admin endpoints (require admin role)
+router.post('/spawn', adminMiddleware, npcController.spawnNPC);
+router.post('/respawn', adminMiddleware, npcController.respawnNPCs);
 
 module.exports = router;
 

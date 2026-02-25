@@ -1,4 +1,4 @@
-const { Ship, Component, ShipComponent, User, sequelize } = require('../models');
+const { Ship, Component, ShipComponent, User, Port, sequelize } = require('../models');
 const config = require('../config');
 
 /**
@@ -59,7 +59,7 @@ const getInstalledSlotCounts = async (shipId, transaction = null) => {
     include: [{ model: Component, as: 'component', attributes: ['type'] }],
     ...(transaction && { transaction })
   });
-  
+
   const counts = {};
   for (const sc of components) {
     const type = sc.component.type;
@@ -69,7 +69,20 @@ const getInstalledSlotCounts = async (shipId, transaction = null) => {
 };
 
 /**
- * Install a component on a ship
+ * Calculate total energy cost of installed components
+ */
+const getTotalEnergyCost = async (shipId, transaction = null) => {
+  const components = await ShipComponent.findAll({
+    where: { ship_id: shipId, is_active: true },
+    include: [{ model: Component, as: 'component', attributes: ['energy_cost'] }],
+    ...(transaction && { transaction })
+  });
+
+  return components.reduce((total, sc) => total + (sc.component.energy_cost || 0), 0);
+};
+
+/**
+ * Install a component on a ship (requires ship to be at a port)
  */
 const installComponent = async (userId, shipId, componentId) => {
   const t = await sequelize.transaction();
@@ -82,6 +95,15 @@ const installComponent = async (userId, shipId, componentId) => {
       transaction: t, lock: t.LOCK.UPDATE
     });
     if (!ship) throw Object.assign(new Error('Ship not found'), { statusCode: 404 });
+
+    // Verify ship is at a port
+    const port = await Port.findOne({
+      where: { sector_id: ship.current_sector_id, is_active: true },
+      transaction: t
+    });
+    if (!port) {
+      throw Object.assign(new Error('Ship must be at a port to install components'), { statusCode: 400 });
+    }
 
     const component = await Component.findByPk(componentId, { transaction: t });
     if (!component) throw Object.assign(new Error('Component not found'), { statusCode: 404 });
@@ -102,6 +124,16 @@ const installComponent = async (userId, shipId, componentId) => {
     const currentCount = installedCounts[component.type] || 0;
     if (currentCount >= maxSlots) {
       throw Object.assign(new Error(`No ${component.type} slots available (${currentCount}/${maxSlots})`), { statusCode: 400 });
+    }
+
+    // Check energy capacity
+    const currentEnergyCost = await getTotalEnergyCost(shipId, t);
+    const newTotalEnergy = currentEnergyCost + (component.energy_cost || 0);
+    if (newTotalEnergy > ship.max_energy) {
+      throw Object.assign(
+        new Error(`Insufficient energy capacity. Need ${newTotalEnergy}, have ${ship.max_energy}`),
+        { statusCode: 400 }
+      );
     }
 
     // Deduct credits and install
@@ -127,7 +159,7 @@ const installComponent = async (userId, shipId, componentId) => {
 };
 
 /**
- * Uninstall a component from a ship
+ * Uninstall a component from a ship (requires ship to be at a port)
  */
 const uninstallComponent = async (userId, shipId, shipComponentId) => {
   const t = await sequelize.transaction();
@@ -137,6 +169,15 @@ const uninstallComponent = async (userId, shipId, shipComponentId) => {
       transaction: t, lock: t.LOCK.UPDATE
     });
     if (!ship) throw Object.assign(new Error('Ship not found'), { statusCode: 404 });
+
+    // Verify ship is at a port
+    const port = await Port.findOne({
+      where: { sector_id: ship.current_sector_id, is_active: true },
+      transaction: t
+    });
+    if (!port) {
+      throw Object.assign(new Error('Ship must be at a port to uninstall components'), { statusCode: 400 });
+    }
 
     const shipComponent = await ShipComponent.findOne({
       where: { ship_component_id: shipComponentId, ship_id: shipId },
@@ -269,6 +310,7 @@ module.exports = {
   getAvailableComponents,
   getShipWithComponents,
   getInstalledSlotCounts,
+  getTotalEnergyCost,
   installComponent,
   uninstallComponent,
   recalculateShipStats,

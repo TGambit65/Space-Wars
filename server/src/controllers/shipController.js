@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const shipService = require('../services/shipService');
+const crewBonusService = require('../services/crewBonusService');
 
 const getShips = async (req, res, next) => {
   try {
@@ -97,10 +98,39 @@ const getAdjacentSectors = async (req, res, next) => {
   }
 };
 
+const getCrewEffectiveness = async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    const { shipId } = req.params;
+
+    // Verify ship ownership
+    await shipService.getShipStatus(shipId, req.userId);
+
+    // Get crew effectiveness
+    const effectiveness = await crewBonusService.getCrewEffectivenessSummary(shipId);
+
+    res.json({
+      success: true,
+      data: effectiveness
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getShips,
   getShipStatus,
   moveShip,
-  getAdjacentSectors
+  getAdjacentSectors,
+  getCrewEffectiveness
 };
 

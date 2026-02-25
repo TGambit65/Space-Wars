@@ -1,6 +1,8 @@
 const { Ship, Sector, SectorConnection, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const maintenanceService = require('./maintenanceService');
+const npcService = require('./npcService');
+const { discoverSectorAndNeighbors } = require('./discoveryService');
 
 const getShipById = async (shipId, userId = null) => {
   const whereClause = { ship_id: shipId };
@@ -167,6 +169,9 @@ const moveShip = async (shipId, targetSectorId, userId) => {
     // Apply component degradation from sector jump
     await maintenanceService.degradeOnJump(shipId, transaction);
 
+    // Discover new sector and its neighbors (fog of war)
+    await discoverSectorAndNeighbors(userId, targetSectorId, transaction);
+
     // Commit transaction
     await transaction.commit();
 
@@ -178,10 +183,30 @@ const moveShip = async (shipId, targetSectorId, userId) => {
       }]
     });
 
+    // Check for hostile NPCs in the new sector (potential ambush)
+    // This is done after commit so failures don't affect the move
+    try {
+      const hostileNPC = await npcService.getAggressiveNPCInSector(targetSectorId);
+      const ambushThreat = hostileNPC && npcService.willNPCAttack(hostileNPC);
+
+      // Return ship with optional threat warning
+      ship.dataValues.hostile_encounter = ambushThreat ? {
+        npc_id: hostileNPC.npc_id,
+        npc_name: hostileNPC.name,
+        npc_type: hostileNPC.npc_type,
+        message: `Warning: ${hostileNPC.name} is targeting your ship!`
+      } : null;
+    } catch {
+      // NPC check failed, but move succeeded - just skip the warning
+      ship.dataValues.hostile_encounter = null;
+    }
+
     return ship;
   } catch (error) {
-    // Rollback transaction on any error
-    await transaction.rollback();
+    // Rollback transaction on any error (only if not already committed)
+    if (!transaction.finished) {
+      await transaction.rollback();
+    }
     throw error;
   }
 };

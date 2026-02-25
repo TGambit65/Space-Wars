@@ -1,4 +1,4 @@
-const { NPC, Sector, sequelize } = require('../models');
+const { NPC, Sector, SectorConnection, sequelize } = require('../models');
 const config = require('../config');
 const { Op } = require('sequelize');
 
@@ -49,6 +49,12 @@ const getNPCStats = (npcType, shipType) => {
  * Spawn a single NPC in a sector
  */
 const spawnNPC = async (sectorId, npcType = null, transaction = null) => {
+  // Validate sector exists
+  const sector = await Sector.findByPk(sectorId, { transaction });
+  if (!sector) {
+    throw Object.assign(new Error('Sector not found'), { statusCode: 404 });
+  }
+
   // Random type if not specified
   if (!npcType) {
     const types = Object.keys(config.npcTypes);
@@ -140,14 +146,75 @@ const respawnNPCs = async () => {
 };
 
 /**
+ * Check if two sectors are connected
+ */
+const areSectorsConnected = async (sectorAId, sectorBId, transaction = null) => {
+  if (sectorAId === sectorBId) return false;
+
+  const connection = await SectorConnection.findOne({
+    where: {
+      [Op.or]: [
+        { sector_a_id: sectorAId, sector_b_id: sectorBId },
+        { sector_a_id: sectorBId, sector_b_id: sectorAId }
+      ]
+    },
+    ...(transaction && { transaction })
+  });
+
+  return !!connection;
+};
+
+/**
  * Move NPC to adjacent sector (AI behavior)
  */
 const moveNPC = async (npcId, targetSectorId, transaction = null) => {
   const npc = await NPC.findByPk(npcId, { transaction });
   if (!npc || !npc.is_alive) return null;
-  
+
+  // Validate target sector exists
+  const targetSector = await Sector.findByPk(targetSectorId, { transaction });
+  if (!targetSector) {
+    throw Object.assign(new Error('Target sector not found'), { statusCode: 404 });
+  }
+
+  // Validate sectors are connected
+  const connected = await areSectorsConnected(npc.current_sector_id, targetSectorId, transaction);
+  if (!connected) {
+    throw Object.assign(new Error('Target sector is not adjacent'), { statusCode: 400 });
+  }
+
   await npc.update({ current_sector_id: targetSectorId, last_action_at: new Date() }, { transaction });
   return npc;
+};
+
+/**
+ * Check for hostile NPCs in a sector that would attack a player
+ * Returns the most aggressive hostile NPC if found
+ */
+const getAggressiveNPCInSector = async (sectorId, transaction = null) => {
+  // Find hostile NPCs ordered by aggression level (descending)
+  const hostileNPC = await NPC.findOne({
+    where: {
+      current_sector_id: sectorId,
+      is_alive: true,
+      aggression_level: { [Op.gte]: 0.7 } // Aggressive or higher
+    },
+    order: [['aggression_level', 'DESC'], ['attack_power', 'DESC']],
+    ...(transaction && { transaction })
+  });
+
+  return hostileNPC;
+};
+
+/**
+ * Determine if an NPC will initiate combat based on aggression
+ * Higher aggression = higher chance of attacking
+ */
+const willNPCAttack = (npc) => {
+  if (!npc || !npc.is_alive) return false;
+
+  // Random roll vs aggression level (aggressive NPCs have 70%+ chance)
+  return Math.random() < npc.aggression_level;
 };
 
 module.exports = {
@@ -157,6 +224,8 @@ module.exports = {
   getNPCsInSector,
   getNPCById,
   respawnNPCs,
-  moveNPC
+  moveNPC,
+  getAggressiveNPCInSector,
+  willNPCAttack
 };
 

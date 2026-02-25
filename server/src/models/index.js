@@ -13,6 +13,13 @@ const Component = require('./Component');
 const ShipComponent = require('./ShipComponent');
 const NPC = require('./NPC');
 const CombatLog = require('./CombatLog');
+// Phase 4: Planets, Colonization & Crew
+const Planet = require('./Planet');
+const PlanetResource = require('./PlanetResource');
+const Colony = require('./Colony');
+const Crew = require('./Crew');
+const Artifact = require('./Artifact');
+const PlayerDiscovery = require('./PlayerDiscovery');
 
 // Define relationships
 
@@ -104,6 +111,56 @@ CombatLog.belongsTo(NPC, { foreignKey: 'defender_npc_id', as: 'defenderNpc' });
 Sector.hasMany(CombatLog, { foreignKey: 'sector_id', as: 'combatLogs' });
 CombatLog.belongsTo(Sector, { foreignKey: 'sector_id', as: 'sector' });
 
+// ============== Phase 4: Planets, Colonization & Crew ==============
+
+// Sector <-> Planet (One-to-Many)
+Sector.hasMany(Planet, { foreignKey: 'sector_id', as: 'planets' });
+Planet.belongsTo(Sector, { foreignKey: 'sector_id', as: 'sector' });
+
+// User <-> Planet (One-to-Many for ownership)
+User.hasMany(Planet, { foreignKey: 'owner_user_id', as: 'ownedPlanets' });
+Planet.belongsTo(User, { foreignKey: 'owner_user_id', as: 'owner' });
+
+// Planet <-> PlanetResource (One-to-Many)
+Planet.hasMany(PlanetResource, { foreignKey: 'planet_id', as: 'resources' });
+PlanetResource.belongsTo(Planet, { foreignKey: 'planet_id', as: 'planet' });
+
+// Planet <-> Colony (One-to-One)
+Planet.hasOne(Colony, { foreignKey: 'planet_id', as: 'colony' });
+Colony.belongsTo(Planet, { foreignKey: 'planet_id', as: 'planet' });
+
+// User <-> Colony (One-to-Many)
+User.hasMany(Colony, { foreignKey: 'user_id', as: 'colonies' });
+Colony.belongsTo(User, { foreignKey: 'user_id', as: 'owner' });
+
+// Ship <-> Crew (One-to-Many)
+Ship.hasMany(Crew, { foreignKey: 'current_ship_id', as: 'crew' });
+Crew.belongsTo(Ship, { foreignKey: 'current_ship_id', as: 'ship' });
+
+// User <-> Crew (One-to-Many for ownership)
+User.hasMany(Crew, { foreignKey: 'owner_user_id', as: 'hiredCrew' });
+Crew.belongsTo(User, { foreignKey: 'owner_user_id', as: 'owner' });
+
+// Port <-> Crew (One-to-Many for available crew at port)
+Port.hasMany(Crew, { foreignKey: 'port_id', as: 'availableCrew' });
+Crew.belongsTo(Port, { foreignKey: 'port_id', as: 'port' });
+
+// Planet <-> Artifact (One-to-Many)
+Planet.hasMany(Artifact, { foreignKey: 'location_planet_id', as: 'artifacts' });
+Artifact.belongsTo(Planet, { foreignKey: 'location_planet_id', as: 'locationPlanet' });
+
+// User <-> Artifact (One-to-Many for ownership)
+User.hasMany(Artifact, { foreignKey: 'owner_user_id', as: 'ownedArtifacts' });
+Artifact.belongsTo(User, { foreignKey: 'owner_user_id', as: 'owner' });
+
+// User <-> Artifact (discoverer relationship)
+User.hasMany(Artifact, { foreignKey: 'discovered_by_user_id', as: 'discoveredArtifacts' });
+Artifact.belongsTo(User, { foreignKey: 'discovered_by_user_id', as: 'discoverer' });
+
+// User <-> PlayerDiscovery (One-to-Many)
+User.hasMany(PlayerDiscovery, { foreignKey: 'user_id', as: 'discoveries' });
+PlayerDiscovery.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
 module.exports = {
   sequelize,
   User,
@@ -119,6 +176,13 @@ module.exports = {
   Component,
   ShipComponent,
   NPC,
-  CombatLog
+  CombatLog,
+  // Phase 4
+  Planet,
+  PlanetResource,
+  Colony,
+  Crew,
+  Artifact,
+  PlayerDiscovery
 };
 

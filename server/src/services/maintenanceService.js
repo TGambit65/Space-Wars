@@ -132,7 +132,8 @@ const repairComponent = async (userId, shipId, shipComponentId, portId) => {
     }
 
     await user.update({ credits: user.credits - cost }, { transaction: t });
-    await shipComponent.update({ condition: 1.0 }, { transaction: t });
+    // Repair component and re-enable it
+    await shipComponent.update({ condition: 1.0, is_active: true }, { transaction: t });
 
     // Recalculate ship stats
     await shipDesignerService.recalculateShipStats(ship, t);
@@ -140,6 +141,108 @@ const repairComponent = async (userId, shipId, shipComponentId, portId) => {
     await t.commit();
     // Note: user.credits was already updated in the transaction
     return { success: true, cost, component: shipComponent.component.name, new_balance: user.credits };
+  } catch (error) {
+    await t.rollback();
+    throw error;
+  }
+};
+
+/**
+ * Restore shields when docking at a port (free service)
+ */
+const restoreShieldsAtPort = async (shipId, transaction = null) => {
+  const ship = await Ship.findByPk(shipId, { transaction });
+  if (!ship) return null;
+
+  if (ship.shield_points < ship.max_shield_points) {
+    await ship.update({
+      shield_points: ship.max_shield_points
+    }, { transaction });
+  }
+  return ship;
+};
+
+/**
+ * Repair all damaged components and hull at a port
+ */
+const repairAll = async (userId, shipId, portId) => {
+  const t = await sequelize.transaction();
+  try {
+    const user = await User.findByPk(userId, { transaction: t, lock: t.LOCK.UPDATE });
+    if (!user) throw Object.assign(new Error('User not found'), { statusCode: 404 });
+
+    const ship = await Ship.findOne({
+      where: { ship_id: shipId, owner_user_id: userId },
+      include: [{
+        model: ShipComponent,
+        as: 'components',
+        include: [{ model: Component, as: 'component' }]
+      }],
+      transaction: t, lock: t.LOCK.UPDATE
+    });
+    if (!ship) throw Object.assign(new Error('Ship not found'), { statusCode: 404 });
+
+    const port = await Port.findByPk(portId, { transaction: t });
+    if (!port || !port.is_active || ship.current_sector_id !== port.sector_id) {
+      throw Object.assign(new Error('Ship must be at a port'), { statusCode: 400 });
+    }
+
+    // Calculate total repair cost
+    const hullCost = calculateHullRepairCost(ship);
+    let componentCost = 0;
+    const repairedComponents = [];
+
+    for (const sc of ship.components) {
+      if (sc.condition < 1.0) {
+        const cost = calculateComponentRepairCost(sc);
+        componentCost += cost;
+        repairedComponents.push({
+          ship_component_id: sc.ship_component_id,
+          name: sc.component.name,
+          cost
+        });
+      }
+    }
+
+    const totalCost = hullCost + componentCost;
+    if (totalCost === 0) {
+      await t.rollback();
+      return { success: true, message: 'Ship is already fully repaired', cost: 0 };
+    }
+
+    if (user.credits < totalCost) {
+      throw Object.assign(new Error(`Insufficient credits. Need ${totalCost}`), { statusCode: 400 });
+    }
+
+    // Apply repairs
+    await user.update({ credits: user.credits - totalCost }, { transaction: t });
+
+    if (hullCost > 0) {
+      await ship.update({
+        hull_points: ship.max_hull_points,
+        last_maintenance_at: new Date()
+      }, { transaction: t });
+    }
+
+    // Repair all components and re-enable them
+    for (const sc of ship.components) {
+      if (sc.condition < 1.0) {
+        await sc.update({ condition: 1.0, is_active: true }, { transaction: t });
+      }
+    }
+
+    // Recalculate ship stats
+    await shipDesignerService.recalculateShipStats(ship, t);
+
+    await t.commit();
+    return {
+      success: true,
+      hull_repair_cost: hullCost,
+      component_repair_cost: componentCost,
+      total_cost: totalCost,
+      components_repaired: repairedComponents.length,
+      new_balance: user.credits
+    };
   } catch (error) {
     await t.rollback();
     throw error;
@@ -158,6 +261,9 @@ const degradeComponents = async (shipId, combatRounds, transaction = null) => {
     { condition: sequelize.literal(`MAX(${minCondition}, condition - ${degradation})`) },
     { where: { ship_id: shipId }, transaction }
   );
+
+  // Disable components that have reached minimum condition
+  await disableMinConditionComponents(shipId, transaction);
 };
 
 /**
@@ -172,6 +278,28 @@ const degradeOnJump = async (shipId, transaction = null) => {
     { condition: sequelize.literal(`MAX(${minCondition}, condition - ${degradation})`) },
     { where: { ship_id: shipId }, transaction }
   );
+
+  // Disable components that have reached minimum condition
+  await disableMinConditionComponents(shipId, transaction);
+};
+
+/**
+ * Disable components that have reached minimum condition (broken)
+ */
+const disableMinConditionComponents = async (shipId, transaction = null) => {
+  const minCondition = config.maintenance.minComponentCondition;
+
+  await ShipComponent.update(
+    { is_active: false },
+    {
+      where: {
+        ship_id: shipId,
+        condition: { [require('sequelize').Op.lte]: minCondition },
+        is_active: true
+      },
+      transaction
+    }
+  );
 };
 
 module.exports = {
@@ -180,7 +308,10 @@ module.exports = {
   getRepairEstimate,
   repairHull,
   repairComponent,
+  repairAll,
+  restoreShieldsAtPort,
   degradeComponents,
-  degradeOnJump
+  degradeOnJump,
+  disableMinConditionComponents
 };
 

@@ -8,15 +8,15 @@ const Sector = sequelize.define('Sector', {
     primaryKey: true
   },
   x_coord: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.FLOAT,
     allowNull: false
   },
   y_coord: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.FLOAT,
     allowNull: false
   },
   z_coord: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.FLOAT,
     allowNull: true,
     defaultValue: 0
   },
@@ -30,6 +30,14 @@ const Sector = sequelize.define('Sector', {
     allowNull: false,
     validate: {
       isIn: [['Core', 'Inner', 'Mid', 'Outer', 'Fringe', 'Unknown']]
+    }
+  },
+  star_class: {
+    type: DataTypes.STRING(20),
+    defaultValue: 'G',
+    allowNull: false,
+    validate: {
+      isIn: [['O', 'B', 'A', 'F', 'G', 'K', 'M', 'Neutron', 'BlackHole']]
     }
   },
   description: {
@@ -52,13 +60,7 @@ const Sector = sequelize.define('Sector', {
   tableName: 'sectors',
   timestamps: true,
   createdAt: 'created_at',
-  updatedAt: 'updated_at',
-  indexes: [
-    {
-      unique: true,
-      fields: ['x_coord', 'y_coord', 'z_coord']
-    }
-  ]
+  updatedAt: 'updated_at'
 });
 
 module.exports = Sector;

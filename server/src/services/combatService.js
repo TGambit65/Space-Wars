@@ -57,51 +57,79 @@ const calculateFleeChance = (attacker, defender) => {
 };
 
 /**
+ * Calculate accuracy modifier based on scanner level difference
+ * Better scanners = higher chance to hit (increases damage)
+ */
+const calculateScannerAccuracyBonus = (attacker, defender) => {
+  const attackerScannerLevel = attacker.scanner_range || 1;
+  const defenderScannerLevel = defender.scanner_range || 1;
+  const scannerAdvantage = attackerScannerLevel - defenderScannerLevel;
+  // Each scanner level difference = 5% accuracy bonus/penalty
+  return 1.0 + (scannerAdvantage * 0.05);
+};
+
+/**
  * Execute a single combat round
  */
 const executeCombatRound = (attacker, defender, roundNum) => {
   const round = { round: roundNum, actions: [] };
-  
-  // Attacker attacks
-  let attackerDamage = calculateDamage(attacker.attack_power, defender.defense_rating);
+
+  // Calculate accuracy bonuses from scanners
+  const attackerAccuracy = calculateScannerAccuracyBonus(attacker, defender);
+  const defenderAccuracy = calculateScannerAccuracyBonus(defender, attacker);
+
+  // Attacker attacks (with scanner accuracy bonus)
+  let attackerDamage = Math.floor(calculateDamage(attacker.attack_power, defender.defense_rating) * attackerAccuracy);
   const attackerCrit = checkCriticalHit();
   if (attackerCrit) attackerDamage = Math.floor(attackerDamage * config.combat.criticalHitMultiplier);
-  
+
   const actualAttackerDamage = applyDamage(defender, attackerDamage);
   round.actions.push({
     actor: 'attacker',
     action: 'attack',
     damage: actualAttackerDamage,
     critical: attackerCrit,
+    accuracy_bonus: attackerAccuracy,
     target_shields: defender.shield_points,
     target_hull: defender.hull_points
   });
-  
+
   // Check if defender destroyed
   if (defender.hull_points <= 0) {
     round.defender_destroyed = true;
     return round;
   }
-  
-  // Defender counter-attacks
-  let defenderDamage = calculateDamage(defender.attack_power, attacker.defense_rating);
+
+  // Defender counter-attacks (with scanner accuracy bonus)
+  let defenderDamage = Math.floor(calculateDamage(defender.attack_power, attacker.defense_rating) * defenderAccuracy);
   const defenderCrit = checkCriticalHit();
   if (defenderCrit) defenderDamage = Math.floor(defenderDamage * config.combat.criticalHitMultiplier);
-  
+
   const actualDefenderDamage = applyDamage(attacker, defenderDamage);
   round.actions.push({
     actor: 'defender',
     action: 'attack',
     damage: actualDefenderDamage,
     critical: defenderCrit,
+    accuracy_bonus: defenderAccuracy,
     target_shields: attacker.shield_points,
     target_hull: attacker.hull_points
   });
-  
+
   if (attacker.hull_points <= 0) {
     round.attacker_destroyed = true;
   }
-  
+
+  // Consume energy for both combatants
+  if (attacker.energy_per_round) {
+    attacker.energy = Math.max(0, attacker.energy - attacker.energy_per_round);
+    round.attacker_energy = attacker.energy;
+  }
+  if (defender.energy_per_round) {
+    defender.energy = Math.max(0, defender.energy - defender.energy_per_round);
+    round.defender_energy = defender.energy;
+  }
+
   return round;
 };
 
@@ -127,6 +155,9 @@ const attackNPC = async (userId, shipId, npcId) => {
       throw Object.assign(new Error('Target not in same sector'), { statusCode: 400 });
     }
 
+    // Mark ship as in combat
+    await ship.update({ in_combat: true }, { transaction: t });
+
     // Execute combat
     const combatRounds = [];
     let totalAttackerDamage = 0, totalDefenderDamage = 0;
@@ -137,14 +168,20 @@ const attackNPC = async (userId, shipId, npcId) => {
       shield_points: ship.shield_points,
       attack_power: ship.attack_power,
       defense_rating: ship.defense_rating,
-      speed: ship.speed
+      speed: ship.speed,
+      scanner_range: ship.scanner_range || 1,
+      energy: ship.energy || ship.max_energy || 100,
+      energy_per_round: Math.floor((ship.max_energy || 100) * 0.02) // 2% energy per round
     };
     const defenderState = {
       hull_points: npc.hull_points,
       shield_points: npc.shield_points,
       attack_power: npc.attack_power,
       defense_rating: npc.defense_rating,
-      speed: npc.speed
+      speed: npc.speed,
+      scanner_range: npc.scanner_range || 1,
+      energy: 100, // NPCs have unlimited effective energy
+      energy_per_round: 0
     };
 
     for (let i = 1; i <= config.combat.maxRoundsPerBattle; i++) {
@@ -174,22 +211,31 @@ const attackNPC = async (userId, shipId, npcId) => {
       creditsLooted = npc.credits_carried;
       experienceGained = npc.experience_value;
 
-      // Update NPC
+      // Update NPC - destroyed
       await npc.update({
         is_alive: false,
         hull_points: 0,
+        shield_points: 0,
         respawn_at: new Date(Date.now() + 5 * 60 * 1000) // 5 min respawn
       }, { transaction: t });
 
       // Award player
       const user = await User.findByPk(userId, { transaction: t, lock: t.LOCK.UPDATE });
       await user.update({ credits: user.credits + creditsLooted }, { transaction: t });
+    } else {
+      // NPC survived (won or draw) - save NPC's damaged state
+      await npc.update({
+        hull_points: Math.max(0, defenderState.hull_points),
+        shield_points: Math.max(0, defenderState.shield_points),
+        last_action_at: new Date()
+      }, { transaction: t });
     }
 
-    // Update ship state
+    // Update ship state including energy consumed during combat
     await ship.update({
       hull_points: Math.max(0, attackerState.hull_points),
       shield_points: Math.max(0, attackerState.shield_points),
+      energy: Math.max(0, attackerState.energy),
       in_combat: false
     }, { transaction: t });
 
@@ -226,6 +272,7 @@ const attackNPC = async (userId, shipId, npcId) => {
       combat_log_id: combatLog.combat_log_id,
       winner,
       rounds: combatRounds.length,
+      combat_rounds: combatRounds,
       credits_looted: creditsLooted,
       experience_gained: experienceGained,
       ship_status: {
@@ -287,14 +334,71 @@ const getCombatHistory = async (userId, limit = 20) => {
   return logs;
 };
 
+/**
+ * Regenerate shields for a ship (called over time or at port)
+ */
+const regenerateShields = async (shipId, fullRestore = false) => {
+  const ship = await Ship.findByPk(shipId);
+  if (!ship || !ship.is_active) return null;
+
+  let newShields;
+  if (fullRestore) {
+    newShields = ship.max_shield_points;
+  } else {
+    // Partial regeneration based on time or recharge rate
+    const regenAmount = Math.floor(ship.max_shield_points * 0.1); // 10% per call
+    newShields = Math.min(ship.max_shield_points, ship.shield_points + regenAmount);
+  }
+
+  await ship.update({ shield_points: newShields });
+  return { ship_id: shipId, shield_points: newShields, max_shield_points: ship.max_shield_points };
+};
+
+/**
+ * Get combat statistics summary for a user's ships
+ */
+const getCombatSummary = async (userId) => {
+  const ships = await Ship.findAll({
+    where: { owner_user_id: userId },
+    attributes: ['ship_id']
+  });
+
+  if (ships.length === 0) {
+    return { total_battles: 0, wins: 0, losses: 0, draws: 0, total_damage_dealt: 0, total_damage_taken: 0 };
+  }
+
+  const shipIds = ships.map(s => s.ship_id);
+
+  const logs = await CombatLog.findAll({
+    where: { attacker_ship_id: { [require('sequelize').Op.in]: shipIds } }
+  });
+
+  const summary = {
+    total_battles: logs.length,
+    wins: logs.filter(l => l.winner_type === 'attacker').length,
+    losses: logs.filter(l => l.winner_type === 'defender').length,
+    draws: logs.filter(l => l.winner_type === 'draw').length,
+    total_damage_dealt: logs.reduce((sum, l) => sum + l.attacker_damage_dealt, 0),
+    total_damage_taken: logs.reduce((sum, l) => sum + l.defender_damage_dealt, 0),
+    avg_rounds_per_battle: logs.length > 0
+      ? Math.round(logs.reduce((sum, l) => sum + l.rounds_fought, 0) / logs.length)
+      : 0
+  };
+
+  return summary;
+};
+
 module.exports = {
   calculateDamage,
   checkCriticalHit,
   applyDamage,
   calculateFleeChance,
+  calculateScannerAccuracyBonus,
   executeCombatRound,
   attackNPC,
   fleeFromCombat,
-  getCombatHistory
+  getCombatHistory,
+  getCombatSummary,
+  regenerateShields
 };
 

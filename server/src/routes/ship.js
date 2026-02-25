@@ -28,6 +28,7 @@ const shipIdValidation = [
 router.get('/', shipController.getShips);
 router.get('/:shipId', shipIdValidation, shipController.getShipStatus);
 router.get('/:shipId/adjacent', shipIdValidation, shipController.getAdjacentSectors);
+router.get('/:shipId/crew-effectiveness', shipIdValidation, shipController.getCrewEffectiveness);
 router.post('/:shipId/move', moveValidation, shipController.moveShip);
 
 module.exports = router;

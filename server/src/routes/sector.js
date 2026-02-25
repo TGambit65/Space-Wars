@@ -33,9 +33,10 @@ const paginationValidation = [
 ];
 
 // Routes
-router.get('/', paginationValidation, sectorController.getSectors);
+router.get('/map', sectorController.getMapData);
 router.get('/stats', sectorController.getUniverseStats);
+router.get('/', paginationValidation, sectorController.getSectors);
 router.get('/:sectorId', sectorIdValidation, sectorController.getSectorById);
+router.get('/:sectorId/system', sectorIdValidation, sectorController.getSystemDetail);
 
 module.exports = router;
-

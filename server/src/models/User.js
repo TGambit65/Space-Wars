@@ -38,6 +38,23 @@ const User = sequelize.define('User', {
       min: 0  // Credits cannot go negative
     }
   },
+  is_admin: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false,
+    comment: 'Admin users can access admin endpoints'
+  },
+  // Phase 4: Crew salary tracking
+  crew_salary_due: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    comment: 'Accumulated crew salary debt'
+  },
+  last_salary_tick: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+    comment: 'Last time crew salaries were calculated'
+  },
   created_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
