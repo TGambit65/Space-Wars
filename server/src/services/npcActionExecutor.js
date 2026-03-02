@@ -58,7 +58,15 @@ const executeAction = async (npc, decision, context = {}, socketService = null) 
           break;
         }
 
-        const moved = await npcService.moveNPC(npc.npc_id, targetSectorId);
+        let moved = false;
+        try {
+          moved = await npcService.moveNPC(npc.npc_id, targetSectorId);
+        } catch (moveErr) {
+          // Move failed — set NPC to idle to prevent repeated errors on the same bad target
+          console.error(`[ActionExecutor] moveNPC failed for ${npc.name}: ${moveErr.message}`);
+          await npc.update({ behavior_state: 'idle', last_action_at: new Date() });
+          break;
+        }
         if (moved) {
           await npc.update({ behavior_state: action === 'patrol' ? 'patrolling' : 'hunting' });
 
@@ -107,7 +115,14 @@ const executeAction = async (npc, decision, context = {}, socketService = null) 
           || findSafestAdjacentSector(context.adjacentSectors || []);
 
         if (fleeTarget) {
-          const moved = await npcService.moveNPC(npc.npc_id, fleeTarget);
+          let moved = false;
+          try {
+            moved = await npcService.moveNPC(npc.npc_id, fleeTarget);
+          } catch (moveErr) {
+            console.error(`[ActionExecutor] flee moveNPC failed for ${npc.name}: ${moveErr.message}`);
+            await npc.update({ behavior_state: 'fleeing', last_action_at: new Date() });
+            break;
+          }
           if (moved) {
             await npc.update({ behavior_state: 'fleeing' });
 

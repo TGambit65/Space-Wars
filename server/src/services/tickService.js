@@ -41,8 +41,8 @@ const startTicks = (io = null) => {
 
   socketService = io;
 
-  const tickRate = Number(gameSettingsService.getSetting('npc.tick_rate_seconds', 30));
-  const combatTickRate = Number(gameSettingsService.getSetting('npc.combat_tick_rate_seconds', 15));
+  const tickRate = Math.max(5, Number(gameSettingsService.getSetting('npc.tick_rate_seconds', 30)) || 30);
+  const combatTickRate = Math.max(5, Number(gameSettingsService.getSetting('npc.combat_tick_rate_seconds', 15)) || 15);
 
   tacticalInterval = setInterval(processTacticalTick, tickRate * 1000);
   combatInterval = setInterval(processCombatTick, combatTickRate * 1000);

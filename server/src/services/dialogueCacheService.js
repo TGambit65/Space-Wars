@@ -7,6 +7,9 @@
 // cache: Map<string, { response: Object, expiresAt: number }>
 const cache = new Map();
 
+// Maximum cache entries before oldest are evicted
+const MAX_CACHE_SIZE = 1000;
+
 // Stats counters
 let hits = 0;
 let misses = 0;
@@ -67,6 +70,12 @@ const setCached = (cacheKey, response, ttlSeconds) => {
     const parts = cacheKey.split(':');
     const category = parts.length >= 2 ? parts[1] : 'general';
     ttlSeconds = getDefaultTTL(category);
+  }
+
+  // Evict oldest entries if at capacity
+  if (cache.size >= MAX_CACHE_SIZE) {
+    const firstKey = cache.keys().next().value;
+    cache.delete(firstKey);
   }
 
   cache.set(cacheKey, {
