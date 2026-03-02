@@ -38,10 +38,10 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
 
   useEffect(() => { scrollToBottom(); }, [messages, isThinking, scrollToBottom]);
 
-  // Clear playing indicator when audio finishes
+  // Clear playing indicator when audio finishes or playback fails to start
   useEffect(() => {
     if (!isPlaying) setPlayingMsgTs(null);
-  }, [isPlaying]);
+  }, [isPlaying, playingMsgTs]);
 
   const handlePlayAudio = useCallback((audio, timestamp) => {
     setPlayingMsgTs(timestamp);
