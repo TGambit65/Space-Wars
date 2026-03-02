@@ -27,6 +27,7 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
   const inputRef = useRef(null);
   const initializedRef = useRef(false);
   const { playAudio, isPlaying, stopPlayback } = useVoiceChat();
+  const [playingMsgTs, setPlayingMsgTs] = useState(null);
 
   const isPremium = subscriptionTier === 'premium' || subscriptionTier === 'elite';
 
@@ -36,6 +37,16 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
   }, []);
 
   useEffect(() => { scrollToBottom(); }, [messages, isThinking, scrollToBottom]);
+
+  // Clear playing indicator when audio finishes
+  useEffect(() => {
+    if (!isPlaying) setPlayingMsgTs(null);
+  }, [isPlaying]);
+
+  const handlePlayAudio = useCallback((audio, timestamp) => {
+    setPlayingMsgTs(timestamp);
+    playAudio(audio);
+  }, [playAudio]);
 
   // Start dialogue on mount
   useEffect(() => {
@@ -274,7 +285,7 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {messages.map((msg, i) => (
-          <MessageBubble key={i} message={msg} npcType={npc.npc_type} onPlayAudio={playAudio} isPlaying={isPlaying} />
+          <MessageBubble key={i} message={msg} npcType={npc.npc_type} onPlayAudio={handlePlayAudio} playingMsgTs={playingMsgTs} />
         ))}
         {isThinking && (
           <div className="flex items-start gap-2">
@@ -345,8 +356,9 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
 
 // ─── Message Bubble ──────────────────────────────────────────────────
 
-const MessageBubble = ({ message, npcType, onPlayAudio, isPlaying }) => {
+const MessageBubble = ({ message, npcType, onPlayAudio, playingMsgTs }) => {
   const isNPC = message.sender === 'npc';
+  const isThisPlaying = playingMsgTs === message.timestamp;
 
   if (isNPC) {
     return (
@@ -361,11 +373,11 @@ const MessageBubble = ({ message, npcType, onPlayAudio, isPlaying }) => {
           </div>
           {message.audio && (
             <button
-              onClick={() => onPlayAudio(message.audio)}
+              onClick={() => onPlayAudio(message.audio, message.timestamp)}
               className="mt-1 text-[10px] text-gray-500 hover:text-accent-cyan flex items-center gap-1"
             >
               <Volume2 className="w-3 h-3" />
-              {isPlaying ? 'Playing...' : 'Play audio'}
+              {isThisPlaying ? 'Playing...' : 'Play audio'}
             </button>
           )}
         </div>

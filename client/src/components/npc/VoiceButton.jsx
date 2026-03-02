@@ -1,8 +1,21 @@
+import { useEffect } from 'react';
 import { Mic, MicOff, Lock } from 'lucide-react';
 import useVoiceChat from '../../hooks/useVoiceChat';
 
 const VoiceButton = ({ onAudioCaptured, disabled, voiceEnabled, isPremium }) => {
   const { isRecording, isVoiceSupported, startRecording, stopRecording } = useVoiceChat();
+
+  // Stop recording if window loses focus (e.g., Alt+Tab) to release the microphone
+  useEffect(() => {
+    if (!isRecording) return;
+    const cancel = () => { stopRecording(); };
+    window.addEventListener('blur', cancel);
+    document.addEventListener('visibilitychange', cancel);
+    return () => {
+      window.removeEventListener('blur', cancel);
+      document.removeEventListener('visibilitychange', cancel);
+    };
+  }, [isRecording, stopRecording]);
 
   const handlePointerDown = (e) => {
     e.preventDefault();
