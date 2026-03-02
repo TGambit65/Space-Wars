@@ -58,6 +58,40 @@ const NPC = sequelize.define('NPC', {
   // Loot and rewards
   credits_carried: { type: DataTypes.INTEGER, defaultValue: 0 },
   experience_value: { type: DataTypes.INTEGER, defaultValue: 50 },
+  // AI behavior extensions
+  behavior_state: {
+    type: DataTypes.STRING(20),
+    defaultValue: 'idle',
+    validate: {
+      isIn: [['idle', 'patrolling', 'hunting', 'fleeing', 'trading', 'guarding', 'engaging']]
+    }
+  },
+  ai_personality: {
+    type: DataTypes.JSON,
+    allowNull: true,
+    comment: 'Generated personality traits { trait_primary, trait_secondary, speech_style, quirk, voice_profile }'
+  },
+  intelligence_tier: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1,
+    validate: { min: 1, max: 3 },
+    comment: '1=scripted only, 2=scripted+simple AI, 3=full AI'
+  },
+  movement_target_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'Sector ID this NPC is navigating toward'
+  },
+  home_sector_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'Sector where NPC was spawned / patrols around'
+  },
+  dialogue_state: {
+    type: DataTypes.JSON,
+    allowNull: true,
+    comment: 'Current conversation tracking state'
+  },
   // Status
   is_alive: { type: DataTypes.BOOLEAN, defaultValue: true },
   respawn_at: { type: DataTypes.DATE, allowNull: true },
@@ -71,7 +105,8 @@ const NPC = sequelize.define('NPC', {
     { fields: ['current_sector_id'] },
     { fields: ['npc_type'] },
     { fields: ['is_alive'] },
-    { fields: ['respawn_at'] }
+    { fields: ['respawn_at'] },
+    { fields: ['behavior_state'] }
   ]
 });
 

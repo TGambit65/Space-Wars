@@ -330,6 +330,54 @@ module.exports = {
     }
   },
 
+  // NPC AI behavior configuration
+  npcAI: {
+    behaviorStates: ['idle', 'patrolling', 'hunting', 'fleeing', 'trading', 'guarding', 'engaging'],
+    intelligenceTiers: {
+      1: { name: 'Scripted', usesAI: false },
+      2: { name: 'Assisted', usesAI: true },
+      3: { name: 'Advanced', usesAI: true }
+    },
+    // Default intelligence tier per NPC type
+    defaultIntelligenceTier: {
+      PIRATE: 1,
+      PIRATE_LORD: 3,
+      TRADER: 2,
+      PATROL: 1,
+      BOUNTY_HUNTER: 2
+    },
+    difficultyThresholds: {
+      1: 0.7,  // Only attacks with overwhelming advantage
+      2: 0.6,
+      3: 0.5,  // Balanced
+      4: 0.4,
+      5: 0.3   // Very aggressive, more ambiguous situations → more AI calls
+    },
+    traits: {
+      primary: ['greedy', 'honorable', 'cowardly', 'cunning', 'brutal', 'jovial', 'paranoid', 'reckless'],
+      secondary: ['patient', 'impulsive', 'calculating', 'superstitious', 'loyal', 'treacherous'],
+      speechStyles: ['formal', 'pirate_slang', 'military', 'merchant_polite', 'threatening', 'cryptic'],
+      quirks: [
+        'always refers to self in third person',
+        'ends sentences with space puns',
+        'quotes ancient Earth literature',
+        'speaks in short clipped sentences',
+        'uses excessive nautical terminology',
+        'frequently mentions their ship by name',
+        'is oddly philosophical about cargo'
+      ],
+      voiceProfiles: ['deep_gruff', 'smooth_confident', 'nervous_fast', 'commanding', 'raspy_old', 'cheerful']
+    },
+    // Weighted trait preferences per NPC type (traits not listed use equal weight)
+    traitBias: {
+      PIRATE:        { primary: { brutal: 3, greedy: 3, reckless: 2 }, speechStyle: { pirate_slang: 4, threatening: 3 }, voiceProfile: { deep_gruff: 3, raspy_old: 2 } },
+      PIRATE_LORD:   { primary: { cunning: 3, brutal: 2, paranoid: 2 }, speechStyle: { formal: 3, threatening: 2 }, voiceProfile: { commanding: 4, smooth_confident: 2 } },
+      TRADER:        { primary: { greedy: 3, jovial: 3, cunning: 2 }, speechStyle: { merchant_polite: 4, formal: 2 }, voiceProfile: { smooth_confident: 3, cheerful: 3 } },
+      PATROL:        { primary: { honorable: 4, paranoid: 2 }, speechStyle: { military: 4, formal: 3 }, voiceProfile: { commanding: 3, deep_gruff: 2 } },
+      BOUNTY_HUNTER: { primary: { cunning: 3, brutal: 2, greedy: 2 }, speechStyle: { cryptic: 3, threatening: 2 }, voiceProfile: { raspy_old: 3, smooth_confident: 2 } }
+    }
+  },
+
   // Combat configuration
   combat: {
     maxRoundsPerBattle: 50,

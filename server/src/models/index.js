@@ -20,6 +20,8 @@ const Colony = require('./Colony');
 const Crew = require('./Crew');
 const Artifact = require('./Artifact');
 const PlayerDiscovery = require('./PlayerDiscovery');
+// AI NPC System
+const GameSetting = require('./GameSetting');
 
 // Define relationships
 
@@ -183,6 +185,8 @@ module.exports = {
   Colony,
   Crew,
   Artifact,
-  PlayerDiscovery
+  PlayerDiscovery,
+  // AI NPC System
+  GameSetting
 };
 

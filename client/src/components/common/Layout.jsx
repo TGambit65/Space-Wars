@@ -92,7 +92,7 @@ function Layout({ user, onLogout, children }) {
       </aside>
 
       {/* Main Content - no padding for fullscreen routes like /map */}
-      <main className={`flex-1 overflow-auto ${['/map', '/system'].includes(location.pathname) ? '' : 'p-6'}`}>
+      <main className={`flex-1 overflow-auto ${['/map', '/system'].includes(location.pathname) || location.pathname.startsWith('/planet/') ? '' : 'p-6'}`}>
         {children}
       </main>
     </div>

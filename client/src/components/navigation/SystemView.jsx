@@ -18,7 +18,7 @@ const STAR_CLASS_LABELS = {
   BlackHole: 'Black Hole'
 };
 
-const SystemView = ({ user }) => {
+const SystemView = ({ user, onHailNPC }) => {
   const navigate = useNavigate();
   const {
     systemDetail,
@@ -140,6 +140,7 @@ const SystemView = ({ user }) => {
         selectedEntity={selectedEntity}
         onClose={handleClosePanel}
         onScanPlanet={handleScanPlanet}
+        onHailNPC={onHailNPC}
         sectorId={sectorId}
         scanning={scanning}
       />

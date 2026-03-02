@@ -1,8 +1,12 @@
 require('dotenv').config();
+const http = require('http');
 const app = require('./app');
 const config = require('./config');
 const { connectDatabase, syncDatabase, sequelize } = require('./config/database');
 const { generateUniverse, generateFullUniverse, seedCommodities } = require('./services/universeGenerator');
+const gameSettingsService = require('./services/gameSettingsService');
+const socketService = require('./services/socketService');
+const tickService = require('./services/tickService');
 const { Sector, Commodity, Port } = require('./models');
 
 let server = null;
@@ -45,14 +49,25 @@ const startServer = async () => {
       }
     }
 
+    // Load game settings from database
+    await gameSettingsService.loadAllSettings();
+
+    // Create HTTP server and initialize Socket.io
+    const httpServer = http.createServer(app);
+    socketService.initialize(httpServer);
+
     // Start server
-    server = app.listen(config.port, () => {
+    server = httpServer.listen(config.port, () => {
       console.log('═'.repeat(50));
-      console.log(`  🚀 Space Wars 3000 Server`);
-      console.log(`  ✓ Running on port ${config.port}`);
-      console.log(`  ✓ Environment: ${config.nodeEnv}`);
-      console.log(`  ✓ API: http://localhost:${config.port}/api`);
+      console.log(`  Space Wars 3000 Server`);
+      console.log(`  Running on port ${config.port}`);
+      console.log(`  Environment: ${config.nodeEnv}`);
+      console.log(`  API: http://localhost:${config.port}/api`);
+      console.log(`  WebSocket: enabled`);
       console.log('═'.repeat(50));
+
+      // Start game tick system after server is listening (sockets available)
+      tickService.startTicks(socketService);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
@@ -65,12 +80,19 @@ const gracefulShutdown = async (signal) => {
   console.log(`\n${signal} received. Shutting down gracefully...`);
 
   if (server) {
+    // Stop game ticks before closing connections
+    tickService.stopTicks();
+
+    // Close Socket.io to disconnect all clients gracefully
+    const io = socketService.getIO();
+    if (io) io.close();
+
     server.close(async () => {
-      console.log('✓ HTTP server closed');
+      console.log('HTTP server closed');
 
       try {
         await sequelize.close();
-        console.log('✓ Database connection closed');
+        console.log('Database connection closed');
         process.exit(0);
       } catch (error) {
         console.error('Error closing database connection:', error);

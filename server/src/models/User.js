@@ -59,6 +59,15 @@ const User = sequelize.define('User', {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
   },
+  subscription_tier: {
+    type: DataTypes.STRING(20),
+    defaultValue: 'free',
+    allowNull: false,
+    validate: {
+      isIn: [['free', 'premium', 'elite']]
+    },
+    comment: 'Account tier: free (text-only), premium (voice + priority), elite (all features + custom voices)'
+  },
   last_login: {
     type: DataTypes.DATE,
     allowNull: true

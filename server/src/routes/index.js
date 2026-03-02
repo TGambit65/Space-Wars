@@ -12,6 +12,8 @@ const npcRoutes = require('./npcRoutes');
 const planetRoutes = require('./planetRoutes');
 const colonyRoutes = require('./colonyRoutes');
 const crewRoutes = require('./crewRoutes');
+// AI NPC Dialogue
+const dialogueRoutes = require('./dialogueRoutes');
 // Admin
 const adminRoutes = require('./adminRoutes');
 const { sequelize } = require('../config/database');
@@ -65,6 +67,8 @@ router.use('/npcs', npcRoutes);
 router.use('/planets', planetRoutes);
 router.use('/colonies', colonyRoutes);
 router.use('/crew', crewRoutes);
+// AI NPC Dialogue
+router.use('/dialogue', dialogueRoutes);
 // Admin
 router.use('/admin', adminRoutes);
 

@@ -1,6 +1,8 @@
-const { NPC, Sector, SectorConnection, sequelize } = require('../models');
+const { NPC, Sector, SectorConnection, Ship, sequelize } = require('../models');
 const config = require('../config');
 const { Op } = require('sequelize');
+const npcPersonalityService = require('./npcPersonalityService');
+const { getAdjacentSectorIds, buildAdjacencyMap } = require('./sectorGraphService');
 
 // NPC name prefixes for generation
 const namePrefixes = {
@@ -80,6 +82,10 @@ const spawnNPC = async (sectorId, npcType = null, transaction = null) => {
   const baseCredits = npcConfig.isBoss ? 1000 : npcType === 'TRADER' ? 500 : 200;
   const credits = Math.floor(baseCredits * (0.8 + Math.random() * 0.4));
 
+  // Generate personality and determine intelligence tier
+  const personality = npcPersonalityService.generatePersonality(npcType);
+  const intelligenceTier = config.npcAI.defaultIntelligenceTier[npcType] || 1;
+
   const npc = await NPC.create({
     name: generateNPCName(npcType),
     npc_type: npcType,
@@ -96,7 +102,12 @@ const spawnNPC = async (sectorId, npcType = null, transaction = null) => {
     flee_threshold: npcConfig.behavior === 'flee' ? 0.5 : 0.2,
     credits_carried: credits,
     experience_value: npcConfig.isBoss ? 500 : 50 + stats.hull / 2,
-    is_alive: true
+    is_alive: true,
+    // Phase 2: AI behavior fields
+    behavior_state: 'idle',
+    ai_personality: personality,
+    intelligence_tier: intelligenceTier,
+    home_sector_id: sectorId
   }, { transaction });
 
   return npc;
@@ -108,7 +119,12 @@ const spawnNPC = async (sectorId, npcType = null, transaction = null) => {
 const getNPCsInSector = async (sectorId) => {
   return NPC.findAll({
     where: { current_sector_id: sectorId, is_alive: true },
-    attributes: ['npc_id', 'name', 'npc_type', 'ship_type', 'hull_points', 'max_hull_points', 'shield_points', 'max_shield_points']
+    attributes: [
+      'npc_id', 'name', 'npc_type', 'ship_type',
+      'hull_points', 'max_hull_points', 'shield_points', 'max_shield_points',
+      'attack_power', 'defense_rating',
+      'behavior_state', 'intelligence_tier'
+    ]
   });
 };
 
@@ -138,7 +154,11 @@ const respawnNPCs = async () => {
       is_alive: true,
       hull_points: stats.hull,
       shield_points: stats.shields,
-      respawn_at: null
+      respawn_at: null,
+      // Reset Phase 2 AI state
+      behavior_state: 'idle',
+      movement_target_id: null,
+      dialogue_state: null
     });
   }
 
@@ -217,6 +237,40 @@ const willNPCAttack = (npc) => {
   return Math.random() < npc.aggression_level;
 };
 
+/**
+ * Get all alive NPCs in sectors with active player ships (and their adjacent sectors).
+ * Used by the tick system to only process NPCs near players.
+ * @returns {Promise<NPC[]>}
+ */
+const getActiveNPCsNearPlayers = async () => {
+  // Find all sectors with active player ships
+  const activeShips = await Ship.findAll({
+    where: { is_active: true },
+    attributes: ['current_sector_id']
+  });
+
+  const playerSectorIds = new Set(activeShips.map(s => s.current_sector_id));
+  if (playerSectorIds.size === 0) return [];
+
+  // Batch-fetch adjacency for all player sectors in a single query
+  const adjacencyMap = await buildAdjacencyMap(playerSectorIds);
+  const allRelevantSectorIds = new Set(playerSectorIds);
+  for (const sectorId of playerSectorIds) {
+    const neighbors = adjacencyMap.get(sectorId) || [];
+    for (const id of neighbors) {
+      allRelevantSectorIds.add(id);
+    }
+  }
+
+  return NPC.findAll({
+    where: {
+      current_sector_id: { [Op.in]: [...allRelevantSectorIds] },
+      is_alive: true
+    },
+    include: [{ model: Sector, as: 'currentSector', attributes: ['sector_id', 'name'] }]
+  });
+};
+
 module.exports = {
   generateNPCName,
   getNPCStats,
@@ -226,6 +280,7 @@ module.exports = {
   respawnNPCs,
   moveNPC,
   getAggressiveNPCInSector,
-  willNPCAttack
+  willNPCAttack,
+  getActiveNPCsNearPlayers
 };
 

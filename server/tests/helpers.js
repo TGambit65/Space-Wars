@@ -1,8 +1,9 @@
 /**
  * Test helper functions and fixtures
  */
-const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, sequelize } = require('../src/models');
+const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, sequelize } = require('../src/models');
 const authService = require('../src/services/authService');
+const gameSettingsService = require('../src/services/gameSettingsService');
 const bcrypt = require('bcryptjs');
 
 /**
@@ -216,8 +217,26 @@ const createTestArtifact = async (planetId, overrides = {}) => {
  * Clean all test data
  * Note: SQLite doesn't support TRUNCATE, so we use destroy with where: {}
  */
+/**
+ * Create a test game setting
+ */
+const createTestGameSetting = async (overrides = {}) => {
+  const defaults = {
+    category: 'general',
+    key: `test.setting.${Date.now()}`,
+    value: 'test_value',
+    value_type: 'string',
+    is_secret: false,
+    description: 'Test setting'
+  };
+  return GameSetting.create({ ...defaults, ...overrides });
+};
+
 const cleanDatabase = async () => {
   // Delete in order to respect foreign key constraints
+  // AI NPC system
+  await GameSetting.destroy({ where: {} });
+  gameSettingsService.clearCache();
   // Phase 4 models first
   await PlayerDiscovery.destroy({ where: {} });
   await Artifact.destroy({ where: {} });
@@ -261,6 +280,7 @@ module.exports = {
   createTestCommodity, createTestPort, addCommodityToPort, addCargoToShip,
   // Phase 4 helpers
   createTestPlanet, createTestPlanetResource, createTestColony, createTestCrew, createTestArtifact,
+  createTestGameSetting,
   cleanDatabase, generateTestToken
 };
 

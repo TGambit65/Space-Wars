@@ -1,4 +1,4 @@
-import { X, Globe, Anchor, Crosshair, Skull, User, Scan, Flag, Building2, Star, AlertCircle } from 'lucide-react';
+import { X, Globe, Anchor, Crosshair, Skull, User, Scan, Flag, Building2, Star, AlertCircle, Orbit, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const PLANET_TYPE_COLORS = {
@@ -14,7 +14,9 @@ const PLANET_TYPE_COLORS = {
   'Crystalline': 'text-purple-300'
 };
 
-const SystemInfoPanel = ({ selectedType, selectedEntity, onClose, onScanPlanet, sectorId, scanning }) => {
+const INTERACTIVE_TYPES = ['TRADER', 'PATROL', 'BOUNTY_HUNTER'];
+
+const SystemInfoPanel = ({ selectedType, selectedEntity, onClose, onScanPlanet, onHailNPC, sectorId, scanning }) => {
   const navigate = useNavigate();
 
   if (!selectedEntity) return null;
@@ -150,6 +152,12 @@ const SystemInfoPanel = ({ selectedType, selectedEntity, onClose, onScanPlanet, 
                 <Building2 className="w-3 h-3 inline mr-1" /> View Colony
               </button>
             )}
+            <button
+              onClick={() => navigate(`/planet/${selectedEntity.planet_id}`)}
+              className="btn w-full text-xs py-1.5 bg-accent-cyan/20 text-accent-cyan border border-accent-cyan/30 hover:bg-accent-cyan/30"
+            >
+              <Orbit className="w-3 h-3 inline mr-1" /> Enter Orbit
+            </button>
           </div>
         </div>
       )}
@@ -222,12 +230,22 @@ const SystemInfoPanel = ({ selectedType, selectedEntity, onClose, onScanPlanet, 
             </div>
           </div>
 
-          <button
-            onClick={() => navigate('/combat', { state: { npc: selectedEntity } })}
-            className="btn btn-danger w-full text-xs py-1.5"
-          >
-            <Crosshair className="w-3 h-3 inline mr-1" /> Engage
-          </button>
+          <div className="space-y-2">
+            {INTERACTIVE_TYPES.includes(selectedEntity.npc_type) && onHailNPC && (
+              <button
+                onClick={() => onHailNPC(selectedEntity)}
+                className="btn w-full text-xs py-1.5 bg-accent-cyan/20 text-accent-cyan border border-accent-cyan/30 hover:bg-accent-cyan/30"
+              >
+                <MessageSquare className="w-3 h-3 inline mr-1" /> Hail
+              </button>
+            )}
+            <button
+              onClick={() => navigate('/combat', { state: { npc: selectedEntity } })}
+              className="btn btn-danger w-full text-xs py-1.5"
+            >
+              <Crosshair className="w-3 h-3 inline mr-1" /> Engage
+            </button>
+          </div>
         </div>
       )}
 

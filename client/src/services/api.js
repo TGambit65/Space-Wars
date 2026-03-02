@@ -131,10 +131,36 @@ export const trade = {
   refuel: (shipId, portId, amount) => api.post(`/trade/refuel/${shipId}`, { port_id: portId, amount }),
 };
 
+// NPC Dialogue
+export const dialogue = {
+  start: (npcId) => api.post(`/dialogue/${npcId}/start`),
+  selectOption: (npcId, option) => api.post(`/dialogue/${npcId}/option`, { option }),
+  sendMessage: (npcId, text) => api.post(`/dialogue/${npcId}/message`, { text }),
+  sendVoice: (npcId, audioBlob) => {
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'voice.webm');
+    return api.post(`/dialogue/${npcId}/voice`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  end: (npcId) => api.post(`/dialogue/${npcId}/end`),
+  getState: (npcId) => api.get(`/dialogue/${npcId}/state`),
+};
+
 // Admin
 export const admin = {
   generateUniverse: (params) => api.post('/admin/universe/generate', params),
   getConfig: () => api.get('/admin/universe/config'),
+  getSettings: () => api.get('/admin/settings'),
+  updateSettings: (settings) => api.put('/admin/settings', { settings }),
+  testAIConnection: (data) => api.post('/admin/ai/test', data),
+  getAIStats: () => api.get('/admin/ai/stats'),
+  getAILogs: (params) => api.get('/admin/ai/logs', { params }),
+  getNPCStats: () => api.get('/admin/npcs/stats'),
+  forceRespawn: () => api.post('/admin/npcs/respawn'),
+  getTickStatus: () => api.get('/admin/ticks/status'),
+  getUsers: (params) => api.get('/admin/users', { params }),
+  updateUserTier: (userId, tier) => api.put('/admin/users/tier', { user_id: userId, subscription_tier: tier }),
 };
 
 export default api;
