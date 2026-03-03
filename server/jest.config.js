@@ -15,6 +15,8 @@ module.exports = {
   clearMocks: true,
   resetMocks: true,
   restoreMocks: true,
+  // Transform ESM-only packages (delaunator, robust-predicates) for Jest
+  transformIgnorePatterns: ['/node_modules/(?!(delaunator|robust-predicates)/)'],
   // Run tests sequentially to avoid SQLite locking issues
   maxWorkers: 1
 };

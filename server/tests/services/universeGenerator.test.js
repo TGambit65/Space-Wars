@@ -16,21 +16,21 @@ describe('Universe Generator', () => {
 
   describe('generateUniverse', () => {
     it('should generate the specified number of sectors', async () => {
-      await generateUniverse(25, 12345);
-      
+      await generateUniverse({ numSystems: 25, seed: 12345 });
+
       const count = await Sector.count();
       expect(count).toBe(25);
     });
 
     it('should create connections between sectors', async () => {
-      await generateUniverse(16, 12345);
+      await generateUniverse({ numSystems: 16, seed: 12345 });
       
       const connectionCount = await SectorConnection.count();
       expect(connectionCount).toBeGreaterThan(0);
     });
 
     it('should create unique sector names', async () => {
-      await generateUniverse(25, 12345);
+      await generateUniverse({ numSystems: 25, seed: 12345 });
       
       const sectors = await Sector.findAll();
       const names = sectors.map(s => s.name);
@@ -39,7 +39,7 @@ describe('Universe Generator', () => {
     });
 
     it('should assign coordinates to all sectors', async () => {
-      await generateUniverse(16, 12345);
+      await generateUniverse({ numSystems: 16, seed: 12345 });
 
       const sectors = await Sector.findAll();
       sectors.forEach(sector => {
@@ -51,13 +51,13 @@ describe('Universe Generator', () => {
     });
 
     it('should produce deterministic results with same seed', async () => {
-      await generateUniverse(16, 99999);
+      await generateUniverse({ numSystems: 16, seed: 99999 });
       const sectors1 = await Sector.findAll({ order: [['name', 'ASC']] });
       const names1 = sectors1.map(s => s.name).sort();
 
       await cleanDatabase();
 
-      await generateUniverse(16, 99999);
+      await generateUniverse({ numSystems: 16, seed: 99999 });
       const sectors2 = await Sector.findAll({ order: [['name', 'ASC']] });
       const names2 = sectors2.map(s => s.name).sort();
 
@@ -66,7 +66,7 @@ describe('Universe Generator', () => {
     });
 
     it('should assign sector types based on distance from center', async () => {
-      await generateUniverse(100, 12345);
+      await generateUniverse({ numSystems: 100, seed: 12345 });
 
       const sectors = await Sector.findAll();
       const types = sectors.map(s => s.type);
@@ -115,19 +115,19 @@ describe('Universe Generator', () => {
 
   describe('generateFullUniverse', () => {
     it('should generate sectors, commodities, and ports', async () => {
-      await generateFullUniverse(25, 12345);
-      
+      await generateFullUniverse({ numSystems: 25, seed: 12345 });
+
       const sectorCount = await Sector.count();
       const commodityCount = await Commodity.count();
       const portCount = await Port.count();
-      
+
       expect(sectorCount).toBe(25);
       expect(commodityCount).toBeGreaterThan(0);
       expect(portCount).toBeGreaterThan(0);
     });
 
     it('should create port commodities', async () => {
-      await generateFullUniverse(25, 12345);
+      await generateFullUniverse({ numSystems: 25, seed: 12345 });
       
       const portCommodityCount = await PortCommodity.count();
       expect(portCommodityCount).toBeGreaterThan(0);
@@ -136,7 +136,7 @@ describe('Universe Generator', () => {
 
   describe('getStartingSector', () => {
     beforeEach(async () => {
-      await generateUniverse(25, 12345);
+      await generateUniverse({ numSystems: 25, seed: 12345 });
     });
 
     it('should return a Core sector', async () => {

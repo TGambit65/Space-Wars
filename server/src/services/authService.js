@@ -26,7 +26,6 @@ const registerUser = async (username, email, password) => {
     });
 
     if (existingUser) {
-      await transaction.rollback();
       const field = existingUser.username === username ? 'username' : 'email';
       const error = new Error(`${field} already exists`);
       error.statusCode = 409;
