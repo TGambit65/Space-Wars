@@ -27,6 +27,9 @@ describe('Crafting Service', () => {
 
     blueprint = await createTestBlueprint({
       name: 'Test Craft Blueprint',
+      category: 'commodity',
+      output_type: 'commodity',
+      output_name: 'Iron Ore',
       required_level: 1,
       required_tech: 'BASIC_CRAFTING',
       ingredients: [{ commodityName: 'Iron Ore', quantity: 5 }],
@@ -134,9 +137,30 @@ describe('Crafting Service', () => {
     });
 
     it('should complete when time has elapsed', async () => {
-      await job.update({ completes_at: new Date(Date.now() - 1000) });
-      const completed = await craftingService.completeCrafting(user.user_id, job.crafting_job_id);
+      // Use commodity output blueprint for verifiable result
+      const outputCommodity = await createTestCommodity({ name: `CraftOutput${Date.now()}` });
+      const outputBlueprint = await createTestBlueprint({
+        name: `Output BP ${Date.now()}`,
+        output_type: 'commodity',
+        output_name: outputCommodity.name,
+        output_quantity: 3,
+        ingredients: [{ commodityName: commodity.name, quantity: 1 }],
+        credits_cost: 10
+      });
+      // Ship already has cargo from beforeEach (20 - 5 used by first craft = 15 remaining)
+      const outputJob = await craftingService.startCrafting(user.user_id, outputBlueprint.blueprint_id, ship.ship_id);
+      await outputJob.update({ completes_at: new Date(Date.now() - 1000) });
+
+      const completed = await craftingService.completeCrafting(user.user_id, outputJob.crafting_job_id);
       expect(completed.status).toBe('completed');
+      expect(completed.completed_at).not.toBeNull();
+
+      // Verify output commodity was actually added to ship cargo
+      const outputCargo = await ShipCargo.findOne({
+        where: { ship_id: ship.ship_id, commodity_id: outputCommodity.commodity_id }
+      });
+      expect(outputCargo).not.toBeNull();
+      expect(outputCargo.quantity).toBe(3);
     });
   });
 
@@ -147,7 +171,9 @@ describe('Crafting Service', () => {
 
       const jobs = await craftingService.getActiveJobs(user.user_id);
       expect(jobs).toHaveLength(1);
-      expect(jobs[0].blueprint).toBeDefined();
+      expect(jobs[0].blueprint).not.toBeNull();
+      expect(jobs[0].blueprint.blueprint_id).toBe(blueprint.blueprint_id);
+      expect(jobs[0].status).toBe('in_progress');
     });
   });
 

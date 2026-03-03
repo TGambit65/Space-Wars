@@ -15,8 +15,10 @@ const getAvailableBlueprints = async (userId) => {
 
   const blueprints = await Blueprint.findAll();
 
-  // Filter by level
-  const filtered = blueprints.filter(bp => (user.player_level || 1) >= bp.required_level);
+  // Filter by level and exclude component blueprints (output not yet implemented)
+  const filtered = blueprints.filter(bp =>
+    (user.player_level || 1) >= bp.required_level && bp.output_type !== 'component'
+  );
 
   // If tech is required, check it (lazy require to avoid circular dependency)
   const progressionService = require('./progressionService');
@@ -43,21 +45,7 @@ const startCrafting = async (userId, blueprintId, shipId) => {
     throw error;
   }
 
-  const user = await User.findByPk(userId);
-  if (!user) {
-    const error = new Error('User not found');
-    error.statusCode = 404;
-    throw error;
-  }
-
-  // Check level
-  if ((user.player_level || 1) < blueprint.required_level) {
-    const error = new Error(`Requires level ${blueprint.required_level}`);
-    error.statusCode = 400;
-    throw error;
-  }
-
-  // Check tech
+  // Check tech (before transaction — read-only, no race concern)
   if (blueprint.required_tech) {
     const progressionService = require('./progressionService');
     const hasTech = await progressionService.hasCompletedTech(userId, blueprint.required_tech);
@@ -85,15 +73,30 @@ const startCrafting = async (userId, blueprintId, shipId) => {
     throw error;
   }
 
-  // Check credits
-  if (Number(user.credits) < blueprint.credits_cost) {
-    const error = new Error('Insufficient credits');
-    error.statusCode = 400;
-    throw error;
-  }
-
   const transaction = await sequelize.transaction();
   try {
+    // Lock user inside transaction for credit safety
+    const user = await User.findByPk(userId, { transaction, lock: true });
+    if (!user) {
+      const error = new Error('User not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    // Check level
+    if ((user.player_level || 1) < blueprint.required_level) {
+      const error = new Error(`Requires level ${blueprint.required_level}`);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // Check credits
+    if (Number(user.credits) < blueprint.credits_cost) {
+      const error = new Error('Insufficient credits');
+      error.statusCode = 400;
+      throw error;
+    }
+
     // Check and deduct ingredients from ship cargo
     const ingredients = blueprint.ingredients;
     for (const ingredient of ingredients) {
@@ -149,18 +152,21 @@ const startCrafting = async (userId, blueprintId, shipId) => {
  * Cancel a crafting job (50% ingredient refund)
  */
 const cancelCrafting = async (userId, jobId) => {
-  const job = await CraftingJob.findOne({
-    where: { crafting_job_id: jobId, user_id: userId, status: 'in_progress' },
-    include: [{ model: Blueprint, as: 'blueprint' }]
-  });
-  if (!job) {
-    const error = new Error('Active crafting job not found');
-    error.statusCode = 404;
-    throw error;
-  }
-
+  let job;
   const transaction = await sequelize.transaction();
   try {
+    job = await CraftingJob.findOne({
+      where: { crafting_job_id: jobId, user_id: userId, status: 'in_progress' },
+      include: [{ model: Blueprint, as: 'blueprint' }],
+      transaction,
+      lock: true
+    });
+    if (!job) {
+      const error = new Error('Active crafting job not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
     // Refund 50% ingredients to ship cargo
     const ingredients = job.blueprint.ingredients;
     for (const ingredient of ingredients) {
@@ -181,35 +187,38 @@ const cancelCrafting = async (userId, jobId) => {
 
     await job.update({ status: 'cancelled' }, { transaction });
     await transaction.commit();
-    return job.reload({ include: [{ model: Blueprint, as: 'blueprint' }] });
   } catch (err) {
     await transaction.rollback();
     throw err;
   }
+
+  return job.reload({ include: [{ model: Blueprint, as: 'blueprint' }] });
 };
 
 /**
  * Complete a crafting job (must be past completes_at)
  */
 const completeCrafting = async (userId, jobId) => {
-  const job = await CraftingJob.findOne({
-    where: { crafting_job_id: jobId, user_id: userId, status: 'in_progress' },
-    include: [{ model: Blueprint, as: 'blueprint' }]
-  });
-  if (!job) {
-    const error = new Error('Active crafting job not found');
-    error.statusCode = 404;
-    throw error;
-  }
-
-  if (new Date() < new Date(job.completes_at)) {
-    const error = new Error('Crafting not yet complete');
-    error.statusCode = 400;
-    throw error;
-  }
-
+  let job;
   const transaction = await sequelize.transaction();
   try {
+    job = await CraftingJob.findOne({
+      where: { crafting_job_id: jobId, user_id: userId, status: 'in_progress' },
+      include: [{ model: Blueprint, as: 'blueprint' }],
+      transaction,
+      lock: true
+    });
+    if (!job) {
+      const error = new Error('Active crafting job not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (new Date() < new Date(job.completes_at)) {
+      const error = new Error('Crafting not yet complete');
+      error.statusCode = 400;
+      throw error;
+    }
     // Add output to ship cargo
     if (job.blueprint.output_type === 'commodity') {
       const commodity = await Commodity.findOne({ where: { name: job.blueprint.output_name }, transaction });
@@ -238,11 +247,12 @@ const completeCrafting = async (userId, jobId) => {
     }
 
     await transaction.commit();
-    return job.reload();
   } catch (err) {
     await transaction.rollback();
     throw err;
   }
+
+  return job.reload();
 };
 
 /**

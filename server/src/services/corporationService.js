@@ -6,20 +6,7 @@ const config = require('../config');
  * Create a new corporation
  */
 const createCorporation = async (userId, name, tag, description) => {
-  const user = await User.findByPk(userId);
-  if (!user) {
-    const error = new Error('User not found');
-    error.statusCode = 404;
-    throw error;
-  }
-
-  if (user.corporation_id) {
-    const error = new Error('Already in a corporation');
-    error.statusCode = 400;
-    throw error;
-  }
-
-  // Validate name/tag
+  // Validate name/tag before transaction (pure validation, no DB reads)
   if (!name || name.length < config.corporations.nameMinLength || name.length > config.corporations.nameMaxLength) {
     const error = new Error(`Corporation name must be ${config.corporations.nameMinLength}-${config.corporations.nameMaxLength} characters`);
     error.statusCode = 400;
@@ -31,15 +18,27 @@ const createCorporation = async (userId, name, tag, description) => {
     throw error;
   }
 
-  // Check credits
-  if (Number(user.credits) < config.corporations.creationCost) {
-    const error = new Error('Insufficient credits');
-    error.statusCode = 400;
-    throw error;
-  }
-
   const transaction = await sequelize.transaction();
   try {
+    const user = await User.findByPk(userId, { transaction, lock: true });
+    if (!user) {
+      const error = new Error('User not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (user.corporation_id) {
+      const error = new Error('Already in a corporation');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (Number(user.credits) < config.corporations.creationCost) {
+      const error = new Error('Insufficient credits');
+      error.statusCode = 400;
+      throw error;
+    }
+
     const corp = await Corporation.create({
       name,
       tag,
@@ -68,7 +67,6 @@ const createCorporation = async (userId, name, tag, description) => {
     return corp;
   } catch (err) {
     await transaction.rollback();
-    // Handle unique constraint violations
     if (err.name === 'SequelizeUniqueConstraintError') {
       const error = new Error('Corporation name or tag already taken');
       error.statusCode = 400;
@@ -109,6 +107,7 @@ const getCorporationByUser = async (userId) => {
  * Join a corporation
  */
 const joinCorporation = async (userId, corpId) => {
+  let corp;
   const transaction = await sequelize.transaction();
   try {
     const user = await User.findByPk(userId, { transaction, lock: true });
@@ -124,7 +123,7 @@ const joinCorporation = async (userId, corpId) => {
       throw error;
     }
 
-    const corp = await Corporation.findByPk(corpId, { transaction, lock: true });
+    corp = await Corporation.findByPk(corpId, { transaction, lock: true });
     if (!corp || !corp.is_active) {
       const error = new Error('Corporation not found');
       error.statusCode = 404;
@@ -148,33 +147,34 @@ const joinCorporation = async (userId, corpId) => {
     await user.update({ corporation_id: corpId }, { transaction });
 
     await transaction.commit();
-    return corp.reload();
   } catch (err) {
     await transaction.rollback();
     throw err;
   }
+
+  return corp.reload();
 };
 
 /**
  * Leave a corporation
  */
 const leaveCorporation = async (userId) => {
-  const user = await User.findByPk(userId);
-  if (!user || !user.corporation_id) {
-    const error = new Error('Not in a corporation');
-    error.statusCode = 400;
-    throw error;
-  }
-
-  const corp = await Corporation.findByPk(user.corporation_id);
-  if (corp && corp.leader_user_id === userId) {
-    const error = new Error('Leader cannot leave. Transfer leadership first or disband.');
-    error.statusCode = 400;
-    throw error;
-  }
-
   const transaction = await sequelize.transaction();
   try {
+    const user = await User.findByPk(userId, { transaction, lock: true });
+    if (!user || !user.corporation_id) {
+      const error = new Error('Not in a corporation');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const corp = await Corporation.findByPk(user.corporation_id, { transaction, lock: true });
+    if (corp && corp.leader_user_id === userId) {
+      const error = new Error('Leader cannot leave. Transfer leadership first or disband.');
+      error.statusCode = 400;
+      throw error;
+    }
+
     await CorporationMember.destroy({
       where: { corporation_id: user.corporation_id, user_id: userId },
       transaction
@@ -196,8 +196,24 @@ const leaveCorporation = async (userId) => {
  * Promote a member to a new role
  */
 const promoteMember = async (leaderId, targetUserId, newRole) => {
+  // Validate role - 'leader' role can only be assigned via transferLeadership
+  const validRoles = ['member', 'officer'];
+  if (!validRoles.includes(newRole)) {
+    const error = new Error(`Invalid role. Must be one of: ${validRoles.join(', ')}`);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // Cannot promote/demote yourself
+  if (leaderId === targetUserId) {
+    const error = new Error('Cannot change your own role');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const { Op } = require('sequelize');
   const leaderMember = await CorporationMember.findOne({
-    where: { user_id: leaderId, role: { [require('sequelize').Op.in]: ['leader', 'officer'] } }
+    where: { user_id: leaderId, role: { [Op.in]: ['leader', 'officer'] } }
   });
   if (!leaderMember) {
     const error = new Error('Insufficient permissions');
@@ -218,6 +234,20 @@ const promoteMember = async (leaderId, targetUserId, newRole) => {
   if (!targetMember) {
     const error = new Error('Member not found');
     error.statusCode = 404;
+    throw error;
+  }
+
+  // Cannot demote the leader — use transferLeadership instead
+  if (targetMember.role === 'leader') {
+    const error = new Error('Cannot change the leader role. Use transfer leadership instead.');
+    error.statusCode = 403;
+    throw error;
+  }
+
+  // Officers can only demote members, not other officers
+  if (leaderMember.role === 'officer' && targetMember.role === 'officer') {
+    const error = new Error('Officers cannot change other officers\' roles');
+    error.statusCode = 403;
     throw error;
   }
 
@@ -266,18 +296,22 @@ const transferLeadership = async (leaderId, newLeaderId) => {
  * Disband a corporation (leader only, refund treasury)
  */
 const disbandCorporation = async (leaderId) => {
-  const corp = await Corporation.findOne({ where: { leader_user_id: leaderId, is_active: true } });
-  if (!corp) {
-    const error = new Error('Not a leader of an active corporation');
-    error.statusCode = 403;
-    throw error;
-  }
-
   const transaction = await sequelize.transaction();
   try {
+    const corp = await Corporation.findOne({
+      where: { leader_user_id: leaderId, is_active: true },
+      transaction,
+      lock: true
+    });
+    if (!corp) {
+      const error = new Error('Not a leader of an active corporation');
+      error.statusCode = 403;
+      throw error;
+    }
+
     // Refund treasury to leader
     if (Number(corp.treasury) > 0) {
-      const leader = await User.findByPk(leaderId, { transaction });
+      const leader = await User.findByPk(leaderId, { transaction, lock: true });
       await leader.update({ credits: Number(leader.credits) + Number(corp.treasury) }, { transaction });
     }
 
@@ -309,24 +343,29 @@ const contributeToTreasury = async (userId, amount) => {
     throw error;
   }
 
-  const user = await User.findByPk(userId);
-  if (!user || !user.corporation_id) {
-    const error = new Error('Not in a corporation');
-    error.statusCode = 400;
-    throw error;
-  }
-
-  if (Number(user.credits) < amount) {
-    const error = new Error('Insufficient credits');
-    error.statusCode = 400;
-    throw error;
-  }
-
   const transaction = await sequelize.transaction();
   try {
-    await user.update({ credits: Number(user.credits) - amount }, { transaction });
+    const user = await User.findByPk(userId, { transaction, lock: true });
+    if (!user || !user.corporation_id) {
+      const error = new Error('Not in a corporation');
+      error.statusCode = 400;
+      throw error;
+    }
 
-    const corp = await Corporation.findByPk(user.corporation_id, { transaction });
+    if (Number(user.credits) < amount) {
+      const error = new Error('Insufficient credits');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const corp = await Corporation.findByPk(user.corporation_id, { transaction, lock: true });
+    if (!corp || !corp.is_active) {
+      const error = new Error('Corporation not found or inactive');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    await user.update({ credits: Number(user.credits) - amount }, { transaction });
     await corp.update({ treasury: Number(corp.treasury) + amount }, { transaction });
 
     const member = await CorporationMember.findOne({
@@ -338,8 +377,6 @@ const contributeToTreasury = async (userId, amount) => {
     }
 
     await transaction.commit();
-    await corp.reload();
-    await member?.reload();
     return { treasury: Number(corp.treasury), contribution: Number(member?.contribution || 0) };
   } catch (err) {
     await transaction.rollback();
@@ -357,31 +394,36 @@ const withdrawFromTreasury = async (userId, amount) => {
     throw error;
   }
 
-  const corp = await Corporation.findOne({ where: { leader_user_id: userId, is_active: true } });
-  if (!corp) {
-    const error = new Error('Not a leader of an active corporation');
-    error.statusCode = 403;
-    throw error;
-  }
-
-  if (Number(corp.treasury) < amount) {
-    const error = new Error('Insufficient treasury funds');
-    error.statusCode = 400;
-    throw error;
-  }
-
+  let corp;
   const transaction = await sequelize.transaction();
   try {
-    const user = await User.findByPk(userId, { transaction });
+    corp = await Corporation.findOne({
+      where: { leader_user_id: userId, is_active: true },
+      transaction,
+      lock: true
+    });
+    if (!corp) {
+      const error = new Error('Not a leader of an active corporation');
+      error.statusCode = 403;
+      throw error;
+    }
+
+    if (Number(corp.treasury) < amount) {
+      const error = new Error('Insufficient treasury funds');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const user = await User.findByPk(userId, { transaction, lock: true });
     await user.update({ credits: Number(user.credits) + amount }, { transaction });
     await corp.update({ treasury: Number(corp.treasury) - amount }, { transaction });
     await transaction.commit();
-    await corp.reload();
-    return { treasury: Number(corp.treasury) };
   } catch (err) {
     await transaction.rollback();
     throw err;
   }
+
+  return { treasury: Number(corp.treasury) };
 };
 
 /**

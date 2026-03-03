@@ -1,35 +1,46 @@
 const { Artifact, Ship, User } = require('../models');
+const { sequelize } = require('../config/database');
 
 /**
  * Equip an artifact onto a ship
  */
 const equipArtifact = async (userId, artifactId, shipId) => {
-  const artifact = await Artifact.findOne({
-    where: { artifact_id: artifactId, owner_user_id: userId }
-  });
-  if (!artifact) {
-    const error = new Error('Artifact not found or not owned');
-    error.statusCode = 404;
-    throw error;
-  }
+  const transaction = await sequelize.transaction();
+  try {
+    const artifact = await Artifact.findOne({
+      where: { artifact_id: artifactId, owner_user_id: userId },
+      transaction,
+      lock: true
+    });
+    if (!artifact) {
+      const error = new Error('Artifact not found or not owned');
+      error.statusCode = 404;
+      throw error;
+    }
 
-  if (artifact.equipped_ship_id) {
-    const error = new Error('Artifact is already equipped');
-    error.statusCode = 400;
-    throw error;
-  }
+    if (artifact.equipped_ship_id) {
+      const error = new Error('Artifact is already equipped');
+      error.statusCode = 400;
+      throw error;
+    }
 
-  const ship = await Ship.findOne({
-    where: { ship_id: shipId, owner_user_id: userId }
-  });
-  if (!ship) {
-    const error = new Error('Ship not found or not owned');
-    error.statusCode = 404;
-    throw error;
-  }
+    const ship = await Ship.findOne({
+      where: { ship_id: shipId, owner_user_id: userId },
+      transaction
+    });
+    if (!ship) {
+      const error = new Error('Ship not found or not owned');
+      error.statusCode = 404;
+      throw error;
+    }
 
-  await artifact.update({ equipped_ship_id: shipId });
-  return artifact;
+    await artifact.update({ equipped_ship_id: shipId }, { transaction });
+    await transaction.commit();
+    return artifact;
+  } catch (err) {
+    await transaction.rollback();
+    throw err;
+  }
 };
 
 /**

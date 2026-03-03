@@ -274,10 +274,17 @@ const processCombatTick = async () => {
           if (creditsLooted > 0 || experienceGained > 0) {
             const user = await User.findByPk(playerShip.owner_user_id);
             if (user) {
-              await user.update({
-                credits: (user.credits || 0) + creditsLooted,
-                experience: (user.experience || 0) + experienceGained
-              });
+              if (creditsLooted > 0) {
+                await user.update({ credits: (user.credits || 0) + creditsLooted });
+              }
+              if (experienceGained > 0) {
+                try {
+                  const progressionService = require('./progressionService');
+                  await progressionService.awardXP(playerShip.owner_user_id, experienceGained, 'combat');
+                } catch (e) {
+                  // XP failure should not block combat rewards
+                }
+              }
             }
           }
 

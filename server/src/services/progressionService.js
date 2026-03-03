@@ -190,44 +190,46 @@ const startResearch = async (userId, techName) => {
     throw error;
   }
 
-  const user = await User.findByPk(userId);
-  if (!user) {
-    const error = new Error('User not found');
-    error.statusCode = 404;
-    throw error;
-  }
+  const transaction = await sequelize.transaction();
+  try {
+    const user = await User.findByPk(userId, { transaction, lock: true });
+    if (!user) {
+      const error = new Error('User not found');
+      error.statusCode = 404;
+      throw error;
+    }
 
-  // Check prerequisites
-  for (const prereq of techConfig.prerequisites) {
-    const completed = await TechResearch.findOne({
-      where: { user_id: userId, tech_name: prereq, is_completed: true }
+    // Check prerequisites
+    for (const prereq of techConfig.prerequisites) {
+      const completed = await TechResearch.findOne({
+        where: { user_id: userId, tech_name: prereq, is_completed: true },
+        transaction
+      });
+      if (!completed) {
+        const error = new Error(`Prerequisite not met: ${prereq}`);
+        error.statusCode = 400;
+        throw error;
+      }
+    }
+
+    // Check if already researched or in progress
+    const existing = await TechResearch.findOne({
+      where: { user_id: userId, tech_name: techName },
+      transaction
     });
-    if (!completed) {
-      const error = new Error(`Prerequisite not met: ${prereq}`);
+    if (existing) {
+      const error = new Error(existing.is_completed ? 'Tech already researched' : 'Research already in progress');
       error.statusCode = 400;
       throw error;
     }
-  }
 
-  // Check if already researched or in progress
-  const existing = await TechResearch.findOne({
-    where: { user_id: userId, tech_name: techName }
-  });
-  if (existing) {
-    const error = new Error(existing.is_completed ? 'Tech already researched' : 'Research already in progress');
-    error.statusCode = 400;
-    throw error;
-  }
+    // Check credits
+    if (Number(user.credits) < techConfig.creditsCost) {
+      const error = new Error('Insufficient credits');
+      error.statusCode = 400;
+      throw error;
+    }
 
-  // Check credits
-  if (Number(user.credits) < techConfig.creditsCost) {
-    const error = new Error('Insufficient credits');
-    error.statusCode = 400;
-    throw error;
-  }
-
-  const transaction = await sequelize.transaction();
-  try {
     await user.update({ credits: Number(user.credits) - techConfig.creditsCost }, { transaction });
 
     const now = new Date();

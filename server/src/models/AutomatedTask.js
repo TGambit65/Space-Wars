@@ -25,7 +25,7 @@ const AutomatedTask = sequelize.define('AutomatedTask', {
   status: {
     type: DataTypes.STRING(20),
     defaultValue: 'active',
-    validate: { isIn: [['active', 'paused', 'completed', 'error']] }
+    validate: { isIn: [['active', 'paused', 'completed', 'cancelled', 'error']] }
   },
   task_config: {
     type: DataTypes.JSON,
@@ -62,7 +62,7 @@ const AutomatedTask = sequelize.define('AutomatedTask', {
   },
   required_tech: {
     type: DataTypes.STRING(80),
-    defaultValue: 'AUTOMATION_I'
+    defaultValue: 'BASIC_AUTOMATION'
   }
 }, {
   tableName: 'automated_tasks',

@@ -26,10 +26,18 @@ describe('Progression Service', () => {
     });
 
     it('should handle multiple level-ups at once', async () => {
-      // Level 2=100, Level 3=250 total (100+150). Give 300 XP = level 3
+      // XP table: level 2 at 100 cumulative, level 3 at 350 (100+250), level 4 at 850 (100+250+500)
+      // 400 XP >= 350 (level 3) but < 850 (level 4) => level 3
       const result = await progressionService.awardXP(user.user_id, 400, 'test');
-      expect(result.new_level).toBeGreaterThanOrEqual(3);
-      expect(result.levels_gained).toBeGreaterThanOrEqual(2);
+      expect(result.new_level).toBe(3);
+      expect(result.levels_gained).toBe(2);
+      expect(result.available_skill_points).toBe(2); // 2 levels * 1 point each
+
+      // Verify persisted to DB
+      await user.reload();
+      expect(Number(user.total_xp)).toBe(400);
+      expect(user.player_level).toBe(3);
+      expect(user.available_skill_points).toBe(2);
     });
 
     it('should throw for invalid user', async () => {

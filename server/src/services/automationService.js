@@ -15,6 +15,25 @@ const createTradeRoute = async (userId, shipId, waypoints) => {
     throw error;
   }
 
+  // Validate waypoint structure
+  for (const wp of waypoints) {
+    if (!wp || !wp.sector_id) {
+      const error = new Error('Each waypoint must have a sector_id');
+      error.statusCode = 400;
+      throw error;
+    }
+  }
+
+  // Validate all waypoint sectors exist
+  for (const wp of waypoints) {
+    const sector = await Sector.findByPk(wp.sector_id);
+    if (!sector) {
+      const error = new Error(`Sector not found: ${wp.sector_id}`);
+      error.statusCode = 400;
+      throw error;
+    }
+  }
+
   const task = await AutomatedTask.create({
     user_id: userId,
     ship_id: shipId,
@@ -146,7 +165,7 @@ const cancelTask = async (userId, taskId) => {
     throw error;
   }
 
-  await task.update({ status: 'completed' });
+  await task.update({ status: 'cancelled' });
   return task;
 };
 
@@ -216,6 +235,19 @@ const executeTradeRouteStep = async (task, ship) => {
 
   // Move ship to next waypoint sector if not already there
   if (ship.current_sector_id !== currentWaypoint.sector_id) {
+    // Validate sector connectivity
+    const connection = await SectorConnection.findOne({
+      where: {
+        [Op.or]: [
+          { sector_a_id: ship.current_sector_id, sector_b_id: currentWaypoint.sector_id },
+          { sector_a_id: currentWaypoint.sector_id, sector_b_id: ship.current_sector_id }
+        ]
+      }
+    });
+    if (!connection) {
+      throw Object.assign(new Error('No route between current sector and waypoint'), { statusCode: 400 });
+    }
+
     // Check fuel
     const fuelCost = Math.ceil(1 * config.automation.fuelMultiplier);
     if (ship.fuel < fuelCost) {

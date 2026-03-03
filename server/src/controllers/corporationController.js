@@ -84,8 +84,8 @@ const disband = async (req, res, next) => {
 const contribute = async (req, res, next) => {
   try {
     const { amount } = req.body;
-    if (!amount || typeof amount !== 'number' || amount <= 0) {
-      return res.status(400).json({ success: false, message: 'amount must be a positive number' });
+    if (!amount || typeof amount !== 'number' || !Number.isFinite(amount) || !Number.isInteger(amount) || amount <= 0) {
+      return res.status(400).json({ success: false, message: 'amount must be a positive integer' });
     }
     const result = await corporationService.contributeToTreasury(req.user.user_id, amount);
     res.json({ success: true, data: result });
@@ -97,8 +97,8 @@ const contribute = async (req, res, next) => {
 const withdraw = async (req, res, next) => {
   try {
     const { amount } = req.body;
-    if (!amount || typeof amount !== 'number' || amount <= 0) {
-      return res.status(400).json({ success: false, message: 'amount must be a positive number' });
+    if (!amount || typeof amount !== 'number' || !Number.isFinite(amount) || !Number.isInteger(amount) || amount <= 0) {
+      return res.status(400).json({ success: false, message: 'amount must be a positive integer' });
     }
     const result = await corporationService.withdrawFromTreasury(req.user.user_id, amount);
     res.json({ success: true, data: result });

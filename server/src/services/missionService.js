@@ -254,13 +254,20 @@ const updateMissionProgress = async (userId, eventType, eventData) => {
     }
 
     if (updated) {
-      pm.progress = progress;
-      pm.changed('progress', true);
-      await pm.save();
+      // Save progress and check completion atomically
+      // If completeMission fails, progress is still saved (better to track progress
+      // than lose it), but we catch to prevent one mission failure blocking others
+      try {
+        pm.progress = progress;
+        pm.changed('progress', true);
+        await pm.save();
 
-      // Check if mission is complete
-      if (isMissionComplete(mission, progress)) {
-        await completeMission(userId, pm.player_mission_id);
+        if (isMissionComplete(mission, progress)) {
+          await completeMission(userId, pm.player_mission_id);
+        }
+      } catch (e) {
+        // Log but don't rethrow — one mission failure shouldn't block others
+        console.error(`[MissionProgress] Error updating mission ${pm.player_mission_id}:`, e.message);
       }
     }
   }
@@ -304,7 +311,7 @@ const completeMission = async (userId, playerMissionId) => {
   const transaction = await sequelize.transaction();
   try {
     // Award credits
-    const user = await User.findByPk(userId, { transaction });
+    const user = await User.findByPk(userId, { transaction, lock: true });
     await user.update({
       credits: Number(user.credits) + pm.mission.reward_credits
     }, { transaction });

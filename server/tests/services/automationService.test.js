@@ -1,6 +1,6 @@
 const { cleanDatabase, createTestUser, createTestSector, createTestShip } = require('../helpers');
 const automationService = require('../../src/services/automationService');
-const { AutomatedTask, TechResearch } = require('../../src/models');
+const { AutomatedTask, TechResearch, SectorConnection } = require('../../src/models');
 
 describe('Automation Service', () => {
   let user, sector, sector2, ship;
@@ -28,6 +28,13 @@ describe('Automation Service', () => {
       started_at: new Date(Date.now() - 3600000),
       completes_at: new Date(Date.now() - 1000),
       credits_spent: 20000
+    });
+
+    // Create sector connection for automation routing
+    await SectorConnection.create({
+      sector_a_id: sector.sector_id,
+      sector_b_id: sector2.sector_id,
+      connection_type: 'standard'
     });
   });
 
@@ -138,7 +145,7 @@ describe('Automation Service', () => {
         { sector_id: sector2.sector_id }
       ]);
       const cancelled = await automationService.cancelTask(user.user_id, task.task_id);
-      expect(cancelled.status).toBe('completed');
+      expect(cancelled.status).toBe('cancelled');
     });
   });
 

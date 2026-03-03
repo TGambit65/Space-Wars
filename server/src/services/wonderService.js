@@ -13,88 +13,105 @@ const startWonderConstruction = async (userId, colonyId, wonderType) => {
     throw error;
   }
 
-  const colony = await Colony.findOne({
-    where: { colony_id: colonyId, user_id: userId }
-  });
-  if (!colony) {
-    const error = new Error('Colony not found or not owned');
-    error.statusCode = 404;
-    throw error;
+  const transaction = await sequelize.transaction();
+  try {
+    const colony = await Colony.findOne({
+      where: { colony_id: colonyId, user_id: userId },
+      transaction
+    });
+    if (!colony) {
+      const error = new Error('Colony not found or not owned');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (colony.infrastructure_level < wonderConfig.requiredInfrastructure) {
+      const error = new Error(`Requires infrastructure level ${wonderConfig.requiredInfrastructure}`);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // Check for duplicate wonder type at colony (inside transaction to prevent race)
+    const existing = await Wonder.findOne({
+      where: { colony_id: colonyId, wonder_type: wonderType },
+      transaction
+    });
+    if (existing) {
+      const error = new Error('This wonder type already exists at this colony');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const wonder = await Wonder.create({
+      colony_id: colonyId,
+      wonder_type: wonderType,
+      name: wonderConfig.name,
+      bonus_type: wonderConfig.bonusType,
+      bonus_value: wonderConfig.bonusValue,
+      construction_phase: 0,
+      max_phases: wonderConfig.maxPhases,
+      is_completed: false,
+      credits_invested: 0
+    }, { transaction });
+
+    await transaction.commit();
+    return wonder;
+  } catch (err) {
+    await transaction.rollback();
+    throw err;
   }
-
-  if (colony.infrastructure_level < wonderConfig.requiredInfrastructure) {
-    const error = new Error(`Requires infrastructure level ${wonderConfig.requiredInfrastructure}`);
-    error.statusCode = 400;
-    throw error;
-  }
-
-  // Check for duplicate wonder type at colony
-  const existing = await Wonder.findOne({
-    where: { colony_id: colonyId, wonder_type: wonderType }
-  });
-  if (existing) {
-    const error = new Error('This wonder type already exists at this colony');
-    error.statusCode = 400;
-    throw error;
-  }
-
-  const wonder = await Wonder.create({
-    colony_id: colonyId,
-    wonder_type: wonderType,
-    name: wonderConfig.name,
-    bonus_type: wonderConfig.bonusType,
-    bonus_value: wonderConfig.bonusValue,
-    construction_phase: 0,
-    max_phases: wonderConfig.maxPhases,
-    is_completed: false,
-    credits_invested: 0
-  });
-
-  return wonder;
 };
 
 /**
  * Advance a wonder's construction phase
  */
 const advanceWonderPhase = async (userId, wonderId) => {
-  const wonder = await Wonder.findByPk(wonderId, {
-    include: [{ model: Colony, as: 'colony' }]
-  });
-  if (!wonder) {
-    const error = new Error('Wonder not found');
-    error.statusCode = 404;
-    throw error;
-  }
-
-  if (wonder.colony.user_id !== userId) {
-    const error = new Error('Colony not owned by user');
-    error.statusCode = 403;
-    throw error;
-  }
-
-  if (wonder.is_completed) {
-    const error = new Error('Wonder is already completed');
-    error.statusCode = 400;
-    throw error;
-  }
-
-  const wonderConfig = config.wonders[wonder.wonder_type];
-  if (!wonderConfig) {
-    const error = new Error('Invalid wonder configuration');
-    error.statusCode = 500;
-    throw error;
-  }
-
-  const cost = wonderConfig.phaseCost;
-  const user = await User.findByPk(userId);
-  if (Number(user.credits) < cost) {
-    const error = new Error('Insufficient credits');
-    error.statusCode = 400;
-    throw error;
-  }
-
+  let wonder;
   const transaction = await sequelize.transaction();
   try {
+    wonder = await Wonder.findByPk(wonderId, {
+      include: [{ model: Colony, as: 'colony' }],
+      transaction,
+      lock: true
+    });
+    if (!wonder) {
+      const error = new Error('Wonder not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (wonder.colony.user_id !== userId) {
+      const error = new Error('Colony not owned by user');
+      error.statusCode = 403;
+      throw error;
+    }
+
+    if (wonder.is_completed) {
+      const error = new Error('Wonder is already completed');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const wonderConfig = config.wonders[wonder.wonder_type];
+    if (!wonderConfig) {
+      const error = new Error('Invalid wonder configuration');
+      error.statusCode = 500;
+      throw error;
+    }
+
+    const cost = wonderConfig.phaseCost;
+    const user = await User.findByPk(userId, { transaction, lock: true });
+    if (!user) {
+      const error = new Error('User not found');
+      error.statusCode = 404;
+      throw error;
+    }
+    if (Number(user.credits) < cost) {
+      const error = new Error('Insufficient credits');
+      error.statusCode = 400;
+      throw error;
+    }
+
     await user.update({ credits: Number(user.credits) - cost }, { transaction });
 
     const newPhase = wonder.construction_phase + 1;
@@ -108,12 +125,12 @@ const advanceWonderPhase = async (userId, wonderId) => {
     }, { transaction });
 
     await transaction.commit();
-
-    return wonder.reload();
   } catch (err) {
     await transaction.rollback();
     throw err;
   }
+
+  return wonder.reload();
 };
 
 /**

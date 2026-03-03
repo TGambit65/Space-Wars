@@ -43,15 +43,19 @@ describe('Economy Tick Service', () => {
       expect(portCommodity.quantity).toBe(0);
     });
 
-    it('should record price snapshots', async () => {
+    it('should record price snapshots with correct values', async () => {
       await economyTickService.processEconomyTick();
 
       const history = await PriceHistory.findAll({
         where: { port_id: port.port_id, commodity_id: commodity.commodity_id }
       });
-      expect(history.length).toBeGreaterThan(0);
+      expect(history).toHaveLength(1);
       expect(history[0].buy_price).toBeGreaterThan(0);
       expect(history[0].sell_price).toBeGreaterThan(0);
+      expect(history[0].quantity).toBe(505); // Updated quantity after tick
+      expect(history[0].port_id).toBe(port.port_id);
+      expect(history[0].commodity_id).toBe(commodity.commodity_id);
+      expect(history[0].recorded_at).toBeInstanceOf(Date);
     });
   });
 
@@ -95,10 +99,17 @@ describe('Economy Tick Service', () => {
     it('should return overview with commodity data and trends', async () => {
       const overview = await economyTickService.getMarketOverview(port.port_id);
       expect(overview.port.port_id).toBe(port.port_id);
-      expect(overview.commodities.length).toBeGreaterThan(0);
-      expect(overview.commodities[0]).toHaveProperty('buy_price');
-      expect(overview.commodities[0]).toHaveProperty('sell_price');
-      expect(overview.commodities[0]).toHaveProperty('trend');
+      expect(overview.port.name).toBe(port.name);
+      expect(overview.commodities).toHaveLength(1);
+
+      const c = overview.commodities[0];
+      expect(c.commodity_id).toBe(commodity.commodity_id);
+      expect(c.name).toBe(commodity.name);
+      expect(c.buy_price).toBeGreaterThan(0);
+      expect(c.sell_price).toBeGreaterThan(0);
+      expect(c.quantity).toBe(500);
+      expect(c.max_quantity).toBe(1000);
+      expect(['stable', 'rising', 'falling']).toContain(c.trend);
     });
 
     it('should throw for non-existent port', async () => {

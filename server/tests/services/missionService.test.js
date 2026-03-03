@@ -121,11 +121,13 @@ describe('Mission Service', () => {
       expect(pm.progress.kills).toBe(1);
     });
 
-    it('should auto-complete mission when requirements met', async () => {
+    it('should auto-complete mission when requirements met and award credits', async () => {
+      const startCredits = Number(user.credits);
       const mission = await createTestMission(port.port_id, {
         mission_type: 'bounty',
         requirements: { kills: 1 },
-        reward_credits: 500
+        reward_credits: 500,
+        reward_xp: 25
       });
       await missionService.acceptMission(user.user_id, mission.mission_id);
 
@@ -133,6 +135,11 @@ describe('Mission Service', () => {
 
       const pms = await PlayerMission.findAll({ where: { user_id: user.user_id } });
       expect(pms[0].status).toBe('completed');
+      expect(pms[0].completed_at).not.toBeNull();
+
+      // Verify credits were awarded
+      await user.reload();
+      expect(Number(user.credits)).toBe(startCredits + 500);
     });
 
     it('should update scan progress', async () => {
@@ -149,14 +156,31 @@ describe('Mission Service', () => {
   });
 
   describe('expireOldMissions', () => {
-    it('should deactivate expired missions', async () => {
-      await createTestMission(port.port_id, {
+    it('should deactivate expired missions and fail accepted player missions', async () => {
+      const mission = await createTestMission(port.port_id, {
         title: 'Expired Mission',
         expires_at: new Date(Date.now() - 1000)
       });
 
+      // Accept the expired mission (accepted before expiry in real scenario)
+      const pm = await PlayerMission.create({
+        user_id: user.user_id,
+        mission_id: mission.mission_id,
+        status: 'accepted',
+        progress: {},
+        accepted_at: new Date(Date.now() - 86400000)
+      });
+
       const count = await missionService.expireOldMissions();
-      expect(count).toBeGreaterThanOrEqual(1);
+      expect(count).toBe(1);
+
+      // Verify mission deactivated
+      await mission.reload();
+      expect(mission.is_active).toBe(false);
+
+      // Verify player mission was set to failed
+      await pm.reload();
+      expect(pm.status).toBe('failed');
     });
   });
 
