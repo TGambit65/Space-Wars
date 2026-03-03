@@ -69,6 +69,13 @@ const Artifact = sequelize.define('Artifact', {
   discovered_at: {
     type: DataTypes.DATE,
     allowNull: true
+  },
+  // Phase 5: Equippable artifacts
+  equipped_ship_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: { model: 'ships', key: 'ship_id' },
+    comment: 'Ship this artifact is equipped on (null if not equipped)'
   }
 }, {
   tableName: 'artifacts',

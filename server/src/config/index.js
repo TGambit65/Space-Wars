@@ -80,7 +80,11 @@ module.exports = {
     CORVETTE: { name: 'Corvette', hull: 120, shields: 100, fuel: 120, cargo: 50 },
     DESTROYER: { name: 'Destroyer', hull: 250, shields: 150, fuel: 150, cargo: 75 },
     CARRIER: { name: 'Carrier', hull: 400, shields: 200, fuel: 100, cargo: 100 },
-    COLONY_SHIP: { name: 'Colony Ship', hull: 300, shields: 100, fuel: 250, cargo: 1000 }
+    COLONY_SHIP: { name: 'Colony Ship', hull: 300, shields: 100, fuel: 250, cargo: 1000 },
+    BATTLECRUISER: { name: 'Battlecruiser', hull: 350, shields: 250, fuel: 120, cargo: 50 },
+    INTERCEPTOR: { name: 'Interceptor', hull: 60, shields: 80, fuel: 120, cargo: 10 },
+    MINING_BARGE: { name: 'Mining Barge', hull: 250, shields: 50, fuel: 100, cargo: 800 },
+    EXPLORER: { name: 'Explorer', hull: 120, shields: 100, fuel: 200, cargo: 100 }
   },
 
   // ============== Phase 2: Economy Configuration ==============
@@ -98,7 +102,10 @@ module.exports = {
     },
     // Minimum/maximum price multipliers
     minPriceMultiplier: 0.5,
-    maxPriceMultiplier: 2.0
+    maxPriceMultiplier: 2.0,
+    // Phase 5: Dynamic Markets
+    economyTickIntervalMs: 600000, // 10 minutes
+    priceHistoryRetentionHours: 168 // 7 days
   },
 
   // Commodity definitions
@@ -141,7 +148,14 @@ module.exports = {
     // Contraband - Illegal but profitable (Black Market only)
     { name: 'Narcotics', category: 'Contraband', basePrice: 450, volume: 1, description: 'Illegal substances', volatility: 0.6, isLegal: false },
     { name: 'Stolen Goods', category: 'Contraband', basePrice: 200, volume: 2, description: 'Hot merchandise', volatility: 0.5, isLegal: false },
-    { name: 'Counterfeit Credits', category: 'Contraband', basePrice: 300, volume: 1, description: 'Forged currency', volatility: 0.4, isLegal: false }
+    { name: 'Counterfeit Credits', category: 'Contraband', basePrice: 300, volume: 1, description: 'Forged currency', volatility: 0.4, isLegal: false },
+
+    // Phase 5 additions
+    { name: 'Deuterium', category: 'Industrial', basePrice: 180, volume: 2, description: 'Fusion reactor fuel isotope', volatility: 0.3 },
+    { name: 'Nanomaterials', category: 'Technology', basePrice: 650, volume: 1, description: 'Self-assembling nano-structures', volatility: 0.4 },
+    { name: 'Exotic Matter', category: 'Luxury', basePrice: 2000, volume: 1, description: 'Anomalous matter with strange properties', volatility: 0.6 },
+    { name: 'Terraforming Kits', category: 'Technology', basePrice: 400, volume: 3, description: 'Planetary atmosphere processors', volatility: 0.25 },
+    { name: 'Clone Organs', category: 'Contraband', basePrice: 700, volume: 1, description: 'Illegal bio-printed organs', volatility: 0.5, isLegal: false }
   ],
 
   // Port types and their commodity preferences
@@ -219,7 +233,11 @@ module.exports = {
     CORVETTE: { weapon: 2, shield: 2, engine: 2, scanner: 1, cargo_pod: 1, armor: 2 },
     DESTROYER: { weapon: 4, shield: 3, engine: 2, scanner: 2, cargo_pod: 1, armor: 3 },
     CARRIER: { weapon: 2, shield: 4, engine: 1, scanner: 3, cargo_pod: 2, armor: 4 },
-    COLONY_SHIP: { weapon: 1, shield: 3, engine: 1, scanner: 2, cargo_pod: 4, armor: 2 }
+    COLONY_SHIP: { weapon: 1, shield: 3, engine: 1, scanner: 2, cargo_pod: 4, armor: 2 },
+    BATTLECRUISER: { weapon: 5, shield: 3, engine: 2, scanner: 2, cargo_pod: 1, armor: 3 },
+    INTERCEPTOR: { weapon: 2, shield: 1, engine: 3, scanner: 1, cargo_pod: 0, armor: 1 },
+    MINING_BARGE: { weapon: 1, shield: 2, engine: 1, scanner: 2, cargo_pod: 6, armor: 2 },
+    EXPLORER: { weapon: 1, shield: 2, engine: 2, scanner: 3, cargo_pod: 2, armor: 1 }
   },
 
   // Component definitions
@@ -233,7 +251,8 @@ module.exports = {
       { name: 'Missile Launcher', tier: 3, damage: 45, accuracy: 70, energyCost: 20, price: 4000, description: 'Heavy guided missiles' },
       { name: 'Railgun', tier: 4, damage: 60, accuracy: 65, energyCost: 25, price: 8000, description: 'Devastating kinetic rounds' },
       { name: 'Photon Torpedo', tier: 4, damage: 80, accuracy: 60, energyCost: 35, price: 12000, description: 'Powerful energy torpedoes' },
-      { name: 'Disruptor Array', tier: 5, damage: 100, accuracy: 55, energyCost: 50, price: 25000, description: 'Military-grade weapon system' }
+      { name: 'Disruptor Array', tier: 5, damage: 100, accuracy: 55, energyCost: 50, price: 25000, description: 'Military-grade weapon system' },
+      { name: 'Graviton Lance', tier: 5, damage: 120, accuracy: 50, energyCost: 60, price: 35000, description: 'Gravitational beam weapon' }
     ],
 
     // Shields
@@ -243,7 +262,8 @@ module.exports = {
       { name: 'Combat Shield', tier: 3, capacity: 180, rechargeRate: 6, energyCost: 8, price: 2500, description: 'Military-spec shielding' },
       { name: 'Heavy Shield', tier: 3, capacity: 250, rechargeRate: 3, energyCost: 10, price: 3500, description: 'High capacity, slow recharge' },
       { name: 'Regenerative Shield', tier: 4, capacity: 200, rechargeRate: 12, energyCost: 12, price: 6000, description: 'Fast-recharging shield' },
-      { name: 'Capital Shield', tier: 5, capacity: 400, rechargeRate: 8, energyCost: 20, price: 15000, description: 'Capital ship grade shields' }
+      { name: 'Capital Shield', tier: 5, capacity: 400, rechargeRate: 8, energyCost: 20, price: 15000, description: 'Capital ship grade shields' },
+      { name: 'Phase Shield', tier: 5, capacity: 500, rechargeRate: 10, energyCost: 25, price: 20000, description: 'Phase-shifted shield bubble' }
     ],
 
     // Engines
@@ -252,7 +272,8 @@ module.exports = {
       { name: 'Plasma Drive', tier: 2, speed: 15, fuelEfficiency: 1.2, price: 800, description: 'Improved thrust and efficiency' },
       { name: 'Fusion Engine', tier: 3, speed: 20, fuelEfficiency: 1.5, price: 2000, description: 'High-performance fusion drive' },
       { name: 'Antimatter Drive', tier: 4, speed: 30, fuelEfficiency: 1.3, price: 5000, description: 'Powerful antimatter propulsion' },
-      { name: 'Quantum Drive', tier: 5, speed: 40, fuelEfficiency: 2.0, price: 12000, description: 'Cutting-edge quantum engine' }
+      { name: 'Quantum Drive', tier: 5, speed: 40, fuelEfficiency: 2.0, price: 12000, description: 'Cutting-edge quantum engine' },
+      { name: 'Hyperspace Drive', tier: 5, speed: 50, fuelEfficiency: 2.5, price: 18000, description: 'Experimental FTL-capable engine' }
     ],
 
     // Scanners
@@ -413,7 +434,11 @@ module.exports = {
     CORVETTE: 3,
     DESTROYER: 8,
     CARRIER: 15,
-    COLONY_SHIP: 20
+    COLONY_SHIP: 20,
+    BATTLECRUISER: 10,
+    INTERCEPTOR: 1,
+    MINING_BARGE: 8,
+    EXPLORER: 4
   },
 
   // Planet types and their characteristics
@@ -582,6 +607,21 @@ module.exports = {
       baseSalary: 100,
       bonuses: { piloting: 0.4, engineering: 1.0, combat: 0.3, science: 1.7 },
       description: 'Advanced AI research assistant'
+    },
+    // Phase 5 additions
+    CRYSTALLID: {
+      name: 'Crystallid',
+      type: 'organic',
+      baseSalary: 180,
+      bonuses: { piloting: 0.7, engineering: 1.6, combat: 0.6, science: 1.3 },
+      description: 'Silicon-based lifeforms with innate structural knowledge'
+    },
+    VOID_WALKER: {
+      name: 'Void Walker',
+      type: 'organic',
+      baseSalary: 200,
+      bonuses: { piloting: 1.5, engineering: 0.8, combat: 0.9, science: 1.1 },
+      description: 'Interdimensional navigators with unmatched spatial awareness'
     }
   },
 
@@ -609,18 +649,18 @@ module.exports = {
     }
   },
 
-  // Artifact types (placeholder bonuses for now)
+  // Artifact types with functional bonuses
   artifactTypes: [
-    { name: 'Ancient Star Map', rarity: 0.1, bonusType: 'navigation', description: 'Reveals hidden routes' },
-    { name: 'Alien Power Core', rarity: 0.05, bonusType: 'energy', description: 'Mysterious energy source' },
-    { name: 'Precursor Data Crystal', rarity: 0.08, bonusType: 'science', description: 'Contains ancient knowledge' },
-    { name: 'Quantum Stabilizer', rarity: 0.06, bonusType: 'shields', description: 'Enhances shield stability' },
-    { name: 'Bio-Enhancement Pod', rarity: 0.07, bonusType: 'crew', description: 'Improves crew performance' },
-    { name: 'Gravity Manipulator', rarity: 0.04, bonusType: 'speed', description: 'Affects local gravity' },
-    { name: 'Temporal Fragment', rarity: 0.02, bonusType: 'special', description: 'Time-displaced artifact' },
-    { name: 'Void Crystal', rarity: 0.03, bonusType: 'damage', description: 'Channels destructive energy' },
-    { name: 'Neural Interface', rarity: 0.09, bonusType: 'piloting', description: 'Direct ship control link' },
-    { name: 'Fusion Catalyst', rarity: 0.12, bonusType: 'fuel', description: 'Improves fuel efficiency' }
+    { name: 'Ancient Star Map', rarity: 0.1, bonusType: 'navigation', bonusValue: 0.15, description: 'Reduces fuel consumption by 15%' },
+    { name: 'Alien Power Core', rarity: 0.05, bonusType: 'energy', bonusValue: 25, description: '+25 max energy' },
+    { name: 'Precursor Data Crystal', rarity: 0.08, bonusType: 'science', bonusValue: 0.20, description: '+20% scan detail' },
+    { name: 'Quantum Stabilizer', rarity: 0.06, bonusType: 'shields', bonusValue: 0.15, description: '+15% shield capacity' },
+    { name: 'Bio-Enhancement Pod', rarity: 0.07, bonusType: 'crew', bonusValue: 0.10, description: '+10% all crew bonuses' },
+    { name: 'Gravity Manipulator', rarity: 0.04, bonusType: 'speed', bonusValue: 5, description: '+5 speed' },
+    { name: 'Temporal Fragment', rarity: 0.02, bonusType: 'special', bonusValue: 0.10, description: 'Reduces research time by 10%' },
+    { name: 'Void Crystal', rarity: 0.03, bonusType: 'damage', bonusValue: 0.12, description: '+12% weapon damage' },
+    { name: 'Neural Interface', rarity: 0.09, bonusType: 'piloting', bonusValue: 0.10, description: '+10% flee chance' },
+    { name: 'Fusion Catalyst', rarity: 0.12, bonusType: 'fuel', bonusValue: 0.20, description: '+20% fuel efficiency' }
   ],
 
   // Colonization settings
@@ -637,6 +677,114 @@ module.exports = {
     salaryTickInterval: 24 * 60 * 60 * 1000, // 24 hours in ms
     salaryMultiplier: 1.0, // Server adjustable
     hiringFeeMultiplier: 5 // Hiring cost = baseSalary * multiplier
+  },
+
+  // ============== Phase 5: Advanced Features ==============
+
+  // Player Progression
+  progression: {
+    // XP required per level (index = level-1)
+    xpPerLevel: [0, 100, 250, 500, 1000, 2000, 4000, 8000, 16000, 32000,
+                 50000, 75000, 100000, 150000, 200000, 300000, 400000, 500000, 750000, 1000000],
+    skillPointsPerLevel: 1,
+    maxSkillLevel: 10,
+    maxPlayerLevel: 20
+  },
+
+  // Skills with per-level effects
+  skills: {
+    COMBAT_MASTERY: { name: 'Combat Mastery', effectPerLevel: { damage_bonus: 0.03 }, description: '+3% weapon damage per level' },
+    SHIELD_EXPERTISE: { name: 'Shield Expertise', effectPerLevel: { shield_bonus: 0.04 }, description: '+4% shield capacity per level' },
+    TRADE_ACUMEN: { name: 'Trade Acumen', effectPerLevel: { trade_bonus: 0.02 }, description: '+2% trade profit per level' },
+    NAVIGATION: { name: 'Navigation', effectPerLevel: { fuel_bonus: 0.03 }, description: '-3% fuel usage per level' },
+    ENGINEERING: { name: 'Engineering', effectPerLevel: { repair_bonus: 0.05 }, description: '+5% repair effectiveness per level' },
+    LEADERSHIP: { name: 'Leadership', effectPerLevel: { crew_bonus: 0.02 }, description: '+2% crew effectiveness per level' },
+    MINING_PROFICIENCY: { name: 'Mining Proficiency', effectPerLevel: { mining_bonus: 0.05 }, description: '+5% resource extraction per level' },
+    SCANNER_MASTERY: { name: 'Scanner Mastery', effectPerLevel: { scan_bonus: 0.04 }, description: '+4% scan range per level' }
+  },
+
+  // Tech tree
+  techTree: {
+    ADVANCED_WEAPONS: {
+      name: 'Advanced Weapons', prerequisites: [], creditsCost: 10000,
+      researchTimeMs: 3600000, unlocks: ['T5 weapons'], description: 'Unlock tier 5 weapon components'
+    },
+    ADVANCED_SHIELDS: {
+      name: 'Advanced Shields', prerequisites: [], creditsCost: 10000,
+      researchTimeMs: 3600000, unlocks: ['T5 shields'], description: 'Unlock tier 5 shield components'
+    },
+    CAPITAL_CLASS_SHIPS: {
+      name: 'Capital Class Ships', prerequisites: ['ADVANCED_WEAPONS', 'ADVANCED_SHIELDS'], creditsCost: 50000,
+      researchTimeMs: 7200000, unlocks: ['Battlecruiser'], description: 'Unlock capital-class ship hulls'
+    },
+    DEEP_SCANNING: {
+      name: 'Deep Scanning', prerequisites: [], creditsCost: 5000,
+      researchTimeMs: 1800000, unlocks: ['enhanced scanning'], description: 'Improved scanning capabilities'
+    },
+    BASIC_CRAFTING: {
+      name: 'Basic Crafting', prerequisites: [], creditsCost: 5000,
+      researchTimeMs: 1800000, unlocks: ['crafting system'], description: 'Unlock the crafting system'
+    },
+    BASIC_AUTOMATION: {
+      name: 'Basic Automation', prerequisites: ['BASIC_CRAFTING'], creditsCost: 20000,
+      researchTimeMs: 3600000, unlocks: ['automation system'], description: 'Unlock automated tasks'
+    },
+    ADVANCED_COLONIES: {
+      name: 'Advanced Colonies', prerequisites: [], creditsCost: 15000,
+      researchTimeMs: 3600000, unlocks: ['wonder construction'], description: 'Unlock wonder construction at colonies'
+    }
+  },
+
+  // Wonders
+  wonders: {
+    ORBITAL_ARRAY: { name: 'Orbital Array', bonusType: 'scan_range', bonusValue: 0.25, maxPhases: 5, phaseCost: 10000, requiredInfrastructure: 3 },
+    TRADE_NEXUS: { name: 'Trade Nexus', bonusType: 'trade_bonus', bonusValue: 0.15, maxPhases: 5, phaseCost: 15000, requiredInfrastructure: 4 },
+    DEFENSE_MATRIX: { name: 'Defense Matrix', bonusType: 'sector_defense', bonusValue: 0.20, maxPhases: 5, phaseCost: 20000, requiredInfrastructure: 5 },
+    SHIPYARD: { name: 'Shipyard', bonusType: 'ship_discount', bonusValue: 0.20, maxPhases: 5, phaseCost: 25000, requiredInfrastructure: 5 },
+    RESEARCH_STATION: { name: 'Research Station', bonusType: 'research_speed', bonusValue: 0.25, maxPhases: 5, phaseCost: 20000, requiredInfrastructure: 4 },
+    GENESIS_DEVICE: { name: 'Genesis Device', bonusType: 'habitability', bonusValue: 0.30, maxPhases: 5, phaseCost: 30000, requiredInfrastructure: 6 }
+  },
+
+  // Crafting blueprints (seeded into DB)
+  blueprints: [
+    { name: 'Craft Pulse Laser', category: 'component', outputType: 'component', outputName: 'Pulse Laser', craftingTime: 300000, requiredLevel: 3, requiredTech: 'BASIC_CRAFTING', ingredients: [{ commodityName: 'Electronics', quantity: 10 }, { commodityName: 'Ore', quantity: 5 }], creditsCost: 500 },
+    { name: 'Craft Combat Shield', category: 'component', outputType: 'component', outputName: 'Combat Shield', craftingTime: 300000, requiredLevel: 3, requiredTech: 'BASIC_CRAFTING', ingredients: [{ commodityName: 'Electronics', quantity: 8 }, { commodityName: 'Ore', quantity: 8 }], creditsCost: 400 },
+    { name: 'Craft Fusion Engine', category: 'component', outputType: 'component', outputName: 'Fusion Engine', craftingTime: 300000, requiredLevel: 3, requiredTech: 'BASIC_CRAFTING', ingredients: [{ commodityName: 'Electronics', quantity: 12 }, { commodityName: 'Fuel', quantity: 5 }], creditsCost: 600 },
+    { name: 'Refine Metals', category: 'commodity', outputType: 'commodity', outputName: 'Refined Metals', craftingTime: 120000, requiredLevel: 1, requiredTech: 'BASIC_CRAFTING', ingredients: [{ commodityName: 'Ore', quantity: 10 }], creditsCost: 100 },
+    { name: 'Synthesize Plasma', category: 'commodity', outputType: 'commodity', outputName: 'Plasma', craftingTime: 180000, requiredLevel: 2, requiredTech: 'BASIC_CRAFTING', ingredients: [{ commodityName: 'Fuel', quantity: 5 }, { commodityName: 'Electronics', quantity: 3 }], creditsCost: 200 },
+    { name: 'Fabricate AI Core', category: 'commodity', outputType: 'commodity', outputName: 'AI Cores', craftingTime: 240000, requiredLevel: 4, requiredTech: 'BASIC_CRAFTING', ingredients: [{ commodityName: 'Electronics', quantity: 15 }, { commodityName: 'Nanomaterials', quantity: 3 }], creditsCost: 800 }
+  ],
+
+  // Missions
+  missions: {
+    maxActiveMissions: 5,
+    missionsPerPort: 3,
+    expirationHours: 24,
+    missionRefreshIntervalMs: 1800000, // 30 minutes
+    rewardMultipliers: {
+      delivery: { credits: 1.0, xp: 1.0 },
+      bounty: { credits: 1.5, xp: 1.5 },
+      scan: { credits: 0.8, xp: 1.2 },
+      trade_volume: { credits: 1.2, xp: 0.8 },
+      patrol: { credits: 1.0, xp: 1.0 }
+    }
+  },
+
+  // Corporations
+  corporations: {
+    creationCost: 50000,
+    maxMembers: 20,
+    nameMinLength: 3,
+    nameMaxLength: 50,
+    tagMinLength: 2,
+    tagMaxLength: 10
+  },
+
+  // Automation
+  automation: {
+    maxActiveTasksPerUser: 3,
+    executionIntervalMs: 60000, // 1 minute
+    fuelMultiplier: 1.5
   }
 };
 

@@ -71,6 +71,25 @@ const User = sequelize.define('User', {
   last_login: {
     type: DataTypes.DATE,
     allowNull: true
+  },
+  // Phase 5: Player Progression
+  total_xp: {
+    type: DataTypes.BIGINT,
+    defaultValue: 0
+  },
+  player_level: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1
+  },
+  available_skill_points: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  // Phase 5: Corporations
+  corporation_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: { model: 'corporations', key: 'corporation_id' }
   }
 }, {
   tableName: 'users',

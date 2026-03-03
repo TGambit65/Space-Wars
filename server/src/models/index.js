@@ -22,6 +22,18 @@ const Artifact = require('./Artifact');
 const PlayerDiscovery = require('./PlayerDiscovery');
 // AI NPC System
 const GameSetting = require('./GameSetting');
+// Phase 5: Advanced Features
+const PriceHistory = require('./PriceHistory');
+const PlayerSkill = require('./PlayerSkill');
+const TechResearch = require('./TechResearch');
+const Wonder = require('./Wonder');
+const Blueprint = require('./Blueprint');
+const CraftingJob = require('./CraftingJob');
+const Mission = require('./Mission');
+const PlayerMission = require('./PlayerMission');
+const Corporation = require('./Corporation');
+const CorporationMember = require('./CorporationMember');
+const AutomatedTask = require('./AutomatedTask');
 
 // Define relationships
 
@@ -163,6 +175,68 @@ Artifact.belongsTo(User, { foreignKey: 'discovered_by_user_id', as: 'discoverer'
 User.hasMany(PlayerDiscovery, { foreignKey: 'user_id', as: 'discoveries' });
 PlayerDiscovery.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
+// ============== Phase 5: Advanced Features ==============
+
+// Ship <-> Artifact (equipped artifacts)
+Ship.hasMany(Artifact, { foreignKey: 'equipped_ship_id', as: 'equippedArtifacts' });
+Artifact.belongsTo(Ship, { foreignKey: 'equipped_ship_id', as: 'equippedShip' });
+
+// PriceHistory relationships
+Port.hasMany(PriceHistory, { foreignKey: 'port_id', as: 'priceHistory' });
+PriceHistory.belongsTo(Port, { foreignKey: 'port_id', as: 'port' });
+Commodity.hasMany(PriceHistory, { foreignKey: 'commodity_id', as: 'priceHistory' });
+PriceHistory.belongsTo(Commodity, { foreignKey: 'commodity_id', as: 'commodity' });
+
+// User <-> PlayerSkill (One-to-Many)
+User.hasMany(PlayerSkill, { foreignKey: 'user_id', as: 'skills' });
+PlayerSkill.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// User <-> TechResearch (One-to-Many)
+User.hasMany(TechResearch, { foreignKey: 'user_id', as: 'techResearch' });
+TechResearch.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// Colony <-> Wonder (One-to-Many)
+Colony.hasMany(Wonder, { foreignKey: 'colony_id', as: 'wonders' });
+Wonder.belongsTo(Colony, { foreignKey: 'colony_id', as: 'colony' });
+
+// CraftingJob relationships
+User.hasMany(CraftingJob, { foreignKey: 'user_id', as: 'craftingJobs' });
+CraftingJob.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+Blueprint.hasMany(CraftingJob, { foreignKey: 'blueprint_id', as: 'craftingJobs' });
+CraftingJob.belongsTo(Blueprint, { foreignKey: 'blueprint_id', as: 'blueprint' });
+Ship.hasMany(CraftingJob, { foreignKey: 'ship_id', as: 'craftingJobs' });
+CraftingJob.belongsTo(Ship, { foreignKey: 'ship_id', as: 'ship' });
+
+// Mission relationships
+Port.hasMany(Mission, { foreignKey: 'port_id', as: 'missions' });
+Mission.belongsTo(Port, { foreignKey: 'port_id', as: 'port' });
+
+// PlayerMission relationships
+User.hasMany(PlayerMission, { foreignKey: 'user_id', as: 'playerMissions' });
+PlayerMission.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+Mission.hasMany(PlayerMission, { foreignKey: 'mission_id', as: 'playerMissions' });
+PlayerMission.belongsTo(Mission, { foreignKey: 'mission_id', as: 'mission' });
+
+// Corporation relationships
+Corporation.belongsTo(User, { foreignKey: 'leader_user_id', as: 'leader' });
+User.hasOne(Corporation, { foreignKey: 'leader_user_id', as: 'ledCorporation' });
+
+// User <-> Corporation (membership)
+Corporation.hasMany(User, { foreignKey: 'corporation_id', as: 'members' });
+User.belongsTo(Corporation, { foreignKey: 'corporation_id', as: 'corporation' });
+
+// CorporationMember relationships
+Corporation.hasMany(CorporationMember, { foreignKey: 'corporation_id', as: 'corporationMembers' });
+CorporationMember.belongsTo(Corporation, { foreignKey: 'corporation_id', as: 'corporation' });
+User.hasMany(CorporationMember, { foreignKey: 'user_id', as: 'corporationMemberships' });
+CorporationMember.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// AutomatedTask relationships
+User.hasMany(AutomatedTask, { foreignKey: 'user_id', as: 'automatedTasks' });
+AutomatedTask.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+Ship.hasMany(AutomatedTask, { foreignKey: 'ship_id', as: 'automatedTasks' });
+AutomatedTask.belongsTo(Ship, { foreignKey: 'ship_id', as: 'ship' });
+
 module.exports = {
   sequelize,
   User,
@@ -187,6 +261,18 @@ module.exports = {
   Artifact,
   PlayerDiscovery,
   // AI NPC System
-  GameSetting
+  GameSetting,
+  // Phase 5
+  PriceHistory,
+  PlayerSkill,
+  TechResearch,
+  Wonder,
+  Blueprint,
+  CraftingJob,
+  Mission,
+  PlayerMission,
+  Corporation,
+  CorporationMember,
+  AutomatedTask
 };
 

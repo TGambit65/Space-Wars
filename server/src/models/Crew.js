@@ -15,7 +15,7 @@ const Crew = sequelize.define('Crew', {
     type: DataTypes.STRING(30),
     allowNull: false,
     validate: {
-      isIn: [['Human', 'Vexian', 'Krynn', 'Zorath', 'Sylphi', 'Grox', 'Nexari', 'Threll', 'Worker Bot', 'Combat Droid', 'Science Unit']]
+      isIn: [['Human', 'Vexian', 'Krynn', 'Zorath', 'Sylphi', 'Grox', 'Nexari', 'Threll', 'Worker Bot', 'Combat Droid', 'Science Unit', 'Crystallid', 'Void Walker']]
     }
   },
   level: {

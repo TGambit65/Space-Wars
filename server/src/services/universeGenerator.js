@@ -929,6 +929,10 @@ const generateFullUniverse = async ({ numSystems = null, seed = null, galaxyShap
     // Phase 4: Generate crew at ports
     await generateCrewAtPorts(ports, rng, transaction);
 
+    // Phase 5: Seed crafting blueprints
+    const craftingService = require('./craftingService');
+    await craftingService.seedBlueprints(transaction);
+
     await transaction.commit();
     console.log('✓ Full universe generation complete');
     return result;

@@ -14,6 +14,15 @@ const colonyRoutes = require('./colonyRoutes');
 const crewRoutes = require('./crewRoutes');
 // AI NPC Dialogue
 const dialogueRoutes = require('./dialogueRoutes');
+// Phase 5: Advanced Features
+const marketRoutes = require('./marketRoutes');
+const progressionRoutes = require('./progressionRoutes');
+const artifactRoutes = require('./artifactRoutes');
+const wonderRoutes = require('./wonderRoutes');
+const craftingRoutes = require('./craftingRoutes');
+const missionRoutes = require('./missionRoutes');
+const corporationRoutes = require('./corporationRoutes');
+const automationRoutes = require('./automationRoutes');
 // Admin
 const adminRoutes = require('./adminRoutes');
 const { sequelize } = require('../config/database');
@@ -69,6 +78,15 @@ router.use('/colonies', colonyRoutes);
 router.use('/crew', crewRoutes);
 // AI NPC Dialogue
 router.use('/dialogue', dialogueRoutes);
+// Phase 5: Advanced Features
+router.use('/market', marketRoutes);
+router.use('/progression', progressionRoutes);
+router.use('/artifacts', artifactRoutes);
+router.use('/wonders', wonderRoutes);
+router.use('/crafting', craftingRoutes);
+router.use('/missions', missionRoutes);
+router.use('/corporations', corporationRoutes);
+router.use('/automation', automationRoutes);
 // Admin
 router.use('/admin', adminRoutes);
 

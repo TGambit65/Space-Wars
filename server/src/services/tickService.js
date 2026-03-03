@@ -4,15 +4,21 @@ const behaviorTreeService = require('./behaviorTreeService');
 const npcActionExecutor = require('./npcActionExecutor');
 const combatService = require('./combatService');
 const dialogueCacheService = require('./dialogueCacheService');
+const economyTickService = require('./economyTickService');
+const automationService = require('./automationService');
+const missionService = require('./missionService');
 const { NPC, Ship, Port, User } = require('../models');
 const { Op, col } = require('sequelize');
 const { getAdjacentSectorIds, getPortSectorIds } = require('./sectorGraphService');
+const config = require('../config');
 
 // ─── Module State ────────────────────────────────────────────────
 
 let tacticalInterval = null;
 let combatInterval = null;
 let maintenanceInterval = null;
+let economyInterval = null;
+let automationInterval = null;
 let processingTactical = false;
 let processingCombat = false;
 let socketService = null;
@@ -47,9 +53,11 @@ const startTicks = (io = null) => {
   tacticalInterval = setInterval(processTacticalTick, tickRate * 1000);
   combatInterval = setInterval(processCombatTick, combatTickRate * 1000);
   maintenanceInterval = setInterval(processMaintenanceTick, 5 * 60 * 1000);
+  economyInterval = setInterval(processEconomyTick, config.economy.economyTickIntervalMs);
+  automationInterval = setInterval(processAutomationTick, config.automation.executionIntervalMs);
 
   stats.startedAt = Date.now();
-  console.log(`[TickService] Game tick system started (tactical: ${tickRate}s, combat: ${combatTickRate}s, maintenance: 300s)`);
+  console.log(`[TickService] Game tick system started (tactical: ${tickRate}s, combat: ${combatTickRate}s, maintenance: 300s, economy: ${config.economy.economyTickIntervalMs / 1000}s, automation: ${config.automation.executionIntervalMs / 1000}s)`);
 };
 
 /**
@@ -59,10 +67,14 @@ const stopTicks = () => {
   if (tacticalInterval) clearInterval(tacticalInterval);
   if (combatInterval) clearInterval(combatInterval);
   if (maintenanceInterval) clearInterval(maintenanceInterval);
+  if (economyInterval) clearInterval(economyInterval);
+  if (automationInterval) clearInterval(automationInterval);
 
   tacticalInterval = null;
   combatInterval = null;
   maintenanceInterval = null;
+  economyInterval = null;
+  automationInterval = null;
   socketService = null;
 
   console.log('[TickService] Game tick system stopped');
@@ -354,6 +366,17 @@ const processMaintenanceTick = async () => {
     // Clear expired dialogue cache entries
     const cacheCleared = dialogueCacheService.clearExpired();
 
+    // Phase 5: Expire old missions and refresh port missions
+    try {
+      const expired = await missionService.expireOldMissions();
+      const refreshed = await missionService.refreshPortMissions();
+      if (expired > 0 || refreshed > 0) {
+        console.log(`[Maintenance] Missions expired: ${expired}, refreshed: ${refreshed}`);
+      }
+    } catch (err) {
+      console.error('[Maintenance] Mission tick error:', err.message);
+    }
+
     stats.maintenanceTicks++;
 
     if (respawned > 0 || healableNPCs.length > 0 || cacheCleared > 0) {
@@ -361,6 +384,32 @@ const processMaintenanceTick = async () => {
     }
   } catch (err) {
     console.error('[Maintenance] Tick error:', err.message);
+  }
+};
+
+// ─── Economy Tick ───────────────────────────────────────────────
+
+/**
+ * Process economy tick: production/consumption and price snapshots.
+ */
+const processEconomyTick = async () => {
+  try {
+    await economyTickService.processEconomyTick();
+  } catch (err) {
+    console.error('[EconomyTick] Error:', err.message);
+  }
+};
+
+// ─── Automation Tick ────────────────────────────────────────────
+
+/**
+ * Process automation tick: execute active automated tasks.
+ */
+const processAutomationTick = async () => {
+  try {
+    await automationService.processAutomationTick();
+  } catch (err) {
+    console.error('[AutomationTick] Error:', err.message);
   }
 };
 

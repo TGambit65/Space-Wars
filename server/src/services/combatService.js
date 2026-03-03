@@ -222,6 +222,14 @@ const attackNPC = async (userId, shipId, npcId) => {
       // Award player
       const user = await User.findByPk(userId, { transaction: t, lock: t.LOCK.UPDATE });
       await user.update({ credits: user.credits + creditsLooted }, { transaction: t });
+
+      // Phase 5: Award combat XP
+      if (experienceGained > 0) {
+        try {
+          const progressionService = require('./progressionService');
+          await progressionService.awardXP(userId, experienceGained, 'combat', t);
+        } catch (e) { /* XP failure should not block combat */ }
+      }
     } else {
       // NPC survived (won or draw) - save NPC's damaged state
       await npc.update({
@@ -266,6 +274,14 @@ const attackNPC = async (userId, shipId, npcId) => {
     }, { transaction: t });
 
     await t.commit();
+
+    // Phase 5: Update mission progress for combat kill (outside transaction)
+    if (winner === 'attacker') {
+      try {
+        const missionService = require('./missionService');
+        await missionService.updateMissionProgress(userId, 'combat_kill', { npc_id: npcId });
+      } catch (e) { /* Mission progress failure should not block combat result */ }
+    }
 
     return {
       success: true,

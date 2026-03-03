@@ -25,7 +25,7 @@ const NPC = sequelize.define('NPC', {
     type: DataTypes.STRING(50),
     allowNull: false,
     validate: {
-      isIn: [['Scout', 'Merchant Cruiser', 'Freighter', 'Fighter', 'Corvette', 'Destroyer', 'Carrier', 'Colony Ship']]
+      isIn: [['Scout', 'Merchant Cruiser', 'Freighter', 'Fighter', 'Corvette', 'Destroyer', 'Carrier', 'Colony Ship', 'Battlecruiser', 'Interceptor', 'Mining Barge', 'Explorer']]
     }
   },
   current_sector_id: {

@@ -152,7 +152,21 @@ const buyCommodity = async (userId, shipId, portId, commodityId, quantity) => {
       transaction_type: 'BUY', quantity, unit_price: unitPrice, tax_amount: tax, total_price: total
     }, { transaction: t });
 
+    // Phase 5: Award XP for trading (1 XP per 100 credits traded)
+    const tradeXP = Math.max(1, Math.floor(total / 100));
+    try {
+      const progressionService = require('./progressionService');
+      await progressionService.awardXP(userId, tradeXP, 'trade', t);
+    } catch (e) { /* XP failure should not block trade */ }
+
     await t.commit();
+
+    // Phase 5: Update mission progress (outside transaction)
+    try {
+      const missionService = require('./missionService');
+      await missionService.updateMissionProgress(userId, 'trade', { type: 'buy', total_value: total });
+    } catch (e) { /* Mission progress failure should not block trade */ }
+
     return { success: true, quantity, unit_price: unitPrice, tax, total, new_balance: user.credits - total };
   } catch (error) {
     await t.rollback();
@@ -251,7 +265,24 @@ const sellCommodity = async (userId, shipId, portId, commodityId, quantity) => {
       transaction_type: 'SELL', quantity, unit_price: unitPrice, tax_amount: tax, total_price: total
     }, { transaction: t });
 
+    // Phase 5: Award XP for trading (1 XP per 100 credits traded)
+    const tradeXP = Math.max(1, Math.floor(total / 100));
+    try {
+      const progressionService = require('./progressionService');
+      await progressionService.awardXP(userId, tradeXP, 'trade', t);
+    } catch (e) { /* XP failure should not block trade */ }
+
     await t.commit();
+
+    // Phase 5: Update mission progress (outside transaction - needs commodity name)
+    try {
+      const missionService = require('./missionService');
+      await missionService.updateMissionProgress(userId, 'trade', {
+        type: 'sell', total_value: total, port_id: portId,
+        commodity_name: portCommodity.commodity.name, quantity
+      });
+    } catch (e) { /* Mission progress failure should not block trade */ }
+
     return { success: true, quantity, unit_price: unitPrice, tax, total, new_balance: Number(user.credits) + total };
   } catch (error) {
     await t.rollback();

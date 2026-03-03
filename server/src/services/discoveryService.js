@@ -58,6 +58,15 @@ const discoverSectorAndNeighbors = async (userId, sectorId, transaction = null) 
     if (neighborNew) newDiscoveries.push(neighborId);
   }
 
+  // Phase 5: Award XP for new discoveries (10 XP per new sector)
+  if (newDiscoveries.length > 0) {
+    try {
+      const progressionService = require('./progressionService');
+      const xp = newDiscoveries.length * 10;
+      await progressionService.awardXP(userId, xp, 'exploration', transaction);
+    } catch (e) { /* XP failure should not block discovery */ }
+  }
+
   return newDiscoveries;
 };
 

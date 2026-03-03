@@ -13,7 +13,11 @@ const getShipTypeKey = (shipTypeName) => {
     'Corvette': 'CORVETTE',
     'Destroyer': 'DESTROYER',
     'Carrier': 'CARRIER',
-    'Colony Ship': 'COLONY_SHIP'
+    'Colony Ship': 'COLONY_SHIP',
+    'Battlecruiser': 'BATTLECRUISER',
+    'Interceptor': 'INTERCEPTOR',
+    'Mining Barge': 'MINING_BARGE',
+    'Explorer': 'EXPLORER'
   };
   return mapping[shipTypeName] || 'SCOUT';
 };

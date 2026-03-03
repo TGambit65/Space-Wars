@@ -1,7 +1,7 @@
 /**
  * Test helper functions and fixtures
  */
-const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, sequelize } = require('../src/models');
+const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, PriceHistory, PlayerSkill, TechResearch, Wonder, Blueprint, CraftingJob, Mission, PlayerMission, Corporation, CorporationMember, AutomatedTask, sequelize } = require('../src/models');
 const authService = require('../src/services/authService');
 const gameSettingsService = require('../src/services/gameSettingsService');
 const bcrypt = require('bcryptjs');
@@ -234,10 +234,21 @@ const createTestGameSetting = async (overrides = {}) => {
 
 const cleanDatabase = async () => {
   // Delete in order to respect foreign key constraints
+  // Phase 5 models first (most dependent)
+  await AutomatedTask.destroy({ where: {} });
+  await CorporationMember.destroy({ where: {} });
+  await PlayerMission.destroy({ where: {} });
+  await Mission.destroy({ where: {} });
+  await CraftingJob.destroy({ where: {} });
+  await Blueprint.destroy({ where: {} });
+  await Wonder.destroy({ where: {} });
+  await TechResearch.destroy({ where: {} });
+  await PlayerSkill.destroy({ where: {} });
+  await PriceHistory.destroy({ where: {} });
   // AI NPC system
   await GameSetting.destroy({ where: {} });
   gameSettingsService.clearCache();
-  // Phase 4 models first
+  // Phase 4 models
   await PlayerDiscovery.destroy({ where: {} });
   await Artifact.destroy({ where: {} });
   await Colony.destroy({ where: {} });
@@ -253,13 +264,48 @@ const cleanDatabase = async () => {
   await ShipCargo.destroy({ where: {} });
   await PortCommodity.destroy({ where: {} });
   await Port.destroy({ where: {} });
-  // Core models
+  // Core models - Corporation before User due to FK
   await Ship.destroy({ where: {} });
   await SectorConnection.destroy({ where: {} });
   await Sector.destroy({ where: {} });
   await Commodity.destroy({ where: {} });
   await Component.destroy({ where: {} });
+  // Clear corporation_id on users before deleting corporations
+  await User.update({ corporation_id: null }, { where: {} });
+  await Corporation.destroy({ where: {} });
   await User.destroy({ where: {} });
+};
+
+/**
+ * Create a test NPC with AI fields
+ */
+const createTestNPC = async (sectorId, overrides = {}) => {
+  const defaults = {
+    name: `Test NPC ${Date.now()}`,
+    npc_type: 'PIRATE',
+    ship_type: 'Fighter',
+    current_sector_id: sectorId,
+    hull_points: 100,
+    max_hull_points: 100,
+    shield_points: 50,
+    max_shield_points: 50,
+    attack_power: 15,
+    defense_rating: 8,
+    speed: 10,
+    aggression_level: 0.5,
+    flee_threshold: 0.2,
+    behavior_state: 'idle',
+    intelligence_tier: 1,
+    ai_personality: {
+      trait_primary: 'cunning',
+      trait_secondary: 'calculating',
+      speech_style: 'formal',
+      quirk: 'speaks in short clipped sentences',
+      voice_profile: 'deep_gruff'
+    },
+    is_alive: true
+  };
+  return NPC.create({ ...defaults, ...overrides });
 };
 
 /**
@@ -275,12 +321,72 @@ const generateTestToken = (user) => {
   );
 };
 
+// ============== Phase 5 Helpers ==============
+
+/**
+ * Create a test blueprint
+ */
+const createTestBlueprint = async (overrides = {}) => {
+  const defaults = {
+    name: `Blueprint ${Date.now()}`,
+    category: 'component',
+    output_type: 'component',
+    output_name: 'Test Output',
+    output_quantity: 1,
+    crafting_time: 60000,
+    required_level: 1,
+    ingredients: [{ commodityName: 'Iron Ore', quantity: 5 }],
+    credits_cost: 100,
+    description: 'A test blueprint'
+  };
+  return Blueprint.create({ ...defaults, ...overrides });
+};
+
+/**
+ * Create a test mission
+ */
+const createTestMission = async (portId, overrides = {}) => {
+  const defaults = {
+    port_id: portId,
+    mission_type: 'delivery',
+    title: `Mission ${Date.now()}`,
+    description: 'A test mission',
+    requirements: { destination_port_id: null, commodity_name: 'Iron Ore', quantity: 10 },
+    reward_credits: 1000,
+    reward_xp: 50,
+    min_level: 1,
+    max_level: 100,
+    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    is_active: true
+  };
+  return Mission.create({ ...defaults, ...overrides });
+};
+
+/**
+ * Create a test corporation
+ */
+const createTestCorporation = async (leaderUserId, overrides = {}) => {
+  const defaults = {
+    name: `Corp ${Date.now()}`,
+    tag: `C${Date.now().toString().slice(-4)}`,
+    leader_user_id: leaderUserId,
+    treasury: 0,
+    member_count: 1,
+    is_active: true
+  };
+  return Corporation.create({ ...defaults, ...overrides });
+};
+
 module.exports = {
   createTestUser, createTestSector, createTestShip, createSectorConnection,
   createTestCommodity, createTestPort, addCommodityToPort, addCargoToShip,
   // Phase 4 helpers
   createTestPlanet, createTestPlanetResource, createTestColony, createTestCrew, createTestArtifact,
   createTestGameSetting,
+  // AI NPC helpers
+  createTestNPC,
+  // Phase 5 helpers
+  createTestBlueprint, createTestMission, createTestCorporation,
   cleanDatabase, generateTestToken
 };
 
