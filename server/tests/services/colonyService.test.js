@@ -32,6 +32,14 @@ describe('Colony Service', () => {
       expect(result.colony.name).toBe('New Colony');
       expect(result.colony.user_id).toBe(testUser.user_id);
       expect(result).toHaveProperty('credits_spent', 10000);
+      expect(result.ship_consumed).toBe(true);
+    });
+
+    it('should destroy the colony ship after colonization', async () => {
+      await colonyService.colonizePlanet(testPlanet.planet_id, testUser.user_id, testShip.ship_id);
+
+      const destroyedShip = await Ship.findByPk(testShip.ship_id);
+      expect(destroyedShip).toBeNull();
     });
 
     it('should deduct colonization cost from user', async () => {
@@ -81,6 +89,51 @@ describe('Colony Service', () => {
       await expect(colonyService.colonizePlanet(testPlanet.planet_id, testUser.user_id, scoutShip.ship_id))
         .rejects.toThrow('Colony Ship required');
     });
+
+    it('should reject colonization with non-colony ship types', async () => {
+      const freighter = await createTestShip(testUser.user_id, testSector.sector_id, { ship_type: 'Freighter' });
+
+      await expect(colonyService.colonizePlanet(testPlanet.planet_id, testUser.user_id, freighter.ship_id))
+        .rejects.toThrow('Colony Ship required');
+    });
+
+    it('should set developing_until for Colony Ship colonization', async () => {
+      const result = await colonyService.colonizePlanet(testPlanet.planet_id, testUser.user_id, testShip.ship_id);
+
+      const colony = await Colony.findByPk(result.colony.colony_id);
+      expect(colony.developing_until).not.toBeNull();
+      // habitability 0.8 → ceil(8 * (1 - 0.8)) = ceil(1.6) = 2 hours
+      const devTime = new Date(colony.developing_until) - new Date(colony.created_at);
+      const devHours = devTime / 3600000;
+      expect(devHours).toBeCloseTo(2, 0);
+    });
+
+    it('should set developing_until to null for Insta Colony Ship', async () => {
+      const instaShip = await createTestShip(testUser.user_id, testSector.sector_id, { ship_type: 'Insta Colony Ship' });
+
+      const result = await colonyService.colonizePlanet(testPlanet.planet_id, testUser.user_id, instaShip.ship_id);
+
+      const colony = await Colony.findByPk(result.colony.colony_id);
+      expect(colony.developing_until).toBeNull();
+    });
+
+    it('should destroy Insta Colony Ship after colonization', async () => {
+      const instaShip = await createTestShip(testUser.user_id, testSector.sector_id, { ship_type: 'Insta Colony Ship' });
+
+      await colonyService.colonizePlanet(testPlanet.planet_id, testUser.user_id, instaShip.ship_id);
+
+      const destroyedShip = await Ship.findByPk(instaShip.ship_id);
+      expect(destroyedShip).toBeNull();
+    });
+
+    it('should allow Insta Colony Ship to colonize', async () => {
+      const instaShip = await createTestShip(testUser.user_id, testSector.sector_id, { ship_type: 'Insta Colony Ship' });
+
+      const result = await colonyService.colonizePlanet(testPlanet.planet_id, testUser.user_id, instaShip.ship_id, 'Instant Colony');
+
+      expect(result.colony.name).toBe('Instant Colony');
+      expect(result.ship_consumed).toBe(true);
+    });
   });
 
   describe('getUserColonies', () => {
@@ -112,6 +165,18 @@ describe('Colony Service', () => {
       expect(details.planet.resources).toBeDefined();
     });
 
+    it('should include development status fields', async () => {
+      const { colony } = await colonyService.colonizePlanet(testPlanet.planet_id, testUser.user_id, testShip.ship_id);
+
+      const details = await colonyService.getColonyDetails(colony.colony_id, testUser.user_id);
+
+      expect(details).toHaveProperty('is_developing');
+      expect(details).toHaveProperty('develops_at');
+      // Colony Ship → developing
+      expect(details.is_developing).toBe(true);
+      expect(details.develops_at).not.toBeNull();
+    });
+
     it('should throw error for non-existent colony', async () => {
       await expect(colonyService.getColonyDetails('00000000-0000-0000-0000-000000000000', testUser.user_id))
         .rejects.toThrow('Colony not found');
@@ -119,7 +184,7 @@ describe('Colony Service', () => {
   });
 
   describe('processResourceGeneration', () => {
-    let colony, metalsCommodity;
+    let colony, metalsCommodity, cargoShip;
 
     beforeEach(async () => {
       // Find or create a metals commodity for resource transfer (may exist from seeder)
@@ -129,11 +194,15 @@ describe('Colony Service', () => {
         defaults: { base_price: 50, volume_per_unit: 1, category: 'Essential', volatility: 0.2, description: 'Metals commodity' }
       });
 
-      // Create colony with old last_resource_tick
-      const result = await colonyService.colonizePlanet(testPlanet.planet_id, testUser.user_id, testShip.ship_id);
+      // Use Insta Colony Ship so colony is immediately active (no developing_until)
+      const instaShip = await createTestShip(testUser.user_id, testSector.sector_id, { ship_type: 'Insta Colony Ship' });
+      const result = await colonyService.colonizePlanet(testPlanet.planet_id, testUser.user_id, instaShip.ship_id);
       colony = result.colony;
       // Set last_resource_tick to 2 hours ago
       await colony.update({ last_resource_tick: new Date(Date.now() - 2 * 60 * 60 * 1000) });
+
+      // Create a separate ship for cargo transfer (colony ship was consumed)
+      cargoShip = await createTestShip(testUser.user_id, testSector.sector_id, { ship_type: 'Scout', cargo_capacity: 100 });
     });
 
     it('should generate resources', async () => {
@@ -145,10 +214,10 @@ describe('Colony Service', () => {
     });
 
     it('should transfer resources to ship cargo when ship_id provided', async () => {
-      const result = await colonyService.processResourceGeneration(colony.colony_id, testUser.user_id, testShip.ship_id);
+      const result = await colonyService.processResourceGeneration(colony.colony_id, testUser.user_id, cargoShip.ship_id);
 
       expect(result.resources_transferred).toBeDefined();
-      expect(result.ship_id).toBe(testShip.ship_id);
+      expect(result.ship_id).toBe(cargoShip.ship_id);
     });
 
     it('should throw error if less than 1 hour since last collection', async () => {
@@ -156,6 +225,29 @@ describe('Colony Service', () => {
 
       await expect(colonyService.processResourceGeneration(colony.colony_id, testUser.user_id))
         .rejects.toThrow('Resources can only be collected once per hour');
+    });
+
+    it('should block resource collection during development', async () => {
+      // Set developing_until to future
+      await colony.update({ developing_until: new Date(Date.now() + 4 * 3600000) });
+
+      await expect(colonyService.processResourceGeneration(colony.colony_id, testUser.user_id))
+        .rejects.toThrow('Colony is still developing');
+    });
+
+    it('should auto-clear developing_until when development is complete', async () => {
+      // Set developing_until to past
+      await colony.update({
+        developing_until: new Date(Date.now() - 1000),
+        last_resource_tick: new Date(Date.now() - 2 * 60 * 60 * 1000)
+      });
+
+      const result = await colonyService.processResourceGeneration(colony.colony_id, testUser.user_id);
+      expect(result).toHaveProperty('resources_generated');
+
+      // developing_until should be cleared
+      const updated = await Colony.findByPk(colony.colony_id);
+      expect(updated.developing_until).toBeNull();
     });
   });
 
@@ -233,4 +325,3 @@ describe('Colony Service', () => {
     });
   });
 });
-

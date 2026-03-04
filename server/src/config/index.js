@@ -81,6 +81,7 @@ module.exports = {
     DESTROYER: { name: 'Destroyer', hull: 250, shields: 150, fuel: 150, cargo: 75 },
     CARRIER: { name: 'Carrier', hull: 400, shields: 200, fuel: 100, cargo: 100 },
     COLONY_SHIP: { name: 'Colony Ship', hull: 300, shields: 100, fuel: 250, cargo: 1000 },
+    INSTA_COLONY_SHIP: { name: 'Insta Colony Ship', hull: 200, shields: 50, fuel: 200, cargo: 500 },
     BATTLECRUISER: { name: 'Battlecruiser', hull: 350, shields: 250, fuel: 120, cargo: 50 },
     INTERCEPTOR: { name: 'Interceptor', hull: 60, shields: 80, fuel: 120, cargo: 10 },
     MINING_BARGE: { name: 'Mining Barge', hull: 250, shields: 50, fuel: 100, cargo: 800 },
@@ -234,6 +235,7 @@ module.exports = {
     DESTROYER: { weapon: 4, shield: 3, engine: 2, scanner: 2, cargo_pod: 1, armor: 3 },
     CARRIER: { weapon: 2, shield: 4, engine: 1, scanner: 3, cargo_pod: 2, armor: 4 },
     COLONY_SHIP: { weapon: 1, shield: 3, engine: 1, scanner: 2, cargo_pod: 4, armor: 2 },
+    INSTA_COLONY_SHIP: { weapon: 0, shield: 2, engine: 1, scanner: 1, cargo_pod: 3, armor: 1 },
     BATTLECRUISER: { weapon: 5, shield: 3, engine: 2, scanner: 2, cargo_pod: 1, armor: 3 },
     INTERCEPTOR: { weapon: 2, shield: 1, engine: 3, scanner: 1, cargo_pod: 0, armor: 1 },
     MINING_BARGE: { weapon: 1, shield: 2, engine: 1, scanner: 2, cargo_pod: 6, armor: 2 },
@@ -435,6 +437,7 @@ module.exports = {
     DESTROYER: 8,
     CARRIER: 15,
     COLONY_SHIP: 20,
+    INSTA_COLONY_SHIP: 15,
     BATTLECRUISER: 10,
     INTERCEPTOR: 1,
     MINING_BARGE: 8,
@@ -667,6 +670,8 @@ module.exports = {
   colonization: {
     baseCost: 10000, // Credits to establish colony
     colonyShipRequired: true, // Require Colony Ship hull type
+    allowedColonyShipTypes: ['Colony Ship', 'Insta Colony Ship'],
+    maxDevelopmentHours: 8, // Max hours for colony development (scales with habitability)
     basePopulationGrowth: 0.05, // 5% per tick
     baseResourceGeneration: 1.0, // Multiplier for resource extraction
     maxInfrastructureLevel: 10

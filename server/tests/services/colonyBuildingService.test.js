@@ -83,6 +83,14 @@ describe('ColonyBuildingService', () => {
         colonyBuildingService.constructBuilding(user.user_id, colony.colony_id, 'QUANTUM_EXTRACTOR')
       ).rejects.toThrow(/Requires tech/);
     });
+
+    it('should reject construction when colony is still developing', async () => {
+      await colony.update({ developing_until: new Date(Date.now() + 4 * 3600000) });
+
+      await expect(
+        colonyBuildingService.constructBuilding(user.user_id, colony.colony_id, 'SURFACE_MINE')
+      ).rejects.toThrow('Colony is still developing');
+    });
   });
 
   describe('upgradeBuilding', () => {

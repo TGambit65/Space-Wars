@@ -67,7 +67,8 @@ const colonizePlanet = async (planetId, userId, shipId, colonyName) => {
     }
 
     // Check if Colony Ship is required and ship type matches
-    if (config.colonization.colonyShipRequired && ship.ship_type !== 'Colony Ship') {
+    const allowedTypes = config.colonization.allowedColonyShipTypes || ['Colony Ship'];
+    if (config.colonization.colonyShipRequired && !allowedTypes.includes(ship.ship_type)) {
       throw Object.assign(new Error('Colony Ship required for colonization'), { statusCode: 400 });
     }
 
@@ -87,6 +88,15 @@ const colonizePlanet = async (planetId, userId, shipId, colonyName) => {
       owner_user_id: userId
     }, { transaction });
 
+    // Calculate development timer based on ship type
+    let developingUntil = null;
+    if (ship.ship_type !== 'Insta Colony Ship') {
+      const maxDevHours = config.colonization.maxDevelopmentHours || 8;
+      const habitability = planet.habitability || 0;
+      const devHours = Math.max(1, Math.ceil(maxDevHours * (1 - habitability)));
+      developingUntil = new Date(Date.now() + devHours * 3600000);
+    }
+
     // Create colony
     const colony = await Colony.create({
       planet_id: planetId,
@@ -94,8 +104,12 @@ const colonizePlanet = async (planetId, userId, shipId, colonyName) => {
       name: colonyName || `${planet.name} Colony`,
       population: 100,
       infrastructure_level: 1,
-      last_resource_tick: new Date()
+      last_resource_tick: new Date(),
+      developing_until: developingUntil
     }, { transaction });
+
+    // Consume the colony ship
+    await ship.destroy({ transaction });
 
     await transaction.commit();
 
@@ -103,7 +117,8 @@ const colonizePlanet = async (planetId, userId, shipId, colonyName) => {
       colony,
       planet,
       credits_spent: cost,
-      remaining_credits: user.credits - cost
+      remaining_credits: user.credits - cost,
+      ship_consumed: true
     };
   } catch (error) {
     await transaction.rollback();
@@ -127,7 +142,14 @@ const getUserColonies = async (userId) => {
     }]
   });
 
-  return colonies;
+  // Add development status fields
+  const now = new Date();
+  return colonies.map(c => {
+    const json = c.toJSON();
+    json.is_developing = !!(c.developing_until && new Date(c.developing_until) > now);
+    json.develops_at = c.developing_until || null;
+    return json;
+  });
 };
 
 /**
@@ -150,7 +172,13 @@ const getColonyDetails = async (colonyId, userId) => {
     throw Object.assign(new Error('Colony not found'), { statusCode: 404 });
   }
 
-  return colony;
+  // Add development status fields
+  const colonyJson = colony.toJSON();
+  const now = new Date();
+  colonyJson.is_developing = !!(colony.developing_until && new Date(colony.developing_until) > now);
+  colonyJson.develops_at = colony.developing_until || null;
+
+  return colonyJson;
 };
 
 /**
@@ -179,7 +207,16 @@ const processResourceGeneration = async (colonyId, userId, shipId = null) => {
       throw Object.assign(new Error('Colony not found'), { statusCode: 404 });
     }
 
+    // Check if colony is still developing
     const now = new Date();
+    if (colony.developing_until) {
+      if (new Date(colony.developing_until) > now) {
+        throw Object.assign(new Error('Colony is still developing'), { statusCode: 400 });
+      }
+      // Development complete — clear the flag
+      await colony.update({ developing_until: null }, { transaction });
+    }
+
     const lastTick = new Date(colony.last_resource_tick);
     const hoursPassed = (now - lastTick) / (1000 * 60 * 60);
 

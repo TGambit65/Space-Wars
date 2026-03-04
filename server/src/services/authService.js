@@ -66,7 +66,15 @@ const registerUser = async (username, email, password) => {
       name: `${sanitizedUsername}'s Scout`
     }, { transaction });
 
-    console.log(`[AUTH] Ship created: ${ship.ship_id}. Adding starting cargo...`);
+    // Create starter colony ship for new player
+    const colonyShip = await Ship.create({
+      owner_user_id: user.user_id,
+      current_sector_id: startingSector.sector_id,
+      ship_type: 'Insta Colony Ship',
+      name: `${sanitizedUsername}'s Colony Ship`
+    }, { transaction });
+
+    console.log(`[AUTH] Ships created: ${ship.ship_id}, ${colonyShip.ship_id}. Adding starting cargo...`);
 
     // Give starting cargo to new player
     const startingCargo = config.economy?.startingCargo || {};

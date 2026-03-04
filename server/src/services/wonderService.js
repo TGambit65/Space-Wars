@@ -25,6 +25,11 @@ const startWonderConstruction = async (userId, colonyId, wonderType) => {
       throw error;
     }
 
+    // Block during development
+    if (colony.developing_until && new Date(colony.developing_until) > new Date()) {
+      throw Object.assign(new Error('Colony is still developing'), { statusCode: 400 });
+    }
+
     if (colony.infrastructure_level < wonderConfig.requiredInfrastructure) {
       const error = new Error(`Requires infrastructure level ${wonderConfig.requiredInfrastructure}`);
       error.statusCode = 400;

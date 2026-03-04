@@ -51,6 +51,12 @@ const Colony = sequelize.define('Colony', {
     defaultValue: DataTypes.NOW,
     comment: 'Last time resources were generated'
   },
+  developing_until: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
+    comment: 'Colony is locked until this time. Null = fully developed.'
+  },
   is_active: {
     type: DataTypes.BOOLEAN,
     defaultValue: true

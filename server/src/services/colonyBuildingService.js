@@ -83,6 +83,11 @@ const constructBuilding = async (userId, colonyId, buildingType) => {
       throw Object.assign(new Error('Colony not found or not owned'), { statusCode: 404 });
     }
 
+    // Block during development
+    if (colony.developing_until && new Date(colony.developing_until) > new Date()) {
+      throw Object.assign(new Error('Colony is still developing'), { statusCode: 400 });
+    }
+
     // Check infrastructure
     if (colony.infrastructure_level < bldgConfig.prerequisiteInfrastructure) {
       throw Object.assign(new Error(`Requires infrastructure level ${bldgConfig.prerequisiteInfrastructure}`), { statusCode: 400 });

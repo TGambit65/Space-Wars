@@ -28,7 +28,7 @@ const Ship = sequelize.define('Ship', {
     defaultValue: 'Scout',
     allowNull: false,
     validate: {
-      isIn: [['Scout', 'Merchant Cruiser', 'Freighter', 'Fighter', 'Corvette', 'Destroyer', 'Carrier', 'Colony Ship', 'Battlecruiser', 'Interceptor', 'Mining Barge', 'Explorer']]
+      isIn: [['Scout', 'Merchant Cruiser', 'Freighter', 'Fighter', 'Corvette', 'Destroyer', 'Carrier', 'Colony Ship', 'Insta Colony Ship', 'Battlecruiser', 'Interceptor', 'Mining Barge', 'Explorer']]
     }
   },
   name: {
