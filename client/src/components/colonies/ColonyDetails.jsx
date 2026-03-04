@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { X, Building2, Users, ArrowUp, Package, Trash2, Clock, Globe, Rocket } from 'lucide-react';
+import { X, Building2, Users, ArrowUp, Package, Trash2, Clock, Globe, Rocket, Sparkles, Factory } from 'lucide-react';
+import ColonyWonders from './ColonyWonders';
+import ColonyBuildings from './ColonyBuildings';
 
 const planetColors = {
   Terran: 'from-green-600 to-blue-600',
@@ -17,6 +19,7 @@ const planetColors = {
 function ColonyDetails({ colony, ships, onClose, onCollect, onUpgrade, onAbandon }) {
   const [selectedShip, setSelectedShip] = useState('');
   const [loading, setLoading] = useState({ collect: false, upgrade: false });
+  const [activeTab, setActiveTab] = useState('overview');
   
   const planet = colony.planet || {};
   const gradient = planetColors[planet.type] || 'from-gray-500 to-gray-700';
@@ -89,70 +92,103 @@ function ColonyDetails({ colony, ships, onClose, onCollect, onUpgrade, onAbandon
           </div>
         </div>
 
-        {/* Collect Resources */}
-        <div className="px-6 pb-6">
-          <div className="p-4 rounded-lg bg-space-700/50 space-y-4">
-            <h3 className="font-semibold text-white flex items-center gap-2">
-              <Package className="w-5 h-5 text-accent-cyan" /> Collect Resources
-            </h3>
-            
-            {!canCollect ? (
-              <p className="text-gray-400 text-center py-2">Resources can only be collected once per hour.</p>
-            ) : (
-              <>
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">Select Ship to Receive Resources</label>
-                  <select className="input w-full" value={selectedShip} onChange={(e) => setSelectedShip(e.target.value)}>
-                    <option value="">Choose a ship...</option>
-                    {ships.map(ship => (
-                      <option key={ship.ship_id} value={ship.ship_id}>
-                        {ship.name} - {ship.currentSector?.name || 'Unknown'}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <button onClick={handleCollect} disabled={loading.collect || !selectedShip} className="btn btn-primary w-full flex items-center justify-center gap-2">
-                  {loading.collect ? <div className="w-5 h-5 border-2 border-space-900 border-t-transparent rounded-full animate-spin" /> : <Package className="w-5 h-5" />}
-                  Collect Resources ({hoursSinceCollect}h worth)
-                </button>
-              </>
-            )}
-          </div>
+        {/* Tabs */}
+        <div className="flex gap-1 px-6 border-b" style={{ borderColor: 'rgba(0,255,255,0.1)' }}>
+          {[
+            { id: 'overview', label: 'Overview' },
+            { id: 'buildings', label: 'Buildings', icon: Factory },
+            { id: 'wonders', label: 'Wonders', icon: Sparkles },
+          ].map(t => (
+            <button key={t.id} onClick={() => setActiveTab(t.id)}
+              className={`px-4 py-2 text-sm transition-all flex items-center gap-1.5 ${activeTab === t.id ? 'text-neon-cyan font-semibold' : 'text-gray-500 hover:text-gray-300'}`}
+              style={activeTab === t.id ? { borderBottom: '2px solid #00ffff' } : {}}
+            >
+              {t.icon && <t.icon className="w-3.5 h-3.5" />}
+              {t.label}
+            </button>
+          ))}
         </div>
 
-        {/* Upgrade Infrastructure */}
-        <div className="px-6 pb-6">
-          <div className="p-4 rounded-lg bg-space-700/50 space-y-4">
-            <h3 className="font-semibold text-white flex items-center gap-2">
-              <ArrowUp className="w-5 h-5 text-accent-green" /> Upgrade Infrastructure
-            </h3>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400">Current Level</span>
-              <span className="text-white font-bold">{colony.infrastructure_level}/10</span>
+        {activeTab === 'overview' && (
+          <>
+            {/* Collect Resources */}
+            <div className="px-6 pt-4 pb-6">
+              <div className="p-4 rounded-lg bg-space-700/50 space-y-4">
+                <h3 className="font-semibold text-white flex items-center gap-2">
+                  <Package className="w-5 h-5 text-accent-cyan" /> Collect Resources
+                </h3>
+
+                {!canCollect ? (
+                  <p className="text-gray-400 text-center py-2">Resources can only be collected once per hour.</p>
+                ) : (
+                  <>
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1">Select Ship to Receive Resources</label>
+                      <select className="input w-full" value={selectedShip} onChange={(e) => setSelectedShip(e.target.value)}>
+                        <option value="">Choose a ship...</option>
+                        {ships.map(ship => (
+                          <option key={ship.ship_id} value={ship.ship_id}>
+                            {ship.name} - {ship.currentSector?.name || 'Unknown'}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <button onClick={handleCollect} disabled={loading.collect || !selectedShip} className="btn btn-primary w-full flex items-center justify-center gap-2">
+                      {loading.collect ? <div className="w-5 h-5 border-2 border-space-900 border-t-transparent rounded-full animate-spin" /> : <Package className="w-5 h-5" />}
+                      Collect Resources ({hoursSinceCollect}h worth)
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
-            <div className="progress-bar"><div className="progress-fill bg-accent-green" style={{ width: `${colony.infrastructure_level * 10}%` }} /></div>
-            {isMaxLevel ? (
-              <p className="text-accent-green text-center py-2">Maximum level reached!</p>
-            ) : (
-              <>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Upgrade Cost</span>
-                  <span className="text-accent-orange font-bold">{upgradeCost.toLocaleString()} credits</span>
-                </div>
-                <button onClick={handleUpgrade} disabled={loading.upgrade} className="btn btn-success w-full">
-                  {loading.upgrade ? 'Upgrading...' : `Upgrade to Level ${colony.infrastructure_level + 1}`}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
 
-        {/* Abandon Colony */}
-        <div className="px-6 pb-6">
-          <button onClick={() => onAbandon(colony.colony_id)} className="btn btn-danger w-full flex items-center justify-center gap-2">
-            <Trash2 className="w-5 h-5" /> Abandon Colony
-          </button>
-        </div>
+            {/* Upgrade Infrastructure */}
+            <div className="px-6 pb-6">
+              <div className="p-4 rounded-lg bg-space-700/50 space-y-4">
+                <h3 className="font-semibold text-white flex items-center gap-2">
+                  <ArrowUp className="w-5 h-5 text-accent-green" /> Upgrade Infrastructure
+                </h3>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Current Level</span>
+                  <span className="text-white font-bold">{colony.infrastructure_level}/10</span>
+                </div>
+                <div className="progress-bar"><div className="progress-fill bg-accent-green" style={{ width: `${colony.infrastructure_level * 10}%` }} /></div>
+                {isMaxLevel ? (
+                  <p className="text-accent-green text-center py-2">Maximum level reached!</p>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-400">Upgrade Cost</span>
+                      <span className="text-accent-orange font-bold">{upgradeCost.toLocaleString()} credits</span>
+                    </div>
+                    <button onClick={handleUpgrade} disabled={loading.upgrade} className="btn btn-success w-full">
+                      {loading.upgrade ? 'Upgrading...' : `Upgrade to Level ${colony.infrastructure_level + 1}`}
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Abandon Colony */}
+            <div className="px-6 pb-6">
+              <button onClick={() => onAbandon(colony.colony_id)} className="btn btn-danger w-full flex items-center justify-center gap-2">
+                <Trash2 className="w-5 h-5" /> Abandon Colony
+              </button>
+            </div>
+          </>
+        )}
+
+        {activeTab === 'buildings' && (
+          <div className="px-6 py-4">
+            <ColonyBuildings colonyId={colony.colony_id} colony={colony} />
+          </div>
+        )}
+
+        {activeTab === 'wonders' && (
+          <div className="px-6 py-4">
+            <ColonyWonders colonyId={colony.colony_id} />
+          </div>
+        )}
       </div>
     </div>
   );

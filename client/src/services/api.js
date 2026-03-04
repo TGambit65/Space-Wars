@@ -147,6 +147,92 @@ export const dialogue = {
   getState: (npcId) => api.get(`/dialogue/${npcId}/state`),
 };
 
+// Progression
+export const progression = {
+  get: () => api.get('/progression'),
+  upgradeSkill: (skillName) => api.post(`/progression/skills/${skillName}/upgrade`),
+  getTech: () => api.get('/progression/tech'),
+  research: (techName) => api.post(`/progression/tech/${techName}/research`),
+  checkResearch: () => api.post('/progression/tech/check'),
+};
+
+// Crafting
+export const crafting = {
+  getBlueprints: () => api.get('/crafting/blueprints'),
+  start: (data) => api.post('/crafting/start', data),
+  cancel: (jobId) => api.post(`/crafting/${jobId}/cancel`),
+  complete: (jobId) => api.post(`/crafting/${jobId}/complete`),
+  check: () => api.post('/crafting/check'),
+  getJobs: () => api.get('/crafting/jobs'),
+};
+
+// Missions
+export const missions = {
+  getActive: () => api.get('/missions/active'),
+  getAvailable: (portId) => api.get(`/missions/available/${portId}`),
+  accept: (missionId) => api.post(`/missions/${missionId}/accept`),
+  abandon: (playerMissionId) => api.post(`/missions/${playerMissionId}/abandon`),
+};
+
+// Corporations
+export const corporations = {
+  create: (data) => api.post('/corporations', data),
+  getMine: () => api.get('/corporations/mine'),
+  getLeaderboard: () => api.get('/corporations/leaderboard'),
+  getById: (id) => api.get(`/corporations/${id}`),
+  join: (id) => api.post(`/corporations/${id}/join`),
+  leave: () => api.post('/corporations/leave'),
+  promote: (userId) => api.post(`/corporations/members/${userId}/promote`),
+  transfer: (userId) => api.post(`/corporations/transfer/${userId}`),
+  disband: () => api.delete('/corporations'),
+  contribute: (amount) => api.post('/corporations/treasury/contribute', { amount }),
+  withdraw: (amount) => api.post('/corporations/treasury/withdraw', { amount }),
+};
+
+// Wonders
+export const wonders = {
+  getTypes: () => api.get('/wonders/types'),
+  getColonyWonders: (colonyId) => api.get(`/wonders/colony/${colonyId}`),
+  build: (colonyId, wonderType) => api.post(`/wonders/colony/${colonyId}/build`, { wonder_type: wonderType }),
+  advance: (wonderId) => api.post(`/wonders/${wonderId}/advance`),
+};
+
+// Automation
+export const automation = {
+  getTasks: () => api.get('/automation/tasks'),
+  createTradeRoute: (data) => api.post('/automation/trade-route', data),
+  createMiningRun: (data) => api.post('/automation/mining-run', data),
+  pause: (taskId) => api.post(`/automation/${taskId}/pause`),
+  resume: (taskId) => api.post(`/automation/${taskId}/resume`),
+  cancel: (taskId) => api.delete(`/automation/${taskId}`),
+};
+
+// Market
+export const market = {
+  getOverview: (portId) => api.get(`/market/${portId}/overview`),
+  getHistory: (portId, commodityId) => api.get(`/market/history/${portId}/${commodityId}`),
+  getTrends: (commodityId) => api.get(`/market/trends/${commodityId}`),
+};
+
+// Colony Buildings
+export const buildings = {
+  getTypes: () => api.get('/buildings/types'),
+  getColonyBuildings: (colonyId) => api.get(`/buildings/colony/${colonyId}`),
+  getAvailable: (colonyId) => api.get(`/buildings/colony/${colonyId}/available`),
+  build: (colonyId, buildingType) => api.post(`/buildings/colony/${colonyId}/build`, { building_type: buildingType }),
+  upgrade: (buildingId) => api.post(`/buildings/${buildingId}/upgrade`),
+  demolish: (buildingId) => api.delete(`/buildings/${buildingId}`),
+  toggle: (buildingId, isActive) => api.patch(`/buildings/${buildingId}/toggle`, { is_active: isActive }),
+  repair: (buildingId) => api.post(`/buildings/${buildingId}/repair`),
+};
+
+// Artifacts
+export const artifacts = {
+  getAll: () => api.get('/artifacts'),
+  equip: (id, shipId) => api.post(`/artifacts/${id}/equip`, { ship_id: shipId }),
+  unequip: (id) => api.post(`/artifacts/${id}/unequip`),
+};
+
 // Admin
 export const admin = {
   generateUniverse: (params) => api.post('/admin/universe/generate', params),

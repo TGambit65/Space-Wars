@@ -745,6 +745,182 @@ module.exports = {
     GENESIS_DEVICE: { name: 'Genesis Device', bonusType: 'habitability', bonusValue: 0.30, maxPhases: 5, phaseCost: 30000, requiredInfrastructure: 6 }
   },
 
+  // Colony Buildings
+  buildings: {
+    // === Extraction (Tier 1 → 2 → 3) ===
+    SURFACE_MINE: {
+      name: 'Surface Mine', category: 'extraction', tier: 1,
+      cost: 25000, workforce: 50, powerConsumption: 0, powerGeneration: 0,
+      maintenanceCost: 500, prerequisiteInfrastructure: 1, prerequisiteTech: null,
+      upgradesTo: 'DEEP_CORE_DRILL',
+      production: { inputs: {}, outputs: { 'Ore': 20 } },
+      planetTypeBonus: { Volcanic: 1.5, Desert: 1.2, Barren: 1.3 },
+      maxPerColony: 3
+    },
+    DEEP_CORE_DRILL: {
+      name: 'Deep Core Drill', category: 'extraction', tier: 2,
+      cost: 60000, workforce: 80, powerConsumption: 50, powerGeneration: 0,
+      maintenanceCost: 1200, prerequisiteInfrastructure: 3, prerequisiteTech: null,
+      upgradesTo: 'QUANTUM_EXTRACTOR',
+      production: { inputs: {}, outputs: { 'Ore': 50 } },
+      planetTypeBonus: { Volcanic: 1.5, Desert: 1.2, Barren: 1.3 },
+      maxPerColony: 3
+    },
+    QUANTUM_EXTRACTOR: {
+      name: 'Quantum Extractor', category: 'extraction', tier: 3,
+      cost: 150000, workforce: 120, powerConsumption: 150, powerGeneration: 0,
+      maintenanceCost: 3000, prerequisiteInfrastructure: 6, prerequisiteTech: 'ADVANCED_COLONIES',
+      upgradesTo: null,
+      production: { inputs: {}, outputs: { 'Ore': 120 } },
+      planetTypeBonus: { Volcanic: 1.5, Desert: 1.2, Barren: 1.3 },
+      maxPerColony: 3
+    },
+    WATER_PUMP: {
+      name: 'Water Pump', category: 'extraction', tier: 1,
+      cost: 20000, workforce: 30, powerConsumption: 0, powerGeneration: 0,
+      maintenanceCost: 400, prerequisiteInfrastructure: 1, prerequisiteTech: null,
+      upgradesTo: 'DEEP_WELL',
+      production: { inputs: {}, outputs: { 'Water': 25 } },
+      planetTypeBonus: { Oceanic: 2.0, Terran: 1.5, Ice: 1.3, Jungle: 1.4 },
+      maxPerColony: 3
+    },
+    DEEP_WELL: {
+      name: 'Deep Well', category: 'extraction', tier: 2,
+      cost: 50000, workforce: 50, powerConsumption: 30, powerGeneration: 0,
+      maintenanceCost: 1000, prerequisiteInfrastructure: 3, prerequisiteTech: null,
+      upgradesTo: 'CRYO_HARVESTER',
+      production: { inputs: {}, outputs: { 'Water': 60 } },
+      planetTypeBonus: { Oceanic: 2.0, Terran: 1.5, Ice: 1.3, Jungle: 1.4 },
+      maxPerColony: 3
+    },
+    CRYO_HARVESTER: {
+      name: 'Cryo Harvester', category: 'extraction', tier: 3,
+      cost: 120000, workforce: 80, powerConsumption: 100, powerGeneration: 0,
+      maintenanceCost: 2500, prerequisiteInfrastructure: 6, prerequisiteTech: 'ADVANCED_COLONIES',
+      upgradesTo: null,
+      production: { inputs: {}, outputs: { 'Water': 150 } },
+      planetTypeBonus: { Oceanic: 2.0, Terran: 1.5, Ice: 1.3, Jungle: 1.4 },
+      maxPerColony: 3
+    },
+    SOLAR_ARRAY: {
+      name: 'Solar Array', category: 'extraction', tier: 1,
+      cost: 15000, workforce: 20, powerConsumption: 0, powerGeneration: 100,
+      maintenanceCost: 300, prerequisiteInfrastructure: 1, prerequisiteTech: null,
+      upgradesTo: 'GEOTHERMAL_PLANT',
+      production: { inputs: {}, outputs: {} },
+      planetTypeBonus: { Desert: 1.5, Terran: 1.2 },
+      maxPerColony: 5
+    },
+    GEOTHERMAL_PLANT: {
+      name: 'Geothermal Plant', category: 'extraction', tier: 2,
+      cost: 40000, workforce: 40, powerConsumption: 0, powerGeneration: 250,
+      maintenanceCost: 800, prerequisiteInfrastructure: 3, prerequisiteTech: null,
+      upgradesTo: 'FUSION_REACTOR',
+      production: { inputs: {}, outputs: {} },
+      planetTypeBonus: { Volcanic: 1.8, Terran: 1.2 },
+      maxPerColony: 5
+    },
+    FUSION_REACTOR: {
+      name: 'Fusion Reactor', category: 'extraction', tier: 3,
+      cost: 100000, workforce: 60, powerConsumption: 0, powerGeneration: 500,
+      maintenanceCost: 2000, prerequisiteInfrastructure: 6, prerequisiteTech: 'ADVANCED_COLONIES',
+      upgradesTo: null,
+      production: { inputs: {}, outputs: {} },
+      planetTypeBonus: {},
+      maxPerColony: 5
+    },
+
+    // === Infrastructure ===
+    HABITAT_MODULE: {
+      name: 'Habitat Module', category: 'infrastructure', tier: 1,
+      cost: 30000, workforce: 20, powerConsumption: 20, powerGeneration: 0,
+      maintenanceCost: 600, prerequisiteInfrastructure: 2, prerequisiteTech: null,
+      upgradesTo: null,
+      production: { inputs: {}, outputs: {} },
+      bonusEffect: { type: 'max_population', value: 500 },
+      planetTypeBonus: {},
+      maxPerColony: 5
+    },
+    HYDROPONIC_FARM: {
+      name: 'Hydroponic Farm', category: 'infrastructure', tier: 1,
+      cost: 20000, workforce: 40, powerConsumption: 30, powerGeneration: 0,
+      maintenanceCost: 500, prerequisiteInfrastructure: 2, prerequisiteTech: null,
+      upgradesTo: null,
+      production: { inputs: { 'Water': 5 }, outputs: { 'Food': 30 } },
+      planetTypeBonus: { Terran: 1.3, Jungle: 1.5 },
+      maxPerColony: 4
+    },
+    RESEARCH_LAB: {
+      name: 'Research Lab', category: 'infrastructure', tier: 2,
+      cost: 50000, workforce: 60, powerConsumption: 50, powerGeneration: 0,
+      maintenanceCost: 1500, prerequisiteInfrastructure: 4, prerequisiteTech: null,
+      upgradesTo: null,
+      production: { inputs: {}, outputs: {} },
+      bonusEffect: { type: 'research_speed', value: 0.15 },
+      planetTypeBonus: {},
+      maxPerColony: 2
+    },
+    SPACEPORT: {
+      name: 'Spaceport', category: 'infrastructure', tier: 2,
+      cost: 45000, workforce: 50, powerConsumption: 40, powerGeneration: 0,
+      maintenanceCost: 1200, prerequisiteInfrastructure: 3, prerequisiteTech: null,
+      upgradesTo: null,
+      production: { inputs: {}, outputs: {} },
+      bonusEffect: { type: 'trade_capacity', value: 0.25 },
+      planetTypeBonus: {},
+      maxPerColony: 1
+    },
+    DEFENSE_GRID: {
+      name: 'Defense Grid', category: 'infrastructure', tier: 2,
+      cost: 40000, workforce: 30, powerConsumption: 60, powerGeneration: 0,
+      maintenanceCost: 1000, prerequisiteInfrastructure: 3, prerequisiteTech: null,
+      upgradesTo: null,
+      production: { inputs: {}, outputs: {} },
+      bonusEffect: { type: 'colony_defense', value: 50 },
+      planetTypeBonus: {},
+      maxPerColony: 3
+    },
+    ENTERTAINMENT_COMPLEX: {
+      name: 'Entertainment Complex', category: 'infrastructure', tier: 1,
+      cost: 25000, workforce: 30, powerConsumption: 25, powerGeneration: 0,
+      maintenanceCost: 700, prerequisiteInfrastructure: 2, prerequisiteTech: null,
+      upgradesTo: null,
+      production: { inputs: {}, outputs: {} },
+      bonusEffect: { type: 'morale', value: 0.10 },
+      planetTypeBonus: {},
+      maxPerColony: 2
+    },
+
+    // === Manufacturing ===
+    REFINERY: {
+      name: 'Refinery', category: 'manufacturing', tier: 2,
+      cost: 60000, workforce: 70, powerConsumption: 80, powerGeneration: 0,
+      maintenanceCost: 1500, prerequisiteInfrastructure: 3, prerequisiteTech: null,
+      upgradesTo: null,
+      production: { inputs: { 'Ore': 10 }, outputs: { 'Refined Metals': 8 } },
+      planetTypeBonus: {},
+      maxPerColony: 2
+    },
+    COMPONENT_FACTORY: {
+      name: 'Component Factory', category: 'manufacturing', tier: 3,
+      cost: 100000, workforce: 100, powerConsumption: 120, powerGeneration: 0,
+      maintenanceCost: 2500, prerequisiteInfrastructure: 5, prerequisiteTech: 'BASIC_CRAFTING',
+      upgradesTo: null,
+      production: { inputs: { 'Refined Metals': 5, 'Electronics': 3 }, outputs: { 'Ship Parts': 4 } },
+      planetTypeBonus: {},
+      maxPerColony: 1
+    },
+    CHEMICAL_PLANT: {
+      name: 'Chemical Plant', category: 'manufacturing', tier: 2,
+      cost: 55000, workforce: 60, powerConsumption: 70, powerGeneration: 0,
+      maintenanceCost: 1300, prerequisiteInfrastructure: 3, prerequisiteTech: null,
+      upgradesTo: null,
+      production: { inputs: { 'Water': 8, 'Organics': 5 }, outputs: { 'Chemicals': 6 } },
+      planetTypeBonus: {},
+      maxPerColony: 2
+    }
+  },
+
   // Crafting blueprints (seeded into DB)
   blueprints: [
     { name: 'Craft Pulse Laser', category: 'component', outputType: 'component', outputName: 'Pulse Laser', craftingTime: 300000, requiredLevel: 3, requiredTech: 'BASIC_CRAFTING', ingredients: [{ commodityName: 'Electronics', quantity: 10 }, { commodityName: 'Ore', quantity: 5 }], creditsCost: 500 },

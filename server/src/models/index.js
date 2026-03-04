@@ -34,6 +34,8 @@ const PlayerMission = require('./PlayerMission');
 const Corporation = require('./Corporation');
 const CorporationMember = require('./CorporationMember');
 const AutomatedTask = require('./AutomatedTask');
+// Phase C: Colony Buildings
+const ColonyBuilding = require('./ColonyBuilding');
 
 // Define relationships
 
@@ -237,6 +239,10 @@ AutomatedTask.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 Ship.hasMany(AutomatedTask, { foreignKey: 'ship_id', as: 'automatedTasks' });
 AutomatedTask.belongsTo(Ship, { foreignKey: 'ship_id', as: 'ship' });
 
+// Phase C: Colony Buildings
+Colony.hasMany(ColonyBuilding, { foreignKey: 'colony_id', as: 'buildings' });
+ColonyBuilding.belongsTo(Colony, { foreignKey: 'colony_id', as: 'colony' });
+
 module.exports = {
   sequelize,
   User,
@@ -273,6 +279,8 @@ module.exports = {
   PlayerMission,
   Corporation,
   CorporationMember,
-  AutomatedTask
+  AutomatedTask,
+  // Phase C
+  ColonyBuilding
 };
 

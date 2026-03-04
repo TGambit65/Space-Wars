@@ -1,7 +1,7 @@
 /**
  * Test helper functions and fixtures
  */
-const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, PriceHistory, PlayerSkill, TechResearch, Wonder, Blueprint, CraftingJob, Mission, PlayerMission, Corporation, CorporationMember, AutomatedTask, sequelize } = require('../src/models');
+const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, PriceHistory, PlayerSkill, TechResearch, Wonder, Blueprint, CraftingJob, Mission, PlayerMission, Corporation, CorporationMember, AutomatedTask, ColonyBuilding, sequelize } = require('../src/models');
 const authService = require('../src/services/authService');
 const gameSettingsService = require('../src/services/gameSettingsService');
 const bcrypt = require('bcryptjs');
@@ -241,6 +241,7 @@ const cleanDatabase = async () => {
   await Mission.destroy({ where: {} });
   await CraftingJob.destroy({ where: {} });
   await Blueprint.destroy({ where: {} });
+  await ColonyBuilding.destroy({ where: {} });
   await Wonder.destroy({ where: {} });
   await TechResearch.destroy({ where: {} });
   await PlayerSkill.destroy({ where: {} });
@@ -321,6 +322,24 @@ const generateTestToken = (user) => {
   );
 };
 
+// ============== Phase C Helpers ==============
+
+/**
+ * Create a test colony building
+ */
+const createTestBuilding = async (colonyId, overrides = {}) => {
+  const defaults = {
+    colony_id: colonyId,
+    building_type: 'SURFACE_MINE',
+    level: 1,
+    is_active: true,
+    workforce: 50,
+    condition: 1.0,
+    last_production: null
+  };
+  return ColonyBuilding.create({ ...defaults, ...overrides });
+};
+
 // ============== Phase 5 Helpers ==============
 
 /**
@@ -385,6 +404,8 @@ module.exports = {
   createTestGameSetting,
   // AI NPC helpers
   createTestNPC,
+  // Phase C helpers
+  createTestBuilding,
   // Phase 5 helpers
   createTestBlueprint, createTestMission, createTestCorporation,
   cleanDatabase, generateTestToken

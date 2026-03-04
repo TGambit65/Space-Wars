@@ -1,5 +1,6 @@
 const { Colony, Planet, PlanetResource, Ship, User, Sector, Commodity, ShipCargo, sequelize } = require('../models');
 const config = require('../config');
+const colonyBuildingService = require('./colonyBuildingService');
 
 // Map planet resources to commodity names for cargo transfer
 // Keys match planetResources in config, values match commodity names
@@ -271,6 +272,17 @@ const processResourceGeneration = async (colonyId, userId, shipId = null) => {
       }
     }
 
+    // Process building production tick
+    let buildingProduction = { production: [], powerBalance: 0 };
+    try {
+      buildingProduction = await colonyBuildingService.processProductionTick(
+        colonyId, hoursPassed, generatedResources, transaction, colony
+      );
+    } catch (buildingErr) {
+      // Non-fatal: log but don't fail the whole collection
+      console.warn('Building production error:', buildingErr.message);
+    }
+
     // Calculate population growth
     const populationGrowthRate = config.colonization.basePopulationGrowth || 0.05;
     const habitabilityMultiplier = colony.planet.habitability || 0.5;
@@ -297,7 +309,9 @@ const processResourceGeneration = async (colonyId, userId, shipId = null) => {
       resources_transferred: ship ? transferredResources : null,
       ship_id: shipId || null,
       population_growth: populationGrowth,
-      new_population: cappedPopulation
+      new_population: cappedPopulation,
+      building_production: buildingProduction.production,
+      power_balance: buildingProduction.powerBalance
     };
   } catch (error) {
     await transaction.rollback();

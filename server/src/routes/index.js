@@ -23,6 +23,8 @@ const craftingRoutes = require('./craftingRoutes');
 const missionRoutes = require('./missionRoutes');
 const corporationRoutes = require('./corporationRoutes');
 const automationRoutes = require('./automationRoutes');
+// Phase C: Colony Buildings
+const colonyBuildingRoutes = require('./colonyBuildingRoutes');
 // Admin
 const adminRoutes = require('./adminRoutes');
 const { sequelize } = require('../config/database');
@@ -87,6 +89,8 @@ router.use('/crafting', craftingRoutes);
 router.use('/missions', missionRoutes);
 router.use('/corporations', corporationRoutes);
 router.use('/automation', automationRoutes);
+// Phase C: Colony Buildings
+router.use('/buildings', colonyBuildingRoutes);
 // Admin
 router.use('/admin', adminRoutes);
 
