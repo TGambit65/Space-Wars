@@ -156,7 +156,7 @@ const getMapData = async (req, res, next) => {
     const sectors = await Sector.findAll({
       attributes: [
         'sector_id', 'name', 'x_coord', 'y_coord', 'type', 'star_class',
-        'hazard_level', 'is_starting_sector'
+        'hazard_level', 'is_starting_sector', 'phenomena'
       ],
       include: [
         {
@@ -182,6 +182,27 @@ const getMapData = async (req, res, next) => {
 
     const config = require('../config');
 
+    // Fetch current user's ships for map badges
+    let userShipsBySector = new Map();
+    if (req.userId) {
+      const userShips = await Ship.findAll({
+        where: { owner_user_id: req.userId },
+        attributes: ['ship_id', 'name', 'ship_type', 'fleet_id', 'current_sector_id', 'is_active']
+      });
+      for (const ship of userShips) {
+        if (!userShipsBySector.has(ship.current_sector_id)) {
+          userShipsBySector.set(ship.current_sector_id, []);
+        }
+        userShipsBySector.get(ship.current_sector_id).push({
+          ship_id: ship.ship_id,
+          name: ship.name,
+          ship_type: ship.ship_type,
+          fleet_id: ship.fleet_id,
+          is_active: ship.is_active
+        });
+      }
+    }
+
     const systems = sectors.map(s => {
       const discovered = !discoveredIds || discoveredIds.has(s.sector_id);
       return {
@@ -196,7 +217,9 @@ const getMapData = async (req, res, next) => {
         is_starting_sector: s.is_starting_sector,
         has_port: discovered ? (s.ports && s.ports.length > 0) : null,
         ship_count: discovered ? (s.ships ? s.ships.length : 0) : null,
-        discovered
+        phenomena: discovered ? s.phenomena : null,
+        discovered,
+        my_ships: discovered ? (userShipsBySector.get(s.sector_id) || []) : []
       };
     });
 

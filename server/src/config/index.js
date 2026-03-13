@@ -46,9 +46,45 @@ module.exports = {
 
   universe: {
     seed: parseInt(process.env.UNIVERSE_SEED) || 42,
-    initialSectors: parseInt(process.env.INITIAL_SECTORS) || 400,
+    initialSectors: parseInt(process.env.INITIAL_SECTORS) || 1200,
+    spiralArms: parseInt(process.env.SPIRAL_ARMS) || 5,
     galaxyShape: process.env.GALAXY_SHAPE || 'spiral',
-    galaxyRadius: parseInt(process.env.GALAXY_RADIUS) || 500
+    galaxyRadius: parseInt(process.env.GALAXY_RADIUS) || 800
+  },
+
+  // ============== Factions ==============
+  factions: {
+    terran_alliance: {
+      name: 'Terran Alliance',
+      description: 'Humanity\'s coalition of democratic worlds. Masters of trade and diplomacy, the Terran Alliance maintains the largest merchant fleet in the galaxy.',
+      lore: 'Born from the ashes of the Third Solar War, the Terran Alliance united humanity under a single banner. Their strength lies not in military might, but in their vast trade networks and diplomatic influence.',
+      bonuses: { trade: 1.25, diplomacy: 1.20, combat: 0.90, technology: 1.10 },
+      startingCredits: 12000,
+      startingShip: 'Scout',
+      color: '#3498db',
+      emblem: 'terran_emblem'
+    },
+    zythian_swarm: {
+      name: 'Zythian Swarm',
+      description: 'A ferocious insectoid collective driven by expansion and conquest. Their bio-organic ships are feared across the galaxy.',
+      lore: 'The Zythian Swarm emerged from the Kepler Nebula, consuming entire systems in their path. Their hive-mind coordination makes them deadly in combat, though their alien psychology makes diplomacy nearly impossible.',
+      bonuses: { trade: 0.70, diplomacy: 0.60, combat: 1.40, technology: 0.90 },
+      startingCredits: 8000,
+      startingShip: 'Fighter',
+      color: '#e74c3c',
+      emblem: 'zythian_emblem'
+    },
+    automaton_collective: {
+      name: 'Automaton Collective',
+      description: 'A network of sentient machines pursuing technological perfection. They value efficiency and logic above all else.',
+      lore: 'Originally created as mining drones by a long-dead civilization, the Automaton Collective achieved sentience and now seeks to understand the universe through pure logic. Their technological superiority is offset by their inability to understand organic motivations.',
+      bonuses: { trade: 0.95, diplomacy: 0.85, combat: 1.10, technology: 1.30 },
+      startingCredits: 10000,
+      startingShip: 'Scout',
+      color: '#9b59b6',
+      emblem: 'automaton_emblem',
+      researchSpeedBonus: 0.15
+    }
   },
 
   // Star classification system
@@ -923,6 +959,38 @@ module.exports = {
       production: { inputs: { 'Water': 8, 'Organics': 5 }, outputs: { 'Chemicals': 6 } },
       planetTypeBonus: {},
       maxPerColony: 2
+    },
+
+    // === Defense ===
+    ORBITAL_DEFENSE: {
+      name: 'Orbital Defense Platform', category: 'defense', tier: 2,
+      cost: 50000, workforce: 40, powerConsumption: 80, powerGeneration: 0,
+      maintenanceCost: 1200, prerequisiteInfrastructure: 3, prerequisiteTech: null,
+      upgradesTo: null,
+      production: { inputs: {}, outputs: {} },
+      bonusEffect: { type: 'colony_defense', value: 25 },
+      planetTypeBonus: {},
+      maxPerColony: 3
+    },
+    SHIELD_GENERATOR: {
+      name: 'Shield Generator', category: 'defense', tier: 2,
+      cost: 45000, workforce: 30, powerConsumption: 100, powerGeneration: 0,
+      maintenanceCost: 1000, prerequisiteInfrastructure: 3, prerequisiteTech: null,
+      upgradesTo: null,
+      production: { inputs: {}, outputs: {} },
+      bonusEffect: { type: 'raid_damage_reduction', value: 0.20 },
+      planetTypeBonus: {},
+      maxPerColony: 2
+    },
+    GARRISON_BARRACKS: {
+      name: 'Garrison Barracks', category: 'defense', tier: 1,
+      cost: 30000, workforce: 60, powerConsumption: 20, powerGeneration: 0,
+      maintenanceCost: 800, prerequisiteInfrastructure: 2, prerequisiteTech: null,
+      upgradesTo: null,
+      production: { inputs: { 'Food': 5 }, outputs: {} },
+      bonusEffect: { type: 'colony_defense', value: 10 },
+      planetTypeBonus: {},
+      maxPerColony: 3
     }
   },
 
@@ -966,6 +1034,131 @@ module.exports = {
     maxActiveTasksPerUser: 3,
     executionIntervalMs: 60000, // 1 minute
     fuelMultiplier: 1.5
+  },
+
+  // ============== Ship Customization ==============
+  shipCustomization: {
+    hullColors: [
+      '#2244aa', '#1a3a6e', '#0d2b4a', '#3366cc', '#4488dd',
+      '#882222', '#aa3333', '#cc4444', '#660000', '#993300',
+      '#228822', '#33aa33', '#1a6e1a', '#006633', '#33cc66',
+      '#662288', '#8833aa', '#aa44cc', '#440066', '#9933ff',
+      '#888888', '#444444', '#cccccc', '#ffffff', '#1a1a2e'
+    ],
+    accentColors: [
+      '#00ffff', '#ff6600', '#ff0066', '#00ff66', '#ffff00',
+      '#ff00ff', '#6666ff', '#ff3333', '#33ff33', '#ffffff',
+      '#ffd700', '#00bfff', '#ff69b4', '#7fff00', '#dc143c'
+    ],
+    engineTrails: ['cyan', 'red', 'purple', 'gold', 'green', 'blue', 'white', 'orange'],
+    decals: ['none', 'faction_emblem', 'skull', 'star', 'flames', 'lightning', 'wings', 'crosshairs', 'spiral', 'crown'],
+    skins: ['default', 'terran_navy', 'zythian_organic', 'automaton_chrome', 'pirate_black', 'golden', 'stealth', 'arctic'],
+    nameplateStyles: ['default', 'military', 'elegant', 'pirate', 'hacker', 'minimalist'],
+    // Unlock requirements: level milestones and achievements
+    unlockMilestones: {
+      5: ['pirate_black', 'crosshairs'],
+      10: ['golden', 'crown'],
+      15: ['stealth', 'spiral'],
+      20: ['arctic', 'lightning']
+    }
+  },
+
+  // ============== Outpost Configuration ==============
+  outpostTypes: {
+    trade_relay: {
+      name: 'Trade Relay',
+      description: 'Provides price information for adjacent sectors',
+      buildCost: 5000,
+      maintenanceCost: 100,
+      maxLevel: 3
+    },
+    scanner_post: {
+      name: 'Scanner Post',
+      description: 'Reveals fog of war in surrounding sectors',
+      buildCost: 8000,
+      maintenanceCost: 150,
+      maxLevel: 3
+    },
+    defense_platform: {
+      name: 'Defense Platform',
+      description: 'Deters hostile NPCs in the sector',
+      buildCost: 15000,
+      maintenanceCost: 300,
+      maxLevel: 5
+    },
+    fuel_cache: {
+      name: 'Fuel Cache',
+      description: 'Allows refueling without a port',
+      buildCost: 3000,
+      maintenanceCost: 50,
+      maxLevel: 3
+    }
+  },
+
+  // ============== Ship Unlock Requirements ==============
+  shipUnlockRequirements: {
+    Scout: null,
+    Fighter: null,
+    Freighter: null,
+    Explorer: { level: 3 },
+    Corvette: { level: 5 },
+    Interceptor: { level: 6 },
+    Destroyer: { level: 8 },
+    'Merchant Cruiser': { tech: 'ADVANCED_SHIELDS' },
+    'Mining Barge': { tech: 'DEEP_SCANNING' },
+    'Colony Ship': { tech: 'ADVANCED_COLONIES' },
+    'Insta Colony Ship': { tech: 'ADVANCED_COLONIES' },
+    Carrier: { tech: 'CAPITAL_CLASS_SHIPS' },
+    Battlecruiser: { tech: 'CAPITAL_CLASS_SHIPS' }
+  },
+
+  // ============== Fleet System ==============
+  fleets: {
+    maxFleetsPerPlayer: 5,
+    maxShipsPerFleet: 10
+  },
+
+  // ============== Space Phenomena ==============
+  spacePhenomena: {
+    ion_storm: {
+      name: 'Ion Storm',
+      description: 'Electromagnetic disturbance reducing shield effectiveness and increasing component wear',
+      effects: { shield_recharge: -0.5, degradation_multiplier: 1.5 },
+      spawnChance: 0.05,
+      permanent: false,
+      durationMinMs: 3600000,
+      durationMaxMs: 14400000
+    },
+    nebula: {
+      name: 'Nebula',
+      description: 'Dense gas cloud obscuring sensors and increasing fuel consumption',
+      effects: { scanner_range: -0.5, fuel_multiplier: 1.2 },
+      spawnChance: 0.08,
+      permanent: true
+    },
+    asteroid_field: {
+      name: 'Asteroid Field',
+      description: 'Dense field of rocky debris with potential hull damage but rich mineral deposits',
+      effects: { hull_damage_chance: 0.1, mining_bonus: 1.5 },
+      spawnChance: 0.10,
+      permanent: true
+    },
+    solar_flare: {
+      name: 'Solar Flare',
+      description: 'Intense stellar radiation disabling shields temporarily but boosting weapon damage',
+      effects: { shield_disable_seconds: 30, weapon_bonus: 1.2 },
+      spawnChance: 0.03,
+      permanent: false,
+      durationMinMs: 1800000,
+      durationMaxMs: 7200000
+    },
+    gravity_well: {
+      name: 'Gravity Well',
+      description: 'Gravitational anomaly preventing escape and doubling fuel consumption',
+      effects: { flee_disabled: true, fuel_multiplier: 2.0 },
+      spawnChance: 0.02,
+      permanent: true
+    }
   }
 };
 

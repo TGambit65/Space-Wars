@@ -1,6 +1,74 @@
 import { useRef, useEffect, useCallback, useState, useMemo } from 'react';
 import useViewport from './hooks/useViewport';
 
+// Simple Quadtree for spatial indexing (optimized for 1200+ nodes)
+class Quadtree {
+  constructor(bounds, capacity = 8) {
+    this.bounds = bounds; // { x, y, w, h }
+    this.capacity = capacity;
+    this.points = [];
+    this.divided = false;
+    this.nw = null; this.ne = null; this.sw = null; this.se = null;
+  }
+
+  insert(point) { // { x, y, data }
+    if (!this._contains(point)) return false;
+    if (this.points.length < this.capacity && !this.divided) {
+      this.points.push(point);
+      return true;
+    }
+    if (!this.divided) this._subdivide();
+    return this.nw.insert(point) || this.ne.insert(point) || this.sw.insert(point) || this.se.insert(point);
+  }
+
+  query(range, found = []) { // range: { x, y, w, h }
+    if (!this._intersects(range)) return found;
+    for (const p of this.points) {
+      if (p.x >= range.x && p.x <= range.x + range.w && p.y >= range.y && p.y <= range.y + range.h) {
+        found.push(p);
+      }
+    }
+    if (this.divided) {
+      this.nw.query(range, found);
+      this.ne.query(range, found);
+      this.sw.query(range, found);
+      this.se.query(range, found);
+    }
+    return found;
+  }
+
+  queryRadius(cx, cy, r) {
+    const range = { x: cx - r, y: cy - r, w: r * 2, h: r * 2 };
+    const candidates = this.query(range);
+    const r2 = r * r;
+    return candidates.filter(p => (p.x - cx) ** 2 + (p.y - cy) ** 2 <= r2);
+  }
+
+  _contains(p) {
+    const b = this.bounds;
+    return p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h;
+  }
+
+  _intersects(range) {
+    const b = this.bounds;
+    return !(range.x > b.x + b.w || range.x + range.w < b.x || range.y > b.y + b.h || range.y + range.h < b.y);
+  }
+
+  _subdivide() {
+    const { x, y, w, h } = this.bounds;
+    const hw = w / 2, hh = h / 2;
+    this.nw = new Quadtree({ x, y, w: hw, h: hh }, this.capacity);
+    this.ne = new Quadtree({ x: x + hw, y, w: hw, h: hh }, this.capacity);
+    this.sw = new Quadtree({ x, y: y + hh, w: hw, h: hh }, this.capacity);
+    this.se = new Quadtree({ x: x + hw, y: y + hh, w: hw, h: hh }, this.capacity);
+    for (const p of this.points) {
+      this.nw.insert(p) || this.ne.insert(p) || this.sw.insert(p) || this.se.insert(p);
+    }
+    this.points = [];
+    this.divided = true;
+  }
+}
+
 // Star class colors
 const STAR_COLORS = {
   O: '#6B8BFF', B: '#8BB5FF', A: '#D4E4FF', F: '#F8F0D0',
@@ -14,6 +82,14 @@ const TYPE_COLORS = {
   Outer: '#A855F7', Fringe: '#F97316', Unknown: '#6B7280'
 };
 
+const PHENOMENA_COLORS = {
+  ion_storm: '#FFD700',
+  nebula: '#9B59B6',
+  asteroid_field: '#CD853F',
+  solar_flare: '#FF4500',
+  gravity_well: '#DC143C'
+};
+
 const STAR_SIZES = {
   Core: 8, Inner: 7, Mid: 6, Outer: 5, Fringe: 4, Unknown: 4
 };
@@ -23,7 +99,10 @@ const GalaxyMapCanvas = ({
   currentSectorId,
   adjacencyMap,
   onSystemClick,
-  selectedSystemId
+  onSystemRightClick,
+  selectedSystemId,
+  userShipsBySector,
+  onSelectionComplete
 }) => {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
@@ -37,7 +116,9 @@ const GalaxyMapCanvas = ({
     centerOn, handleWheel,
     handleMouseDown, handleMouseMove, handleMouseUp,
     worldToScreen, screenToWorld,
-    setZoom
+    setZoom,
+    isSelecting, selectionRect, shiftHeld,
+    setOnSelectionComplete
   } = useViewport(containerRef);
 
   // Build position lookup
@@ -49,6 +130,32 @@ const GalaxyMapCanvas = ({
     }
     return m;
   }, [mapData]);
+
+  // Build quadtree spatial index for fast hit-testing at 1200+ nodes
+  const quadtree = useMemo(() => {
+    if (!mapData?.systems || mapData.systems.length === 0) return null;
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const sys of mapData.systems) {
+      if (sys.x_coord < minX) minX = sys.x_coord;
+      if (sys.y_coord < minY) minY = sys.y_coord;
+      if (sys.x_coord > maxX) maxX = sys.x_coord;
+      if (sys.y_coord > maxY) maxY = sys.y_coord;
+    }
+    const pad = 50;
+    const qt = new Quadtree({ x: minX - pad, y: minY - pad, w: (maxX - minX) + pad * 2, h: (maxY - minY) + pad * 2 });
+    for (const sys of mapData.systems) {
+      qt.insert({ x: sys.x_coord, y: sys.y_coord, data: sys.sector_id });
+    }
+    return qt;
+  }, [mapData]);
+
+  // Wire up selection complete: pass screenToWorld and quadtree to parent callback
+  useEffect(() => {
+    if (!onSelectionComplete) return;
+    setOnSelectionComplete((rect) => {
+      onSelectionComplete(rect, screenToWorld, quadtree);
+    });
+  }, [onSelectionComplete, screenToWorld, quadtree, setOnSelectionComplete]);
 
   // Adjacent system IDs for current position
   const adjacentIds = useMemo(() => {
@@ -76,13 +183,31 @@ const GalaxyMapCanvas = ({
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  // Hit-test: find system under screen coordinates
+  // Hit-test: find system under screen coordinates (quadtree-optimized)
   const hitTest = useCallback((screenX, screenY) => {
     const world = screenToWorld(screenX, screenY);
     const hitRadius = 12 / zoom; // Larger hit area at lower zoom
+
+    // Use quadtree for fast spatial lookup
+    if (quadtree) {
+      const nearby = quadtree.queryRadius(world.x, world.y, hitRadius);
+      let closest = null;
+      let closestDist = Infinity;
+      for (const p of nearby) {
+        const dx = p.x - world.x;
+        const dy = p.y - world.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < closestDist) {
+          closest = p.data;
+          closestDist = dist;
+        }
+      }
+      return closest;
+    }
+
+    // Fallback to linear scan
     let closest = null;
     let closestDist = Infinity;
-
     for (const [id, pos] of systemPositions) {
       const dx = pos.x - world.x;
       const dy = pos.y - world.y;
@@ -93,7 +218,7 @@ const GalaxyMapCanvas = ({
       }
     }
     return closest;
-  }, [screenToWorld, zoom, systemPositions]);
+  }, [screenToWorld, zoom, systemPositions, quadtree]);
 
   // Mouse click handler
   const handleClick = useCallback((e) => {
@@ -107,6 +232,19 @@ const GalaxyMapCanvas = ({
     }
   }, [isDragging, hitTest, onSystemClick]);
 
+  // Right-click handler
+  const handleContextMenu = useCallback((e) => {
+    e.preventDefault();
+    if (isDragging) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const hit = hitTest(x, y);
+    if (hit && onSystemRightClick) {
+      onSystemRightClick(hit);
+    }
+  }, [isDragging, hitTest, onSystemRightClick]);
+
   // Mouse hover handler
   const handleHover = useCallback((e) => {
     if (isDragging) return;
@@ -115,7 +253,7 @@ const GalaxyMapCanvas = ({
     const y = e.clientY - rect.top;
     const hit = hitTest(x, y);
     setHoveredSystem(hit);
-    containerRef.current.style.cursor = hit ? 'pointer' : (isDragging ? 'grabbing' : 'grab');
+    containerRef.current.style.cursor = (isSelecting || shiftHeld) ? 'crosshair' : (hit ? 'pointer' : (isDragging ? 'grabbing' : 'grab'));
   }, [isDragging, hitTest]);
 
   // Main render loop
@@ -130,20 +268,48 @@ const GalaxyMapCanvas = ({
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      // Calculate viewport bounds in world coordinates for frustum culling
+      const viewBounds = {
+        minX: -offset.x / zoom - 50 / zoom,
+        minY: -offset.y / zoom - 50 / zoom,
+        maxX: (-offset.x + canvas.width) / zoom + 50 / zoom,
+        maxY: (-offset.y + canvas.height) / zoom + 50 / zoom
+      };
+
+      // Filter visible systems for LOD (major perf win at 1200+ systems)
+      const visibleSystems = mapData.systems.filter(sys =>
+        sys.x_coord >= viewBounds.minX && sys.x_coord <= viewBounds.maxX &&
+        sys.y_coord >= viewBounds.minY && sys.y_coord <= viewBounds.maxY
+      );
+
       // Draw background stars (faint dots)
       drawBackgroundStars(ctx, canvas.width, canvas.height, offset, zoom);
 
-      // Draw hyperlanes
+      // Draw hyperlanes (use full set but skip offscreen lanes)
       drawHyperlanes(ctx, mapData.hyperlanes, systemPositions, offset, zoom,
-        currentSectorId, adjacentIds, t);
+        currentSectorId, adjacentIds, t, viewBounds);
 
-      // Draw star systems
-      drawSystems(ctx, mapData.systems, offset, zoom, currentSectorId,
+      // Draw star systems (only visible ones)
+      drawSystems(ctx, visibleSystems, offset, zoom, currentSectorId,
         adjacentIds, hoveredSystem, selectedSystemId, t);
 
-      // Draw labels (only when zoomed in enough)
-      if (zoom > 0.35) {
-        drawLabels(ctx, mapData.systems, offset, zoom, currentSectorId, hoveredSystem);
+      // Draw labels — LOD: show names at medium zoom, hide at far zoom
+      if (zoom > 0.25) {
+        // At low zoom, only show labels for current/hovered/selected systems
+        const labelSystems = zoom > 0.45 ? visibleSystems : visibleSystems.filter(s =>
+          s.sector_id === currentSectorId || s.sector_id === hoveredSystem || s.sector_id === selectedSystemId
+        );
+        drawLabels(ctx, labelSystems, offset, zoom, currentSectorId, hoveredSystem);
+      }
+
+      // Draw ship badges on systems with user's ships
+      if (userShipsBySector && userShipsBySector.size > 0) {
+        drawShipBadges(ctx, visibleSystems, offset, zoom, userShipsBySector);
+      }
+
+      // Draw selection box (Shift+drag)
+      if (isSelecting && selectionRect) {
+        drawSelectionBox(ctx, selectionRect, visibleSystems, offset, zoom, userShipsBySector);
       }
 
       // Draw tooltip
@@ -151,8 +317,9 @@ const GalaxyMapCanvas = ({
         const sys = systemPositions.get(hoveredSystem);
         if (sys) {
           const screen = worldToScreen(sys.x, sys.y);
+          const myShips = userShipsBySector ? userShipsBySector.get(hoveredSystem) : null;
           drawTooltip(ctx, sys, screen.x, screen.y, adjacentIds.has(hoveredSystem),
-            hoveredSystem === currentSectorId);
+            hoveredSystem === currentSectorId, myShips);
         }
       }
 
@@ -164,7 +331,8 @@ const GalaxyMapCanvas = ({
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
   }, [mapData, offset, zoom, currentSectorId, adjacentIds, hoveredSystem,
-    selectedSystemId, systemPositions, worldToScreen]);
+    selectedSystemId, systemPositions, worldToScreen, userShipsBySector,
+    isSelecting, selectionRect]);
 
   return (
     <div
@@ -176,6 +344,7 @@ const GalaxyMapCanvas = ({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       onClick={handleClick}
+      onContextMenu={handleContextMenu}
     >
       <canvas
         ref={canvasRef}
@@ -210,13 +379,22 @@ function drawBackgroundStars(ctx, width, height, offset, zoom) {
 }
 
 function drawHyperlanes(ctx, hyperlanes, systemPositions, offset, zoom,
-  currentSectorId, adjacentIds, time) {
+  currentSectorId, adjacentIds, time, viewBounds) {
   if (!hyperlanes) return;
 
   for (const lane of hyperlanes) {
     const from = systemPositions.get(lane.from_id);
     const to = systemPositions.get(lane.to_id);
     if (!from || !to) continue;
+
+    // Frustum culling: skip lanes where both endpoints are outside viewport
+    if (viewBounds) {
+      const fromVisible = from.x >= viewBounds.minX && from.x <= viewBounds.maxX &&
+        from.y >= viewBounds.minY && from.y <= viewBounds.maxY;
+      const toVisible = to.x >= viewBounds.minX && to.x <= viewBounds.maxX &&
+        to.y >= viewBounds.minY && to.y <= viewBounds.maxY;
+      if (!fromVisible && !toVisible) continue;
+    }
 
     // Skip lanes where both ends are undiscovered
     const fromDiscovered = from.discovered !== false;
@@ -336,6 +514,18 @@ function drawSystems(ctx, systems, offset, zoom, currentSectorId,
       ctx.stroke();
     }
 
+    // Phenomena indicator
+    if (sys.phenomena) {
+      const phenColor = PHENOMENA_COLORS[sys.phenomena.type] || '#FFD700';
+      ctx.strokeStyle = phenColor;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.arc(sx, sy, baseSize + 12, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
     // Current location pulsing ring
     if (isCurrent) {
       const pulse = 1 + Math.sin(time * 3) * 0.3;
@@ -415,7 +605,84 @@ function drawLabels(ctx, systems, offset, zoom, currentSectorId, hoveredSystem) 
   }
 }
 
-function drawTooltip(ctx, sys, screenX, screenY, isAdjacent, isCurrent) {
+function drawShipBadges(ctx, systems, offset, zoom, userShipsBySector) {
+  if (!systems || !userShipsBySector) return;
+
+  for (const sys of systems) {
+    const myShips = userShipsBySector.get(sys.sector_id);
+    if (!myShips || myShips.length === 0) continue;
+
+    const sx = sys.x_coord * zoom + offset.x;
+    const sy = sys.y_coord * zoom + offset.y;
+    const baseSize = Math.max(3, (STAR_SIZES[sys.type] || 5) * Math.min(1.5, zoom * 0.8));
+
+    const hasFleetShips = myShips.some(s => s.fleet_id);
+    const badgeColor = hasFleetShips ? '#F97316' : '#06B6D4'; // orange for fleet, cyan for unassigned
+
+    // Badge position: bottom-right of star
+    const bx = sx + baseSize + 4;
+    const by = sy + baseSize + 4;
+    const badgeSize = Math.max(6, 8 * Math.min(1, zoom));
+
+    // Badge background
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+    ctx.beginPath();
+    ctx.arc(bx, by, badgeSize + 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Badge circle
+    ctx.fillStyle = badgeColor;
+    ctx.beginPath();
+    ctx.arc(bx, by, badgeSize, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Ship count text
+    ctx.fillStyle = '#0F172A';
+    ctx.font = `bold ${Math.max(8, badgeSize)}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(myShips.length), bx, by);
+  }
+}
+
+function drawSelectionBox(ctx, rect, systems, offset, zoom, userShipsBySector) {
+  const x = Math.min(rect.startX, rect.endX);
+  const y = Math.min(rect.startY, rect.endY);
+  const w = Math.abs(rect.endX - rect.startX);
+  const h = Math.abs(rect.endY - rect.startY);
+
+  // Semi-transparent cyan fill
+  ctx.fillStyle = 'rgba(6, 182, 212, 0.1)';
+  ctx.fillRect(x, y, w, h);
+
+  // Dashed cyan border
+  ctx.strokeStyle = 'rgba(6, 182, 212, 0.7)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([6, 4]);
+  ctx.strokeRect(x, y, w, h);
+  ctx.setLineDash([]);
+
+  // Highlight systems with user ships inside the selection box
+  if (!systems || !userShipsBySector) return;
+  for (const sys of systems) {
+    const myShips = userShipsBySector.get(sys.sector_id);
+    if (!myShips || myShips.length === 0) continue;
+
+    const sx = sys.x_coord * zoom + offset.x;
+    const sy = sys.y_coord * zoom + offset.y;
+
+    if (sx >= x && sx <= x + w && sy >= y && sy <= y + h) {
+      const baseSize = Math.max(3, (STAR_SIZES[sys.type] || 5) * Math.min(1.5, zoom * 0.8));
+      ctx.strokeStyle = 'rgba(6, 182, 212, 0.9)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(sx, sy, baseSize + 14, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+}
+
+function drawTooltip(ctx, sys, screenX, screenY, isAdjacent, isCurrent, myShips) {
   const padding = 10;
   const lineHeight = 16;
 
@@ -452,8 +719,13 @@ function drawTooltip(ctx, sys, screenX, screenY, isAdjacent, isCurrent) {
   ];
   if (sys.has_port) lines.push('Has Port');
   if (sys.ship_count > 0) lines.push(`Ships: ${sys.ship_count}`);
+  if (myShips && myShips.length > 0) lines.push(`My Ships: ${myShips.length}`);
+  if (sys.phenomena) {
+    const phenDefs = { ion_storm: 'Ion Storm', nebula: 'Nebula', asteroid_field: 'Asteroid Field', solar_flare: 'Solar Flare', gravity_well: 'Gravity Well' };
+    lines.push(`Phenomena: ${phenDefs[sys.phenomena.type] || sys.phenomena.type}`);
+  }
   if (isCurrent) lines.push('CURRENT LOCATION');
-  else if (isAdjacent) lines.push('Click to travel');
+  else if (isAdjacent) lines.push('Right-click to travel');
 
   const maxWidth = Math.max(...lines.map(l => ctx.measureText(l).width));
   const boxW = maxWidth + padding * 2;

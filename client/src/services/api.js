@@ -16,13 +16,18 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle auth errors
+// Handle auth errors — only redirect when an authenticated session is invalidated,
+// not when login/register returns 401 (wrong credentials)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      const requestUrl = error.config?.url || '';
+      const isAuthEndpoint = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register');
+      if (!isAuthEndpoint) {
+        localStorage.removeItem('token');
+        window.location.href = '/';
+      }
     }
     return Promise.reject(error);
   }
@@ -33,6 +38,7 @@ export const auth = {
   login: (username, password) => api.post('/auth/login', { username, password }),
   register: (data) => api.post('/auth/register', data),
   getProfile: () => api.get('/auth/profile'),
+  togglePvP: () => api.post('/auth/pvp-toggle'),
 };
 
 // Ships
@@ -41,6 +47,7 @@ export const ships = {
   getById: (id) => api.get(`/ships/${id}`),
   move: (shipId, targetSectorId) => api.post(`/ships/${shipId}/move`, { target_sector_id: targetSectorId }),
   getCrewEffectiveness: (shipId) => api.get(`/ships/${shipId}/crew-effectiveness`),
+  activate: (shipId) => api.post(`/ships/${shipId}/activate`),
 };
 
 // Sectors
@@ -70,6 +77,7 @@ export const colonies = {
   collect: (colonyId, shipId) => api.post(`/colonies/${colonyId}/collect`, { ship_id: shipId }),
   upgrade: (colonyId) => api.post(`/colonies/${colonyId}/upgrade`),
   abandon: (colonyId) => api.delete(`/colonies/${colonyId}`),
+  getRaids: () => api.get('/colonies/raids'),
 };
 
 // Crew
@@ -98,6 +106,9 @@ export const combat = {
   flee: (shipId) => api.post(`/combat/flee/${shipId}`),
   getHistory: () => api.get('/combat/history'),
   getLog: (logId) => api.get(`/combat/log/${logId}`),
+  realtimeAttackNPC: (shipId, npcId) => api.post(`/combat/realtime/attack-npc/${shipId}`, { npcId }),
+  realtimeAttackPlayer: (shipId, defenderShipId) => api.post(`/combat/realtime/attack-player/${shipId}`, { defenderShipId }),
+  getRealtimeState: (combatId) => api.get(`/combat/realtime/state/${combatId}`),
 };
 
 // Ship Designer
@@ -231,6 +242,77 @@ export const artifacts = {
   getAll: () => api.get('/artifacts'),
   equip: (id, shipId) => api.post(`/artifacts/${id}/equip`, { ship_id: shipId }),
   unequip: (id) => api.post(`/artifacts/${id}/unequip`),
+};
+
+// Factions
+export const factions = {
+  list: () => api.get('/factions'),
+  getStandings: () => api.get('/factions/standings'),
+  getLeaderboard: () => api.get('/factions/leaderboard'),
+  getWars: () => api.get('/factions/wars'),
+  getActiveWars: () => api.get('/factions/wars/active'),
+};
+
+// Messages
+export const messages = {
+  getInbox: (params) => api.get('/messages/inbox', { params }),
+  getSent: (params) => api.get('/messages/sent', { params }),
+  send: (data) => api.post('/messages/send', data),
+  markRead: (id) => api.post(`/messages/${id}/read`),
+  delete: (id) => api.delete(`/messages/${id}`),
+  getUnread: () => api.get('/messages/unread'),
+};
+
+// Outposts
+export const outposts = {
+  getAll: () => api.get('/outposts'),
+  getInSector: (sectorId) => api.get(`/outposts/sector/${sectorId}`),
+  build: (data) => api.post('/outposts', data),
+  upgrade: (id) => api.post(`/outposts/${id}/upgrade`),
+  destroy: (id) => api.delete(`/outposts/${id}`),
+};
+
+// Ship Design Templates
+export const templates = {
+  getAll: () => api.get('/templates'),
+  save: (data) => api.post('/templates', data),
+  load: (id) => api.get(`/templates/${id}`),
+  delete: (id) => api.delete(`/templates/${id}`),
+};
+
+// Cosmetics
+export const cosmetics = {
+  getCatalog: () => api.get('/cosmetics/catalog'),
+  updateVisual: (shipId, visualConfig) => api.put(`/cosmetics/ships/${shipId}/visual`, { visual_config: visualConfig }),
+  checkMilestones: () => api.post('/cosmetics/check-milestones'),
+};
+
+// Community Events
+export const events = {
+  getAll: (params) => api.get('/events', { params }),
+  getActive: () => api.get('/events/active'),
+  contribute: (eventId, amount) => api.post(`/events/${eventId}/contribute`, { amount }),
+  getLeaderboard: (eventId) => api.get(`/events/${eventId}/leaderboard`),
+};
+
+// Corporation Agreements
+export const agreements = {
+  getAll: () => api.get('/corporations/agreements'),
+  propose: (data) => api.post('/corporations/agreements/propose', data),
+  respond: (id, accept) => api.post(`/corporations/agreements/${id}/respond`, { accept }),
+  breakAgreement: (id) => api.post(`/corporations/agreements/${id}/break`),
+};
+
+// Fleets
+export const fleets = {
+  getAll: () => api.get('/fleets'),
+  getById: (id) => api.get(`/fleets/${id}`),
+  create: (name, shipIds) => api.post('/fleets', { name, ship_ids: shipIds }),
+  rename: (id, name) => api.patch(`/fleets/${id}`, { name }),
+  addShips: (id, shipIds) => api.post(`/fleets/${id}/ships`, { ship_ids: shipIds }),
+  removeShips: (id, shipIds) => api.delete(`/fleets/${id}/ships`, { data: { ship_ids: shipIds } }),
+  disband: (id) => api.delete(`/fleets/${id}`),
+  move: (id, targetSectorId) => api.post(`/fleets/${id}/move`, { target_sector_id: targetSectorId }),
 };
 
 // Admin

@@ -36,6 +36,23 @@ const CorporationMember = require('./CorporationMember');
 const AutomatedTask = require('./AutomatedTask');
 // Phase C: Colony Buildings
 const ColonyBuilding = require('./ColonyBuilding');
+// Faction & Warfare
+const FactionStanding = require('./FactionStanding');
+const FactionWar = require('./FactionWar');
+// Real-time Combat
+const CombatInstance = require('./CombatInstance');
+// Messaging
+const Message = require('./Message');
+// Visual Customization
+const CosmeticUnlock = require('./CosmeticUnlock');
+// Fleet System
+const Fleet = require('./Fleet');
+// Phase 7: Agreements, Events, Outposts, Templates
+const CorporationAgreement = require('./CorporationAgreement');
+const CommunityEvent = require('./CommunityEvent');
+const EventContribution = require('./EventContribution');
+const Outpost = require('./Outpost');
+const ShipDesignTemplate = require('./ShipDesignTemplate');
 
 // Define relationships
 
@@ -243,6 +260,56 @@ AutomatedTask.belongsTo(Ship, { foreignKey: 'ship_id', as: 'ship' });
 Colony.hasMany(ColonyBuilding, { foreignKey: 'colony_id', as: 'buildings' });
 ColonyBuilding.belongsTo(Colony, { foreignKey: 'colony_id', as: 'colony' });
 
+// ============== Faction & Warfare ==============
+User.hasMany(FactionStanding, { foreignKey: 'user_id', as: 'factionStandings' });
+FactionStanding.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// ============== Real-time Combat ==============
+Sector.hasMany(CombatInstance, { foreignKey: 'sector_id', as: 'combatInstances' });
+CombatInstance.belongsTo(Sector, { foreignKey: 'sector_id', as: 'sector' });
+
+// ============== Messaging ==============
+User.hasMany(Message, { foreignKey: 'sender_user_id', as: 'sentMessages' });
+Message.belongsTo(User, { foreignKey: 'sender_user_id', as: 'sender' });
+User.hasMany(Message, { foreignKey: 'recipient_user_id', as: 'receivedMessages' });
+Message.belongsTo(User, { foreignKey: 'recipient_user_id', as: 'recipient' });
+Corporation.hasMany(Message, { foreignKey: 'corporation_id', as: 'messages' });
+Message.belongsTo(Corporation, { foreignKey: 'corporation_id', as: 'corporation' });
+
+// ============== Cosmetic Unlocks ==============
+User.hasMany(CosmeticUnlock, { foreignKey: 'user_id', as: 'cosmeticUnlocks' });
+CosmeticUnlock.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// ============== Corporation Agreements ==============
+Corporation.hasMany(CorporationAgreement, { foreignKey: 'proposer_corp_id', as: 'proposedAgreements' });
+CorporationAgreement.belongsTo(Corporation, { foreignKey: 'proposer_corp_id', as: 'proposer' });
+Corporation.hasMany(CorporationAgreement, { foreignKey: 'target_corp_id', as: 'receivedAgreements' });
+CorporationAgreement.belongsTo(Corporation, { foreignKey: 'target_corp_id', as: 'target' });
+
+// ============== Community Events ==============
+CommunityEvent.hasMany(EventContribution, { foreignKey: 'event_id', as: 'contributions' });
+EventContribution.belongsTo(CommunityEvent, { foreignKey: 'event_id', as: 'event' });
+User.hasMany(EventContribution, { foreignKey: 'user_id', as: 'eventContributions' });
+EventContribution.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// ============== Outposts ==============
+User.hasMany(Outpost, { foreignKey: 'user_id', as: 'outposts' });
+Outpost.belongsTo(User, { foreignKey: 'user_id', as: 'owner' });
+Corporation.hasMany(Outpost, { foreignKey: 'corporation_id', as: 'outposts' });
+Outpost.belongsTo(Corporation, { foreignKey: 'corporation_id', as: 'corporation' });
+Sector.hasMany(Outpost, { foreignKey: 'sector_id', as: 'outposts' });
+Outpost.belongsTo(Sector, { foreignKey: 'sector_id', as: 'sector' });
+
+// ============== Fleet System ==============
+User.hasMany(Fleet, { foreignKey: 'owner_user_id', as: 'fleets' });
+Fleet.belongsTo(User, { foreignKey: 'owner_user_id', as: 'owner' });
+Fleet.hasMany(Ship, { foreignKey: 'fleet_id', as: 'ships' });
+Ship.belongsTo(Fleet, { foreignKey: 'fleet_id', as: 'fleet' });
+
+// ============== Ship Design Templates ==============
+User.hasMany(ShipDesignTemplate, { foreignKey: 'user_id', as: 'designTemplates' });
+ShipDesignTemplate.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
 module.exports = {
   sequelize,
   User,
@@ -281,6 +348,23 @@ module.exports = {
   CorporationMember,
   AutomatedTask,
   // Phase C
-  ColonyBuilding
+  ColonyBuilding,
+  // Factions & Warfare
+  FactionStanding,
+  FactionWar,
+  // Real-time Combat
+  CombatInstance,
+  // Messaging
+  Message,
+  // Cosmetics
+  CosmeticUnlock,
+  // Fleet System
+  Fleet,
+  // Phase 7
+  CorporationAgreement,
+  CommunityEvent,
+  EventContribution,
+  Outpost,
+  ShipDesignTemplate
 };
 

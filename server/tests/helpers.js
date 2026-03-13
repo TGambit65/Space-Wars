@@ -1,7 +1,7 @@
 /**
  * Test helper functions and fixtures
  */
-const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, PriceHistory, PlayerSkill, TechResearch, Wonder, Blueprint, CraftingJob, Mission, PlayerMission, Corporation, CorporationMember, AutomatedTask, ColonyBuilding, sequelize } = require('../src/models');
+const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, PriceHistory, PlayerSkill, TechResearch, Wonder, Blueprint, CraftingJob, Mission, PlayerMission, Corporation, CorporationMember, AutomatedTask, ColonyBuilding, FactionStanding, FactionWar, CombatInstance, Message, CosmeticUnlock, CorporationAgreement, CommunityEvent, EventContribution, Outpost, ShipDesignTemplate, Fleet, sequelize } = require('../src/models');
 const authService = require('../src/services/authService');
 const gameSettingsService = require('../src/services/gameSettingsService');
 const bcrypt = require('bcryptjs');
@@ -234,6 +234,17 @@ const createTestGameSetting = async (overrides = {}) => {
 
 const cleanDatabase = async () => {
   // Delete in order to respect foreign key constraints
+  // New models (Phases 1-7) first — they reference User/Corp/Sector
+  await EventContribution.destroy({ where: {} });
+  await CommunityEvent.destroy({ where: {} });
+  await ShipDesignTemplate.destroy({ where: {} });
+  await CosmeticUnlock.destroy({ where: {} });
+  await CorporationAgreement.destroy({ where: {} });
+  await Message.destroy({ where: {} });
+  await CombatInstance.destroy({ where: {} });
+  await Outpost.destroy({ where: {} });
+  await FactionStanding.destroy({ where: {} });
+  await FactionWar.destroy({ where: {} });
   // Phase 5 models first (most dependent)
   await AutomatedTask.destroy({ where: {} });
   await CorporationMember.destroy({ where: {} });
@@ -265,6 +276,9 @@ const cleanDatabase = async () => {
   await ShipCargo.destroy({ where: {} });
   await PortCommodity.destroy({ where: {} });
   await Port.destroy({ where: {} });
+  // Fleet system - clear fleet_id on ships before deleting fleets
+  await Ship.update({ fleet_id: null }, { where: {} });
+  await Fleet.destroy({ where: {} });
   // Core models - Corporation before User due to FK
   await Ship.destroy({ where: {} });
   await SectorConnection.destroy({ where: {} });
@@ -396,6 +410,22 @@ const createTestCorporation = async (leaderUserId, overrides = {}) => {
   return Corporation.create({ ...defaults, ...overrides });
 };
 
+/**
+ * Create a test fleet
+ */
+const createTestFleet = async (userId, shipIds = [], overrides = {}) => {
+  const fleet = await Fleet.create({
+    owner_user_id: userId,
+    name: overrides.name || `Fleet ${Date.now()}`,
+    is_active: overrides.is_active !== undefined ? overrides.is_active : true
+  });
+  if (shipIds.length > 0) {
+    const { Op } = require('sequelize');
+    await Ship.update({ fleet_id: fleet.fleet_id }, { where: { ship_id: { [Op.in]: shipIds } } });
+  }
+  return fleet;
+};
+
 module.exports = {
   createTestUser, createTestSector, createTestShip, createSectorConnection,
   createTestCommodity, createTestPort, addCommodityToPort, addCargoToShip,
@@ -408,6 +438,8 @@ module.exports = {
   createTestBuilding,
   // Phase 5 helpers
   createTestBlueprint, createTestMission, createTestCorporation,
+  // Fleet helpers
+  createTestFleet,
   cleanDatabase, generateTestToken
 };
 

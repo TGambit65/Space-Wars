@@ -10,8 +10,18 @@ export default function useViewport(containerRef) {
   const [zoom, setZoom] = useState(0.5);
   const [isDragging, setIsDragging] = useState(false);
   const [viewMode, setViewMode] = useState('galaxy'); // 'galaxy' | 'system'
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [selectionRect, setSelectionRect] = useState(null); // { startX, startY, endX, endY } screen coords
+  const [shiftHeld, setShiftHeld] = useState(false);
   const dragStart = useRef(null);
   const dragOffset = useRef({ x: 0, y: 0 });
+  const selectionStart = useRef(null);
+  const onSelectionCompleteRef = useRef(null);
+
+  // Allow callers to set selection complete callback
+  const setOnSelectionComplete = useCallback((fn) => {
+    onSelectionCompleteRef.current = fn;
+  }, []);
 
   // Center viewport on a world position
   const centerOn = useCallback((worldX, worldY, targetZoom) => {
@@ -59,15 +69,39 @@ export default function useViewport(containerRef) {
     }
   }, [containerRef, offset, zoom, viewMode]);
 
-  // Mouse drag for panning
+  // Mouse drag for panning OR selection box
   const handleMouseDown = useCallback((e) => {
     if (e.button !== 0) return; // Left click only
+
+    if (e.shiftKey) {
+      // Start selection box
+      const container = containerRef.current;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      setIsSelecting(true);
+      selectionStart.current = { x, y };
+      setSelectionRect({ startX: x, startY: y, endX: x, endY: y });
+      return;
+    }
+
     setIsDragging(true);
     dragStart.current = { x: e.clientX, y: e.clientY };
     dragOffset.current = { ...offset };
-  }, [offset]);
+  }, [offset, containerRef]);
 
   const handleMouseMove = useCallback((e) => {
+    if (isSelecting && selectionStart.current) {
+      const container = containerRef.current;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      setSelectionRect(prev => prev ? { ...prev, endX: x, endY: y } : null);
+      return;
+    }
+
     if (!isDragging || !dragStart.current) return;
     const dx = e.clientX - dragStart.current.x;
     const dy = e.clientY - dragStart.current.y;
@@ -75,16 +109,29 @@ export default function useViewport(containerRef) {
       x: dragOffset.current.x + dx,
       y: dragOffset.current.y + dy
     });
-  }, [isDragging]);
+  }, [isDragging, isSelecting, containerRef]);
 
   const handleMouseUp = useCallback(() => {
+    if (isSelecting && selectionRect) {
+      // Finalize selection
+      if (onSelectionCompleteRef.current) {
+        onSelectionCompleteRef.current(selectionRect);
+      }
+      setIsSelecting(false);
+      setSelectionRect(null);
+      selectionStart.current = null;
+      return;
+    }
+
     setIsDragging(false);
     dragStart.current = null;
-  }, []);
+  }, [isSelecting, selectionRect]);
 
-  // Keyboard controls
+  // Track shift key for cursor feedback
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.key === 'Shift') setShiftHeld(true);
+
       const PAN_AMOUNT = 50;
       switch (e.key) {
         case 'ArrowLeft':
@@ -115,8 +162,16 @@ export default function useViewport(containerRef) {
       }
     };
 
+    const handleKeyUp = (e) => {
+      if (e.key === 'Shift') setShiftHeld(false);
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
   }, []);
 
   // Convert screen coordinates to world coordinates
@@ -148,6 +203,10 @@ export default function useViewport(containerRef) {
     handleMouseUp,
     screenToWorld,
     worldToScreen,
-    setZoom
+    setZoom,
+    isSelecting,
+    selectionRect,
+    shiftHeld,
+    setOnSelectionComplete
   };
 }

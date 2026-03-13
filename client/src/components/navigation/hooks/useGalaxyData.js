@@ -21,8 +21,10 @@ export default function useGalaxyData() {
         setMapData(mapRes.data.data);
 
         const shipList = shipsRes.data.data?.ships || [];
+        const activeId = shipsRes.data.data?.active_ship_id;
         if (shipList.length > 0) {
-          setCurrentShip(shipList[0]);
+          const active = (activeId && shipList.find(s => s.ship_id === activeId)) || shipList[0];
+          setCurrentShip(active);
         }
       } catch (err) {
         console.error('Failed to load galaxy data', err);
@@ -40,6 +42,18 @@ export default function useGalaxyData() {
     const m = new Map();
     for (const sys of mapData.systems) {
       m.set(sys.sector_id, sys);
+    }
+    return m;
+  }, [mapData]);
+
+  // Build per-sector lookup of current user's ships
+  const userShipsBySector = useMemo(() => {
+    if (!mapData?.systems) return new Map();
+    const m = new Map();
+    for (const sys of mapData.systems) {
+      if (sys.my_ships && sys.my_ships.length > 0) {
+        m.set(sys.sector_id, sys.my_ships);
+      }
     }
     return m;
   }, [mapData]);
@@ -104,6 +118,7 @@ export default function useGalaxyData() {
     currentSectorId,
     sectorMap,
     adjacencyMap,
+    userShipsBySector,
     systemDetail,
     loading,
     error,

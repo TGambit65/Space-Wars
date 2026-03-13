@@ -25,6 +25,18 @@ const corporationRoutes = require('./corporationRoutes');
 const automationRoutes = require('./automationRoutes');
 // Phase C: Colony Buildings
 const colonyBuildingRoutes = require('./colonyBuildingRoutes');
+// Factions & Warfare
+const factionRoutes = require('./factionRoutes');
+// Messaging
+const messagingRoutes = require('./messagingRoutes');
+// Phase 7: Agreements, Events, Outposts, Templates, Cosmetics
+const agreementRoutes = require('./agreementRoutes');
+const eventRoutes = require('./eventRoutes');
+const outpostRoutes = require('./outpostRoutes');
+const shipTemplateRoutes = require('./shipTemplateRoutes');
+const cosmeticRoutes = require('./cosmeticRoutes');
+// Fleet System
+const fleetRoutes = require('./fleet');
 // Admin
 const adminRoutes = require('./adminRoutes');
 const { sequelize } = require('../config/database');
@@ -91,6 +103,18 @@ router.use('/corporations', corporationRoutes);
 router.use('/automation', automationRoutes);
 // Phase C: Colony Buildings
 router.use('/buildings', colonyBuildingRoutes);
+// Factions & Warfare
+router.use('/factions', factionRoutes);
+// Messaging
+router.use('/messages', messagingRoutes);
+// Phase 7
+router.use('/corporations/agreements', agreementRoutes);
+router.use('/events', eventRoutes);
+router.use('/outposts', outpostRoutes);
+router.use('/templates', shipTemplateRoutes);
+router.use('/cosmetics', cosmeticRoutes);
+// Fleet System
+router.use('/fleets', fleetRoutes);
 // Admin
 router.use('/admin', adminRoutes);
 

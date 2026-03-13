@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Map, AlertTriangle } from 'lucide-react';
 import useGalaxyData from './hooks/useGalaxyData';
@@ -6,6 +6,7 @@ import GalaxyMapCanvas from './GalaxyMapCanvas';
 import MapHUD from './ui/MapHUD';
 import MapControls from './ui/MapControls';
 import MovementConfirmDialog from './ui/MovementConfirmDialog';
+import FleetCreationModal from '../ship/FleetCreationModal';
 
 const GalaxyMap = ({ user }) => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const GalaxyMap = ({ user }) => {
     currentSectorId,
     sectorMap,
     adjacencyMap,
+    userShipsBySector,
     systemDetail,
     loading,
     error,
@@ -27,6 +29,13 @@ const GalaxyMap = ({ user }) => {
   const [selectedSystem, setSelectedSystem] = useState(null);
   const [moveTarget, setMoveTarget] = useState(null);
   const [moveError, setMoveError] = useState(null);
+  const [moveToast, setMoveToast] = useState(null);
+  const [showFleetModal, setShowFleetModal] = useState(false);
+  const [selectedShipsForFleet, setSelectedShipsForFleet] = useState(null);
+
+  // Refs for selection callback (passed to canvas via useViewport)
+  const screenToWorldRef = useRef(null);
+  const quadtreeRef = useRef(null);
 
   // When clicking a system on the map
   const handleSystemClick = (sectorId) => {
@@ -63,8 +72,65 @@ const GalaxyMap = ({ user }) => {
     setMoveError(null);
   };
 
+  // Right-click to move directly (no confirmation)
+  const handleSystemRightClick = async (sectorId) => {
+    if (!isAdjacent(sectorId) || moving) return;
+    try {
+      setMoveToast(null);
+      await moveShip(sectorId);
+    } catch (err) {
+      setMoveToast(err.response?.data?.message || 'Movement failed');
+      setTimeout(() => setMoveToast(null), 3000);
+    }
+  };
+
   const handleEnterCombat = (npc) => {
     navigate('/combat', { state: { npc } });
+  };
+
+  // Selection complete callback — called from useViewport via GalaxyMapCanvas
+  const handleSelectionComplete = useCallback((rect, screenToWorld, quadtree) => {
+    if (!userShipsBySector || userShipsBySector.size === 0) return;
+
+    // Convert screen rect to world rect
+    const topLeft = screenToWorld(Math.min(rect.startX, rect.endX), Math.min(rect.startY, rect.endY));
+    const bottomRight = screenToWorld(Math.max(rect.startX, rect.endX), Math.max(rect.startY, rect.endY));
+
+    const worldRect = {
+      x: topLeft.x, y: topLeft.y,
+      w: bottomRight.x - topLeft.x,
+      h: bottomRight.y - topLeft.y
+    };
+
+    // Query quadtree for systems in rect
+    let systemsInRect = [];
+    if (quadtree) {
+      systemsInRect = quadtree.query(worldRect);
+    }
+
+    // Collect ships from matched systems that have user's ships
+    const allShips = [];
+    for (const point of systemsInRect) {
+      const sectorId = point.data;
+      const myShips = userShipsBySector.get(sectorId);
+      if (myShips && myShips.length > 0) {
+        for (const ship of myShips) {
+          allShips.push({ ...ship, sector_id: sectorId, sector_name: sectorMap.get(sectorId)?.name });
+        }
+      }
+    }
+
+    if (allShips.length > 0) {
+      setSelectedShipsForFleet(allShips);
+      setShowFleetModal(true);
+    }
+  }, [userShipsBySector, sectorMap]);
+
+  const handleFleetCreated = () => {
+    setShowFleetModal(false);
+    setSelectedShipsForFleet(null);
+    // Reload map data by navigating to same page
+    window.location.reload();
   };
 
   if (loading) {
@@ -97,7 +163,10 @@ const GalaxyMap = ({ user }) => {
         currentSectorId={currentSectorId}
         adjacencyMap={adjacencyMap}
         onSystemClick={handleSystemClick}
+        onSystemRightClick={handleSystemRightClick}
         selectedSystemId={selectedSystem?.sector_id}
+        userShipsBySector={userShipsBySector}
+        onSelectionComplete={handleSelectionComplete}
       />
 
       {/* Map Controls (zoom buttons, legend) */}
@@ -124,6 +193,22 @@ const GalaxyMap = ({ user }) => {
         />
       )}
 
+      {/* Fleet Creation Modal */}
+      {showFleetModal && selectedShipsForFleet && (
+        <FleetCreationModal
+          ships={selectedShipsForFleet}
+          onClose={() => { setShowFleetModal(false); setSelectedShipsForFleet(null); }}
+          onCreated={handleFleetCreated}
+        />
+      )}
+
+      {/* Move toast */}
+      {moveToast && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-accent-red/90 text-white px-4 py-2 rounded-lg text-sm">
+          {moveToast}
+        </div>
+      )}
+
       {/* Current location indicator */}
       <div className="absolute top-4 left-4 bg-space-900/90 border border-space-700 rounded-lg px-4 py-2 backdrop-blur-sm">
         <div className="flex items-center gap-2">
@@ -138,6 +223,9 @@ const GalaxyMap = ({ user }) => {
             Ship: {currentShip.name} | Explored: {mapData?.discovered_systems || 0}/{mapData?.total_systems || 0}
           </div>
         )}
+        <div className="text-xs text-gray-600 mt-0.5">
+          Shift+drag to select ships
+        </div>
       </div>
     </div>
   );

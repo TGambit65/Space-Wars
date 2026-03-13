@@ -1,32 +1,64 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ships, trade, planets } from '../../services/api';
+import { ships, trade, planets, auth, fleets as fleetsApi } from '../../services/api';
 import CargoHold from './CargoHold';
-import { Rocket, Shield, Activity, Fuel, Box, Anchor, Zap } from 'lucide-react';
+import ArtifactEquipment from './ArtifactEquipment';
+import { Rocket, Shield, Activity, Fuel, Box, Anchor, Zap, Gem, ChevronDown, ChevronRight, Skull, Swords, Users, Trash2, Edit3, MapPin, X } from 'lucide-react';
 
-const ShipPanel = () => {
+const ShipPanel = ({ user }) => {
     const navigate = useNavigate();
     const [ship, setShip] = useState(null);
+    const [allShips, setAllShips] = useState([]);
+    const [activeShipId, setActiveShipId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [toast, setToast] = useState(null);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    // Fleet state
+    const [userFleets, setUserFleets] = useState([]);
+    const [expandedFleetId, setExpandedFleetId] = useState(null);
+    const [renamingFleetId, setRenamingFleetId] = useState(null);
+    const [renameValue, setRenameValue] = useState('');
+
+    const loadShipDetails = async (shipId) => {
+        const shipDetailRes = await ships.getById(shipId);
+        setShip(shipDetailRes.data.data.ship);
+    };
+
+    const loadFleets = async () => {
+        try {
+            const res = await fleetsApi.getAll();
+            setUserFleets(res.data.data?.fleets || []);
+        } catch (err) {
+            console.error('Failed to load fleets', err);
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                // Get all ships
                 const shipsRes = await ships.getAll();
                 const shipList = shipsRes.data.data?.ships || [];
+                const serverActiveId = shipsRes.data.data?.active_ship_id;
 
                 if (shipList.length > 0) {
-                    // For now, just use the first ship found
-                    // In a real multi-ship game, we'd probably have a selector or route param
-                    const shipId = shipList[0].ship_id;
-                    const shipDetailRes = await ships.getById(shipId);
-                    setShip(shipDetailRes.data.data.ship);
+                    const liveShips = shipList.filter(s => s.is_active !== false);
+                    if (liveShips.length === 0) {
+                        setError("No active ships available.");
+                        return;
+                    }
+                    setAllShips(shipList);
+                    const selectedId = (serverActiveId && liveShips.find(s => s.ship_id === serverActiveId))
+                        ? serverActiveId : liveShips[0].ship_id;
+                    setActiveShipId(selectedId);
+                    await loadShipDetails(selectedId);
                 } else {
                     setError("No ships found for this commander.");
                 }
+
+                await loadFleets();
             } catch (err) {
                 console.error("Failed to load ship data", err);
                 setError("Failed to retrieve ship status.");
@@ -38,6 +70,67 @@ const ShipPanel = () => {
         fetchData();
     }, []);
 
+    const handleActivateShip = async (shipId) => {
+        try {
+            await ships.activate(shipId);
+            setActiveShipId(shipId);
+            await loadShipDetails(shipId);
+        } catch (err) {
+            setToast({ message: err.response?.data?.message || 'Failed to activate ship', type: 'error' });
+            setTimeout(() => setToast(null), 5000);
+        }
+    };
+
+    const handlePvPToggle = async () => {
+        try {
+            const res = await auth.togglePvP();
+            alert(`PvP ${res.data.data.pvp_enabled ? 'enabled' : 'disabled'}`);
+            window.location.reload();
+        } catch (err) {
+            console.error('Failed to toggle PvP:', err);
+            setToast({ message: err.response?.data?.message || 'Failed to toggle PvP', type: 'error' });
+            setTimeout(() => setToast(null), 5000);
+        }
+    };
+
+    const handleDisbandFleet = async (fleetId) => {
+        if (!confirm('Disband this fleet? Ships will be unassigned.')) return;
+        try {
+            await fleetsApi.disband(fleetId);
+            setToast({ message: 'Fleet disbanded', type: 'success' });
+            setTimeout(() => setToast(null), 3000);
+            await loadFleets();
+        } catch (err) {
+            setToast({ message: err.response?.data?.message || 'Failed to disband fleet', type: 'error' });
+            setTimeout(() => setToast(null), 5000);
+        }
+    };
+
+    const handleRenameFleet = async (fleetId) => {
+        if (!renameValue.trim()) return;
+        try {
+            await fleetsApi.rename(fleetId, renameValue.trim());
+            setRenamingFleetId(null);
+            setRenameValue('');
+            await loadFleets();
+        } catch (err) {
+            setToast({ message: err.response?.data?.message || 'Failed to rename fleet', type: 'error' });
+            setTimeout(() => setToast(null), 5000);
+        }
+    };
+
+    const handleRemoveShipFromFleet = async (fleetId, shipId) => {
+        try {
+            await fleetsApi.removeShips(fleetId, [shipId]);
+            setToast({ message: 'Ship removed from fleet', type: 'success' });
+            setTimeout(() => setToast(null), 3000);
+            await loadFleets();
+        } catch (err) {
+            setToast({ message: err.response?.data?.message || 'Failed to remove ship', type: 'error' });
+            setTimeout(() => setToast(null), 5000);
+        }
+    };
+
     if (loading) return <div className="p-8 text-center text-accent-cyan">Establishing link with ship computer...</div>;
     if (error) return <div className="p-8 text-center text-accent-red">{error}</div>;
     if (!ship) return <div className="p-8 text-center text-gray-400">No active ship detected.</div>;
@@ -47,6 +140,109 @@ const ShipPanel = () => {
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">
+            {toast && (
+                <div className={`flex items-center justify-between p-3 rounded-lg border ${toast.type === 'error' ? 'bg-accent-red/10 border-accent-red/30 text-accent-red' : 'bg-accent-green/10 border-accent-green/30 text-accent-green'}`}>
+                    <span className="flex items-center gap-2"><Activity className="w-4 h-4" />{toast.message}</span>
+                    <button onClick={() => setToast(null)} className="text-xs underline ml-4">dismiss</button>
+                </div>
+            )}
+
+            {/* Fleets Section */}
+            {userFleets.length > 0 && (
+                <div className="card p-4">
+                    <h2 className="card-header flex items-center gap-2 text-lg mb-3">
+                        <Users className="w-5 h-5 text-accent-orange" /> Fleets
+                    </h2>
+                    <div className="space-y-2">
+                        {userFleets.map(fleet => {
+                            const isExpanded = expandedFleetId === fleet.fleet_id;
+                            const isRenaming = renamingFleetId === fleet.fleet_id;
+                            const activeShips = fleet.ships?.filter(s => s.is_active !== false) || [];
+                            return (
+                                <div key={fleet.fleet_id} className="border border-space-600 rounded-lg overflow-hidden">
+                                    <div
+                                        className="flex items-center justify-between px-3 py-2 bg-space-800 cursor-pointer hover:bg-space-700 transition-colors"
+                                        onClick={() => setExpandedFleetId(isExpanded ? null : fleet.fleet_id)}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <ChevronRight className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                                            {isRenaming ? (
+                                                <input
+                                                    type="text"
+                                                    value={renameValue}
+                                                    onChange={e => setRenameValue(e.target.value)}
+                                                    onKeyDown={e => { if (e.key === 'Enter') handleRenameFleet(fleet.fleet_id); if (e.key === 'Escape') setRenamingFleetId(null); }}
+                                                    onClick={e => e.stopPropagation()}
+                                                    autoFocus
+                                                    className="bg-space-900 border border-accent-cyan/30 rounded px-2 py-0.5 text-sm text-white focus:outline-none w-40"
+                                                />
+                                            ) : (
+                                                <span className="text-sm font-mono text-accent-orange">{fleet.name}</span>
+                                            )}
+                                            <span className="text-xs text-gray-500">({activeShips.length} ships)</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                onClick={e => { e.stopPropagation(); setRenamingFleetId(fleet.fleet_id); setRenameValue(fleet.name); }}
+                                                className="p-1 text-gray-500 hover:text-accent-cyan transition-colors"
+                                                title="Rename"
+                                            >
+                                                <Edit3 className="w-3.5 h-3.5" />
+                                            </button>
+                                            <button
+                                                onClick={e => { e.stopPropagation(); handleDisbandFleet(fleet.fleet_id); }}
+                                                className="p-1 text-gray-500 hover:text-accent-red transition-colors"
+                                                title="Disband"
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {isExpanded && (
+                                        <div className="px-3 py-2 space-y-1 bg-space-900/50">
+                                            {(fleet.ships || []).map(s => (
+                                                <div key={s.ship_id} className={`flex items-center justify-between px-2 py-1.5 rounded text-sm ${s.is_active === false ? 'opacity-40' : ''}`}>
+                                                    <div className="flex items-center gap-2">
+                                                        {s.is_active === false ? (
+                                                            <Skull className="w-3.5 h-3.5 text-accent-red" />
+                                                        ) : (
+                                                            <Rocket className="w-3.5 h-3.5 text-gray-400" />
+                                                        )}
+                                                        <span className="font-mono text-white">{s.name}</span>
+                                                        <span className="text-xs text-gray-500">{s.ship_type}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs text-gray-500 flex items-center gap-1">
+                                                            <MapPin className="w-3 h-3" />
+                                                            {s.currentSector?.name || 'Unknown'}
+                                                        </span>
+                                                        <span className="text-xs text-gray-500">
+                                                            Fuel: {s.fuel}/{s.max_fuel}
+                                                        </span>
+                                                        {s.is_active !== false && (
+                                                            <button
+                                                                onClick={() => handleRemoveShipFromFleet(fleet.fleet_id, s.ship_id)}
+                                                                className="text-gray-500 hover:text-accent-red transition-colors"
+                                                                title="Remove from fleet"
+                                                            >
+                                                                <X className="w-3.5 h-3.5" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">
+                        Shift+drag on galaxy map to select ships and create new fleets. Right-click systems to move fleets.
+                    </p>
+                </div>
+            )}
+
             <header className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-white flex items-center gap-3">
@@ -57,12 +253,110 @@ const ShipPanel = () => {
                         USS <span className="text-white font-mono">{ship.name}</span> • {String(ship.ship_type || 'Unknown').replace('_', ' ')}
                     </p>
                 </div>
-                <div className="text-right">
+                {allShips.length > 1 && (
+                    <div className="relative">
+                        <button
+                            onClick={() => setDropdownOpen(!dropdownOpen)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-accent-cyan/30 bg-accent-cyan/10 text-accent-cyan hover:bg-accent-cyan/20 transition-colors"
+                        >
+                            <Rocket className="w-4 h-4" />
+                            <span className="font-mono text-sm hidden sm:inline">{ship.name}</span>
+                            <span className="text-xs opacity-60 hidden sm:inline">({allShips.filter(s => s.is_active !== false).length}/{allShips.length})</span>
+                            <ChevronDown className={`w-4 h-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                        {dropdownOpen && (
+                            <>
+                                <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
+                                <div className="absolute right-0 top-full mt-2 z-50 w-72 rounded-lg border border-space-600 bg-space-900 shadow-xl shadow-black/50 overflow-hidden">
+                                    <div className="px-3 py-2 border-b border-space-600 text-xs text-gray-500 uppercase tracking-wider">
+                                        Fleet Roster — {allShips.filter(s => s.is_active !== false).length} active / {allShips.length} total
+                                    </div>
+                                    {allShips.map(s => {
+                                        const isActive = s.is_active !== false;
+                                        const isSelected = s.ship_id === activeShipId;
+                                        return (
+                                            <button
+                                                key={s.ship_id}
+                                                onClick={() => {
+                                                    if (isActive && !isSelected) {
+                                                        handleActivateShip(s.ship_id);
+                                                    }
+                                                    setDropdownOpen(false);
+                                                }}
+                                                disabled={!isActive}
+                                                className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${
+                                                    isSelected
+                                                        ? 'bg-accent-cyan/10 border-l-2 border-accent-cyan'
+                                                        : isActive
+                                                            ? 'hover:bg-space-800 border-l-2 border-transparent'
+                                                            : 'opacity-50 border-l-2 border-transparent cursor-not-allowed'
+                                                }`}
+                                            >
+                                                {isActive ? (
+                                                    <Rocket className={`w-4 h-4 flex-shrink-0 ${isSelected ? 'text-accent-cyan' : 'text-gray-400'}`} />
+                                                ) : (
+                                                    <Skull className="w-4 h-4 flex-shrink-0 text-accent-red" />
+                                                )}
+                                                <div className="flex-1 min-w-0">
+                                                    <div className={`font-mono text-sm truncate ${isSelected ? 'text-accent-cyan' : isActive ? 'text-white' : 'text-gray-500'}`}>
+                                                        {s.name}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                        {String(s.ship_type || '').replace('_', ' ')}
+                                                    </div>
+                                                </div>
+                                                {isSelected && (
+                                                    <span className="text-xs px-2 py-0.5 rounded-full border border-accent-cyan/30 bg-accent-cyan/10 text-accent-cyan">
+                                                        Active
+                                                    </span>
+                                                )}
+                                                {!isActive && (
+                                                    <span className="text-xs px-2 py-0.5 rounded-full border border-accent-red/30 bg-accent-red/10 text-accent-red">
+                                                        Destroyed
+                                                    </span>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )}
+                {allShips.length <= 1 && (
                     <div className="badge-cyan text-sm px-3 py-1 rounded-full border border-accent-cyan/30 bg-accent-cyan/10">
                         Active
                     </div>
-                </div>
+                )}
             </header>
+
+            {/* PvP Combat Toggle */}
+            <div className="flex items-center justify-between p-3 rounded-lg" style={{
+                background: user?.pvp_enabled ? 'rgba(244,67,54,0.08)' : 'rgba(255,255,255,0.02)',
+                border: `1px solid ${user?.pvp_enabled ? 'rgba(244,67,54,0.25)' : 'rgba(255,255,255,0.06)'}`
+            }}>
+                <div className="flex items-center gap-2">
+                    <Swords className="w-4 h-4" style={{ color: user?.pvp_enabled ? '#f44336' : '#666' }} />
+                    <div>
+                        <p className={`text-sm font-medium ${user?.pvp_enabled ? 'text-red-400' : 'text-gray-400'}`}>
+                            PvP Combat
+                        </p>
+                        <p className="text-xs text-gray-600">
+                            {user?.pvp_enabled ? 'You can be attacked by same-faction players' : 'Cross-faction PvP is always enabled'}
+                        </p>
+                    </div>
+                </div>
+                <button
+                    onClick={handlePvPToggle}
+                    className={`px-3 py-1 text-xs rounded font-medium transition-all ${
+                        user?.pvp_enabled
+                            ? 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30'
+                            : 'bg-gray-700/50 text-gray-400 border border-gray-600/30 hover:bg-gray-700'
+                    }`}
+                >
+                    {user?.pvp_enabled ? 'ENABLED' : 'DISABLED'}
+                </button>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Main Stats Card */}
@@ -148,7 +442,7 @@ const ShipPanel = () => {
                     {/* Action Buttons */}
                     <div className="grid grid-cols-2 gap-3 mt-6">
                         <button
-                            onClick={() => navigate('/map')}
+                            onClick={() => navigate('/system')}
                             className="btn btn-primary flex justify-center items-center gap-2"
                         >
                             <Rocket className="w-4 h-4" /> Navigate
@@ -164,15 +458,13 @@ const ShipPanel = () => {
                                 const sector = ship.currentSector || ship.current_sector;
                                 if (!sector?.sector_id) return;
                                 try {
-                                    // Assuming planets.scan returns data or initiates a background scan
-                                    // There is no specific response format given for scan in the prompts, 
-                                    // but usually it returns a list of planets or a success message.
-                                    // We'll just alert success for now.
                                     await planets.scan(sector.sector_id);
-                                    alert(`Scan complete for ${sector.name}. Check Planets databank.`);
+                                    setToast({ message: `Scan complete for ${sector.name}. Check Planets databank.`, type: 'success' });
+                                    setTimeout(() => setToast(null), 5000);
                                 } catch (e) {
                                     console.error("Scan failed", e);
-                                    alert("Scan failed: " + (e.response?.data?.error || e.message));
+                                    setToast({ message: "Scan failed: " + (e.response?.data?.error || e.message), type: 'error' });
+                                    setTimeout(() => setToast(null), 5000);
                                 }
                             }}
                             className="btn btn-secondary flex justify-center items-center gap-2 col-span-2 md:col-span-1"
@@ -189,6 +481,14 @@ const ShipPanel = () => {
                 capacity={ship.cargo_capacity}
                 used={ship.cargo_used}
             />
+
+            {/* Artifact Equipment */}
+            <div className="card p-6">
+                <h2 className="card-header flex items-center gap-2 text-xl">
+                    <Gem className="w-5 h-5" /> Artifacts
+                </h2>
+                <ArtifactEquipment shipId={ship.ship_id} />
+            </div>
         </div>
     );
 };

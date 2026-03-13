@@ -111,6 +111,29 @@ const Ship = sequelize.define('Ship', {
   is_active: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
+  },
+  // Fleet membership
+  fleet_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    defaultValue: null,
+    references: {
+      model: 'fleets',
+      key: 'fleet_id'
+    }
+  },
+  // Phase 6: Visual customization
+  visual_config: {
+    type: DataTypes.JSON,
+    defaultValue: {
+      hull_color: '#2244aa',
+      accent_color: '#00ffff',
+      engine_trail: 'cyan',
+      decal: 'none',
+      skin: 'default',
+      nameplate_style: 'default'
+    },
+    comment: 'Ship visual customization settings'
   }
 }, {
   tableName: 'ships',
@@ -126,6 +149,9 @@ const Ship = sequelize.define('Ship', {
     },
     {
       fields: ['is_active']
+    },
+    {
+      fields: ['fleet_id']
     }
   ]
 });
