@@ -2,7 +2,7 @@
  * Trade Service Tests
  */
 const tradeService = require('../../src/services/tradeService');
-const { User, Ship, Sector, Port, Commodity, PortCommodity, ShipCargo, Transaction } = require('../../src/models');
+const { User, Ship, Sector, Port, Commodity, PortCommodity, ShipCargo, Transaction, TransferLedger } = require('../../src/models');
 const { createTestUser, createTestSector, createTestShip, createTestPort, createTestCommodity, addCommodityToPort, addCargoToShip, cleanDatabase } = require('../helpers');
 
 describe('Trade Service', () => {
@@ -140,6 +140,45 @@ describe('Trade Service', () => {
         buyUser.user_id, buyShip.ship_id, testPort.port_id, testCommodity.commodity_id, 10
       )).rejects.toThrow('same sector');
     });
+
+    it('should replay an idempotent buy without double charging or duplicating cargo', async () => {
+      const idempotencyKey = 'trade-buy-replay-1';
+
+      const first = await tradeService.buyCommodity(
+        buyUser.user_id, buyShip.ship_id, testPort.port_id, testCommodity.commodity_id, 5, { idempotencyKey }
+      );
+      const second = await tradeService.buyCommodity(
+        buyUser.user_id, buyShip.ship_id, testPort.port_id, testCommodity.commodity_id, 5, { idempotencyKey }
+      );
+
+      expect(second).toEqual(first);
+
+      const cargo = await ShipCargo.findOne({
+        where: { ship_id: buyShip.ship_id, commodity_id: testCommodity.commodity_id }
+      });
+      expect(cargo.quantity).toBe(5);
+
+      const ledgers = await TransferLedger.findAll({
+        where: { idempotency_key: idempotencyKey }
+      });
+      expect(ledgers).toHaveLength(1);
+    });
+
+    it('should flag suspiciously large purchases in the transfer ledger', async () => {
+      await buyUser.update({ credits: 100000 });
+      await buyShip.update({ cargo_capacity: 500 });
+
+      await tradeService.buyCommodity(
+        buyUser.user_id, buyShip.ship_id, testPort.port_id, testCommodity.commodity_id, 260, { idempotencyKey: 'trade-buy-risk-1' }
+      );
+
+      const ledger = await TransferLedger.findOne({
+        where: { idempotency_key: 'trade-buy-risk-1' }
+      });
+      expect(ledger).not.toBeNull();
+      expect(ledger.risk_flags).toContain('large_credit_transfer');
+      expect(ledger.risk_flags).toContain('large_commodity_transfer');
+    });
   });
 
   describe('sellCommodity', () => {
@@ -188,4 +227,3 @@ describe('Trade Service', () => {
     });
   });
 });
-

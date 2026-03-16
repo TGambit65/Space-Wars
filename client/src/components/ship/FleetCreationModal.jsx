@@ -56,7 +56,7 @@ const FleetCreationModal = ({ ships, onClose, onCreated }) => {
             <Users className="w-5 h-5 text-accent-cyan" />
             Create Fleet
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+          <button onClick={onClose} data-dismiss className="text-gray-400 hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>

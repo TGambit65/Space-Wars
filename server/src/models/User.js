@@ -38,6 +38,21 @@ const User = sequelize.define('User', {
       min: 0  // Credits cannot go negative
     }
   },
+  faction: {
+    type: DataTypes.STRING(30),
+    allowNull: false,
+    defaultValue: 'terran_alliance',
+    validate: {
+      isIn: [['terran_alliance', 'zythian_swarm', 'automaton_collective']]
+    },
+    comment: 'Player faction affiliation'
+  },
+  pvp_enabled: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false,
+    comment: 'Whether player has opted into PvP combat'
+  },
   is_admin: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
@@ -90,6 +105,12 @@ const User = sequelize.define('User', {
     type: DataTypes.UUID,
     allowNull: true,
     references: { model: 'corporations', key: 'corporation_id' }
+  },
+  // Active ship selection
+  active_ship_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: { model: 'ships', key: 'ship_id' }
   }
 }, {
   tableName: 'users',

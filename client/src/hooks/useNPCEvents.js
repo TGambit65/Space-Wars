@@ -54,6 +54,25 @@ const useNPCEvents = (socket) => {
       setCombatAlert(null);
     };
 
+    // Handler map for dispatching batch updates
+    const eventHandlers = {
+      'npc:entered_sector': onEnteredSector,
+      'npc:left_sector': onLeftSector,
+      'npc:destroyed': onDestroyed,
+      'npc:state_change': onStateChange,
+      'npc:hails_player': onHailsPlayer,
+      'npc:attacks_player': onAttacksPlayer,
+    };
+
+    // Batched NPC updates: single socket event containing multiple changes
+    const onBatchUpdate = (updates) => {
+      if (!Array.isArray(updates)) return;
+      for (const { event, data } of updates) {
+        const handler = eventHandlers[event];
+        if (handler) handler(data);
+      }
+    };
+
     socket.on('npc:entered_sector', onEnteredSector);
     socket.on('npc:left_sector', onLeftSector);
     socket.on('npc:destroyed', onDestroyed);
@@ -61,6 +80,7 @@ const useNPCEvents = (socket) => {
     socket.on('npc:hails_player', onHailsPlayer);
     socket.on('npc:attacks_player', onAttacksPlayer);
     socket.on('combat:ended', onCombatEnded);
+    socket.on('npc:batch_update', onBatchUpdate);
 
     return () => {
       socket.off('npc:entered_sector', onEnteredSector);
@@ -70,6 +90,7 @@ const useNPCEvents = (socket) => {
       socket.off('npc:hails_player', onHailsPlayer);
       socket.off('npc:attacks_player', onAttacksPlayer);
       socket.off('combat:ended', onCombatEnded);
+      socket.off('npc:batch_update', onBatchUpdate);
     };
   }, [socket]);
 

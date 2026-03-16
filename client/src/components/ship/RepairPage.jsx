@@ -25,7 +25,8 @@ const RepairPage = ({ user: initialUser }) => {
             const shipsRes = await ships.getAll();
             const shipList = shipsRes.data.data?.ships || [];
             if (shipList.length === 0) throw new Error("No active ship found.");
-            const shipId = shipList[0].ship_id;
+            const activeId = shipsRes.data.data?.active_ship_id;
+            const shipId = (activeId && shipList.find(s => s.ship_id === activeId)?.ship_id) || shipList[0].ship_id;
 
             // Fetch profile too to ensure credits are fresh if navigating directly
             const [shipRes, estimateRes, profileRes] = await Promise.all([

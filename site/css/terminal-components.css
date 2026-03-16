@@ -1,0 +1,246 @@
+/* ==========================================================================
+   Space Wars 3000 - Terminal/Console Styling Components
+   Game-terminal style visual components for immersive documentation
+   ========================================================================== */
+
+/* Terminal window styling with borders and headers */
+.terminal-window {
+  background-color: #000;
+  border: 2px solid var(--doc-primary-color);
+  border-radius: var(--doc-radius-md);
+  box-shadow: 
+    0 0 20px rgba(0, 255, 255, 0.3),
+    inset 0 0 20px rgba(0, 255, 255, 0.1);
+  font-family: 'Courier New', 'Monaco', monospace;
+  overflow: hidden;
+  position: relative;
+  margin: var(--doc-spacing-lg) 0;
+}
+
+.terminal-header {
+  background: linear-gradient(135deg, #1a237e 0%, #0d1557 100%);
+  border-bottom: 1px solid var(--doc-primary-color);
+  padding: var(--doc-spacing-sm) var(--doc-spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.terminal-title {
+  color: var(--doc-primary-color);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.terminal-controls {
+  display: flex;
+  gap: var(--doc-spacing-xs);
+}
+
+.terminal-control {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.terminal-control.close { background-color: #ff4444; }
+.terminal-control.minimize { background-color: #ffaa00; }
+.terminal-control.maximize { background-color: #00aa00; }
+
+/* Console text styling with monospace fonts */
+.terminal-content {
+  background-color: #000;
+  padding: var(--doc-spacing-md);
+  min-height: 200px;
+  font-family: 'Courier New', 'Monaco', monospace;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #00ff00;
+  overflow-x: auto;
+}
+
+.terminal-line {
+  margin-bottom: var(--doc-spacing-xs);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.terminal-prompt {
+  color: var(--doc-primary-color);
+  font-weight: bold;
+}
+
+.terminal-command {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.terminal-output {
+  color: #00ff00;
+  margin-left: var(--doc-spacing-md);
+}
+
+.terminal-error {
+  color: #ff4444;
+  margin-left: var(--doc-spacing-md);
+}
+
+.terminal-warning {
+  color: #ffaa00;
+  margin-left: var(--doc-spacing-md);
+}
+
+.terminal-info {
+  color: var(--doc-primary-color);
+  margin-left: var(--doc-spacing-md);
+}
+
+/* Cursor animations and blinking effects */
+.terminal-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.2em;
+  background-color: #00ff00;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: cursor-blink 1s infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.terminal-cursor.typing {
+  animation: cursor-typing 0.1s infinite;
+}
+
+@keyframes cursor-typing {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* Terminal command prompt styling */
+.terminal-prompt-line {
+  display: flex;
+  align-items: center;
+  margin: var(--doc-spacing-sm) 0;
+}
+
+.terminal-prompt-symbol {
+  color: var(--doc-primary-color);
+  margin-right: var(--doc-spacing-xs);
+  font-weight: bold;
+}
+
+.terminal-prompt-symbol::before {
+  content: ">";
+}
+
+.terminal-prompt-symbol.root::before {
+  content: "#";
+}
+
+.terminal-prompt-symbol.user::before {
+  content: "$";
+}
+
+/* Interactive terminal elements */
+.terminal-interactive {
+  border: 1px dashed var(--doc-primary-color);
+  background-color: rgba(0, 255, 255, 0.05);
+  padding: var(--doc-spacing-sm);
+  margin: var(--doc-spacing-md) 0;
+  position: relative;
+}
+
+.terminal-interactive::before {
+  content: "Interactive Terminal";
+  position: absolute;
+  top: -10px;
+  left: var(--doc-spacing-sm);
+  background-color: #000;
+  color: var(--doc-primary-color);
+  font-size: 0.75rem;
+  padding: 0 var(--doc-spacing-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Terminal scanning effect */
+.terminal-scanlines {
+  position: relative;
+  overflow: hidden;
+}
+
+.terminal-scanlines::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 255, 0.03) 2px,
+    rgba(0, 255, 255, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .terminal-window {
+    margin: var(--doc-spacing-md) 0;
+  }
+  
+  .terminal-content {
+    padding: var(--doc-spacing-sm);
+    font-size: 0.8rem;
+  }
+  
+  .terminal-header {
+    padding: var(--doc-spacing-xs) var(--doc-spacing-sm);
+  }
+  
+  .terminal-title {
+    font-size: 0.8rem;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .terminal-cursor {
+    animation: none;
+    opacity: 1;
+  }
+  
+  .terminal-scanlines::before {
+    display: none;
+  }
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+  .terminal-window {
+    border-color: #ffffff;
+    box-shadow: none;
+  }
+  
+  .terminal-content {
+    background-color: #000000;
+    color: #ffffff;
+  }
+  
+  .terminal-output {
+    color: #ffffff;
+  }
+}

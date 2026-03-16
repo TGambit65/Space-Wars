@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damage Calculation System - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+    <script src="../../js/wiki-smart-navigation.js"></script>
+    <script src="../../js/wiki-interactive-features.js"></script>
+</head>
+<body class="doc-container combat-page">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">← Combat Guide</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="damage-calculation.html" class="doc-nav-link active">Damage System</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="weapon-effectiveness.html" class="doc-nav-link">Weapons</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="shield-armor.html" class="doc-nav-link">Defense</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item">
+                <a href="index.html" class="doc-breadcrumb-link">Combat Guide</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Damage Calculation System</div>
+        </nav>
+        
+        <h1 class="doc-h1 holo-text">💥 Damage Calculation System: The Math Behind the Boom!</h1>
+        
+        <div class="doc-alert info">
+            <strong>🧮 Combat Mathematics Academy:</strong> Welcome to the ultimate guide on how damage works! 
+            Learn the secret formulas that determine who explodes and who survives in space battles! 💣🚀
+        </div>
+
+        <p class="doc-lead">
+            Ever wonder why sometimes your laser does 100 damage and other times it does 150? Or why some 
+            ships seem to shrug off your best attacks? It's all about the math! In this guide, you'll learn 
+            exactly how damage is calculated, what affects it, and how to maximize your destructive power! 
+            Get ready to become a damage-dealing expert! 🎯⚡
+        </p>
+
+        <!-- Basic Damage Formula -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">📐 The Basic Damage Formula</h2>
+            
+            <div class="doc-alert accent">
+                <strong>🎯 The Golden Rule:</strong> Final Damage = Base Damage × All Modifiers - All Reductions! 
+                Understanding this formula is the key to combat mastery! 🔑
+            </div>
+            
+            <p>Damage calculation in Space Wars 3000 follows a specific order of operations. Each step can 
+            dramatically change the final number that pops up when you hit an enemy! Let's break it down!</p>
+
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Master Damage Formula</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STEP 1</span>
+                        <span class="terminal-output">Base Damage = Weapon's listed damage value</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STEP 2</span>
+                        <span class="terminal-output">Modified Damage = Base × (1 + Damage Bonuses)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STEP 3</span>
+                        <span class="terminal-output">Critical Check = Roll for critical hit chance</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STEP 4</span>
+                        <span class="terminal-output">Resistance Check = Apply enemy resistances</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STEP 5</span>
+                        <span class="terminal-output">Final Damage = Result after all calculations</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🎲 Step-by-Step Example</h3>
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>📊 Example: Laser Cannon Shot</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">The Setup</h4>
+                    <p>You fire a Plasma Cannon at an enemy fighter. Let's calculate the damage!</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Damage Calculation Example</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">BASE DAMAGE</span>
+                                <span class="terminal-output">Plasma Cannon = 100 damage</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">YOUR BONUSES</span>
+                                <span class="terminal-output">+20% from skills, +15% from targeting computer</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">CALCULATION</span>
+                                <span class="terminal-output">100 × (1 + 0.20 + 0.15) = 100 × 1.35 = 135</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">CRIT ROLL</span>
+                                <span class="terminal-output">20% chance... SUCCESS! Damage × 2 = 270</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ENEMY ARMOR</span>
+                                <span class="terminal-output">25% plasma resistance: 270 × 0.75 = 202.5</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">FINAL DAMAGE</span>
+                                <span class="terminal-output">203 damage dealt! (rounded up)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="doc-alert info">
+                        <strong>💡 What Happened:</strong> Your 100 base damage became 203 through bonuses and 
+                        a critical hit, even after enemy resistance! That's a 103% increase! 🎯
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Damage Modifiers -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🎯 Damage Modifiers Explained</h2>
+            
+            <p>Damage modifiers are what separate good pilots from GREAT ones! These multipliers can turn 
+            weak attacks into devastating strikes! Let's learn about each type! 🚀</p>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">⬆️ Positive Modifiers</h3>
+                        <span class="doc-badge accent">Increase Damage</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <h4 class="doc-h4">Common Damage Bonuses</h4>
+                        <ul class="doc-list">
+                            <li><strong>Skill Bonuses:</strong> +5% to +50%</li>
+                            <li><strong>Equipment Mods:</strong> +10% to +30%</li>
+                            <li><strong>Range Bonus:</strong> +25% at optimal range</li>
+                            <li><strong>Faction Bonus:</strong> +15% with faction weapons</li>
+                            <li><strong>Formation Bonus:</strong> +20% in attack formation</li>
+                        </ul>
+                        <div class="doc-alert accent">
+                            <strong>🔥 Stack 'Em Up:</strong> Most bonuses stack additively! 
+                            +20% + 15% = +35% total!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">⬇️ Negative Modifiers</h3>
+                        <span class="doc-badge warning">Reduce Damage</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <h4 class="doc-h4">Common Damage Penalties</h4>
+                        <ul class="doc-list">
+                            <li><strong>Long Range:</strong> -50% beyond optimal</li>
+                            <li><strong>Moving Target:</strong> -20% vs fast ships</li>
+                            <li><strong>Damaged Weapons:</strong> -30% if damaged</li>
+                            <li><strong>Power Shortage:</strong> -40% if low power</li>
+                            <li><strong>Weather Effects:</strong> -15% in nebulas</li>
+                        </ul>
+                        <div class="doc-alert warning">
+                            <strong>😰 Watch Out:</strong> Penalties can stack too! 
+                            Keep your ship in good condition!
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🎰 Range Modifiers</h3>
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Weapon Range Effectiveness</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">POINT BLANK</span>
+                        <span class="terminal-output">0-25% range: 75% damage (too close!)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">OPTIMAL</span>
+                        <span class="terminal-output">25-75% range: 100% damage + 25% bonus!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">LONG</span>
+                        <span class="terminal-output">75-100% range: 75% damage (getting far)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">EXTREME</span>
+                        <span class="terminal-output">100%+ range: 50% damage (barely reaching)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Critical Hits -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">⚡ Critical Hits: The Game Changers!</h2>
+            
+            <div class="doc-alert info">
+                <strong>🎯 Critical Hit:</strong> When the stars align and your shot hits the perfect spot, 
+                dealing MASSIVE bonus damage! It's like rolling a natural 20! 🎲✨
+            </div>
+
+            <p>Critical hits are the most exciting part of combat! One lucky shot can turn the tide of battle! 
+            Let's learn how to maximize your chances of landing these devastating attacks! 💥</p>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🎲 How Critical Hits Work</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">The Critical Hit System</h4>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Critical Hit Mechanics</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">BASE CHANCE</span>
+                                <span class="terminal-output">All weapons start with 5% crit chance</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">SKILL BONUS</span>
+                                <span class="terminal-output">Targeting skills add +1-10% crit chance</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EQUIPMENT</span>
+                                <span class="terminal-output">Targeting computer: +5% crit chance</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">WEAPON MODS</span>
+                                <span class="terminal-output">Precision barrel: +3% crit chance</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">MAX CHANCE</span>
+                                <span class="terminal-output">Crit chance caps at 50% (still random!)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">Critical Damage Multipliers</h4>
+                    <ul class="doc-list">
+                        <li><strong>Normal Critical:</strong> 2.0x damage (double damage!)</li>
+                        <li><strong>Precision Critical:</strong> 2.5x damage (with special skills)</li>
+                        <li><strong>Devastating Critical:</strong> 3.0x damage (legendary weapons only)</li>
+                        <li><strong>System Critical:</strong> 2.0x damage + disables a system!</li>
+                    </ul>
+
+                    <div class="doc-alert accent">
+                        <strong>💥 Pro Tip:</strong> Stack crit chance bonuses to turn every third shot into 
+                        a critical hit! That's a 66% damage increase overall! 🎯
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🎯 Critical Hit Locations</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Where You Hit Matters!</h4>
+                    <p>Different parts of enemy ships have different critical vulnerabilities!</p>
+                    
+                    <div class="doc-grid doc-grid-2">
+                        <div class="doc-card">
+                            <div class="doc-card-header">
+                                <h5 class="doc-card-title">🎯 Weak Points</h5>
+                            </div>
+                            <div class="doc-card-body">
+                                <ul class="doc-list">
+                                    <li><strong>Engines:</strong> 3x crit damage, slows enemy</li>
+                                    <li><strong>Weapons:</strong> 2x damage, disables guns</li>
+                                    <li><strong>Bridge:</strong> 2.5x damage, stuns crew</li>
+                                    <li><strong>Reactor:</strong> 4x damage, power loss</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="doc-card">
+                            <div class="doc-card-header">
+                                <h5 class="doc-card-title">🛡️ Armored Points</h5>
+                            </div>
+                            <div class="doc-card-body">
+                                <ul class="doc-list">
+                                    <li><strong>Hull:</strong> 1.5x crit damage only</li>
+                                    <li><strong>Armor:</strong> No crit bonus</li>
+                                    <li><strong>Shields:</strong> Immune to crits</li>
+                                    <li><strong>Turrets:</strong> 1.5x, well protected</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Damage Types and Resistances -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🛡️ Damage Types & Resistances</h2>
+            
+            <p>Not all damage is created equal! Different weapons deal different types of damage, and different 
+            defenses protect better against certain types. It's like a cosmic game of rock-paper-scissors! ✂️📄🗿</p>
+
+            <h3 class="doc-h3">⚡ Damage Type Chart</h3>
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Damage Type Effectiveness Matrix</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">DAMAGE TYPE</span>
+                        <span class="terminal-output">vs SHIELDS | vs ARMOR | vs HULL | SPECIAL</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-info">═══════════════════════════════════════════════════════════</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">ENERGY</span>
+                        <span class="terminal-output">   150%    |   50%    |  100%  | Melts shields!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">KINETIC</span>
+                        <span class="terminal-output">    50%    |  150%    |  100%  | Cracks armor!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">EXPLOSIVE</span>
+                        <span class="terminal-output">    75%    |  100%    |  150%  | Hull breaker!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">PLASMA</span>
+                        <span class="terminal-output">   100%    |  100%    |  100%  | Balanced!</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-alert warning">
+                <strong>🎯 Strategy Tip:</strong> Use energy weapons to drop shields, then switch to kinetic 
+                or explosive to finish the job! Mix your weapons for best results! 🔫
+            </div>
+
+            <h3 class="doc-h3">🛡️ Resistance Calculations</h3>
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>📊 How Resistances Work</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Resistance Formula</h4>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Resistance Calculation</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">FORMULA</span>
+                                <span class="terminal-output">Final Damage = Incoming × (1 - Resistance%)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EXAMPLE</span>
+                                <span class="terminal-output">100 damage vs 30% resist = 100 × 0.7 = 70</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">STACKING</span>
+                                <span class="terminal-output">Multiple resists multiply: 20% + 20% = 36% total</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">CAP</span>
+                                <span class="terminal-output">Maximum resistance is 75% (always take some damage)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">Common Resistance Sources</h4>
+                    <ul class="doc-list">
+                        <li><strong>Armor Type:</strong> 10-30% to specific damage</li>
+                        <li><strong>Shield Mods:</strong> 5-15% resistance bonus</li>
+                        <li><strong>Hull Material:</strong> 10-20% inherent resistance</li>
+                        <li><strong>Active Systems:</strong> 15-25% when powered</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Damage Optimization -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🚀 Damage Optimization Strategies</h2>
+            
+            <p>Now that you understand how damage works, let's learn how to maximize it! These strategies will 
+            turn you into a damage-dealing machine! 💪⚡</p>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">📈 Maximize Your Damage</h3>
+                        <span class="doc-badge accent">Offensive Tips</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <ol class="doc-list">
+                            <li><strong>Stack Bonuses:</strong> Combine all damage modifiers</li>
+                            <li><strong>Optimal Range:</strong> Fight at your best distance</li>
+                            <li><strong>Target Weak Points:</strong> Aim for critical locations</li>
+                            <li><strong>Mix Damage Types:</strong> Counter all defenses</li>
+                            <li><strong>Time Your Shots:</strong> Wait for shields to drop</li>
+                        </ol>
+                        <div class="doc-alert info">
+                            <strong>💡 Example:</strong> +50% from skills/gear + optimal range + 
+                            weak point = 3x base damage!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🛡️ Minimize Enemy Damage</h3>
+                        <span class="doc-badge secondary">Defensive Tips</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <ol class="doc-list">
+                            <li><strong>Layer Defenses:</strong> Shields + armor + resist</li>
+                            <li><strong>Move Constantly:</strong> Harder to hit = less damage</li>
+                            <li><strong>Face Your Strong Side:</strong> Rotate damaged areas away</li>
+                            <li><strong>Use Cover:</strong> Asteroids block shots!</li>
+                            <li><strong>Emergency Systems:</strong> Save defensive cooldowns</li>
+                        </ol>
+                        <div class="doc-alert info">
+                            <strong>🛡️ Example:</strong> 30% resist + moving + cover = 
+                            take only 40% damage!
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🎯 Advanced Damage Tactics</h3>
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Pro Damage Optimization</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">ALPHA STRIKE</span>
+                        <span class="terminal-output">Fire all weapons at once for massive burst</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">FOCUS FIRE</span>
+                        <span class="terminal-output">All ships target same enemy = quick kill</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">DAMAGE SPIKE</span>
+                        <span class="terminal-output">Save cooldowns, use all at once</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">SHIELD BREAK</span>
+                        <span class="terminal-output">Energy weapons first, then switch types</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Reference -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">📋 Damage Quick Reference</h2>
+            
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Essential Damage Formulas</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">BASIC</span>
+                        <span class="terminal-output">Damage = Base × Modifiers × Type Effectiveness</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">CRITICAL</span>
+                        <span class="terminal-output">Crit Damage = Normal Damage × Crit Multiplier</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">RESISTANCE</span>
+                        <span class="terminal-output">Final = Incoming × (1 - Resistance%)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">DPS</span>
+                        <span class="terminal-output">DPS = (Damage × Fire Rate) × Accuracy</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🎮 Remember These Tips!</h3>
+            <ul class="doc-list">
+                <li>📍 Fight at optimal range for +25% damage</li>
+                <li>🎯 Stack crit chance for consistent big hits</li>
+                <li>🔥 Use correct damage type vs enemy defense</li>
+                <li>📊 More damage bonuses = exponentially more damage</li>
+                <li>🛡️ Enemy resistances can cut your damage in half</li>
+                <li>⚡ One critical hit can change everything!</li>
+            </ul>
+        </section>
+
+        <!-- Cross-References -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🔗 Apply Damage Calculations</h2>
+            
+            <div class="doc-alert info">
+                <strong>🧮 Mathematical Mastery:</strong> Now that you understand the damage formulas, 
+                these guides will help you use this knowledge to design better ships and win more fights!
+            </div>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🛠️ Design for Optimal Damage</h3>
+                        <span class="doc-badge warning">Math-Based Building</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Use damage calculations to optimize your ship designs:</p>
+                        <ul class="doc-list">
+                            <li><a href="../ship-design/optimization-guide.html">DPS Optimization</a> - Mathematical formulas for maximum damage output</li>
+                            <li><a href="../ship-design/ship-builds.html">Combat Builds</a> - Designs based on damage calculations</li>
+                            <li><a href="../ship-design/comparison-charts.html">Hull Damage Potential</a> - Which hulls excel at damage dealing</li>
+                        </ul>
+                        <div class="doc-alert accent">
+                            <strong>💡 Design Tip:</strong> Use the damage formulas to calculate your ship's theoretical maximum DPS!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🎯 Weapons That Match the Math</h3>
+                        <span class="doc-badge secondary">Damage Application</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Choose weapons based on damage calculation understanding:</p>
+                        <ul class="doc-list">
+                            <li><a href="weapon-effectiveness.html">Weapon Effectiveness</a> - How different weapons interact with damage formulas</li>
+                            <li><a href="shield-armor.html">Defense Systems</a> - How defenses modify damage calculations</li>
+                            <li><a href="../navigation/sector-movement.html">Range Optimization</a> - Position for maximum damage efficiency</li>
+                        </ul>
+                        <div class="doc-alert secondary">
+                            <strong>🎯 Tactical Tip:</strong> Damage falloff affects DPS - control your engagement range!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🏛️ Faction Damage Bonuses</h3>
+                        <span class="doc-badge">Mathematical Advantages</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Leverage faction-specific damage calculation bonuses:</p>
+                        <ul class="doc-list">
+                            <li><a href="../factions/terran-federation.html">Terran Precision</a> - +10% critical hit chance</li>
+                            <li><a href="../factions/zynthian-collective.html">Zynthian Adaptation</a> - Damage increases over time</li>
+                            <li><a href="../factions/nexus-syndicate.html">Nexus Calculations</a> - AI-optimized damage output</li>
+                        </ul>
+                        <div class="doc-alert info">
+                            <strong>🎯 Faction Tip:</strong> Faction bonuses can increase your effective DPS by 20-30%!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">💰 Damage Economics</h3>
+                        <span class="doc-badge accent">Profit Through Power</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Turn your damage understanding into economic advantage:</p>
+                        <ul class="doc-list">
+                            <li><a href="../trading/risk-reward-analysis.html">Combat Profitability</a> - Calculate damage-to-profit ratios</li>
+                            <li><a href="../trading/trade-routes.html">Armed Escort Services</a> - Provide protection for profit</li>
+                            <li><a href="../trading/beginner-trading.html">Pirate Salvage</a> - Profit from defeated enemies</li>
+                        </ul>
+                        <div class="doc-alert accent">
+                            <strong>💰 Profit Tip:</strong> High-damage ships can clear pirate encounters worth 1000+ credits!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="../ship-design/comparison-charts.html" class="doc-nav-link">← Ship Comparisons</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="weapon-effectiveness.html" class="doc-nav-link">Next: Weapon Guide →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            console.log('Damage Calculation System loaded');
+        });
+    </script>
+</body>
+</html>

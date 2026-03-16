@@ -119,8 +119,22 @@ const MapHUD = ({ currentShip, selectedSystem, systemDetail, onClose, onEnterCom
                 {systemDetail.neighbors.map(n => (
                   <div key={n.sector_id} className="flex justify-between items-center text-xs bg-space-800/50 rounded px-2 py-1">
                     <span className="text-gray-300">{n.name}</span>
-                    <span className={`${n.connection_type === 'wormhole' ? 'text-accent-purple' : 'text-gray-500'}`}>
-                      {n.connection_type === 'wormhole' ? 'Wormhole' : `${n.travel_time}t`}
+                    <span className={`${
+                      (n.lane_class || n.connection_type) === 'wormhole'
+                        ? 'text-accent-purple'
+                        : (n.lane_class || n.connection_type) === 'portal'
+                          ? 'text-orange-400'
+                          : (n.lane_class || n.connection_type) === 'protected'
+                            ? 'text-blue-300'
+                            : 'text-gray-500'
+                    }`}>
+                      {(n.lane_class || n.connection_type) === 'wormhole'
+                        ? 'Wormhole'
+                        : (n.lane_class || n.connection_type) === 'portal'
+                          ? 'Portal'
+                          : (n.lane_class || n.connection_type) === 'protected'
+                            ? `Safe ${n.travel_time}t`
+                            : `${n.travel_time}t`}
                     </span>
                   </div>
                 ))}

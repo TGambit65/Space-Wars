@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="nexusOrange2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF5722;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E64A19;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="nexusMetal2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ECEFF1;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#CFD8DC;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#90A4AE;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="aiCore2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FF8A65;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#FF5722;stop-opacity:0.1" />
+    </radialGradient>
+    <linearGradient id="weaponSystem" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF3D00;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#E64A19;stop-opacity:0.8" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Aegis Combat Platform - Heavily armored weapons platform -->
+  <!-- AI processing field -->
+  <ellipse cx="100" cy="100" rx="95" ry="90" fill="url(#aiCore2)"/>
+  
+  <!-- Main hull - angular combat platform design -->
+  <path d="M100 25 L135 45 L145 80 L150 120 L145 160 L130 180 L100 185 L70 180 L55 160 L50 120 L55 80 L65 45 Z" 
+        fill="url(#nexusMetal2)" stroke="#37474F" stroke-width="3"/>
+  
+  <!-- Armor plating sections -->
+  <rect x="70" y="50" width="60" height="12" rx="2" fill="#78909C" opacity="0.9"/>
+  <rect x="70" y="70" width="60" height="12" rx="2" fill="#78909C" opacity="0.9"/>
+  <rect x="70" y="120" width="60" height="12" rx="2" fill="#78909C" opacity="0.9"/>
+  <rect x="70" y="140" width="60" height="12" rx="2" fill="#78909C" opacity="0.9"/>
+  
+  <!-- Central AI command core -->
+  <rect x="85" y="85" width="30" height="30" rx="5" fill="url(#nexusOrange2)"/>
+  <circle cx="100" cy="100" r="12" fill="#FFC107"/>
+  <circle cx="100" cy="100" r="8" fill="#FF5722"/>
+  
+  <!-- Adaptive weapon systems (8 total) -->
+  <circle cx="45" cy="60" r="8" fill="#37474F"/>
+  <circle cx="155" cy="60" r="8" fill="#37474F"/>
+  <circle cx="30" cy="90" r="10" fill="#37474F"/>
+  <circle cx="170" cy="90" r="10" fill="#37474F"/>
+  <circle cx="30" cy="110" r="10" fill="#37474F"/>
+  <circle cx="170" cy="110" r="10" fill="#37474F"/>
+  <circle cx="45" cy="140" r="8" fill="#37474F"/>
+  <circle cx="155" cy="140" r="8" fill="#37474F"/>
+  
+  <!-- Weapon system details -->
+  <circle cx="45" cy="60" r="5" fill="url(#weaponSystem)"/>
+  <circle cx="155" cy="60" r="5" fill="url(#weaponSystem)"/>
+  <circle cx="30" cy="90" r="7" fill="url(#weaponSystem)"/>
+  <circle cx="170" cy="90" r="7" fill="url(#weaponSystem)"/>
+  <circle cx="30" cy="110" r="7" fill="url(#weaponSystem)"/>
+  <circle cx="170" cy="110" r="7" fill="url(#weaponSystem)"/>
+  <circle cx="45" cy="140" r="5" fill="url(#weaponSystem)"/>
+  <circle cx="155" cy="140" r="5" fill="url(#weaponSystem)"/>
+  
+  <!-- Overlapping shield matrix generators -->
+  <ellipse cx="75" cy="75" rx="8" ry="12" fill="#42A5F5" opacity="0.6"/>
+  <ellipse cx="125" cy="75" rx="8" ry="12" fill="#42A5F5" opacity="0.6"/>
+  <ellipse cx="75" cy="125" rx="8" ry="12" fill="#42A5F5" opacity="0.6"/>
+  <ellipse cx="125" cy="125" rx="8" ry="12" fill="#42A5F5" opacity="0.6"/>
+  
+  <!-- Shield matrix connections -->
+  <path d="M75 75 Q100 85 125 75" stroke="#42A5F5" stroke-width="2" fill="none" opacity="0.5"/>
+  <path d="M75 125 Q100 115 125 125" stroke="#42A5F5" stroke-width="2" fill="none" opacity="0.5"/>
+  <path d="M75 75 Q85 100 75 125" stroke="#42A5F5" stroke-width="2" fill="none" opacity="0.5"/>
+  <path d="M125 75 Q115 100 125 125" stroke="#42A5F5" stroke-width="2" fill="none" opacity="0.5"/>
+  
+  <!-- Predictive targeting AI arrays -->
+  <rect x="90" y="35" width="20" height="12" rx="6" fill="url(#nexusOrange2)"/>
+  <circle cx="95" cy="41" r="2" fill="#FFC107"/>
+  <circle cx="100" cy="41" r="2" fill="#FFC107"/>
+  <circle cx="105" cy="41" r="2" fill="#FFC107"/>
+  
+  <!-- Engine systems -->
+  <ellipse cx="75" cy="165" rx="12" ry="18" fill="#37474F"/>
+  <ellipse cx="125" cy="165" rx="12" ry="18" fill="#37474F"/>
+  
+  <!-- Engine glow -->
+  <ellipse cx="75" cy="175" rx="10" ry="15" fill="#FF6F00" opacity="0.9"/>
+  <ellipse cx="125" cy="175" rx="10" ry="15" fill="#FF6F00" opacity="0.9"/>
+  
+  <!-- Tactical adaptation modules -->
+  <rect x="55" y="95" width="8" height="10" rx="2" fill="#FF8A65" opacity="0.8"/>
+  <rect x="137" y="95" width="8" height="10" rx="2" fill="#FF8A65" opacity="0.8"/>
+  
+  <!-- AI processing nodes -->
+  <circle cx="90" cy="90" r="3" fill="#FFC107"/>
+  <circle cx="110" cy="90" r="3" fill="#FFC107"/>
+  <circle cx="90" cy="110" r="3" fill="#FFC107"/>
+  <circle cx="110" cy="110" r="3" fill="#FFC107"/>
+  
+  <!-- Neural networks -->
+  <path d="M90 90 Q100 95 110 90" stroke="#FFC107" stroke-width="1" fill="none" opacity="0.7"/>
+  <path d="M90 110 Q100 105 110 110" stroke="#FFC107" stroke-width="1" fill="none" opacity="0.7"/>
+  <path d="M90 90 Q95 100 90 110" stroke="#FFC107" stroke-width="1" fill="none" opacity="0.7"/>
+  <path d="M110 90 Q105 100 110 110" stroke="#FFC107" stroke-width="1" fill="none" opacity="0.7"/>
+  
+  <!-- Weapon optimization displays -->
+  <rect x="65" y="55" width="4" height="4" fill="#FF5722" opacity="0.8"/>
+  <rect x="131" y="55" width="4" height="4" fill="#FF5722" opacity="0.8"/>
+  <rect x="65" y="145" width="4" height="4" fill="#FF5722" opacity="0.8"/>
+  <rect x="131" y="145" width="4" height="4" fill="#FF5722" opacity="0.8"/>
+  
+  <!-- Command and control systems -->
+  <path d="M100 25 Q90 15 85 10" stroke="#FFC107" stroke-width="2" fill="none"/>
+  <circle cx="85" cy="10" r="2" fill="#FFC107"/>
+  
+  <path d="M100 25 Q100 15 100 5" stroke="#FFC107" stroke-width="3" fill="none"/>
+  <circle cx="100" cy="5" r="3" fill="#FFC107"/>
+  
+  <path d="M100 25 Q110 15 115 10" stroke="#FFC107" stroke-width="2" fill="none"/>
+  <circle cx="115" cy="10" r="2" fill="#FFC107"/>
+  
+  <!-- Nexus collective symbol -->
+  <circle cx="100" cy="100" r="6" fill="white" opacity="0.95"/>
+  <text x="100" y="105" text-anchor="middle" font-family="Arial" font-size="10" font-weight="bold" fill="#FF5722">⚡</text>
+  
+  <!-- Platform status indicators -->
+  <circle cx="100" cy="60" r="1" fill="#FFC107" opacity="0.8"/>
+  <circle cx="100" cy="140" r="1" fill="#FFC107" opacity="0.8"/>
+  <circle cx="65" cy="100" r="1" fill="#FFC107" opacity="0.8"/>
+  <circle cx="135" cy="100" r="1" fill="#FFC107" opacity="0.8"/>
+</svg>

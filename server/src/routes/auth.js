@@ -29,7 +29,11 @@ const registerValidation = [
     .matches(/[0-9]/)
     .withMessage('Password must contain at least one number')
     .matches(/[!@#$%^&*(),.?":{}|<>]/)
-    .withMessage('Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)')
+    .withMessage('Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)'),
+  body('faction')
+    .optional()
+    .isIn(['terran_alliance', 'zythian_swarm', 'automaton_collective'])
+    .withMessage('Invalid faction')
 ];
 
 const loginValidation = [
@@ -45,7 +49,8 @@ const loginValidation = [
 // Routes
 router.post('/register', registerValidation, authController.register);
 router.post('/login', loginValidation, authController.login);
+router.post('/logout', authController.logout);
 router.get('/profile', authMiddleware, authController.getProfile);
+router.post('/pvp-toggle', authMiddleware, authController.togglePvP);
 
 module.exports = router;
-

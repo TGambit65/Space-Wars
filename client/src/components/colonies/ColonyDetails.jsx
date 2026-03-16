@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { X, Building2, Users, ArrowUp, Package, Trash2, Clock, Globe, Rocket, Sparkles, Factory, Loader } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { X, Building2, Users, ArrowUp, Package, Trash2, Clock, Globe, Rocket, Sparkles, Factory, Loader, Zap, Box } from 'lucide-react';
 import ColonyWonders from './ColonyWonders';
 import ColonyBuildings from './ColonyBuildings';
 
@@ -86,9 +87,18 @@ function ColonyDetails({ colony, ships, onClose, onCollect, onUpgrade, onAbandon
                 </p>
               </div>
             </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-white p-1">
-              <X className="w-6 h-6" />
-            </button>
+            <div className="flex items-center gap-2">
+              <Link
+                to={`/colony/${colony.colony_id}/voxel`}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/20 hover:bg-accent-cyan/20 transition-colors"
+                onClick={onClose}
+              >
+                <Box className="w-4 h-4" /> 3D View
+              </Link>
+              <button onClick={onClose} className="text-gray-400 hover:text-white p-1">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -147,6 +157,44 @@ function ColonyDetails({ colony, ships, onClose, onCollect, onUpgrade, onAbandon
 
             {activeTab === 'overview' && (
               <>
+                {/* Production Overview */}
+                {planet.resources?.length > 0 && (
+                  <div className="px-6 pt-4">
+                    <div className="p-4 rounded-lg bg-space-700/50 space-y-3">
+                      <h3 className="font-semibold text-white flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-neon-cyan" /> Production Overview
+                      </h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        {planet.resources.map(r => {
+                          const remaining = (r.total_quantity || 0) - (r.extracted_quantity || 0);
+                          const pct = r.total_quantity > 0 ? (remaining / r.total_quantity) * 100 : 0;
+                          const infraBonus = 1 + ((colony.infrastructure_level || 1) - 1) * 0.1;
+                          const popBonus = Math.min(1 + (colony.population || 0) / 1000, 2.0);
+                          const ratePerHour = Math.round((r.abundance || 1) * 1.0 * infraBonus * popBonus * 10) / 10;
+                          return (
+                            <div key={r.planet_resource_id || r.resource_type} className="p-2.5 rounded-lg" style={{ background: 'rgba(0,255,255,0.03)', border: '1px solid rgba(0,255,255,0.08)' }}>
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-xs text-white font-medium">{r.resource_type}</span>
+                                <span className="text-[10px] text-neon-cyan font-mono">~{ratePerHour}/hr</span>
+                              </div>
+                              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                                <div className="h-full rounded-full transition-all" style={{
+                                  width: `${pct}%`,
+                                  background: pct > 50 ? '#00ffff' : pct > 20 ? '#ffc107' : '#f44336',
+                                }} />
+                              </div>
+                              <div className="flex justify-between mt-1">
+                                <span className="text-[10px] text-gray-500">x{r.abundance?.toFixed(1)} abundance</span>
+                                <span className="text-[10px] text-gray-500">{remaining.toLocaleString()} remaining</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Collect Resources */}
                 <div className="px-6 pt-4 pb-6">
                   <div className="p-4 rounded-lg bg-space-700/50 space-y-4">

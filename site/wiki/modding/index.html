@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modding & Customization Guide - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+    <script src="../../js/wiki-smart-navigation.js"></script>
+    <script src="../../js/wiki-interactive-features.js"></script>
+    <script src="../../js/wiki-metadata.js"></script>
+    <script src="../../js/wiki-fun-facts.js"></script>
+</head>
+<body class="doc-container modding-page">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="../index.html" class="doc-nav-link">← Wiki Home</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link active">Modding Guide</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Modding & Customization</div>
+        </nav>
+
+        <h1 class="doc-h1 holo-text">🛠️ Modding & Customization Guide</h1>
+        
+        <div class="doc-alert info">
+            <strong>Make It Your Own!</strong> Learn how to customize Space Wars 3000 with mods, 
+            custom content, and your own creative additions! 🎨
+        </div>
+
+        <p class="doc-lead">
+            Ever wanted to add your own ships, create new weapons, or even design entire factions? 
+            This guide shows you how to mod Space Wars 3000 and make it truly yours! From simple 
+            texture swaps to complex gameplay changes, we'll walk you through everything step by step. 
+            Remember: the best mods are the ones that make YOU happy! 🚀✨
+        </p>
+
+        <!-- Getting Started Section -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🚀 Getting Started with Modding</h2>
+            
+            <div class="doc-alert warning">
+                <strong>Safety First!</strong> Always backup your game files before modding. 
+                Trust us, future-you will thank present-you! 💾
+            </div>
+
+            <h3 class="doc-h3">What You'll Need</h3>
+            <ul class="doc-list">
+                <li><strong>Text Editor</strong>: Any editor works, but we recommend VS Code (it's free!)</li>
+                <li><strong>Image Editor</strong>: For custom textures (GIMP or Paint.NET are great free options)</li>
+                <li><strong>JSON Knowledge</strong>: Don't worry, we'll teach you the basics!</li>
+                <li><strong>Creativity</strong>: The most important tool of all! 🎨</li>
+            </ul>
+
+            <h3 class="doc-h3">Mod File Structure</h3>
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Mod Directory Structure</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">MODS/</span>
+                        <span class="terminal-output">Your mod folder</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">├── mod.json</span>
+                        <span class="terminal-info">Mod configuration file</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">├── ships/</span>
+                        <span class="terminal-info">Custom ship definitions</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">├── weapons/</span>
+                        <span class="terminal-info">New weapon types</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">├── textures/</span>
+                        <span class="terminal-info">Custom graphics</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">└── sounds/</span>
+                        <span class="terminal-info">Custom sound effects</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Simple Mods Section -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🎨 Simple Mods for Beginners</h2>
+            
+            <div class="accordion">
+                <div class="accordion-item">
+                    <button class="accordion-trigger">
+                        <span class="accordion-icon">▶</span>
+                        Custom Ship Colors
+                    </button>
+                    <div class="accordion-content">
+                        <p>The easiest mod to start with! Change your ship's color in just 3 steps:</p>
+                        <pre class="doc-code">
+{
+  "ship_color": {
+    "primary": "#FF00FF",    // Hot pink!
+    "secondary": "#00FFFF",  // Cyan accents
+    "glow": "#FFFF00"       // Yellow engine glow
+  }
+}</pre>
+                        <p>Save this as <code>my_colors.json</code> in your mods folder and boom - 
+                        you've got a fabulous pink spaceship! 💖</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-trigger">
+                        <span class="accordion-icon">▶</span>
+                        Funny Ship Names
+                    </button>
+                    <div class="accordion-content">
+                        <p>Give your ships personality with custom name lists:</p>
+                        <pre class="doc-code">
+{
+  "ship_names": [
+    "S.S. Floaty McFloatface",
+    "The Cosmic Potato",
+    "Definitely Not Pirates",
+    "Mom's Spaceship",
+    "Error 404: Ship Not Found"
+  ]
+}</pre>
+                        <p>Now your fleet will have the best names in the galaxy! 😄</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-trigger">
+                        <span class="accordion-icon">▶</span>
+                        Custom Sound Effects
+                    </button>
+                    <div class="accordion-content">
+                        <p>Replace boring laser sounds with anything you want!</p>
+                        <ul class="doc-list">
+                            <li>Record yourself saying "pew pew!"</li>
+                            <li>Use cat meows for missiles</li>
+                            <li>Make engines sound like race cars</li>
+                            <li>Add "YEET!" when firing weapons</li>
+                        </ul>
+                        <p>Just save as .ogg files in the sounds folder!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Modding Section -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🔧 Advanced Modding</h2>
+            
+            <h3 class="doc-h3">Creating Custom Ships</h3>
+            <p>Ready to design your own ship? Here's a complete example:</p>
+            
+            <pre class="doc-code">
+{
+  "id": "mega_destroyer",
+  "name": "Mega Destroyer 9000",
+  "description": "It destroys things... MEGA-ly!",
+  "hull_points": 500,
+  "speed": 7,
+  "maneuverability": 6,
+  "weapon_slots": 8,
+  "special_ability": {
+    "name": "Mega Blast",
+    "cooldown": 60,
+    "effect": "damage_all_enemies",
+    "power": 100
+  }
+}</pre>
+
+            <h3 class="doc-h3">Custom Weapons</h3>
+            <p>Create weapons that match your playstyle:</p>
+            
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">Rainbow Laser</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Shoots all colors at once!</p>
+                        <ul class="doc-list">
+                            <li>Damage: 50 per color</li>
+                            <li>Colors: 7 (ROYGBIV)</li>
+                            <li>Effect: Confuses enemies</li>
+                            <li>Sound: Unicorn neighing</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">Banana Launcher</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Slippery space bananas!</p>
+                        <ul class="doc-list">
+                            <li>Damage: 30</li>
+                            <li>Special: Makes enemies spin</li>
+                            <li>Ammo: Infinite potassium</li>
+                            <li>Warning: May cause giggles</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modding Best Practices -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">📋 Modding Best Practices</h2>
+            
+            <div class="best-practices-grid">
+                <div class="practice-item do">
+                    <h3>✅ DO</h3>
+                    <ul class="doc-list">
+                        <li>Test your mods thoroughly</li>
+                        <li>Share with the community</li>
+                        <li>Credit other modders</li>
+                        <li>Keep backups of everything</li>
+                        <li>Have fun and be creative!</li>
+                    </ul>
+                </div>
+                
+                <div class="practice-item dont">
+                    <h3>❌ DON'T</h3>
+                    <ul class="doc-list">
+                        <li>Make overpowered items</li>
+                        <li>Break game balance (unless it's funny)</li>
+                        <li>Use copyrighted content</li>
+                        <li>Forget to document your changes</li>
+                        <li>Be mean to other modders</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sharing Your Mods -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🌟 Sharing Your Creations</h2>
+            
+            <p>Made something awesome? Share it with the galaxy!</p>
+            
+            <div class="doc-alert accent">
+                <strong>Mod Showcase:</strong> Submit your mods to the community hub and see them 
+                featured in the monthly mod spotlight! 🏆
+            </div>
+            
+            <h3 class="doc-h3">How to Package Your Mod</h3>
+            <ol class="doc-list">
+                <li>Create a cool name (avoid "MyMod" or "Test")</li>
+                <li>Write a fun description</li>
+                <li>Include installation instructions</li>
+                <li>Add screenshots of your creation</li>
+                <li>Zip it up and upload!</li>
+            </ol>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="../index.html" class="doc-nav-link">← Wiki Home</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="../lore/extended-compendium.html" class="doc-nav-link">Extended Lore →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            console.log('Modding Guide loaded');
+        });
+    </script>
+    
+    <style>
+        .best-practices-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .practice-item {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .practice-item.do {
+            border: 2px solid #00ff00;
+        }
+        
+        .practice-item.dont {
+            border: 2px solid #ff6666;
+        }
+        
+        .practice-item h3 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .practice-item.do h3 {
+            color: #00ff00;
+        }
+        
+        .practice-item.dont h3 {
+            color: #ff6666;
+        }
+    </style>
+</body>
+</html>

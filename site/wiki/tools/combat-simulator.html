@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combat Simulator - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+    <script src="../../js/wiki-smart-navigation.js"></script>
+    <script src="../../js/wiki-interactive-features.js"></script>
+    <script src="../../js/wiki-combat-simulator.js"></script>
+</head>
+<body class="doc-container tools-page">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="../index.html" class="doc-nav-link">← Wiki Home</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">Interactive Tools</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="trade-planner.html" class="doc-nav-link">Trade Planner</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="combat-simulator.html" class="doc-nav-link active">Combat Simulator</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item">
+                <a href="index.html" class="doc-breadcrumb-link">Interactive Tools</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Combat Simulator</div>
+        </nav>
+
+        <h1 class="doc-h1 holo-text">⚔️ Combat Simulator</h1>
+        
+        <div class="doc-alert warning">
+            <strong>Battle Testing Laboratory:</strong> Test your ship designs in simulated combat without risking 
+            your actual ships! It's like a holodeck for space battles! 🎮
+        </div>
+
+        <p class="doc-lead">
+            Welcome to the most exciting part of ship design - seeing if your creation can actually survive a fight! 
+            This combat simulator runs thousands of battle scenarios in seconds, giving you detailed analysis of how 
+            your ship performs against different enemies. No more guessing if your design is good - you'll know 
+            exactly how it performs before you build it! Admiral "Never Surprised" Johnson tested over 500 ship 
+            designs here before finding the perfect one. Now he wins every battle because he already knows the outcome! 🏆
+        </p>
+
+        <!-- Combat Setup -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🎯 Combat Setup</h2>
+            
+            <div class="doc-grid doc-grid-2">
+                <!-- Player Ship -->
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🚀 Your Ship</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <div class="ship-selection">
+                            <label>Choose Your Ship:</label>
+                            <select id="player-ship">
+                                <option value="">Select ship type...</option>
+                                <option value="fighter">Fighter - Fast & Agile</option>
+                                <option value="cruiser">Cruiser - Balanced</option>
+                                <option value="battleship">Battleship - Heavy</option>
+                                <option value="corvette">Corvette - Light</option>
+                            </select>
+                        </div>
+                        
+                        <div class="ship-stats" id="player-stats">
+                            <div class="stat-display">
+                                <div class="stat-label">Hull Points:</div>
+                                <div class="stat-value" id="player-hull">--</div>
+                            </div>
+                            <div class="stat-display">
+                                <div class="stat-label">Shield Strength:</div>
+                                <div class="stat-value" id="player-shields">--</div>
+                            </div>
+                            <div class="stat-display">
+                                <div class="stat-label">Armor Rating:</div>
+                                <div class="stat-value" id="player-armor">--</div>
+                            </div>
+                            <div class="stat-display">
+                                <div class="stat-label">Speed:</div>
+                                <div class="stat-value" id="player-speed">--</div>
+                            </div>
+                            <div class="stat-display">
+                                <div class="stat-label">Maneuverability:</div>
+                                <div class="stat-value" id="player-maneuver">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enemy Ship -->
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">👾 Enemy Ship</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <div class="ship-selection">
+                            <label>Choose Enemy Ship:</label>
+                            <select id="enemy-ship">
+                                <option value="">Select enemy type...</option>
+                                <option value="fighter">Fighter - Fast & Agile</option>
+                                <option value="cruiser">Cruiser - Balanced</option>
+                                <option value="battleship">Battleship - Heavy</option>
+                                <option value="corvette">Corvette - Light</option>
+                                <option value="pirate">Pirate Ship - Unpredictable</option>
+                            </select>
+                        </div>
+                        
+                        <div class="ship-stats" id="enemy-stats">
+                            <div class="stat-display">
+                                <div class="stat-label">Hull Points:</div>
+                                <div class="stat-value" id="enemy-hull">--</div>
+                            </div>
+                            <div class="stat-display">
+                                <div class="stat-label">Shield Strength:</div>
+                                <div class="stat-value" id="enemy-shields">--</div>
+                            </div>
+                            <div class="stat-display">
+                                <div class="stat-label">Armor Rating:</div>
+                                <div class="stat-value" id="enemy-armor">--</div>
+                            </div>
+                            <div class="stat-display">
+                                <div class="stat-label">Speed:</div>
+                                <div class="stat-value" id="enemy-speed">--</div>
+                            </div>
+                            <div class="stat-display">
+                                <div class="stat-label">Maneuverability:</div>
+                                <div class="stat-value" id="enemy-maneuver">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="combat-controls">
+                <button class="doc-button primary" onclick="runSimulation()">Run Combat Simulation</button>
+                <button class="doc-button secondary" onclick="runMultipleSimulations()">Run 100 Simulations</button>
+                <button class="doc-button" onclick="clearSimulation()">Clear Results</button>
+            </div>
+        </section>
+
+        <!-- Combat Results -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">📊 Combat Results</h2>
+            
+            <div class="doc-grid doc-grid-2">
+                <!-- Battle Summary -->
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🏆 Battle Summary</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <div class="terminal-window">
+                            <div class="terminal-header">
+                                <span class="terminal-title">Combat Analysis</span>
+                            </div>
+                            <div class="terminal-content" id="battle-summary">
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">STATUS</span>
+                                    <span class="terminal-output">Ready to simulate combat</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">WINNER</span>
+                                    <span class="terminal-output">--</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">ROUNDS</span>
+                                    <span class="terminal-output">--</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">DAMAGE_DEALT</span>
+                                    <span class="terminal-output">--</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">DAMAGE_TAKEN</span>
+                                    <span class="terminal-output">--</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">ACCURACY</span>
+                                    <span class="terminal-output">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Combat Log -->
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">📜 Combat Log</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <div class="combat-log" id="combat-log">
+                            <div class="log-entry">
+                                Combat simulation not yet run. Click "Run Combat Simulation" to begin!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Multiple Simulation Results -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">📈 Statistical Analysis</h2>
+            
+            <div class="doc-alert info">
+                <strong>Big Data Combat:</strong> Running multiple simulations gives you statistical confidence 
+                in your ship's performance. One battle might be lucky - 100 battles show the truth!
+            </div>
+
+            <div class="doc-grid doc-grid-3">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">📊 Win Rate</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <div class="stat-big" id="win-rate">--</div>
+                        <div class="stat-label">Victory Percentage</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="win-rate-bar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">⚡ Average Rounds</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <div class="stat-big" id="avg-rounds">--</div>
+                        <div class="stat-label">Rounds to Victory</div>
+                        <div class="stat-detail" id="round-range">Range: --</div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">💥 Damage Efficiency</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <div class="stat-big" id="damage-efficiency">--</div>
+                        <div class="stat-label">Damage Dealt/Taken</div>
+                        <div class="stat-detail" id="damage-detail">--</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tactical Analysis -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🎯 Tactical Analysis</h2>
+            
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>⚔️ Combat Strengths</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <div id="combat-strengths">
+                        <p>Run a combat simulation to see your ship's tactical strengths and weaknesses!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🛡️ Defensive Analysis</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <div id="defensive-analysis">
+                        <p>Defensive capabilities will be analyzed after combat simulation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>📈 Improvement Suggestions</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <div id="improvement-suggestions">
+                        <p>Ship improvement recommendations will appear here after simulation.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Related Tools -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🔗 Related Tools</h2>
+            
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🚀 Design Better Ships</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Use test results to improve your ship design</p>
+                        <a href="ship-calculator.html" class="doc-button secondary">Ship Calculator →</a>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">💰 Calculate Precise Damage</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Analyze weapon effectiveness in detail</p>
+                        <a href="damage-calculator.html" class="doc-button secondary">Damage Calculator →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="trade-planner.html" class="doc-nav-link">← Trade Planner</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="damage-calculator.html" class="doc-nav-link">Damage Calculator →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            
+            // Initialize Combat Simulator
+            const combatSim = new WikiCombatSimulator();
+            
+            // Add event listeners for ship selection
+            document.getElementById('player-ship').addEventListener('change', function() {
+                const shipType = this.value;
+                if (shipType) {
+                    combatSim.setPlayerShip(shipType);
+                    updatePlayerStats(combatSim.getPlayerShip());
+                }
+            });
+            
+            document.getElementById('enemy-ship').addEventListener('change', function() {
+                const shipType = this.value;
+                if (shipType) {
+                    combatSim.setEnemyShip(shipType);
+                    updateEnemyStats(combatSim.getEnemyShip());
+                }
+            });
+            
+            // Combat simulation functions
+            window.runSimulation = function() {
+                if (!combatSim.playerShip || !combatSim.enemyShip) {
+                    alert('Please select both player and enemy ships');
+                    return;
+                }
+                
+                const result = combatSim.runSingleSimulation();
+                displayBattleResults(result);
+                displayCombatLog(result.log);
+                displayTacticalAnalysis(result);
+            };
+            
+            window.runMultipleSimulations = function() {
+                if (!combatSim.playerShip || !combatSim.enemyShip) {
+                    alert('Please select both player and enemy ships');
+                    return;
+                }
+                
+                const results = combatSim.runMultipleSimulations(100);
+                displayStatisticalResults(results);
+            };
+            
+            window.clearSimulation = function() {
+                // Clear all result displays
+                document.getElementById('battle-summary').innerHTML = `
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STATUS</span>
+                        <span class="terminal-output">Ready to simulate combat</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">WINNER</span>
+                        <span class="terminal-output">--</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">ROUNDS</span>
+                        <span class="terminal-output">--</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">DAMAGE_DEALT</span>
+                        <span class="terminal-output">--</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">DAMAGE_TAKEN</span>
+                        <span class="terminal-output">--</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">ACCURACY</span>
+                        <span class="terminal-output">--</span>
+                    </div>
+                `;
+                
+                document.getElementById('combat-log').innerHTML = `
+                    <div class="log-entry">
+                        Combat simulation not yet run. Click "Run Combat Simulation" to begin!
+                    </div>
+                `;
+                
+                document.getElementById('win-rate').textContent = '--';
+                document.getElementById('avg-rounds').textContent = '--';
+                document.getElementById('damage-efficiency').textContent = '--';
+            };
+            
+            function updatePlayerStats(ship) {
+                document.getElementById('player-hull').textContent = ship.hullPoints;
+                document.getElementById('player-shields').textContent = ship.shields;
+                document.getElementById('player-armor').textContent = ship.armor;
+                document.getElementById('player-speed').textContent = ship.speed;
+                document.getElementById('player-maneuver').textContent = ship.maneuverability;
+            }
+            
+            function updateEnemyStats(ship) {
+                document.getElementById('enemy-hull').textContent = ship.hullPoints;
+                document.getElementById('enemy-shields').textContent = ship.shields;
+                document.getElementById('enemy-armor').textContent = ship.armor;
+                document.getElementById('enemy-speed').textContent = ship.speed;
+                document.getElementById('enemy-maneuver').textContent = ship.maneuverability;
+            }
+            
+            function displayBattleResults(result) {
+                const summary = document.getElementById('battle-summary');
+                summary.innerHTML = `
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STATUS</span>
+                        <span class="terminal-output">Combat simulation complete</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">WINNER</span>
+                        <span class="terminal-output">${result.winner}</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">ROUNDS</span>
+                        <span class="terminal-output">${result.rounds}</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">DAMAGE_DEALT</span>
+                        <span class="terminal-output">${result.playerDamageDealt}</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">DAMAGE_TAKEN</span>
+                        <span class="terminal-output">${result.playerDamageTaken}</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">ACCURACY</span>
+                        <span class="terminal-output">${result.playerAccuracy}%</span>
+                    </div>
+                `;
+            }
+            
+            function displayCombatLog(log) {
+                const logDiv = document.getElementById('combat-log');
+                logDiv.innerHTML = '';
+                
+                log.forEach(entry => {
+                    const logEntry = document.createElement('div');
+                    logEntry.className = 'log-entry';
+                    logEntry.textContent = entry;
+                    logDiv.appendChild(logEntry);
+                });
+            }
+            
+            function displayStatisticalResults(results) {
+                const wins = results.filter(r => r.winner === 'Player').length;
+                const winRate = (wins / results.length * 100).toFixed(1);
+                
+                document.getElementById('win-rate').textContent = winRate + '%';
+                document.getElementById('win-rate-bar').style.width = winRate + '%';
+                
+                const avgRounds = (results.reduce((sum, r) => sum + r.rounds, 0) / results.length).toFixed(1);
+                document.getElementById('avg-rounds').textContent = avgRounds;
+                
+                const minRounds = Math.min(...results.map(r => r.rounds));
+                const maxRounds = Math.max(...results.map(r => r.rounds));
+                document.getElementById('round-range').textContent = `Range: ${minRounds}-${maxRounds}`;
+            }
+            
+            function displayTacticalAnalysis(result) {
+                const strengths = document.getElementById('combat-strengths');
+                const defense = document.getElementById('defensive-analysis');
+                const improvements = document.getElementById('improvement-suggestions');
+                
+                // Generate tactical analysis based on combat results
+                if (result.winner === 'Player') {
+                    strengths.innerHTML = `
+                        <h4>Your ship performed well!</h4>
+                        <ul class="doc-list">
+                            <li>Victory achieved in ${result.rounds} rounds</li>
+                            <li>Dealt ${result.playerDamageDealt} damage</li>
+                            <li>Accuracy: ${result.playerAccuracy}%</li>
+                        </ul>
+                    `;
+                } else {
+                    strengths.innerHTML = `
+                        <h4>Your ship needs improvement:</h4>
+                        <ul class="doc-list">
+                            <li>Defeated in ${result.rounds} rounds</li>
+                            <li>Only dealt ${result.playerDamageDealt} damage</li>
+                            <li>Accuracy: ${result.playerAccuracy}%</li>
+                        </ul>
+                    `;
+                }
+                
+                defense.innerHTML = `
+                    <h4>Defensive Performance:</h4>
+                    <ul class="doc-list">
+                        <li>Damage taken: ${result.playerDamageTaken}</li>
+                        <li>Survival time: ${result.rounds} rounds</li>
+                        <li>Damage mitigation: ${((1 - result.playerDamageTaken / result.playerDamageDealt) * 100).toFixed(1)}%</li>
+                    </ul>
+                `;
+                
+                improvements.innerHTML = `
+                    <h4>Recommendations:</h4>
+                    <ul class="doc-list">
+                        <li>Try different weapon combinations</li>
+                        <li>Consider upgrading shields or armor</li>
+                        <li>Test against different enemy types</li>
+                        <li>Run multiple simulations for statistical confidence</li>
+                    </ul>
+                `;
+            }
+            
+            console.log('Combat Simulator loaded');
+        });
+    </script>
+    
+    <style>
+        .combat-controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .combat-controls button {
+            margin: 0 10px;
+        }
+        
+        .ship-selection {
+            margin-bottom: 20px;
+        }
+        
+        .ship-selection label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .ship-selection select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #333;
+            background: #1a1a1a;
+            color: #ffffff;
+            border-radius: 4px;
+        }
+        
+        .ship-stats {
+            margin-top: 15px;
+        }
+        
+        .stat-display {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px;
+            background: rgba(0, 255, 0, 0.1);
+            border-radius: 4px;
+        }
+        
+        .stat-label {
+            font-weight: bold;
+        }
+        
+        .stat-value {
+            color: #00ffff;
+        }
+        
+        .combat-log {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            color: #00ff00;
+        }
+        
+        .stat-big {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00ffff;
+            text-align: center;
+        }
+        
+        .stat-detail {
+            text-align: center;
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
+            transition: width 0.3s ease;
+        }
+    </style>
+</body>
+</html>

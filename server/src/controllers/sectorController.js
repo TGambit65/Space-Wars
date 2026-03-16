@@ -3,6 +3,96 @@ const { Op, fn, col, literal } = require('sequelize');
 const { Sector, SectorConnection, Port, Ship, NPC, Planet, Colony, sequelize } = require('../models');
 const config = require('../config');
 const { getDiscoveredSectorIds } = require('../services/discoveryService');
+const worldPolicyService = require('../services/worldPolicyService');
+
+// ─── Static Map Cache ────────────────────────────────────────────
+// Sectors and connections are generated once and never change at runtime.
+// Cache them to avoid full-table scans on every /api/sectors/map request.
+let staticMapCache = null; // { sectors, connections, sectorCount, generatedAt }
+
+const clearMapCache = () => {
+  staticMapCache = null;
+};
+
+const serializeSector = (sector) => ({
+  sector_id: sector.sector_id,
+  name: sector.name,
+  x_coord: sector.x_coord,
+  y_coord: sector.y_coord,
+  z_coord: sector.z_coord,
+  type: sector.type,
+  star_class: sector.star_class,
+  description: sector.description,
+  is_starting_sector: sector.is_starting_sector,
+  hazard_level: sector.hazard_level,
+  phenomena: sector.phenomena,
+  policy_summary: worldPolicyService.summarizeSectorPolicy(sector)
+});
+
+const getStaticMapData = async () => {
+  if (staticMapCache) return staticMapCache;
+
+  const sectors = await Sector.findAll({
+    attributes: [
+      'sector_id', 'name', 'x_coord', 'y_coord', 'type', 'star_class',
+      'hazard_level', 'is_starting_sector', 'phenomena',
+      'zone_class', 'security_class', 'access_mode', 'owner_user_id', 'owner_corporation_id', 'rule_flags'
+    ],
+    include: [{
+      model: Port,
+      as: 'ports',
+      attributes: ['port_id'],
+      where: { is_active: true },
+      required: false
+    }]
+  });
+
+  const connections = await SectorConnection.findAll({
+    attributes: [
+      'sector_a_id',
+      'sector_b_id',
+      'connection_type',
+      'lane_class',
+      'access_mode',
+      'travel_time',
+      'rule_flags'
+    ]
+  });
+
+  staticMapCache = {
+    sectors: sectors.map(s => ({
+      sector_id: s.sector_id,
+      name: s.name,
+      x_coord: s.x_coord,
+      y_coord: s.y_coord,
+      type: s.type,
+      star_class: s.star_class,
+      hazard_level: s.hazard_level,
+      is_starting_sector: s.is_starting_sector,
+      phenomena: s.phenomena,
+      zone_class: s.zone_class,
+      security_class: s.security_class,
+      access_mode: s.access_mode,
+      owner_user_id: s.owner_user_id,
+      owner_corporation_id: s.owner_corporation_id,
+      rule_flags: s.rule_flags,
+      has_port: s.ports && s.ports.length > 0
+    })),
+    connections: connections.map(c => ({
+      from_id: c.sector_a_id,
+      to_id: c.sector_b_id,
+      connection_type: c.connection_type,
+      lane_class: c.lane_class,
+      access_mode: c.access_mode,
+      travel_time: c.travel_time,
+      rule_flags: c.rule_flags
+    })),
+    sectorCount: sectors.length,
+    generatedAt: Date.now()
+  };
+
+  return staticMapCache;
+};
 
 const getSectors = async (req, res, next) => {
   try {
@@ -33,7 +123,7 @@ const getSectors = async (req, res, next) => {
     res.json({
       success: true,
       data: {
-        sectors,
+        sectors: sectors.map(serializeSector),
         pagination: {
           total: count,
           page: parseInt(page),
@@ -74,7 +164,7 @@ const getSectorById = async (req, res, next) => {
       where: {
         [Op.or]: [
           { sector_a_id: sectorId },
-          { sector_b_id: sectorId }
+          { sector_b_id: sectorId, is_bidirectional: true }
         ]
       },
       include: [
@@ -88,9 +178,13 @@ const getSectorById = async (req, res, next) => {
         ? conn.sectorB
         : conn.sectorA;
       return {
-        sector: adjacentSector,
+        sector: serializeSector(adjacentSector),
         connection_type: conn.connection_type,
-        travel_time: conn.travel_time
+        lane_class: conn.lane_class,
+        access_mode: conn.access_mode,
+        travel_time: conn.travel_time,
+        sector_policy: worldPolicyService.summarizeSectorPolicy(adjacentSector),
+        connection_policy: worldPolicyService.summarizeConnectionPolicy(conn, sector, adjacentSector)
       };
     });
 
@@ -103,7 +197,8 @@ const getSectorById = async (req, res, next) => {
     res.json({
       success: true,
       data: {
-        sector,
+        sector: serializeSector(sector),
+        sector_policy: worldPolicyService.summarizeSectorPolicy(sector),
         adjacentSectors,
         ports
       }
@@ -143,46 +238,41 @@ const getUniverseStats = async (req, res, next) => {
  * GET /api/sectors/map
  * Single-payload endpoint optimized for galaxy map rendering.
  * Includes fog-of-war: only discovered systems have full detail.
+ *
+ * Static data (sectors, connections, ports) is cached in-memory.
+ * Dynamic data (ship counts, user ships, discoveries) is fetched per-request.
+ * ETag support for conditional requests.
  */
 const getMapData = async (req, res, next) => {
   try {
+    // Load static map data from cache (sectors + connections + port presence)
+    const staticData = await getStaticMapData();
+
+    // ETag: based on sector count + cache generation time
+    const etag = `"map-${staticData.sectorCount}-${staticData.generatedAt}"`;
+    res.set('ETag', etag);
+    res.set('Cache-Control', 'private, max-age=30');
+
+    if (req.headers['if-none-match'] === etag) {
+      return res.status(304).end();
+    }
+
     // Get discovered sector IDs for the current user (if authenticated)
     let discoveredIds = null;
     if (req.userId) {
       discoveredIds = await getDiscoveredSectorIds(req.userId);
     }
 
-    // Fetch all sectors with port/ship counts
-    const sectors = await Sector.findAll({
-      attributes: [
-        'sector_id', 'name', 'x_coord', 'y_coord', 'type', 'star_class',
-        'hazard_level', 'is_starting_sector', 'phenomena'
-      ],
-      include: [
-        {
-          model: Port,
-          as: 'ports',
-          attributes: ['port_id'],
-          where: { is_active: true },
-          required: false
-        },
-        {
-          model: Ship,
-          as: 'ships',
-          attributes: ['ship_id'],
-          required: false
-        }
-      ]
+    // Dynamic: aggregate ship counts per sector (1 lightweight query)
+    const shipCounts = await Ship.findAll({
+      where: { is_active: true },
+      attributes: ['current_sector_id', [fn('COUNT', col('ship_id')), 'ship_count']],
+      group: ['current_sector_id'],
+      raw: true
     });
+    const shipCountMap = new Map(shipCounts.map(r => [r.current_sector_id, parseInt(r.ship_count)]));
 
-    // Fetch all connections
-    const connections = await SectorConnection.findAll({
-      attributes: ['sector_a_id', 'sector_b_id', 'connection_type', 'travel_time']
-    });
-
-    const config = require('../config');
-
-    // Fetch current user's ships for map badges
+    // Dynamic: fetch current user's ships for map badges (1 query, ~10 rows)
     let userShipsBySector = new Map();
     if (req.userId) {
       const userShips = await Ship.findAll({
@@ -203,11 +293,11 @@ const getMapData = async (req, res, next) => {
       }
     }
 
-    const systems = sectors.map(s => {
+    // Merge static + dynamic
+    const systems = staticData.sectors.map(s => {
       const discovered = !discoveredIds || discoveredIds.has(s.sector_id);
       return {
         sector_id: s.sector_id,
-        // Fog of war: hide details for undiscovered systems
         name: discovered ? s.name : null,
         x_coord: s.x_coord,
         y_coord: s.y_coord,
@@ -215,22 +305,25 @@ const getMapData = async (req, res, next) => {
         star_class: discovered ? s.star_class : null,
         hazard_level: discovered ? s.hazard_level : null,
         is_starting_sector: s.is_starting_sector,
-        has_port: discovered ? (s.ports && s.ports.length > 0) : null,
-        ship_count: discovered ? (s.ships ? s.ships.length : 0) : null,
+        has_port: discovered ? s.has_port : null,
+        ship_count: discovered ? (shipCountMap.get(s.sector_id) || 0) : null,
         phenomena: discovered ? s.phenomena : null,
+        policy_summary: discovered ? worldPolicyService.summarizeSectorPolicy(s) : null,
         discovered,
         my_ships: discovered ? (userShipsBySector.get(s.sector_id) || []) : []
       };
     });
 
     // Only include hyperlanes where at least one end is discovered
-    const hyperlanes = connections
-      .filter(c => !discoveredIds || discoveredIds.has(c.sector_a_id) || discoveredIds.has(c.sector_b_id))
+    const hyperlanes = staticData.connections
+      .filter(c => !discoveredIds || discoveredIds.has(c.from_id) || discoveredIds.has(c.to_id))
       .map(c => ({
-        from_id: c.sector_a_id,
-        to_id: c.sector_b_id,
-        connection_type: c.connection_type,
-        travel_time: c.travel_time
+        ...c,
+        connection_policy: {
+          lane_class: c.lane_class,
+          access_mode: c.access_mode,
+          rule_flags: c.rule_flags || {}
+        }
       }));
 
     res.json({
@@ -239,8 +332,8 @@ const getMapData = async (req, res, next) => {
         systems,
         hyperlanes,
         galaxy_radius: config.universe.galaxyRadius,
-        total_systems: sectors.length,
-        discovered_systems: discoveredIds ? discoveredIds.size : sectors.length
+        total_systems: staticData.sectorCount,
+        discovered_systems: discoveredIds ? discoveredIds.size : staticData.sectorCount
       }
     });
   } catch (error) {
@@ -307,7 +400,7 @@ const getSystemDetail = async (req, res, next) => {
       where: {
         [Op.or]: [
           { sector_a_id: sectorId },
-          { sector_b_id: sectorId }
+          { sector_b_id: sectorId, is_bidirectional: true }
         ]
       },
       include: [
@@ -324,7 +417,11 @@ const getSystemDetail = async (req, res, next) => {
         type: neighbor.type,
         star_class: neighbor.star_class,
         connection_type: conn.connection_type,
-        travel_time: conn.travel_time
+        lane_class: conn.lane_class,
+        access_mode: conn.access_mode,
+        travel_time: conn.travel_time,
+        sector_policy: worldPolicyService.summarizeSectorPolicy(neighbor),
+        connection_policy: worldPolicyService.summarizeConnectionPolicy(conn, sector, neighbor)
       };
     });
 
@@ -344,7 +441,8 @@ const getSystemDetail = async (req, res, next) => {
           star_class: sector.star_class,
           star_color,
           hazard_level: sector.hazard_level,
-          description: sector.description
+          description: sector.description,
+          policy_summary: worldPolicyService.summarizeSectorPolicy(sector)
         },
         planets,
         ports,
@@ -363,5 +461,6 @@ module.exports = {
   getSectorById,
   getUniverseStats,
   getMapData,
-  getSystemDetail
+  getSystemDetail,
+  clearMapCache
 };

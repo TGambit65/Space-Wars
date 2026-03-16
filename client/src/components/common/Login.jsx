@@ -1,126 +1,258 @@
 import { useState } from 'react';
 import { auth } from '../../services/api';
-import { Rocket, LogIn, UserPlus, AlertCircle } from 'lucide-react';
+import { Rocket, LogIn, UserPlus, AlertCircle, Shield, Swords, TrendingUp, ChevronRight, ChevronLeft } from 'lucide-react';
+
+const FACTIONS = [
+  {
+    id: 'terran_alliance',
+    name: 'Terran Alliance',
+    icon: Shield,
+    color: '#3498db',
+    description: 'Masters of trade and diplomacy',
+    lore: 'Humanity\'s coalition of democratic worlds. The largest merchant fleet in the galaxy.',
+    bonuses: { trade: '+25%', diplomacy: '+20%', combat: '-10%', technology: '+10%' },
+    startingCredits: '12,000',
+    startingShip: 'Scout'
+  },
+  {
+    id: 'zythian_swarm',
+    name: 'Zythian Swarm',
+    icon: Swords,
+    color: '#e74c3c',
+    description: 'Ferocious insectoid collective',
+    lore: 'Bio-organic ships feared across the galaxy. Hive-mind coordination makes them deadly in combat.',
+    bonuses: { trade: '-30%', diplomacy: '-40%', combat: '+40%', technology: '-10%' },
+    startingCredits: '8,000',
+    startingShip: 'Fighter'
+  },
+  {
+    id: 'automaton_collective',
+    name: 'Automaton Collective',
+    icon: TrendingUp,
+    color: '#9b59b6',
+    description: 'Sentient machines seeking perfection',
+    lore: 'Originally mining drones that achieved sentience. Technological superiority offset by alien psychology.',
+    bonuses: { trade: '-5%', diplomacy: '-15%', combat: '+10%', technology: '+30%' },
+    startingCredits: '10,000',
+    startingShip: 'Scout'
+  }
+];
 
 function Login({ onLogin }) {
   const [isRegister, setIsRegister] = useState(false);
-  const [formData, setFormData] = useState({ username: '', email: '', password: '' });
+  const [step, setStep] = useState('form'); // 'form' | 'faction'
+  const [formData, setFormData] = useState({ username: '', email: '', password: '', faction: 'terran_alliance' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
+    if (isRegister && step === 'form') {
+      setStep('faction');
+      return;
+    }
+
+    setLoading(true);
     try {
       if (isRegister) {
         const res = await auth.register(formData);
-        // API returns { success: true, data: { user, token, ... } }
         const { user, token } = res.data.data;
         onLogin(user, token);
       } else {
         const res = await auth.login(formData.username, formData.password);
-        // API returns { success: true, data: { user, token } }
         const { user, token } = res.data.data;
         onLogin(user, token);
       }
     } catch (err) {
       const data = err.response?.data;
-      // Handle validation errors array
       if (data?.errors && Array.isArray(data.errors)) {
         setError(data.errors.map(e => e.msg).join(', '));
       } else {
         setError(data?.message || data?.error || 'An error occurred');
       }
+      if (isRegister) setStep('form');
     } finally {
       setLoading(false);
     }
   };
+
+  const selectedFaction = FACTIONS.find(f => f.id === formData.faction);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-space-700 border-2 border-accent-cyan mb-4 animate-pulse-slow">
-            <Rocket className="w-10 h-10 text-accent-cyan" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 animate-pulse-slow"
+            style={{
+              background: 'rgba(0, 255, 255, 0.06)',
+              border: '2px solid rgba(0, 255, 255, 0.3)',
+              boxShadow: '0 0 30px rgba(0, 255, 255, 0.15)',
+            }}
+          >
+            <Rocket className="w-10 h-10 text-neon-cyan" />
           </div>
-          <h1 className="text-3xl font-bold text-white">Space Wars 3000</h1>
-          <p className="text-gray-400 mt-2">Explore. Trade. Conquer.</p>
+          <h1 className="text-3xl font-bold text-white font-display tracking-wider">Space Wars</h1>
+          <p className="text-neon-cyan/50 font-display text-sm tracking-[0.3em] mt-1">3000</p>
+          <p className="text-gray-500 mt-3 text-sm">Explore. Trade. Conquer.</p>
         </div>
 
         {/* Form Card */}
-        <div className="card">
-          <h2 className="text-xl font-semibold text-center mb-6">
-            {isRegister ? 'Create Account' : 'Welcome Back'}
-          </h2>
-
-          {error && (
-            <div className="flex items-center gap-2 p-3 mb-4 rounded-lg bg-accent-red/10 border border-accent-red/30 text-accent-red">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              <span className="text-sm">{error}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="username" className="block text-sm text-gray-400 mb-1">Username</label>
-              <input
-                id="username"
-                type="text"
-                className="input w-full"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                required
-              />
-            </div>
-
-            {isRegister && (
-              <div>
-                <label htmlFor="email" className="block text-sm text-gray-400 mb-1">Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  className="input w-full"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                />
+        <div className="holo-panel p-6">
+          {isRegister && step === 'faction' ? (
+            /* Faction Selection Step */
+            <>
+              <div className="flex items-center gap-2 mb-6">
+                <button onClick={() => setStep('form')} className="text-gray-400 hover:text-neon-cyan transition-colors">
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <h2 className="text-lg font-display text-white">Choose Your Faction</h2>
               </div>
-            )}
 
-            <div>
-              <label htmlFor="password" className="block text-sm text-gray-400 mb-1">Password</label>
-              <input
-                id="password"
-                type="password"
-                className="input w-full"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
-              />
-            </div>
+              <div className="space-y-3 mb-6">
+                {FACTIONS.map(faction => {
+                  const Icon = faction.icon;
+                  const isSelected = formData.faction === faction.id;
+                  return (
+                    <button
+                      key={faction.id}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, faction: faction.id })}
+                      className="w-full text-left p-4 rounded-lg transition-all duration-200"
+                      style={{
+                        background: isSelected ? `${faction.color}15` : 'rgba(255,255,255,0.02)',
+                        border: `1px solid ${isSelected ? `${faction.color}60` : 'rgba(255,255,255,0.06)'}`,
+                        boxShadow: isSelected ? `0 0 20px ${faction.color}15` : 'none',
+                      }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg" style={{ background: `${faction.color}20` }}>
+                          <Icon className="w-5 h-5" style={{ color: faction.color }} />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-display font-semibold" style={{ color: isSelected ? faction.color : '#fff' }}>
+                            {faction.name}
+                          </p>
+                          <p className="text-xs text-gray-500">{faction.description}</p>
+                        </div>
+                        {isSelected && (
+                          <div className="w-3 h-3 rounded-full" style={{ background: faction.color, boxShadow: `0 0 8px ${faction.color}` }} />
+                        )}
+                      </div>
+                      {isSelected && (
+                        <div className="mt-3 pl-12">
+                          <p className="text-xs text-gray-400 mb-2">{faction.lore}</p>
+                          <div className="grid grid-cols-4 gap-2">
+                            {Object.entries(faction.bonuses).map(([key, val]) => (
+                              <div key={key} className="text-center">
+                                <p className="text-[10px] text-gray-600 uppercase">{key}</p>
+                                <p className="text-xs font-bold" style={{ color: val.startsWith('+') ? '#4caf50' : '#f44336' }}>{val}</p>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex gap-4 mt-2 text-xs text-gray-500">
+                            <span>Credits: {faction.startingCredits}</span>
+                            <span>Ship: {faction.startingShip}</span>
+                          </div>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
 
-            <button type="submit" className="btn btn-primary w-full flex items-center justify-center gap-2" disabled={loading}>
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-space-900 border-t-transparent rounded-full animate-spin" />
-              ) : isRegister ? (
-                <><UserPlus className="w-5 h-5" /> Create Account</>
-              ) : (
-                <><LogIn className="w-5 h-5" /> Login</>
+              <button onClick={handleSubmit} className="holo-button w-full justify-center" disabled={loading}>
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-neon-cyan border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <UserPlus className="w-4 h-4" /> Create Account as {selectedFaction?.name}
+                    <ChevronRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </>
+          ) : (
+            /* Login / Register Form */
+            <>
+              <h2 className="text-lg font-display text-center mb-6 text-white">
+                {isRegister ? 'Create Account' : 'Welcome Back'}
+              </h2>
+
+              {error && (
+                <div className="flex items-center gap-2 p-3 mb-4 rounded-lg text-sm"
+                  style={{ background: 'rgba(244,67,54,0.08)', border: '1px solid rgba(244,67,54,0.25)', color: '#f44336' }}
+                >
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{error}</span>
+                </div>
               )}
-            </button>
-          </form>
 
-          <div className="mt-4 text-center">
-            <button
-              onClick={() => { setIsRegister(!isRegister); setError(''); }}
-              className="text-accent-cyan hover:underline text-sm"
-            >
-              {isRegister ? 'Already have an account? Login' : "Don't have an account? Register"}
-            </button>
-          </div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="username" className="block text-xs text-gray-500 mb-1.5 uppercase tracking-wider font-display">Username</label>
+                  <input
+                    id="username"
+                    type="text"
+                    className="input w-full"
+                    autoComplete="username"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    required
+                  />
+                </div>
+
+                {isRegister && (
+                  <div>
+                    <label htmlFor="email" className="block text-xs text-gray-500 mb-1.5 uppercase tracking-wider font-display">Email</label>
+                    <input
+                      id="email"
+                      type="email"
+                      className="input w-full"
+                      autoComplete="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label htmlFor="password" className="block text-xs text-gray-500 mb-1.5 uppercase tracking-wider font-display">Password</label>
+                  <input
+                    id="password"
+                    type="password"
+                    className="input w-full"
+                    autoComplete={isRegister ? 'new-password' : 'current-password'}
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <button type="submit" className="holo-button w-full justify-center mt-2" disabled={loading}>
+                  {loading ? (
+                    <div className="w-5 h-5 border-2 border-neon-cyan border-t-transparent rounded-full animate-spin" />
+                  ) : isRegister ? (
+                    <><UserPlus className="w-4 h-4" /> Choose Faction <ChevronRight className="w-4 h-4" /></>
+                  ) : (
+                    <><LogIn className="w-4 h-4" /> Login</>
+                  )}
+                </button>
+              </form>
+
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => { setIsRegister(!isRegister); setError(''); setStep('form'); }}
+                  className="text-neon-cyan/70 hover:text-neon-cyan text-sm transition-colors"
+                >
+                  {isRegister ? 'Already have an account? Login' : "Don't have an account? Register"}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -128,4 +260,3 @@ function Login({ onLogin }) {
 }
 
 export default Login;
-

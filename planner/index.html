@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Wars 3000 - Game Design Plan</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a1e;--card:#111133;--border:#1a1a4e;--accent:#00ffff;--orange:#ff6600;--text:#e0e0e0;--muted:#666;--red:#f44;--green:#4c4;--purple:#a78bfa;--yellow:#ffc107}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+
+.app{display:flex;min-height:100vh}
+.sidebar{width:280px;background:#080818;border-right:1px solid var(--border);position:fixed;height:100vh;overflow-y:auto;z-index:10}
+.main{margin-left:280px;flex:1;padding:2rem 3rem;max-width:1100px}
+
+.sidebar-header{padding:1.5rem;border-bottom:1px solid var(--border)}
+.sidebar-header h1{font-size:1.2rem;color:var(--accent);letter-spacing:2px}
+.sidebar-header p{font-size:.7rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:3px}
+.nav-section{padding:.75rem 0}
+.nav-section-title{padding:.5rem 1.5rem;font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-weight:700}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 1.5rem;font-size:.85rem;color:#999;cursor:pointer;transition:all .15s;border-left:2px solid transparent}
+.nav-item:hover{background:rgba(0,255,255,.04);color:#ccc}
+.nav-item .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dot-exists{background:var(--green)}.dot-new{background:var(--orange)}.dot-planned{background:var(--yellow)}
+.nav-item .count{margin-left:auto;font-size:.7rem;background:rgba(255,255,255,.06);padding:1px 6px;border-radius:8px;color:var(--muted)}
+
+.section{margin-bottom:3rem;scroll-margin-top:2rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.section-header h2{font-size:1.4rem;color:#fff}
+.badge{font-size:.6rem;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.badge-exists{background:rgba(76,175,80,.15);color:var(--green);border:1px solid rgba(76,175,80,.3)}
+.badge-new{background:rgba(255,102,0,.15);color:var(--orange);border:1px solid rgba(255,102,0,.3)}
+.badge-planned{background:rgba(255,193,7,.15);color:var(--yellow);border:1px solid rgba(255,193,7,.3)}
+
+.feature{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.25rem;margin-bottom:1rem;transition:border-color .2s}
+.feature:hover{border-color:rgba(0,255,255,.2)}
+.feature-title{font-size:1rem;color:#fff;font-weight:600}
+.feature-summary{font-size:.85rem;color:#aaa;margin-top:.4rem;line-height:1.6}
+.feature-meta{display:flex;gap:8px;margin-top:.6rem;flex-wrap:wrap;align-items:center}
+.tag{font-size:.7rem;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.04);color:var(--muted);border:1px solid rgba(255,255,255,.06)}
+.tag-pve{color:#4caf50;border-color:rgba(76,175,80,.2);background:rgba(76,175,80,.06)}
+.tag-pvp{color:#f44336;border-color:rgba(244,67,54,.2);background:rgba(244,67,54,.06)}
+.tag-store{color:var(--orange);border-color:rgba(255,102,0,.2);background:rgba(255,102,0,.06)}
+.tag-backend{color:var(--purple);border-color:rgba(167,139,250,.2);background:rgba(167,139,250,.06)}
+.tag-frontend{color:var(--accent);border-color:rgba(0,255,255,.2);background:rgba(0,255,255,.06)}
+.details-link{font-size:.75rem;color:var(--accent);cursor:pointer;opacity:.8;margin-left:auto;padding:3px 10px;border:1px solid rgba(0,255,255,.25);border-radius:4px;transition:all .15s}
+.details-link:hover{opacity:1;background:rgba(0,255,255,.08)}
+
+.workflow{display:flex;gap:4px;align-items:center;margin-top:.5rem;flex-wrap:wrap}
+.wf-step{font-size:.7rem;padding:3px 8px;border-radius:3px;background:rgba(0,255,255,.06);border:1px solid rgba(0,255,255,.15);color:var(--accent)}
+.wf-arrow{color:var(--muted);font-size:.7rem}
+
+/* Comments (inline on cards) */
+.comments-toggle{font-size:.8rem;color:var(--accent);cursor:pointer;margin-top:.75rem;display:inline-flex;align-items:center;gap:4px;opacity:.7}
+.comments-toggle:hover{opacity:1}
+.comments-area{margin-top:.75rem;display:none}
+.comments-area.open{display:block}
+.comment{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.05);border-radius:6px;padding:.75rem;margin-bottom:.5rem}
+.comment-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.comment-author{font-size:.75rem;color:var(--accent);font-weight:600}
+.comment-time{font-size:.65rem;color:var(--muted)}
+.comment-text{font-size:.82rem;color:#bbb;white-space:pre-wrap}
+.comment-delete{font-size:.65rem;color:var(--red);cursor:pointer;opacity:.5;margin-left:8px}
+.comment-delete:hover{opacity:1}
+.comment-form{display:flex;gap:8px;margin-top:.5rem}
+.comment-form input[type=text]{flex:1;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:4px;padding:6px 10px;color:var(--text);font-size:.82rem;outline:none}
+.comment-form input[type=text]:focus{border-color:var(--accent)}
+.comment-form button{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.3);color:var(--accent);padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.8rem;white-space:nowrap}
+.comment-form button:hover{background:rgba(0,255,255,.2)}
+
+/* Modal */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;justify-content:center;align-items:flex-start;padding:3vh 2vw;overflow-y:auto}
+.modal-backdrop.open{display:flex}
+.modal{background:#0d0d2b;border:1px solid var(--border);border-radius:12px;width:100%;max-width:850px;max-height:94vh;overflow-y:auto;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;padding:1.5rem 2rem 1rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:#0d0d2b;z-index:1}
+.modal-header h2{font-size:1.3rem;color:#fff}
+.modal-close{background:none;border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.modal-close:hover{color:var(--red);border-color:var(--red)}
+.modal-body{padding:1.5rem 2rem 2rem}
+.modal-section{margin-bottom:1.5rem}
+.modal-section-title{font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--accent);font-weight:700;margin-bottom:.5rem;padding-bottom:.35rem;border-bottom:1px solid rgba(0,255,255,.1)}
+.modal-section p,.modal-section li{font-size:.88rem;color:#bbb;line-height:1.7}
+.modal-section ul{padding-left:1.25rem;margin-top:.25rem}
+.modal-section li{margin-bottom:.3rem}
+.modal-section .detail-table{width:100%;border-collapse:collapse;margin-top:.4rem;font-size:.82rem}
+.modal-section .detail-table th{text-align:left;color:var(--accent);font-size:.65rem;text-transform:uppercase;letter-spacing:1px;padding:6px 8px;border-bottom:1px solid var(--border)}
+.modal-section .detail-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.03);color:#bbb}
+
+.author-bar{padding:.75rem 1.5rem;border-top:1px solid var(--border);margin-top:auto}
+.author-bar label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px}
+.author-bar input{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:4px;padding:5px 8px;color:var(--text);font-size:.8rem;outline:none}
+.author-bar input:focus{border-color:var(--accent)}
+
+.stats{display:flex;gap:1.5rem;padding:1rem 1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.stat{text-align:center}.stat-val{font-size:1.2rem;font-weight:700;color:#fff}.stat-label{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+
+.search{padding:.75rem 1.5rem}
+.search input{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-size:.85rem;outline:none}
+.search input:focus{border-color:var(--accent)}
+.search input::placeholder{color:#444}
+
+@media(max-width:768px){.sidebar{display:none}.main{margin-left:0;padding:1rem}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h1>SPACE WARS 3000</h1>
+    <p>Game Design Plan</p>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div class="search"><input type="text" id="search" placeholder="Search features..."></div>
+  <nav id="nav"></nav>
+  <div class="author-bar">
+    <label>Your Name (for comments)</label>
+    <input type="text" id="authorName" placeholder="e.g. Todd, Claude, Droid..." />
+  </div>
+</aside>
+<main class="main" id="content"></main>
+</div>
+<div class="modal-backdrop" id="modalBackdrop"><div class="modal" id="modal"></div></div>
+
+<script>
+const PLAN=[
+// ============ UNIVERSE & WORLD ============
+{id:'universe',title:'Universe & World Design',status:'planned',features:[
+{id:'sector-zones',title:'Zone-Based Galaxy Layout',status:'new',
+  desc:'Galaxy split into PvE/PvP zones with dedicated Adventure Zones (5-10 sectors each). PvP zones have increased resources and rare drops. Home sectors are on-demand, not part of shared count. ~2,040 shared sectors total.',
+  tags:['backend','pve','pvp'],
+  workflow:['Define zone boundaries','Update universe generator','Zone flags on Sector model','Adventure zone cluster generator','Map UI zone colors','PvP flag enforcement','Reward multiplier per zone'],
+  details:`<p>Zone layout with sector counts:</p>
+<table class="detail-table"><tr><th>Zone</th><th>Sectors</th><th>Type</th><th>Level Range</th></tr>
+<tr><td>Core Hubs</td><td>200</td><td>Protected PvE</td><td>L1-3</td></tr>
+<tr><td>Inner Ring</td><td>600</td><td>Mid-game PvE</td><td>L3-6</td></tr>
+<tr><td>Outer Ring</td><td>500</td><td>Endgame PvE</td><td>L5-8</td></tr>
+<tr><td>PvE Adventure Zones</td><td>80</td><td>5-10 sector clusters</td><td>L4-8</td></tr>
+<tr><td>Frontier</td><td>400</td><td>Open PvP</td><td>L7-10</td></tr>
+<tr><td>Deep Space</td><td>100</td><td>Elite PvP</td><td>L9-10+</td></tr>
+<tr><td>PvP Adventure Zones</td><td>60</td><td>High-reward clusters</td><td>L8-10+</td></tr>
+<tr><td>Wormhole Nodes</td><td>40</td><td>Transit</td><td>--</td></tr>
+</table>
+<p>Home sectors are lazily generated from user_id seed. 5,000 players = 5,000+ home sectors loaded on-demand, plus purchased expansion sectors. Not part of shared sector count.</p>
+<p><strong>PvP Adventure Zones</strong> have significantly increased resource spawns, rare ore veins, and exclusive item drops. Risk = reward -- these are the most profitable areas in the game but fully contested.</p>
+<p><strong>PvE Adventure Zones</strong> offer group content (3-5 players), instanced or limited occupancy, periodic resets. Safer but lower rewards than PvP equivalents.</p>`},
+
+{id:'home-sectors',title:'Player Home Sectors (Homesteads)',status:'new',
+  desc:'Each player gets a procedurally generated home sector at galaxy rim with resource planets, NPC port, jump points to hubs, and buildable shipyards. Owner + alliance only. One-time Deluxe/Premium Starter Packs (not subscription-tied) for extra sectors.',
+  tags:['backend','frontend','store'],
+  workflow:['Homestead generator service','Access control middleware','Jump point connections to hubs','Shipyard building type','Shipyard cap per sector/orbit','On-demand loading','Store template purchase flow'],
+  details:`<p>Home sector contents (generated from user_id seed):</p>
+<ul>
+<li><strong>2-3 resource planets</strong> -- enough to bootstrap, not a windfall. Mixed types based on faction.</li>
+<li><strong>1 small NPC port</strong> -- basic supplies, repairs, fuel. No rare commodities.</li>
+<li><strong>2-3 jump points</strong> to nearby Core hub sectors for quick access to the shared galaxy.</li>
+<li><strong>Asteroid/resource nodes</strong> for mining barges.</li>
+</ul>
+<p><strong>Shipyards:</strong> Players can build shipyards for ship construction. Cap: 2 shipyards per sector, 1 per planet orbit. Building a shipyard requires a Construction Ship + blueprints + resources.</p>
+<p><strong>Access Control:</strong> Only the owner and their corporation/alliance members can enter. Adjustable to "Corp only", "Corp + Allies", or "Locked" (owner only).</p>
+<p><strong>Expansion:</strong> Players can buy up to 3 additional sectors (total 4 with home). Can add planets to owned sectors up to a cap (4-6 per sector).</p>
+<p><strong>Starter Packs (ONE-TIME purchase, not subscription-tied):</strong> Avoids the problem of subscription cancellation removing sectors/planets mid-game.</p>
+<table class="detail-table"><tr><th>Pack</th><th>Contents</th><th>Price Model</th></tr>
+<tr><td>Free</td><td>1 home sector, 2 resource planets</td><td>Free</td></tr>
+<tr><td>Deluxe Starter</td><td>2 home sectors, 4 resource planets, bonus asteroid field, 500 gems</td><td>One-time purchase</td></tr>
+<tr><td>Premium Starter</td><td>3 home sectors, 6 resource planets, shipyard pre-built, 1500 gems, exclusive cosmetic</td><td>One-time purchase</td></tr>
+</table>
+<p>Once purchased, sectors are permanent -- no subscription dependency. Premium monthly subscription exists separately for convenience perks (faster gem earn, queue priority, cosmetic badge) but NEVER gates sector ownership.</p>`},
+
+{id:'sector-scaling',title:'Universe Scaling Config',status:'planned',
+  desc:'Start with 1,200 shared sectors, scalable to 3,500 without re-gen. Home sectors are on-demand. Architecture supports 10k with infrastructure upgrade. Budget ~$50-100/mo to start.',
+  tags:['backend'],
+  details:`<p><strong>Scaling tiers:</strong></p>
+<table class="detail-table"><tr><th>Tier</th><th>Shared Sectors</th><th>Concurrent</th><th>Registered</th><th>Infrastructure</th><th>Est. Monthly Cost</th></tr>
+<tr><td>Launch</td><td>1,200</td><td>200</td><td>2,000</td><td>Single VPS (8-core, 32GB RAM, NVMe SSD)</td><td>$50-80/mo</td></tr>
+<tr><td>Growth</td><td>2,000</td><td>500</td><td>5,000</td><td>App server + DB server (2x VPS)</td><td>$150-200/mo</td></tr>
+<tr><td>Scale</td><td>3,500</td><td>1,000</td><td>8,000</td><td>PostgreSQL managed DB, Redis cache, load balancer, 2 app nodes</td><td>$400-600/mo</td></tr>
+<tr><td>Future</td><td>10,000</td><td>3,000+</td><td>20,000+</td><td>PostGIS sharding, WebGL map, microservices, 4+ app nodes, CDN</td><td>$1,500-2,500/mo</td></tr>
+</table>
+<p><strong>Cost Breakdown (Launch Tier):</strong></p>
+<ul>
+<li>VPS (Hetzner/Contabo 8-core, 32GB): ~$30-50/mo</li>
+<li>Domain + DNS: ~$1/mo</li>
+<li>Cloudflare (free tier): $0</li>
+<li>Backups (daily snapshot): ~$5/mo</li>
+<li>Email/transactional (SendGrid free tier): $0</li>
+<li>SSL (Let's Encrypt): $0</li>
+<li>Monitoring (UptimeRobot free): $0</li>
+<li><strong>Total Launch: ~$40-60/mo</strong></li>
+</ul>
+<p><strong>Cost Breakdown (Growth Tier):</strong></p>
+<ul>
+<li>App server VPS (8-core, 32GB): ~$40-50/mo</li>
+<li>DB server VPS (8-core, 64GB, NVMe): ~$60-80/mo</li>
+<li>Redis cache (managed or self-hosted): ~$15-30/mo</li>
+<li>Backups + monitoring: ~$15/mo</li>
+<li><strong>Total Growth: ~$130-175/mo</strong></li>
+</ul>
+<p>Home sectors + purchased expansions are on-demand (not part of shared count). Data model designed so 10k is a config change + infra upgrade, not a rewrite. Oversell ratio 7:1.</p>`},
+
+{id:'difficulty-scaling',title:'Zone Difficulty Scaling',status:'new',
+  desc:'NPC levels and hazard intensity scale with distance from Core. Purchasable private Adventure Sectors (PvE, difficulty 1-10). AI-powered NPCs for dynamic, unpredictable encounters.',
+  tags:['backend','store'],
+  details:`<p><strong>Zone difficulty table:</strong></p>
+<table class="detail-table"><tr><th>Zone</th><th>NPC Level</th><th>Hazard</th><th>Reward Mult</th></tr>
+<tr><td>Core</td><td>L1-3</td><td>1-2</td><td>1.0x</td></tr>
+<tr><td>Inner Ring</td><td>L3-6</td><td>2-4</td><td>1.3x</td></tr>
+<tr><td>Outer Ring</td><td>L5-8</td><td>4-7</td><td>1.6x</td></tr>
+<tr><td>Frontier (PvP)</td><td>L7-10</td><td>6-9</td><td>2.0x</td></tr>
+<tr><td>Deep Space (PvP)</td><td>L9-10+</td><td>8-10</td><td>2.5x</td></tr>
+</table>
+<p><strong>Purchasable Adventure Sectors (PvE):</strong> Player chooses difficulty 1-10 at purchase. Lower difficulty = lower rewards but MUST still be fun and progression-worthy for new players. Not as profitable as PvP adventure zones. Purchased from store or grindable via special mission chain.</p>
+<p><strong>AI-Powered NPCs:</strong></p>
+<ul>
+<li><strong>LLM-driven dialogue:</strong> Key NPCs (quest givers, merchants, faction leaders) use AI to generate contextual dialogue based on player history, faction standing, and current events. Not every NPC -- just notable ones.</li>
+<li><strong>Adaptive tactics:</strong> Boss NPCs and raid leaders use AI to analyze player fleet composition and adapt strategy mid-fight (switch targets, change attack patterns, call reinforcements). Makes repeat encounters feel fresh.</li>
+<li><strong>Dynamic quest generation:</strong> AI generates unique side-quests based on current galaxy state (trade shortages, faction conflicts, raider activity). "The Zythian Hive has been raiding trade routes near Sector 47 -- escort a merchant convoy for bonus rewards."</li>
+<li><strong>Selective AI -- NOT every NPC:</strong> Most NPCs use standard behavior trees (already built). LLM-driven AI only for: crew members on the player's flagship (contextual dialogue/personality), boss NPCs and raid leaders (adaptive tactics), named quest-givers and faction leaders, swords-for-hire/mercenary NPCs. Regular pirates, traders, patrols use standard behavior trees. This keeps API costs manageable.</li>
+<li><strong>NPC Memory System:</strong> AI-powered NPCs (flagship crew, key quest-givers) maintain a memory of interactions with the player. Your engineer remembers the last battle you survived together. Your faction contact remembers you completed their quest chain. Memories stored as a compact JSON log per NPC-player pair, fed as context to LLM calls. Creates genuine emotional attachment -- these NPCs feel like they KNOW you.</li>
+<li><strong>Implementation:</strong> Start with behavior trees + simple LLM calls for dialogue on select NPCs. Evolve toward full tactical AI as the agent companion system (OpenClaw) matures. Cache common interactions, only call LLM for novel situations.</li>
+</ul>`},
+]},
+
+// ============ TRAVEL & NAVIGATION ============
+{id:'travel',title:'Travel & Navigation',status:'planned',features:[
+{id:'wormholes-static',title:'Portals + Static Wormholes',status:'new',
+  desc:'Two systems: (1) Player Portals -- purchasable, owned-sector-only, with destination picker modal. (2) Static Wormholes -- public infrastructure in un-ownable sectors, one hop from hyperlanes. 15-20 pairs.',
+  tags:['backend','frontend','store'],
+  workflow:['Portal model','Owned-sector placement','Destination picker modal','Store purchase flow','Crafting alt','Static wormhole pairs in un-ownable sectors','Map rendering (purple=static, blue=player)'],
+  details:`<p><strong>Player Portals:</strong></p>
+<ul>
+<li>Purchasable from store (gems or credits) or craftable via blueprint using <strong>rare portal components</strong> (Warp Crystal, Void Conduit, Spatial Stabilizer) -- hard to find, dropped from deep space encounters and adventure zones. We hope they buy them from the store instead of grinding.</li>
+<li>Placeable ONLY in sectors the player owns.</li>
+<li>Clicking a portal opens a modal listing all owned sectors -- select destination to teleport.</li>
+<li>Instant travel, no cooldown between owned sectors.</li>
+<li>Max 1 portal per owned sector.</li>
+</ul>
+<p><strong>Static Wormholes:</strong></p>
+<ul>
+<li>15-20 pairs of fixed public wormholes placed at universe generation.</li>
+<li>Located in UN-OWNABLE sectors, always exactly one hop from a hyperlane.</li>
+<li>Free to use by anyone. Cannot be blocked, owned, or destroyed.</li>
+<li>Connect major zones: Home rim to Core, Core to Outer, Outer to Frontier entries.</li>
+<li>Map rendering: purple animated lines for static wormholes, blue for player portals.</li>
+</ul>`},
+
+{id:'wormholes-unstable',title:'Unstable Wormholes (Adventure Access)',status:'new',
+  desc:'Temporary wormholes to adventure clusters lasting DAYS. Auto-teleport home on close. 5-10 active at once. Admins can launch event wormholes on the fly.',
+  tags:['backend','frontend'],
+  workflow:['Spawn timer (multi-day)','Adventure cluster linking','Auto-teleport on expiry','Global notification','Admin panel event creation','Map rendering (animated + countdown)'],
+  details:`<p>Unstable wormholes spawn periodically and connect the shared galaxy to adventure clusters. They last for <strong>days</strong>, not hours -- creating multi-day expedition gameplay.</p>
+<ul>
+<li><strong>5-10 active</strong> at any time across the galaxy.</li>
+<li>Server-wide announcement on spawn with location and countdown.</li>
+<li>When wormhole closes, any player still inside is <strong>auto-teleported</strong> back to their home sector.</li>
+<li>Map shows animated wormhole icon with time remaining.</li>
+</ul>
+<p><strong>Admin Event Tools:</strong> Admin panel button to create custom event wormholes specifying duration, destination cluster, difficulty, announcement text, and reward multiplier. Enables on-the-fly events without code deployment.</p>`},
+
+{id:'jump-drives',title:'Jump Drive Component',status:'new',
+  desc:'High-tier ship component: 3-5 sector jumps at once, max 60-second cooldown, Tier 4-5. Endgame long-range mobility.',
+  tags:['backend'],
+  workflow:['New component type','Jump range calc','Cooldown timer (<=60s)','Fuel cost (high)'],
+  details:`<p>Jump Drives give endgame ships independent long-range travel without relying on wormholes or gates.</p>
+<ul>
+<li><strong>Range:</strong> 3-5 sectors per jump (tier-dependent).</li>
+<li><strong>Cooldown:</strong> Max 60 seconds. Not instant but fast enough to be tactically useful.</li>
+<li><strong>Fuel cost:</strong> High -- 3-5x normal travel fuel per sector skipped.</li>
+<li><strong>Tier:</strong> 4-5 only. Expensive to craft or purchase.</li>
+<li>Cannot jump into protected/locked sectors.</li>
+<li>Jump leaves a brief "jump signature" visible on scanners for 30 seconds (counter-play for PvP tracking).</li>
+</ul>`},
+
+{id:'deep-space-gates',title:'Player-Built Gates + Commercial Portals',status:'new',
+  desc:'Three tiers: Personal gates (home-to-owned, instant+cooldown), Corporation gates (tolls, PvP-destructible), Commercial PvE-to-PvP portals with 10 Space Hub types (Casino, Arena, Paint Dock, Racing Circuit, Intelligence Broker, etc.).',
+  tags:['backend','pvp','store','frontend'],
+  workflow:['Gate model (3 tiers)','Construction ship consumption','Instant travel + cooldown','Corp toll system','PvP destruction','Commercial portal rules engine','First-aggressor tracking + stat penalty','Space Hub buildings','Portal owner advertising UI','PvP warning modal'],
+  details:`<p><strong>Tier 1 -- Personal Gates:</strong></p>
+<ul>
+<li>Built in owned sectors with Construction Ship.</li>
+<li>Instant travel FROM home sector TO that gate. Cooldown timer between uses.</li>
+<li>Store purchasable or craftable.</li>
+</ul>
+<p><strong>Tier 2 -- Corporation Gates:</strong></p>
+<ul>
+<li>Expensive structures in Outer Ring / Frontier.</li>
+<li>Permanent two-sector link. Tolls for public use (corp sets price).</li>
+<li>Can be destroyed in PvP. Requires Construction Ship + rare materials.</li>
+</ul>
+<p><strong>Tier 3 -- Commercial PvE-to-PvP Portals:</strong></p>
+<ul>
+<li>Placeable in some un-ownable PvE sectors. Leads to a PvP sector.</li>
+<li><strong>Robust PvP warning modal</strong> required before entry.</li>
+<li>PvP sector owners CANNOT attack visitors from PvE portals unless attacked first.</li>
+<li>Attacking a PvE portal visitor = <strong>15% stat penalty for 10 minutes + 1-hour portal ban</strong>.</li>
+</ul>
+<p><strong>Space Hub Buildings</strong> (PvP sector owners can build):</p>
+<table class="detail-table"><tr><th>Hub Type</th><th>Function</th><th>Revenue Model</th></tr>
+<tr><td>Casino</td><td>Gambling mini-games (dice, cards)</td><td>House edge on wagers</td></tr>
+<tr><td>Custom Paint Dock</td><td>Exclusive ship skins/patterns</td><td>Per-skin pricing (credits/gems)</td></tr>
+<tr><td>Exotic Market</td><td>Rare items at markup</td><td>Transaction margin</td></tr>
+<tr><td>Arena</td><td>1v1 / fleet PvP matches</td><td>Entry fees + wagers</td></tr>
+<tr><td>Bounty Board</td><td>Post/accept bounties on players</td><td>Posting fee</td></tr>
+<tr><td>Recruitment Office</td><td>Hire rare crew species + elite workers</td><td>Premium hiring fees</td></tr>
+<tr><td>Black Market Vault</td><td>Trade contraband/stolen goods at 3x value</td><td>10% house cut on transactions</td></tr>
+<tr><td>Racing Circuit</td><td>Ship racing mini-game through obstacle courses</td><td>Entry fees + spectator wagers</td></tr>
+<tr><td>Salvage Yard</td><td>Buy/sell wrecked ships and rare components</td><td>Listing fees + transaction margin</td></tr>
+<tr><td>Intelligence Broker</td><td>Buy scanner data on other players/sectors (fleet positions, resource maps)</td><td>Per-query pricing</td></tr>
+</table>
+<p>Portal owners get an <strong>advertising modal popup</strong> for visitors + scrolling name display while in sector. Creates safe tourism/commerce between PvE and PvP. <strong>Casino prototype is an early development priority.</strong></p>`},
+
+{id:'protected-lanes',title:'Protected Space Lanes',status:'new',
+  desc:'Flagged hyperlane connections with PvP disabled and no hostile NPC spawns. Safe but longer routes connecting home to Core and Core hubs.',
+  tags:['backend','frontend','pvp'],
+  workflow:['Protected flag on SectorConnection','PvP check middleware','NPC spawn exclusion','Map visual distinction'],
+  details:`<p>Specific hyperlane connections are flagged as protected. Thicker blue/white lines on map with shield icons.</p>
+<ul>
+<li>PvP completely disabled on these lanes.</li>
+<li>No hostile NPC spawns.</li>
+<li>Connections: Home jump points to Core hubs, Core hubs to each other, Core to Inner Ring entries.</li>
+<li>Route is typically longer than unprotected alternatives -- safety vs speed trade-off.</li>
+<li>Route planner should offer "safe route" toggle that prefers protected lanes.</li>
+</ul>`},
+
+{id:'route-planner',title:'Route Planner (BFS Pathfinder)',status:'exists',
+  desc:'Already implemented. Click a distant sector to see the shortest path with animated cyan overlay and hop count. Uses BFS on adjacency map.',
+  tags:['frontend'],
+  details:`<p>Fully working. Uses BFS pathfinding on the sector adjacency graph.</p>
+<ul>
+<li>Click any sector on the galaxy map to calculate and display the route.</li>
+<li>Animated cyan overlay shows the path with hop count.</li>
+<li>Gap prevention: overlay checks for missing connection data before rendering.</li>
+<li><strong>Future:</strong> Add "safe route" toggle that prefers protected lanes (longer but PvP-free).</li>
+</ul>`},
+]},
+
+// ============ PVP SYSTEM ============
+{id:'pvp',title:'PvP System',status:'planned',features:[
+{id:'pvp-zones',title:'PvP Zone Enforcement',status:'new',
+  desc:'Frontier (400) and Deep Space (100) are open PvP. Core/Home always safe. PvP zones get better trade margins, more resources, and exclusive Gaia super-colony planets. Defensive stations and planetary satellites.',
+  tags:['backend','pvp'],
+  workflow:['Zone-based PvP rules','Entry warning system','PvP trade price bonuses','Gaia planet type (PvP only)','Defensive station building','Planetary satellite system'],
+  details:`<p><strong>PvP Zone Rules:</strong></p>
+<ul>
+<li>Frontier (400 sectors) + Deep Space (100 sectors) = open PvP.</li>
+<li>Core and Home sectors = always safe ("Care Bear Land").</li>
+<li>Robust warning modal on first PvP zone entry.</li>
+</ul>
+<p><strong>PvP-Only Perks:</strong></p>
+<ul>
+<li>Trading hubs pay higher buy prices and sell lower (better margins).</li>
+<li>Resource abundance 1.5-2x PvE equivalents.</li>
+<li><strong>Gaia super-colony planets</strong> -- best colony planets in the game, PvP only.</li>
+</ul>
+<p><strong>Defensive Structures:</strong></p>
+<ul>
+<li>Defensive stations in owned territory (works in both PvE vs raiders AND PvP vs players).</li>
+<li>Planetary satellites for scanning (early warning), defense (auto-fire on hostiles), and resource bonuses.</li>
+<li>Construction Ships required to build (see ship-types).</li>
+</ul>`},
+
+{id:'pvp-rewards',title:'PvP Zone Reward Multipliers',status:'new',
+  desc:'2x credits, 2x XP in PvP zones. Exclusive rare crafting materials and ship components only available in PvP space.',
+  tags:['backend','pvp'],
+  details:`<ul>
+<li><strong>2x credits</strong> from all sources (trade, missions, loot).</li>
+<li><strong>2x XP</strong> from combat, missions, and exploration.</li>
+<li><strong>Exclusive drops:</strong> Rare crafting materials and ship components that ONLY drop in PvP space.</li>
+<li>These exclusives are tradeable -- PvP players can sell them to PvE players at markup, creating cross-zone economic flow.</li>
+<li>Risk-reward balance: best rewards require genuine risk of player combat.</li>
+</ul>`},
+
+{id:'pvp-choke',title:'Anti-Griefing Design',status:'new',
+  desc:'6-8 wide entry corridors into PvP, 30-second invuln buffer on entry. Tourist Pass (20 min immunity, in-game currency or store). Tourists cannot enter owned sectors. Anti-scouting restrictions.',
+  tags:['backend','pvp','store'],
+  details:`<p><strong>Anti-Gate-Camping:</strong> Gate camping kills player retention. Design multiple wide entry corridors (6-8 entry points, not chokepoints). 30-second invulnerability buffer when entering a PvP zone.</p>
+<p><strong>Tourist Pass System:</strong></p>
+<ul>
+<li>Purchasable with in-game currency or from store.</li>
+<li>Grants 20 minutes of full immunity (cannot attack or be attacked).</li>
+<li>Tourists <strong>CANNOT enter player-owned sectors</strong> -- only public/un-owned PvP sectors. Eliminates scouting of private territory.</li>
+<li><strong>Eligibility restrictions:</strong> Players who own PvP sectors or have engaged in PvP combat are ineligible. Prevents PvP veterans from scouting with immunity.</li>
+<li><strong>Anti-dummy-account:</strong> Minimum account age 7 days + level L3 required to purchase a tourist pass.</li>
+</ul>
+<p><strong>Additional Anti-Griefing Measures:</strong></p>
+<ul>
+<li><strong>Bounty escalation:</strong> Repeatedly killing the same low-level player auto-generates an escalating bounty on the griefer. Other PvP players are incentivized to hunt them down.</li>
+<li><strong>Diminishing returns:</strong> Killing the same player within 1 hour yields 0 loot/XP after the first kill. No reward for spawn camping.</li>
+<li><strong>Newbie shield:</strong> Players under level 5 in PvP space have a visible "New Pilot" tag. Killing a new pilot gives 0 rewards and adds a "Bully" debuff (5% stat penalty for 30 min, visible to all). Social pressure.</li>
+<li><strong>Revenge flag:</strong> If killed in PvP, player gets a 10-minute "Revenge" buff -- 15% damage bonus specifically against their killer. Encourages fighting back over rage-quitting.</li>
+<li><strong>Safe logout:</strong> Players can always safely log out within 30 seconds if not in active combat. No getting trapped.</li>
+<li><strong>Distress beacon:</strong> Under-attack players can broadcast a distress signal visible to allied and nearby neutral players, calling for help with a map ping.</li>
+</ul>
+<p>Focus on consensual combat: fleet battles, territory disputes, raid defense -- not ganking newbies at gates.</p>`},
+
+{id:'pvp-harbors',title:'Neutral Safe Harbors in PvP Space',status:'new',
+  desc:'Neutral stations deep in PvP space. Dock safely, repair and refuel. No trading. Forward operating bases for PvP campaigns.',
+  tags:['backend','pvp'],
+  details:`<p>A handful of neutral stations scattered through Frontier and Deep Space where players can dock without risk.</p>
+<ul>
+<li><strong>Services:</strong> Repair, refuel. No commodity trading (prevents safe trading in PvP).</li>
+<li>PvP disabled within docking range of the harbor.</li>
+<li>Cannot be owned, attacked, or destroyed.</li>
+<li>Serve as forward operating bases for deeper PvP expeditions.</li>
+<li>3-5 harbors total, strategically placed at zone intersections.</li>
+</ul>`},
+
+{id:'offline-protection',title:'Offline Ship Protection',status:'new',
+  desc:'PvE: 3-day protection then auto-dock. PvP: 2-hour vulnerability then auto-recall home. PvP Base Tokens (7-day, grindable/purchasable). Corp HQ Tokens. Vacation Pass for individuals.',
+  tags:['backend','store'],
+  details:`<p>Ships in public sectors gain protection after player logout. Home sector is always safe.</p>
+<table class="detail-table"><tr><th>Zone</th><th>Base Protection</th><th>Then...</th></tr>
+<tr><td>PvE sectors</td><td>3 days</td><td>Auto-dock to nearest port</td></tr>
+<tr><td>PvP sectors</td><td>2 hours vulnerable</td><td>Auto-recall to home sector</td></tr>
+<tr><td>Home sector</td><td>Always safe</td><td>--</td></tr>
+</table>
+<p><strong>PvP Base Token (7-day):</strong> Players who establish a home base in PvP space can grind or purchase 7-day protection tokens. Applied to ONE planet designated as their "PvP Base of Operations." Protection activates only when the player (or all corp members for corp HQ) goes offline. If ANY player/corp member is online, the base is fully attackable. 48-hour cooldown between token uses to prevent permanent invulnerability.</p>
+<p><strong>Corporation HQ Token:</strong> Same concept but for the corp headquarters. Applied by corp leadership. Protection only active when ALL corp members are offline. If even one member is online, HQ is fair game.</p>
+<p><strong>Vacation Pass (individual, store item):</strong> Extends personal ship/fleet protection to 7 days in all zones. Cannot be activated during PvP combat or within 1 hour of last PvP engagement.</p>
+<p><strong>Key rule:</strong> Protection is a shield for offline players, never a weapon. Online = vulnerable, always.</p>`},
+]},
+
+// ============ NPC CLANS & RAIDS ============
+{id:'npc-clans',title:'NPC Clans & Dynamic Raids',status:'new',features:[
+{id:'clan-spawning',title:'NPC Clan Territory & Raider Economy',status:'new',
+  desc:'Level-scaled NPC raids. No-raid safe zones in Core PvE. Players can bribe, hire, or destroy raiders. Hire raiders to attack enemies or defend sectors. Raider bases are destructible and respawn elsewhere.',
+  tags:['backend','frontend'],
+  workflow:['Clan spawn timer','Level-scaled difficulty','No-raid zone flag','Raider bribery','Hire-for-attack mechanic','Hire-for-defense','Raider base destruction + respawn','Distance-from-core scaling','Map visual overlay'],
+  details:`<p><strong>Core Mechanic:</strong> NPC clan invasions spawn periodically. Difficulty MUST scale to player level or sector strength -- never unfair.</p>
+<p><strong>No-Raid Zones:</strong> Core PvE ("Care Bear Land") has zero raid pressure for players who want pure peaceful gameplay.</p>
+<p><strong>Raider Economy (PvP zones):</strong></p>
+<ul>
+<li><strong>Bribe:</strong> Pay credits to cancel an incoming raid on your sector.</li>
+<li><strong>Hire to Attack:</strong> Pay NPC broker, select target player/sector. Raid launches in 1-4 hours (target gets warning). Target can counter-bribe to cancel.</li>
+<li><strong>Hire to Defend:</strong> Pay raiders to garrison and protect a sector as defensive NPCs.</li>
+<li><strong>Destroy:</strong> Raider bases are destructible. Players can attack and eliminate them. New bases respawn in different random locations.</li>
+<li>Raider bases appear in un-owned PvP sectors and un-owned PvE sectors only (never in player-owned sectors).</li>
+</ul>
+<p><strong>Clan Types:</strong> Pirates, Zythian Hive, Rogue Automatons, Void Reavers. Each with unique ship types, tactics, and loot tables. Visual: red-tinted sectors with skull icon on map.</p>`},
+
+{id:'clan-raids',title:'Zone-Scaled Raid Frequency',status:'new',
+  desc:'Predictable raid frequency per zone. Inner Ring: rare. Outer Ring: moderate. Frontier: frequent. Players can prepare based on where they settle.',
+  tags:['backend','pve'],
+  workflow:['Raid targeting logic','Zone-based frequency table','Level scaling algorithm','Colony/outpost damage','Notification system','Predictable cooldown timers'],
+  details:`<p>Raid frequency must be <strong>predictable</strong> -- players should know "if I live in Outer Ring, raids come every ~X hours."</p>
+<table class="detail-table"><tr><th>Zone</th><th>Raid Frequency</th><th>NPC Level Match</th></tr>
+<tr><td>Inner Ring</td><td>Every 24-48h</td><td>L3-4 raiders for L3 player</td></tr>
+<tr><td>Outer Ring</td><td>Every 8-16h</td><td>L5-8 scaled to player</td></tr>
+<tr><td>Frontier (PvP)</td><td>Every 4-8h</td><td>L7-10 scaled to player</td></tr>
+<tr><td>Deep Space (PvP)</td><td>Every 2-4h</td><td>L9-10+ scaled to player</td></tr>
+</table>
+<p>Raid difficulty scales to player level. L3 player gets L3-4 raiders. L9 player gets L9-10. Never unfair surprises. Raids gain strength further from core but always remain level-appropriate.</p>`},
+
+{id:'clan-clearing',title:'Stronghold Clearing + Planet Boss Fights + POIs',status:'new',
+  desc:'Space-based clan clearing (3 sectors, escalating waves). Planet boss fights with permanent raid immunity. Regenerating POIs spread throughout. Adventure areas restricted to Party/Corp+Allies. Party system required.',
+  tags:['backend','pve'],
+  workflow:['Space wave encounter system','Boss NPC generation','Planet boss fight system','Permanent raid immunity per planet','POI regeneration timers','Party system (invite, roles, loot rules)','Adventure area access control (party/corp/allies)','Unique loot table','Achievement trigger'],
+  details:`<p><strong>Space-Based Clearing:</strong> 3-sector chain with escalating NPC waves. Final sector has a boss NPC with unique mechanics. Group content (3-5 players recommended).</p>
+<p><strong>Planet Boss Fights:</strong> On Minecraft-style planet surfaces, players encounter boss creatures/installations. Defeating the planet boss <strong>permanently eliminates all raids on that specific planet</strong> -- raid-free forever.</p>
+<p><strong>Points of Interest (POIs):</strong></p>
+<ul>
+<li>POIs are spread throughout the galaxy and within adventure areas.</li>
+<li>Regenerate on a timer (4-24 hours depending on tier) -- always fresh content to find.</li>
+<li>Types: abandoned outposts, derelict ships, resource caches, artifact sites, NPC encampments.</li>
+<li>POIs in adventure areas are higher-tier with better rewards.</li>
+</ul>
+<p><strong>Adventure Area Access (Anti-Griefing):</strong></p>
+<ul>
+<li>Adventure areas are restricted to <strong>Party or Corporation + Allies</strong> only.</li>
+<li>Prevents random players from griefing groups mid-encounter.</li>
+<li>A proper <strong>Party System</strong> is required: invite players, assign roles (tank/DPS/support), set loot rules (need/greed, round-robin, leader assigns), shared XP, party chat channel.</li>
+<li>Max party size: 5 players. Raid groups: 2 parties (10 players) for boss content.</li>
+</ul>
+<p><strong>Rewards:</strong> XP, credits, unique crafting materials, rare blueprint drops, achievement unlock.</p>`},
+]},
+
+// ============ ADVENTURE & TEAM CONTENT ============
+{id:'adventure',title:'Adventure & Team Content',status:'new',features:[
+{id:'adventure-sectors',title:'Adventure Sector System',status:'new',
+  desc:'60 sectors reserved for group content. Gated entry (3-5 players, min ship tier, or sector key). Instanced or limited occupancy. Periodic resets.',
+  tags:['backend','pve'],
+  details:`<p>60 sectors dedicated to challenging group content.</p>
+<ul>
+<li><strong>Entry requirements:</strong> 3-5 players in a fleet, minimum ship tier, or a consumable "sector key" item.</li>
+<li>Instanced or limited to 1-2 groups at a time.</li>
+<li>Periodic resets (daily or weekly depending on difficulty tier).</li>
+<li>Scaling difficulty based on fleet composition and player levels.</li>
+<li>Unique loot tables not available elsewhere.</li>
+</ul>`},
+
+{id:'derelict-explore',title:'Derelict Capital Ship Exploration',status:'new',
+  desc:'Room-by-room clearing of abandoned ships on a grid (16x16 to 32x32). NPC encounters, environmental hazards, loot. Reuses colony surface grid engine with ship tileset.',
+  tags:['backend','pve','frontend'],
+  details:`<p>Players board derelict capital ships and explore room-by-room on a grid view. NPC encounters, environmental hazards (decompression, power failures, radiation), and loot at the end.</p>
+<p><strong>Technical:</strong> Ship interior grid engine reuses the colony surface/voxel engine (same terrain/movement/combat system, different tileset). Ship interiors are 16x16 to 32x32 grids with corridor/room terrain types. Colony surface is currently being built -- ship interiors piggyback on that work.</p>
+<ul>
+<li>Team coordination required (tank/DPS/support roles).</li>
+<li>Branching paths with optional rooms for bonus loot.</li>
+<li>Boss room at the end with unique mechanics.</li>
+</ul>`},
+
+{id:'alien-hive',title:'Alien Hive Sectors',status:'new',
+  desc:'Survival-style waves of escalating NPC enemies. Higher waves = better loot. Team roles (healer/tank/DPS) matter.',
+  tags:['backend','pve'],
+  details:`<p>Wave-based survival encounter in a hostile alien hive sector.</p>
+<ul>
+<li>Waves increase in difficulty. No upper limit -- go as far as you can.</li>
+<li>Loot quality scales with wave reached. Wave 10+ drops exclusive materials.</li>
+<li>Team composition matters: tanks absorb damage, DPS clears waves, healers/support sustain the group.</li>
+<li>Leaderboard for highest wave reached per week.</li>
+</ul>`},
+
+{id:'nebula-challenge',title:'Nebula Navigation Challenges',status:'new',
+  desc:'Environmental hazard sectors with damaging nebulae. Specific ship components (Nebula Shield, Radiation Plating) reduce damage. Gear-check mechanic. Hard to craft or store-purchasable.',
+  tags:['backend','pve','store'],
+  details:`<p>Navigate through damaging nebula sectors. Continuous hull/shield damage while inside.</p>
+<p><strong>Mitigation Components:</strong></p>
+<ul>
+<li><strong>Nebula Shield:</strong> Reduces nebula damage by 50%. Tier 3-4, craftable with rare materials.</li>
+<li><strong>Radiation Plating:</strong> Reduces nebula damage by 80%. Tier 5, very hard to craft OR purchasable from store.</li>
+<li>Without protection, only high-tier ships with strong shields survive.</li>
+</ul>
+<p>Creates a <strong>gear-check mechanic</strong> -- you need the right loadout for nebula runs. Rewards include nebula-exclusive ore types and crafting materials.</p>`},
+
+{id:'raid-bosses',title:'Raid Bosses',status:'new',
+  desc:'Single powerful NPC requiring coordinated fleet tactics. Multiple phases, special mechanics. Weekly reset. Top-tier loot.',
+  tags:['backend','pve'],
+  details:`<p>Server-wide boss encounters requiring coordinated fleets of 5-10 players.</p>
+<ul>
+<li><strong>Multiple phases</strong> with distinct mechanics (shield phase, add spawns, enrage timer).</li>
+<li>Weekly reset -- one attempt per reset cycle per player.</li>
+<li>Top-tier loot: exclusive components, rare blueprints, cosmetic rewards.</li>
+<li>Server-wide leaderboard for fastest clear times.</li>
+<li>2-3 raid bosses at launch, rotating on different weeks.</li>
+</ul>`},
+
+{id:'timed-rush',title:'Timed Resource Rushes',status:'new',
+  desc:'Sector floods with rare materials for 15 minutes. Mixed PvPvE. Announced server-wide. Hub portals provide fast access from anywhere.',
+  tags:['backend','pve','pvp'],
+  details:`<p>Time-limited events: a sector floods with rare resources for 15 minutes. Fight NPCs and other players for the loot. Mixed PvPvE.</p>
+<ul>
+<li>Announced server-wide with sector location and countdown.</li>
+<li>Hub sectors have portal/wormhole access points to rush locations for fast access.</li>
+<li>High-value but contested -- PvP players can attack PvE players during the rush.</li>
+<li>2-3 rushes per day at random times to keep players engaged.</li>
+</ul>`},
+]},
+
+// ============ STORE & MONETIZATION ============
+{id:'store',title:'Store & Monetization',status:'new',features:[
+{id:'store-philosophy',title:'Store Design Philosophy',status:'new',
+  desc:'Everything purchasable MUST be grindable. One-time Starter Packs for sectors (not subscription-tied). Premium subscription for convenience only (2x gem earn, queue priority, cosmetic badge). Free players on the SAME map.',
+  tags:['store'],
+  details:`<p><strong>CORE RULE:</strong> Everything purchasable MUST be grindable in-game. Store = convenience + cosmetics, never power.</p>
+<p><strong>One-Time Starter Packs</strong> (sectors/planets -- see home-sectors):</p>
+<ul>
+<li>Free: 1 home sector, 2 planets.</li>
+<li>Deluxe: 2 sectors, 4 planets, 500 gems. One-time purchase.</li>
+<li>Premium: 3 sectors, 6 planets, shipyard, 1500 gems, exclusive cosmetic. One-time purchase.</li>
+<li>Sectors are PERMANENT. No subscription dependency.</li>
+</ul>
+<p><strong>Premium Subscription (convenience only):</strong></p>
+<ul>
+<li>Faster gem earn rate (2x daily login gems).</li>
+<li>Queue priority for instanced content.</li>
+<li>Cosmetic-only premium badge/nameplate.</li>
+<li>NEVER gates asset ownership. Cancelling subscription loses no sectors/ships/crew.</li>
+</ul>
+<p>Free players play on the SAME map -- no population split.</p>
+<p><strong>Categories:</strong> Starter Packs, Cosmetics, Convenience, Homestead Expansion, Premium Currency (Star Gems), Premium Subscription, Bank Slots.</p>`},
+
+{id:'store-cosmetics',title:'Cosmetic Store Items',status:'new',
+  desc:'Ship skins, engine trails, decals, nameplates, faction packs, station decorations, crew outfits. All visual-only. Earnable via achievements or grind.',
+  tags:['store','frontend'],
+  workflow:['Store UI page','Purchase flow','Unlock system','Grind alternative paths'],
+  details:`<p>All cosmetics are visual-only with zero gameplay impact. Every item has an in-game earn path (achievements, milestones, or gem grinding).</p>
+<ul>
+<li>Ship skins (hull patterns, animated effects)</li>
+<li>Engine trails (8+ styles, color customizable)</li>
+<li>Decals and faction-themed cosmetic packs</li>
+<li>Station/colony decorations</li>
+<li>Crew outfit customization</li>
+<li>Nameplate styles and borders</li>
+</ul>`},
+
+{id:'store-homestead',title:'Homestead Expansion',status:'new',
+  desc:'Buy up to 3 additional sectors (total 4). Add planets to sectors (cap 4-6). Templates: Mining Colony, Agricultural Haven, Fortress, Trade Hub. Premium gets 3 sectors included.',
+  tags:['store','backend'],
+  workflow:['Template definitions','Sector generation from template','Purchase/unlock flow','Home sector linking','Add-planet flow','Planet cap per sector'],
+  details:`<p><strong>Sector Expansion:</strong> Buy up to 3 additional sectors (total 4 including home). Can also add planets to owned sectors up to a planet cap (4-6 per sector, TBD).</p>
+<p><strong>Templates:</strong></p>
+<table class="detail-table"><tr><th>Template</th><th>Focus</th><th>Guaranteed Features</th></tr>
+<tr><td>Mining Colony</td><td>Resources</td><td>Rich asteroid field, ore-heavy planets</td></tr>
+<tr><td>Agricultural Haven</td><td>Farming</td><td>High-yield farming planet, fertile soil</td></tr>
+<tr><td>Fortress Sector</td><td>Defense</td><td>Pre-built defensive stations, chokepoint layout</td></tr>
+<tr><td>Trade Hub</td><td>Economy</td><td>NPC marketplace, high-traffic jump connections</td></tr>
+</table>
+<p>Premium subscribers get 3 home sectors included. Free players start with 1 and purchase more with gems/credits.</p>`},
+
+{id:'store-convenience',title:'Convenience Items',status:'new',
+  desc:'XP boosters, inventory expansion, fast travel tokens, auto-repair kits. External Storage Module (+50 cargo, no slot used, ship-size cap). All grindable.',
+  tags:['store'],
+  details:`<p>All convenience items have in-game earn paths (daily quests, crafting, achievements).</p>
+<ul>
+<li><strong>XP Boosters:</strong> 2x for 24h, grindable from daily quests.</li>
+<li><strong>Inventory Expansion:</strong> +50 cargo, permanent.</li>
+<li><strong>Fast Travel Tokens:</strong> Skip to any owned sector, craftable.</li>
+<li><strong>Auto-Repair Kits:</strong> Instant repair, craftable.</li>
+<li><strong>External Storage Module:</strong> +50 cargo WITHOUT using a component slot. Cap per ship by hull size (Scout: 1, Freighter: 4, Carrier: 3). Purchasable or craftable.</li>
+<li><strong>Vacation Pass:</strong> 7-day offline protection. See offline-protection.</li>
+<li><strong>Tourist Pass:</strong> 20-min PvP immunity. See pvp-choke.</li>
+</ul>`},
+
+{id:'premium-currency',title:'Premium Currency (Star Gems)',status:'new',
+  desc:'Dual currency: Credits (in-game) + Star Gems (premium). Gems buy cosmetic ships, not stat-superior. 3-day flash + 30-day extended sales. Admin-editable specials. Grind rate: weeks not months.',
+  tags:['store','backend'],
+  workflow:['Gem model on User','Daily login gem rewards','Achievement gem rewards','Store purchase with gems','Gem-exclusive cosmetic hulls','Event ship sales (3-day flash + 30-day extended)','Admin panel sale management','Grind-rate balancing','Real money purchase integration'],
+  details:`<p><strong>Dual Currency:</strong> Credits (earned in-game) and Star Gems (premium). Gems earned slowly via achievements and daily login, or bought with real money.</p>
+<p><strong>What Gems Buy:</strong></p>
+<ul>
+<li>Special ships with unique models/skins (NOT stat-superior -- cosmetic hulls only).</li>
+<li>Cosmetics, convenience items, expansion templates.</li>
+<li>Cost must be attainable from grinding in weeks, not months.</li>
+</ul>
+<p><strong>Sales System:</strong></p>
+<ul>
+<li><strong>3-day flash sales:</strong> Limited-time event ships, high discount.</li>
+<li><strong>30-day extended sales:</strong> Gives free players time to grind gems to earn it.</li>
+<li><strong>All specials admin-editable</strong> via admin panel: create/edit/schedule sales, set prices, set durations.</li>
+</ul>
+<p><strong>Balance:</strong> Gem earn rate tuned so store items feel achievable in weeks. Paying is a shortcut, not a requirement.</p>`},
+]},
+
+// ============ ECONOMY & TRADING ============
+{id:'economy',title:'Economy & Trading',status:'exists',features:[
+{id:'dynamic-pricing',title:'Dynamic Supply/Demand Pricing',status:'exists',
+  desc:'30+ commodities, 8 port types, 10-min economy ticks, 7-day price history. New: livestock, exotic plants, food crops for Minecraft-style farming/ranching economy.',
+  tags:['backend'],
+  details:`<p><strong>Existing:</strong> 30+ commodities across 8 port types. Prices fluctuate based on supply/demand with 10-minute economy ticks. Price history tracked for 7 days. Min/max multipliers 0.5x-2.0x.</p>
+<p><strong>New Commodity Categories</strong> (for Minecraft-style planets):</p>
+<ul>
+<li><strong>Livestock/Animals:</strong> Raiseable on colony farms. Sell at agricultural stations.</li>
+<li><strong>Exotic Plants:</strong> Rare biome-specific flora. High value, slow growth.</li>
+<li><strong>Common Food Crops:</strong> Wheat, vegetables -- basic colony sustenance and trade commodity.</li>
+</ul>
+<p>Creates a farming/ranching gameplay loop tied directly into the economy. Players can specialize in agriculture as a viable career path.</p>`},
+
+{id:'port-types',title:'8+ Port Types (+ PvP Player Ports)',status:'exists',
+  desc:'Base 8 port types plus PvP sector owners can build destination ports: Casino, Exotic Market, Arena, Bounty Board, Repair Bay. Tied to Commercial Portal system.',
+  tags:['backend','pvp'],
+  details:`<p><strong>Base 8:</strong> Trading Hub, Mining Outpost, Agricultural Station, Tech Center, Space Station, Fuel Depot, Medical Station, Black Market.</p>
+<p><strong>PvP Player-Built Ports:</strong></p>
+<table class="detail-table"><tr><th>Port Type</th><th>Function</th></tr>
+<tr><td>Casino</td><td>Gambling mini-games for credit wagers</td></tr>
+<tr><td>Exotic Market</td><td>Rare items at owner-set markup</td></tr>
+<tr><td>Arena</td><td>1v1/fleet PvP matches for wagers</td></tr>
+<tr><td>Bounty Board</td><td>Post/accept bounties on players</td></tr>
+<tr><td>Repair Bay</td><td>Premium fast-repair service</td></tr>
+</table>
+<p>These tie into the Commercial Portal system (see deep-space-gates). PvP sector owners create destinations worth visiting.</p>`},
+
+{id:'trading-ui',title:'Trading Interface + Profit Indicators',status:'exists',
+  desc:'Buy/sell at ports with average cost basis display and Best Trades panel. Traders always see what they paid so they never sell at a loss unknowingly.',
+  tags:['frontend'],
+  details:`<p>Already implemented. Average cost basis is displayed prominently for every commodity in cargo. Best Trades panel shows highest-profit routes from current location.</p>
+<p><strong>Key requirement:</strong> The average cost display must be prominent and unmissable. Traders losing money unknowingly is a rage-quit trigger. Verify this is clear in the current UI.</p>`},
+
+{id:'economy-scaling',title:'Dynamic Economy Scaling',status:'new',
+  desc:'Port restock rates scale with regional player count. High-traffic zones restock fast. Remote zones are sparse and expensive, rewarding explorers.',
+  tags:['backend'],
+  details:`<p>Port commodity quantities and restock rates dynamically adjust based on active player count in the region.</p>
+<ul>
+<li>200 players in Core = fast restocking, competitive prices.</li>
+<li>10 players in Outer Ring = sparse supply, expensive, but higher profit margins for traders who make the trip.</li>
+<li>Rewards explorers and players who operate in less-trafficked regions.</li>
+<li>Prevents Core economy from being depleted by too many players.</li>
+</ul>`},
+]},
+
+// ============ COMBAT ============
+{id:'combat',title:'Combat System',status:'exists',features:[
+{id:'turn-combat',title:'Turn-Based Space Combat',status:'exists',
+  desc:'Shields, armor, crits (10%, 2x dmg), flee mechanics. Max 50 rounds. 2% component degradation per round. 70% loot chance.',
+  tags:['backend'],
+  details:`<p>Fully implemented turn-based combat system.</p>
+<ul><li>Shields absorb damage first, then armor, then hull.</li><li>Critical hits: 10% chance, 2x damage.</li><li>Flee mechanics with success chance based on engine tier vs opponent speed.</li><li>Max 50 rounds per fight.</li><li>Components degrade 2% per combat round.</li><li>Loot drops on victory: 70% chance, quality scales with NPC level.</li><li>XP awarded per damage dealt and per kill.</li></ul>`},
+
+{id:'realtime-combat',title:'Real-Time Combat System',status:'exists',
+  desc:'Alternative real-time combat with speed control (1x/2x/4x/Skip). Detailed loot breakdown.',
+  tags:['backend','frontend'],
+  details:`<p>Alternative to turn-based: real-time combat resolution with player-controlled speed.</p>
+<ul><li>Speed control: 1x (watch every hit), 2x, 4x, Skip (instant resolve).</li><li>Detailed loot breakdown at conclusion.</li><li>Same damage/shield/armor mechanics as turn-based, just displayed in real-time.</li></ul>`},
+
+{id:'ground-combat',title:'Ground Combat',status:'exists',
+  desc:'5 unit types + new Artillery and Air Support. Grid-based with terrain effects, cover, orbital bombardment. Air support requires Landing Pad building.',
+  tags:['backend'],
+  details:`<p><strong>Existing 5 unit types:</strong> Militia, Marines, Heavy Armor, Mech, Spec Ops.</p>
+<p><strong>New Support Units:</strong></p>
+<ul>
+<li><strong>Artillery:</strong> Long-range, area damage, slow to reposition. Effective vs static defenses.</li>
+<li><strong>Air Support (Gunships/Helicopters):</strong> Fast strike capability, vulnerable to AA fire. Requires a Landing Pad colony building to deploy.</li>
+</ul>
+<p>Grid-based with terrain effects and cover bonuses. Orbital bombardment from ships in orbit. NPC raids on colonies use ground combat system.</p>`},
+
+{id:'npc-types',title:'6 NPC Types',status:'exists',
+  desc:'Pirate, Pirate Lord, Trader, System Patrol, Bounty Hunter + Colony Workers. Workers are hireable NPCs that boost colony production.',
+  tags:['backend'],
+  details:`<p><strong>Space NPCs:</strong> Pirate, Pirate Lord (boss), Trader, System Patrol, Bounty Hunter. Each with distinct hostility, behavior, ship types, loot multipliers, and AI behavior trees with personality traits.</p>
+<p><strong>New -- Colony Workers:</strong> Hireable NPCs assigned to colony buildings to boost production (mine faster, farm faster, build faster). Hired from NPC ports or trained at Academy building. Workers have a salary cost and skill levels that improve over time.</p>`},
+]},
+
+// ============ SHIPS ============
+{id:'ships',title:'Ships & Equipment',status:'exists',features:[
+{id:'ship-types',title:'15 Ship Types (incl. Construction Ship)',status:'exists',
+  desc:'14 existing + Construction Ship (consumable, destroyed on project completion). Faction-specific hull configurations: Terran=cargo/trade, Zythian=weapon/armor, Automaton=tech/scanner slots.',
+  tags:['backend'],
+  details:`<p><strong>Ship List:</strong> Scout, Fighter, Corvette, Destroyer, Battlecruiser, Carrier, Interceptor, Freighter, Merchant Cruiser, Colony Ship, Insta Colony Ship, Mining Barge, Explorer, Construction Ship.</p>
+<p><strong>Construction Ship:</strong> CONSUMABLE -- destroyed when project completes. Projects vary in build time. In PvP, raiders/players can destroy the project AND construction ship mid-build. Safe in Care Bear Land.</p>
+<p><strong>Faction Hull Configurations:</strong></p>
+<table class="detail-table"><tr><th>Faction</th><th>Hull Focus</th><th>Bonus</th></tr>
+<tr><td>Terran Alliance</td><td>Extra cargo/trade slots</td><td>+10% trade profit, +5% diplomacy</td></tr>
+<tr><td>Zythian Swarm</td><td>Extra weapon/armor slots</td><td>+10% weapon damage, +5% crit chance</td></tr>
+<tr><td>Automaton Collective</td><td>Extra tech/scanner slots</td><td>+10% scan range, +5% efficiency</td></tr>
+</table>
+<p>Faction bonuses stack with hull layout advantages.</p>`},
+
+{id:'components',title:'8+ Component Types, 50+ Components',status:'exists',
+  desc:'6 existing + Research Modules + Artifact Components (Phase Cloak, Gravity Anchor, Chrono Stabilizer, Void Lens). Plus Tractor Beams, Mining Lasers, Comm Arrays, Nebula Shields.',
+  tags:['backend'],
+  details:`<p><strong>Existing 6 types:</strong> Weapons (9), Shields (7), Engines (6), Scanners (5), Cargo Pods (5), Armor (5). Tiers 1-5.</p>
+<p><strong>New Component Types:</strong></p>
+<ul>
+<li><strong>Research Modules:</strong> Boost tech research speed, artifact analysis, scanning depth.</li>
+<li><strong>Artifact Components:</strong> Rare drops from ruins/derelicts. Unique effects not available from crafting:
+  <ul>
+  <li><em>Phase Cloak:</em> Brief invisibility on scanner (5 seconds).</li>
+  <li><em>Gravity Anchor:</em> Prevents forced movement (tractor beams, knockback).</li>
+  <li><em>Chrono Stabilizer:</em> Reduces all cooldowns by 10%.</li>
+  <li><em>Void Lens:</em> Reveals hidden/cloaked sectors on map.</li>
+  </ul></li>
+<li><strong>Tractor Beams:</strong> Pull cargo/debris from space. Useful for salvage missions.</li>
+<li><strong>Mining Lasers:</strong> Passive asteroid harvesting while traveling through asteroid fields.</li>
+<li><strong>Comm Arrays:</strong> Extend fleet command range beyond default.</li>
+<li><strong>Nebula Shields:</strong> Reduce environmental hazard damage (nebulae, radiation).</li>
+</ul>
+<p>Component degradation and repair system applies to all types.</p>`},
+
+{id:'ship-designer',title:'Ship Designer (Marketing Funnel)',status:'exists',
+  desc:'MAJOR CONVERSION TOOL. Ship designer available to website VISITORS (no account needed). Over-the-top engaging experience that hooks visitors into finishing their build. Discount flagship on signup. Must be robust, hold attention, and guide completion.',
+  tags:['backend','frontend','store'],
+  workflow:['Public ship designer page (no auth)','Guided build flow with hints/suggestions','Component budget system for visitors','Save-to-account on signup','Discount flagship purchase flow','Faction templates with base bonuses'],
+  details:`<p><strong>MARKETING FUNNEL:</strong> The ship designer is a top-of-funnel acquisition tool. It must be over the top.</p>
+<p><strong>Visitor Experience (no account):</strong></p>
+<ul>
+<li>Website visitors can access the ship designer without creating an account.</li>
+<li>Guided build flow: pick a faction, choose a mid-tier hull, allocate components within a visitor budget.</li>
+<li>Must be <strong>robust and engaging</strong> -- hold attention, provide hints/suggestions, celebrate milestones ("Shield system online!", "Weapons armed!").</li>
+<li>Help visitors finish the ship they started -- subtle guidance, never let them get stuck.</li>
+<li>On completion: "Your ship is ready. Create an account to launch it." + <strong>discount purchase offer</strong>. NOTE: Placeholder for the ship designer already exists on the homepage.</li>
+</ul>
+<p><strong>Signup Conversion:</strong></p>
+<ul>
+<li>Visitors who sign up get their designed ship as a <strong>flagship at a discount</strong> (e.g., 50% off credits cost).</li>
+<li>Ship is mid-tier only (Corvette or Destroyer class) -- gives a real head start but not overpowered.</li>
+<li>Visitor component budget limits prevent min-maxing before they even play.</li>
+<li>The ship arrives with a custom nameplate: "First Command" badge.</li>
+</ul>
+<p><strong>Existing Features:</strong> Component slot management, stat recalculation, template save/load. Faction-specific templates with base stat bonuses (Terran=trade, Zythian=combat, Automaton=tech).</p>`},
+
+{id:'ship-customizer',title:'Ship Cosmetic Customizer',status:'exists',
+  desc:'25 hull colors, 15 accent colors, 8 trails, 10 decals, 8 skins, 6 nameplates. Live preview. PvP Paint Docks offer exclusive options.',
+  tags:['frontend','store'],
+  details:`<p>Fully implemented cosmetic customizer with live preview. Unlock milestones at levels 5/10/15/20.</p>
+<p><strong>New -- Commercial Paint Docks:</strong> PvP sector owners who build Custom Ship Paint Docks (see Space Hubs under deep-space-gates) can offer exclusive customization options not available elsewhere: premium patterns, animated skins, faction-hybrid color schemes. Paint Dock owners set prices in credits or gems.</p>`},
+
+{id:'fleets',title:'Fleet System',status:'exists',
+  desc:'Max 5 fleets, 10 ships each. Shift+drag selection. Instant fleet jump (switch control to any fleet). Attack warning system with instant attention teleport.',
+  tags:['backend','frontend'],
+  details:`<p>Fully implemented fleet grouping with galaxy map Shift+drag selection.</p>
+<p><strong>New:</strong></p>
+<ul>
+<li><strong>Instant Fleet Jump:</strong> Player can switch their active view/control to any fleet instantly. Ships stay where they are -- you command from anywhere.</li>
+<li><strong>Attack Warning System:</strong> When a fleet or colony is under attack, player gets an alert and can teleport their attention there immediately. No travel delay for the PLAYER, only for ships.</li>
+</ul>`},
+]},
+
+// ============ COLONIES ============
+{id:'colonies',title:'Colonies & Planets',status:'exists',features:[
+{id:'colonization',title:'Planet Colonization',status:'exists',
+  desc:'14 planet types (existing 10 + Forest, Swamp, Ruins, Radiated Ruins). Colony Ship required. Minecraft-style surfaces MUST visually match planet type (ice planet = ice biome, volcanic = lava biome, etc.).',
+  tags:['backend','frontend'],
+  details:`<p><strong>14 planet types:</strong> Existing 10 plus 4 new types.</p>
+<table class="detail-table"><tr><th>New Type</th><th>Resources</th><th>Special</th><th>Surface Biome</th></tr>
+<tr><td>Forest</td><td>High organics/wood</td><td>Dense tree cover, lumber economy</td><td>Plains + heavy tree gen</td></tr>
+<tr><td>Swamp</td><td>Unique bio-samples/chemicals</td><td>Difficult terrain, rare materials</td><td>Swamp biome (mud, shallow water)</td></tr>
+<tr><td>Ruins</td><td>Artifact-rich</td><td>Pre-built structures to salvage</td><td>Metal grating + rocky, pre-placed buildings</td></tr>
+<tr><td>Radiated Ruins</td><td>Highest-tier artifacts</td><td>Dangerous, requires rad protection</td><td>Volcanic + crystal, radiation hazard overlay</td></tr>
+</table>
+<p><strong>Surface-to-Planet-Type Matching (CRITICAL):</strong> The Minecraft-style planet surface MUST visually match the planet type. The voxel engine TerrainGenerator already supports 13 biomes -- each planet type maps to a biome configuration:</p>
+<table class="detail-table"><tr><th>Planet Type</th><th>Primary Biome</th><th>Secondary Biomes</th></tr>
+<tr><td>Terran/Gaia</td><td>Plains</td><td>Water, highland</td></tr>
+<tr><td>Ice</td><td>Ice</td><td>Rocky, water (frozen)</td></tr>
+<tr><td>Desert</td><td>Sand</td><td>Rocky, highland</td></tr>
+<tr><td>Volcanic</td><td>Lava</td><td>Volcanic rock, volcanic vent</td></tr>
+<tr><td>Crystal</td><td>Crystal</td><td>Rocky, highland</td></tr>
+<tr><td>Forest</td><td>Plains (dense trees)</td><td>Swamp, water</td></tr>
+<tr><td>Swamp</td><td>Swamp</td><td>Plains, water</td></tr>
+</table>
+<p>Colony Ship required. Population growth, resource generation, and infrastructure upgrades (max level 10).</p>`},
+
+{id:'colony-buildings',title:'Colony Buildings (Blueprint + Freeform)',status:'exists',
+  desc:'Two modes: (1) Blueprint System -- acquire, fill with resources, construct. (2) Freeform -- Minecraft-style custom building. Unified blueprint system for buildings, ships, and components.',
+  tags:['backend','frontend'],
+  details:`<p><strong>MAJOR REVISION:</strong> Move away from preset colony types. Players determine what to build freely.</p>
+<p><strong>Mode 1 -- Blueprint System:</strong></p>
+<ul>
+<li>Acquire building blueprints through research, drops, or store.</li>
+<li>Fill blueprint with required resources.</li>
+<li>Construct (takes time) or insta-spawn (costs 2x resources).</li>
+<li>Unified system: building blueprints, ship blueprints, and component blueprints all use the same acquisition/resource-filling/crafting pipeline.</li>
+</ul>
+<p><strong>Mode 2 -- Freeform Building:</strong></p>
+<ul>
+<li>Minecraft-style custom construction. Place blocks to build houses, walls, decorations, storage rooms.</li>
+<li>Purely aesthetic + functional (storage capacity, weather shelter, display rooms).</li>
+<li>Players can express creativity and build unique colony layouts.</li>
+</ul>
+<p>Manual mining AND auto-mine systems coexist. Existing 21 building types remain as the blueprint library, expandable.</p>`},
+
+{id:'colony-surface',title:'Colony Surface Grid (Minecraft-Style)',status:'exists',
+  desc:'FLAGSHIP FEATURE. Two systems: 2D PixiJS (fully working) + 3D Voxel Engine (Three.js, ~60% complete, critical worker bugs being fixed). Start 64x64, expansion tokens to 128x128 cap. Chunk-based loading.',
+  tags:['backend','frontend'],
+  details:`<p><strong>The #1 selling point of Space Wars 3000.</strong></p>
+<p><strong>2D System (ColonySurface.jsx + PixiJS):</strong> FULLY WORKING. Top-down tile grid (24-48 tiles). Buildings, weather effects (7 types), anomalies, daily quests, garrison/defense, custom block palette with color picker.</p>
+<p><strong>3D Voxel Engine (VoxelEngine + Three.js):</strong> ~60% complete. Architecture is solid:</p>
+<ul>
+<li>35 block types (terrain, ores, building materials, decorative).</li>
+<li>13 biomes (plains, rocky, water, highland, sand, lava, ice, crystal, swamp, volcanic, landing zone, metal, open sky).</li>
+<li>24 building templates (mines, habitats, solar arrays, spaceports, refineries, etc.).</li>
+<li>Greedy meshing with ambient occlusion + face culling.</li>
+<li>FPS player controller with physics, collision, jump, fly mode.</li>
+<li>DDA raycaster for block breaking/placing.</li>
+<li>Server delta persistence (only stores changes from procedural generation).</li>
+<li>Chunk-based loading with Web Workers (2 terrain + 2 mesh workers).</li>
+</ul>
+<p><strong>Critical bugs being fixed by Claude Code:</strong> Worker message field mismatches (cx vs chunkX), single-chunk delta loading, building generation not connected.</p>
+<p><strong>Expansion Plan:</strong> Start at 64x64 territory. Players purchase or grind expansion tokens to increase. Hard cap: 128x128 (requires chunk-based viewport rendering at that size). Chunk architecture built from day one.</p>`},
+
+{id:'wonders',title:'Wonder System (Realm + Planet Limits)',status:'exists',
+  desc:'Buildable + pre-existing wonders. Realm-limited (1 Genesis Device empire-wide) vs planet-limited. Pre-existing wonders found via exploration. Colonization exclusivity in PvE. Insta Colony Ships: home sector only.',
+  tags:['backend'],
+  details:`<p><strong>Two categories:</strong></p>
+<ul>
+<li><strong>Buildable Wonders:</strong> Some realm-limited (e.g., only 1 Genesis Device empire-wide). Others unlimited empire-wide but planet-limited (e.g., max 1 Shipyard per planet).</li>
+<li><strong>Pre-existing Wonders:</strong> Rare wonders placed at universe generation. Lucky player who colonizes a planet with a pre-existing wonder gets it for free.</li>
+</ul>
+<p><strong>Colonization Rules:</strong></p>
+<ul>
+<li>Once a player colonizes a planet in a <strong>PvE sector</strong>, no other player can build there (exclusivity).</li>
+<li><strong>PvP sectors:</strong> Contested -- colonies can be attacked and taken.</li>
+<li><strong>Insta Colony Ships</strong> only work in player home sectors. Prevents instant-claiming rush on valuable planets in shared sectors.</li>
+</ul>
+<p><strong>Existing 6 types:</strong> Orbital Array, Trade Nexus, Defense Matrix, Shipyard, Research Station, Genesis Device. Expand over time.</p>`},
+
+{id:'colony-no-limit',title:'No Hard Colony Limits',status:'new',
+  desc:'No artificial cap. Soft pressure via maintenance scaling (colony 5 = 3x cost, colony 10 = 8x), crew requirements, defense burden. Wealthy endgame players can run 15+.',
+  tags:['backend'],
+  details:`<p><strong>DESIGN DECISION:</strong> No artificial colony cap. Instead, natural soft pressure:</p>
+<ul>
+<li><strong>Maintenance scaling:</strong> Colony 5 costs 3x colony 1. Colony 10 costs 8x. Exponential curve.</li>
+<li><strong>Crew requirements:</strong> Each colony needs crew. More colonies = more salary burden.</li>
+<li><strong>Defense burden:</strong> Undefended colonies become raid targets. More territory = more to defend.</li>
+<li>Wealthy endgame players CAN run 15+ colonies if they earn the resources and manage the logistics.</li>
+</ul>`},
+]},
+
+// ============ CREW ============
+{id:'crew',title:'Crew & Species',status:'exists',features:[
+{id:'crew-species',title:'Crew System (Deep RPG Layer)',status:'exists',
+  desc:'13 species, individual skill trees, clothing/equipment/personal artifacts, crafting for crew gear. Ships require crew to operate. Players get attached to their crew -- training, equipping, and specializing them. Security details and troop ships need larger crews.',
+  tags:['backend','frontend','store'],
+  workflow:['Crew skill system (6-8 skills per crew member)','Crew equipment slots (weapon, armor, tool, accessory)','Crew clothing/cosmetics','Personal artifact system for crew','Crew gear crafting blueprints','Ship crew requirements by hull size','Security detail / troop ship crew scaling','Academy training system','Store: recruit packs, cosmetic crew outfits'],
+  details:`<p><strong>MAJOR EXPANSION:</strong> Crew members are individual characters players invest in and grow attached to.</p>
+<p><strong>Crew Requirements by Ship:</strong></p>
+<table class="detail-table"><tr><th>Ship Class</th><th>Min Crew</th><th>Max Crew</th><th>Notes</th></tr>
+<tr><td>Scout/Fighter</td><td>1</td><td>3</td><td>Pilot + optional gunner/engineer</td></tr>
+<tr><td>Corvette/Destroyer</td><td>3</td><td>8</td><td>Bridge crew + specialists</td></tr>
+<tr><td>Battlecruiser/Carrier</td><td>8</td><td>20</td><td>Full bridge + security detail</td></tr>
+<tr><td>Troop Ship</td><td>5</td><td>50+</td><td>Crew + ground troops for invasions</td></tr>
+</table>
+<p><strong>Individual Crew Skill System:</strong></p>
+<ul>
+<li>Each crew member has 6-8 trainable skills: Piloting, Gunnery, Engineering, Science, Medical, Leadership, Combat, Stealth.</li>
+<li>Players choose where to invest skill points -- specialize crew for specific roles.</li>
+<li>Well-trained crew members genuinely impact performance (better accuracy, faster repairs, stronger shields).</li>
+<li>Crew level up through use and Academy training.</li>
+</ul>
+<p><strong>Crew Equipment:</strong></p>
+<ul>
+<li>4 equipment slots per crew member: Weapon, Armor, Tool, Accessory.</li>
+<li>Clothing/cosmetics -- visual customization, some with minor stat boosts.</li>
+<li>Personal artifacts -- rare items that boost individual crew performance.</li>
+<li>All crew gear craftable via the unified blueprint system (new blueprint category).</li>
+</ul>
+<p><strong>Death & Recovery (NO PERMADEATH):</strong></p>
+<ul>
+<li>Crew members carry an <strong>Identity Disk</strong> -- a neural backup of their consciousness.</li>
+<li>When "killed," the identity disk is recovered and the crew member is loaded into a <strong>new sleeve (clone body)</strong>.</li>
+<li><strong>7-day recovery timer</strong> before the crew member returns to active duty.</li>
+<li>Medical costs for the new sleeve (scales with crew level).</li>
+<li>Store opportunity: "Rapid Sleeve" item that reduces recovery to 24 hours.</li>
+<li>NO permadeath ever. Players invest weeks into crew -- losing them permanently is a game-killer.</li>
+</ul>
+<p><strong>Upgraded Sleeves:</strong> Players can purchase or grind upgraded bodies for their Identity Disk crew. Better sleeves = stat bonuses, faster recovery, unique cosmetic appearances. Store and crafting paths available.</p>
+<p><strong>Player + Agent Exclusive Gear:</strong> The player character and their AI Agent companion have access to exclusive items and equipment that regular crew members cannot use -- hero-tier weapons, unique artifacts, special armor sets. This creates a clear power hierarchy: Player > Agent > Crew.</p>
+<p><strong>Agent Downtime:</strong> Your AI Agent can be "killed" too -- same Identity Disk system, 7-day recovery. "Rapid Sleeve" store item works for agents too. While your agent is down, you're solo.</p>
+<p><strong>Simplified Crew Maintenance:</strong> Three tiers of management: (1) YOUR personal character and equipment, (2) YOUR AGENT and their equipment, (3) CREW MEMBERS with simplified bulk management (auto-equip best available, auto-heal, salary handled). Keep crew management lightweight -- the deep RPG layer is for the player and agent, not micromanaging 20 crew members.</p>
+<p><strong>Emotional Investment:</strong> Players name their crew, train them over weeks, equip them with hard-won gear. The identity disk system means loss is painful (7 days without your best crew member) but never permanent.</p>
+<p><strong>13 species:</strong> 10 organic + 3 robot. Unique stat bonuses per species. Academy building trains recruits over time.</p>`},
+
+{id:'crew-salary',title:'Crew Economy (Balanced Burden)',status:'exists',
+  desc:'Species-based salary, 24h tick. CRITICAL: must not overburden players. Salary + food + training + upkeep must feel manageable, not like a job. Auto-scaling costs that stay proportional to income.',
+  tags:['backend'],
+  details:`<p><strong>DESIGN WARNING:</strong> Games that make upkeep feel like a chore lose players. Salary, food, training, equipment repair -- these costs must stay proportional to what the player is earning. A player should NEVER feel like they are working just to pay their crew.</p>
+<p><strong>Balance Rules:</strong></p>
+<ul>
+<li>Total crew costs should never exceed 20-25% of a player's typical income at any level.</li>
+<li>Auto-scaling: crew costs are percentage-based, not flat. A L3 player's crew costs less than a L9 player's crew in absolute terms.</li>
+<li>Crew members in reserve (not assigned to ships) cost 50% salary -- no penalty for having a roster.</li>
+<li>Food is handled as a simple flat cost per crew member, bundled into salary (not a separate system to manage).</li>
+<li>Training costs are one-time per skill level, not ongoing.</li>
+</ul>
+<p><strong>Current:</strong> Species-based salary, 24h tick interval. Salary debt tracking. Hiring fee = baseSalary * 5.</p>
+<p><strong>Planet Workers:</strong> Players can hire automated workers for planet surfaces. Requires a <strong>Worker Hub</strong> building -- a special structure that needs a rare component (Automation Core) to construct. Workers handle mining, farming, and hauling on the colony surface. Costs are included in the crew burden calculation. Workers are not crew members -- they're simpler NPCs that run production tasks.</p>
+<p><strong>Key principle:</strong> Crew management should feel like building a team, not running a payroll department.</p>`},
+]},
+
+// ============ PROGRESSION ============
+{id:'progression',title:'Progression & Research',status:'exists',features:[
+{id:'levels',title:'Player Levels (1-20)',status:'exists',
+  desc:'XP table from 100 to 1M. 8 skills (Combat, Shield, Trade, Nav, Engineering, Leadership, Mining, Scanner). Skill points per level, max skill 10.',
+  tags:['backend'],
+  details:`<p>20 player levels with XP table from 100 (L1) to 1,000,000 (L20). Each level grants skill points distributed across 8 skills: Combat Mastery, Shield Expertise, Trade Acumen, Navigation, Engineering, Leadership, Mining Proficiency, Scanner Mastery. Max skill level 10 each.</p>`},
+
+{id:'tech-tree',title:'Tech Research Tree (Expanded)',status:'exists',
+  desc:'Expanded from 7 to 15+ techs covering all new systems: portals, construction ships, crew skills, planetary mining, AI companions, PvP structures, commercial hubs. Branching tree with faction-specific unlocks.',
+  tags:['backend','frontend'],
+  details:`<p><strong>Expanded Tech Tree (15+ techs, 4 branches):</strong></p>
+<p><strong>Branch 1 -- Military:</strong></p>
+<ul>
+<li>Advanced Weapons (existing)</li>
+<li>Advanced Shields (existing)</li>
+<li>Capital Class Ships (existing)</li>
+<li><strong>NEW: Defensive Structures</strong> -- unlocks planetary satellites, defensive stations</li>
+<li><strong>NEW: PvP Fortification</strong> -- unlocks advanced PvP defenses, toll gates</li>
+</ul>
+<p><strong>Branch 2 -- Exploration & Science:</strong></p>
+<ul>
+<li>Deep Scanning (existing)</li>
+<li><strong>NEW: Portal Technology</strong> -- unlocks portal crafting blueprints</li>
+<li><strong>NEW: Jump Drive Engineering</strong> -- unlocks jump drive component</li>
+<li><strong>NEW: Nebula Navigation</strong> -- unlocks nebula shield/radiation plating crafting</li>
+</ul>
+<p><strong>Branch 3 -- Economy & Industry:</strong></p>
+<ul>
+<li>Basic Crafting (existing)</li>
+<li><strong>NEW: Advanced Crafting</strong> -- unlocks crew gear blueprints, ship blueprints, artifact crafting</li>
+<li><strong>NEW: Construction Engineering</strong> -- unlocks Construction Ship, outpost building</li>
+<li><strong>NEW: Commercial Operations</strong> -- unlocks Space Hub buildings, toll gates, advertising</li>
+<li><strong>NEW: Planetary Mining</strong> -- unlocks Minecraft-style manual mining, auto-mine drones, expansion tokens</li>
+</ul>
+<p><strong>Branch 4 -- Leadership & AI:</strong></p>
+<ul>
+<li>Basic Automation (existing)</li>
+<li>Advanced Colonies (existing)</li>
+<li><strong>NEW: Crew Training</strong> -- unlocks crew skill system, Academy upgrades</li>
+<li><strong>NEW: AI Companion</strong> -- unlocks AI agent integration (future)</li>
+<li><strong>NEW: Alliance Coordination</strong> -- unlocks territory claims, corp gates</li>
+</ul>
+<p>Each tech has prerequisites, credit costs, and research timers. Faction-specific tech bonuses: Terran research economy techs 20% faster, Zythian military 20% faster, Automaton science 20% faster.</p>`},
+
+{id:'crafting',title:'Crafting System (5 Blueprint Categories)',status:'exists',
+  desc:'Expanded to 5 categories: Ship Components, Buildings, Ships, Crew Gear (weapons/armor/tools/accessories), and Artifacts (personal + ship). Unified pipeline for all. Special artifact blueprints from rare drops.',
+  tags:['backend','frontend'],
+  workflow:['Unified blueprint model (5 categories)','Resource-filling UI','Crafting queue + timers','Crew gear slot integration','Personal artifact crafting','Ship artifact crafting','Rare blueprint drop tables','Tech tree prerequisites per blueprint tier'],
+  details:`<p><strong>Five blueprint categories (unified system):</strong></p>
+<table class="detail-table"><tr><th>Category</th><th>Examples</th><th>Source</th></tr>
+<tr><td>Ship Components</td><td>Weapons, shields, engines, research modules, nebula shields</td><td>Crafting stations, tech research</td></tr>
+<tr><td>Buildings</td><td>Colony structures, defensive stations, outposts, Space Hubs</td><td>Tech research, mission rewards</td></tr>
+<tr><td>Ships</td><td>Full ship construction from hull up</td><td>Shipyard blueprints, rare drops</td></tr>
+<tr><td>Crew Gear</td><td>Crew weapons, armor, tools, accessories, clothing</td><td>Academy research, adventure drops</td></tr>
+<tr><td>Artifacts</td><td>Personal crew artifacts, ship artifacts, unique effects</td><td>Rare drops from ruins/bosses/derelicts ONLY</td></tr>
+</table>
+<p>All five use the same pipeline: acquire blueprint, fill with required resources, start time-based crafting job. Required player level and tech prerequisites apply.</p>
+<p><strong>Artifact Blueprints:</strong> Special category -- blueprints for artifacts can ONLY be found as rare drops (ruins, boss fights, derelict exploration). Cannot be purchased. Creates a crafting endgame where rare blueprint acquisition drives content engagement.</p>`},
+
+{id:'missions',title:'Mission System',status:'exists',
+  desc:'5 mission types (delivery, bounty, scan, trade_volume, patrol). Max 5 active, 3 per port, 24h expiry, 30min refresh.',
+  tags:['backend'],
+  details:`<p>5 mission types available at ports. Max 5 active simultaneously. 3 missions per port. 24-hour expiration. 30-minute refresh cycle. Rewards: credits, XP, occasionally rare items.</p>`},
+
+{id:'achievements-client',title:'Client Achievement System',status:'exists',
+  desc:'12 localStorage achievements tracking trades, combats, exploration, colonies, fleets, credits, levels. Trophy panel on Dashboard.',
+  tags:['frontend'],
+  details:`<p>12 client-side achievements tracked in localStorage. Trophy panel on Dashboard shows progress. Achievements track: total trades, combats won, sectors explored, colonies established, fleets created, credits earned, levels reached. Future: move to server-side for gem rewards and cross-device persistence.</p>`},
+
+{id:'endgame-retention',title:'Endgame & Lifer Retention',status:'new',
+  desc:'Critical: keep endgamers who "have everything." Server transfers with legacy rewards, cross-wipe bank vaults, prestige resets, over-the-top endgame adventures, competitive seasons, and community leadership roles.',
+  tags:['backend','frontend'],
+  details:`<p><strong>THE PROBLEM:</strong> When players have everything, they leave. They may return for nostalgia but quickly leave again. We need systems that keep endgamers engaged PERMANENTLY.</p>
+<p><strong>Retention Systems:</strong></p>
+<table class="detail-table"><tr><th>System</th><th>How It Works</th><th>Why It Keeps Them</th></tr>
+<tr><td>Server Transfers</td><td>Endgamers can transfer to a NEW server with fresh economy, keeping their character + 1 flagship. Legacy badge visible to all.</td><td>Fresh competition, mentor role, prestige</td></tr>
+<tr><td>Cross-Wipe Bank Vault</td><td>Special bank that persists across server wipes/seasons. Store select items, credits (capped), and cosmetics.</td><td>Investment never fully lost, reduces wipe anxiety</td></tr>
+<tr><td>Prestige Reset</td><td>Voluntary reset to L1 with permanent prestige bonuses (+5% all stats per prestige). Prestige badge and exclusive cosmetics.</td><td>Replayability with visible status</td></tr>
+<tr><td>Over-the-Top Adventures</td><td>Endgame-only content: multi-week expedition chains across 20+ sectors. Unique bosses. Requires full fleet + maxed crew.</td><td>Challenge that matches their power level</td></tr>
+<tr><td>Competitive Seasons</td><td>3-month seasons with leaderboards, exclusive rewards, and server-wide rankings. Season resets rankings (not assets).</td><td>Recurring goals, bragging rights</td></tr>
+<tr><td>Community Leadership</td><td>Endgamers can become Faction Governors (elected), run events, set faction trade policies, mentor new players for XP bonuses.</td><td>Social purpose, political gameplay</td></tr>
+<tr><td>Legacy Projects</td><td>Massive multi-player construction projects (space stations, jump gate networks) that take months. Named after contributors.</td><td>Permanent mark on the game world</td></tr>
+<tr><td>Agent Optimization</td><td>Endgame players obsess over AI agent strategies. Agent leaderboards, agent tournaments, agent marketplace.</td><td>Infinite optimization ceiling</td></tr>
+<tr><td>Autonomous Sectors</td><td>Lifers who outgrow 15 sectors can release sectors to become autonomous NPC-governed regions. Player assigns an Agent as Governor. Governors have skills (Military, Resources, Agriculture, Prosperity, Diplomacy, Logistics). Player hires/fires governors and sets policy. Autonomous sectors grow on their own with periodic reports.</td><td>Empire-builder endgame with delegation gameplay</td></tr>
+</table>
+<p><strong>Autonomous Sector System:</strong> When a lifer wants to expand past the 15-sector soft cap, they don't directly manage more sectors. Instead, they release sectors to become <strong>autonomous regions</strong> governed by NPC leaders (or their own AI Agent placed as Governor). Governor NPCs have rated skills:</p>
+<ul>
+<li><strong>Military:</strong> Defense capability, raid resistance, fleet maintenance.</li>
+<li><strong>Resources:</strong> Mining output, resource extraction efficiency.</li>
+<li><strong>Agriculture:</strong> Food production, farming yield, population growth.</li>
+<li><strong>Prosperity:</strong> Trade income, citizen happiness, tax revenue.</li>
+<li><strong>Diplomacy:</strong> Relations with neighboring sectors, reduced conflict chance.</li>
+<li><strong>Logistics:</strong> Supply chain efficiency, construction speed.</li>
+</ul>
+<p>Players hire and fire governors, set high-level policy (defensive vs expansionist vs economic), and receive periodic reports. Autonomous sectors grow on their own but less optimally than player-managed ones. Creates an empire-builder endgame layer on top of the base game.</p>
+<p><strong>Key principle:</strong> Endgamers need STATUS (visible prestige), PURPOSE (leadership, mentoring), and CHALLENGE (content scaled to their power). Give them all three.</p>`},
+]},
+
+// ============ SOCIAL ============
+{id:'social',title:'Social & Organizations',status:'exists',features:[
+{id:'corporations',title:'Corporation System + Alliances',status:'exists',
+  desc:'50K creation cost, max 20 members. Alliance system (cap 3-5 allies). Player-adjustable sector access: Corp Only, Corp+Allies, Public, or Locked.',
+  tags:['backend'],
+  details:`<p><strong>Corporations:</strong> 50K credits to create. Max 20 members. Name/tag requirements.</p>
+<p><strong>Alliance System (NEW):</strong></p>
+<ul>
+<li>Corporations can formally ally each other. Cap on alliances: 3-5 (TBD).</li>
+<li>Allied corps share map visibility in allied sectors.</li>
+<li><strong>Sector Access Permissions:</strong> Per-sector, player-adjustable:
+  <ul>
+  <li>"Corp Only" -- only your corp members can enter.</li>
+  <li>"Corp + Allies" -- corp and allied corp members.</li>
+  <li>"Public" -- anyone can enter.</li>
+  <li>"Locked" -- owner only.</li>
+  </ul></li>
+</ul>`},
+
+{id:'messaging',title:'Player Messaging',status:'exists',
+  desc:'In-game mail with reply button and unread count in sidebar.',
+  tags:['backend','frontend'],
+  details:`<p>In-game mail system with reply button. Unread count displayed in sidebar navigation. Simple but functional for player-to-player communication.</p>`},
+
+{id:'factions',title:'3+ Factions (Expandable)',status:'exists',
+  desc:'Launch with 3: Terran (trade), Zythian (combat), Automaton (tech). Architecture MUST support easy addition of new factions for evergreen lifecycle. Faction config is data-driven, not hardcoded.',
+  tags:['backend','frontend'],
+  details:`<p><strong>Launch Factions:</strong> Terran Alliance (trade/diplomacy), Zythian Swarm (combat), Automaton Collective (tech). Standing system, faction wars, leaderboards.</p>
+<p><strong>Expandable Architecture (CRITICAL):</strong></p>
+<ul>
+<li>Faction definitions must be <strong>data-driven</strong> (config file or database), NOT hardcoded.</li>
+<li>Adding a new faction should require: a config entry (name, bonuses, colors, ship templates), art assets (UI theme, ship skins), and lore text. Zero code changes to game logic.</li>
+<li>Faction-specific bonuses, hull configurations, tech speed modifiers, and UI themes all pull from the faction config.</li>
+<li>New factions are a major content expansion -- "Season 2: The Void Collective arrives" drives returning players.</li>
+</ul>
+<p><strong>Potential Future Factions:</strong></p>
+<ul>
+<li><strong>Void Nomads</strong> -- exploration/stealth focused, bonus to scanning and cloaking.</li>
+<li><strong>Merchant League</strong> -- pure economy faction, best trade margins and crafting speed.</li>
+<li><strong>Pirate Syndicate</strong> -- raid-focused, bonus to NPC hiring and raider economy.</li>
+</ul>
+<p>Each new faction adds ship templates, UI themes, tech bonuses, crew species, and lore -- a full content package.</p>`},
+
+{id:'community-events',title:'Community Events',status:'exists',
+  desc:'Server-wide events with contribution system for collective goals.',
+  tags:['backend'],
+  details:`<p>Server-wide events where all players contribute toward collective goals. Rewards distributed based on contribution level. Creates server-wide engagement moments.</p>`},
+
+{id:'alliance-territory',title:'Corporation Territory Claims',status:'new',
+  desc:'CORPORATIONS (not alliances) claim 5-10 public sectors via control structures. Allied corps get shared bonuses in claimed territory. Bonuses: reduced taxes, faster repairs. PvP: contestable.',
+  tags:['backend','pvp'],
+  details:`<p><strong>Clarification:</strong> Territory is claimed by <strong>Corporations</strong>, not alliances. Alliances are relationships between corps -- territory belongs to a specific corp.</p>
+<ul>
+<li>A corporation can claim 5-10 public sectors by building control structures (requires Construction Ships).</li>
+<li><strong>Bonuses for corp members:</strong> Reduced port taxes, faster repairs, bonus resource generation in claimed sectors.</li>
+<li><strong>Allied corps:</strong> Get partial bonuses (50% of tax reduction, repair speed) in allied corp territory -- reward for alliances.</li>
+<li>Other players can still enter -- claims don't lock sectors.</li>
+<li>In PvP zones, claims can be contested by destroying the control structure.</li>
+<li>Claimed sectors show corp banner on map (allied sectors show a smaller allied banner).</li>
+</ul>`},
+]},
+
+// ============ INFRASTRUCTURE ============
+{id:'infrastructure',title:'Infrastructure & Automation',status:'exists',features:[
+{id:'outposts',title:'10+ Outpost Types',status:'exists',
+  desc:'Expanded from 4 to 10+. Original: Trade Relay, Scanner Post, Defense Platform, Fuel Cache. New: Comm Relay, Mining Drone Hub, Repair Station, Nav Beacon, Smuggler Cache, Toll Gate, Research Probe.',
+  tags:['backend'],
+  details:`<p>Expanded from 4 to 10+ outpost types. All player-built with Construction Ships. Levels 1-5. PvP: can be attacked/destroyed.</p>
+<table class="detail-table"><tr><th>Outpost</th><th>Function</th></tr>
+<tr><td>Trade Relay</td><td>Extended trade range (existing)</td></tr>
+<tr><td>Scanner Post</td><td>Sector scanning (existing)</td></tr>
+<tr><td>Defense Platform</td><td>Auto-fire on hostiles (existing)</td></tr>
+<tr><td>Fuel Cache</td><td>Refueling point (existing)</td></tr>
+<tr><td>Comm Relay</td><td>Extends fleet command + chat range</td></tr>
+<tr><td>Mining Drone Hub</td><td>Auto-harvests nearby asteroids</td></tr>
+<tr><td>Repair Station</td><td>Auto-repairs docked ships over time</td></tr>
+<tr><td>Navigation Beacon</td><td>Reduces fuel cost for friendly ships in sector</td></tr>
+<tr><td>Smuggler Cache</td><td>Hidden storage, only visible to owner + scanner T4+</td></tr>
+<tr><td>Toll Gate</td><td>Charges non-allied ships passing through</td></tr>
+<tr><td>Research Probe</td><td>Passively generates discovery data for nearby unexplored sectors</td></tr>
+<tr><td>Worker Hub (Planet)</td><td>Enables automated workers on planet surface (mining, farming, hauling). Requires rare Automation Core component.</td></tr>
+</table>
+<p>Creates meaningful sector control beyond just colonies. Strategic placement of outposts defines territory.</p>
+<p><strong>Automated Planet Workers:</strong> The Worker Hub outpost (built on planet surface) deploys automated workers that handle mining, farming, and resource hauling without player input. Requires a rare Automation Core component to build. Workers operate 24/7 but at 60% efficiency of manual play -- incentivizes active play while rewarding infrastructure investment.</p>`},
+
+{id:'automation',title:'Task Automation',status:'exists',
+  desc:'Current: max 3 automated tasks, 1-min interval, 1.5x fuel. Foundation for AI agent system.',
+  tags:['backend'],
+  details:`<p>Max 3 automated tasks, 1-minute interval, 1.5x fuel cost. This is the primitive version of automation -- the AI Agent Companion (see below) will eventually supersede this for players who unlock it.</p>`},
+
+{id:'ai-agent',title:'AI Agent Companion',status:'new',
+  desc:'Player-linked AI companion runs as a scoped sub-account with its own ship/crew, audited action budget, queue-backed directives, and API permissions limited to assigned assets. Trade/defense/scouting ship first; governor and marketplace extensions later.',
+  tags:['backend','frontend'],
+  workflow:['Agent authentication system (agent account linked to player)','Agent API access (same endpoints as players)','Agent ship assignment','Agent behavior configuration UI','Agent activity log/feed','Agent resource limits (prevent abuse)','Rate limiting per agent','Agent permission system (what it can/cannot do)','OpenClaw integration research','Agent marketplace (share/sell agent strategies?)'],
+  details:`<p><strong>VISION:</strong> A human player can have an AI agent companion log into the game and play alongside them. The agent is a real participant -- it has its own ship, makes its own decisions, and interacts with the game world.</p>
+<p><strong>How It Works:</strong></p>
+<ul>
+<li><strong>1 agent per player.</strong> Linked to the player's account as a sub-account.</li>
+<li>Agent logs in via the same API endpoints as human players (JWT auth, REST API).</li>
+<li>Agent gets assigned a ship from the player's fleet.</li>
+<li>Agent can: trade, mine, scout, fight NPCs, defend colonies, run supply routes, craft, manage colony production. Agent's ship has its own crew members (managed by the agent, subject to the same crew system -- skills, gear, Identity Disks).</li>
+<li>Agent CANNOT: engage in PvP (initially), access store, modify player settings, delete assets.</li>
+</ul>
+<p><strong>Agent Configuration UI:</strong></p>
+<ul>
+<li>Player sets high-level directives: "Defend my colony in Sector 47", "Run trade route between Core Hub 3 and Outer Ring 12", "Scout sectors 50-60 and report".</li>
+<li>Priority system: Defense > Trade > Exploration.</li>
+<li>Budget limits: max credits the agent can spend per day.</li>
+<li>Activity log: real-time feed of what the agent is doing. Player can review and adjust.</li>
+</ul>
+<p><strong>Technical Architecture:</strong></p>
+<ul>
+<li><strong>CRITICAL RULE:</strong> Every game action = API endpoint. Never put game logic in frontend only. This is already the case (Routes -> Controllers -> Services).</li>
+<li>Agent runs as a separate process/service, calling the game API like a player client would.</li>
+<li>Start with OpenClaw or similar agent framework. Iterate from there.</li>
+<li>Rate limiting: agents get slightly slower API access than humans (500ms min between actions) to prevent server load abuse.</li>
+<li>Agent actions are logged and auditable. If an agent exploits a bug, the player is responsible.</li>
+</ul>
+<p><strong>Phased Rollout:</strong></p>
+<table class="detail-table"><tr><th>Phase</th><th>Capability</th><th>Complexity</th></tr>
+<tr><td>Phase 1</td><td>Simple trade route automation (buy low, sell high loop)</td><td>Low -- scripted behavior</td></tr>
+<tr><td>Phase 2</td><td>Colony management (production queues, defense deployment)</td><td>Medium -- decision trees</td></tr>
+<tr><td>Phase 3</td><td>Combat (NPC fights, fleet defense)</td><td>Medium -- tactical AI</td></tr>
+<tr><td>Phase 4</td><td>Full autonomous play (LLM-driven decisions, adaptation)</td><td>High -- OpenClaw integration</td></tr>
+</table>
+<p><strong>This is a separate project</strong> but ALL current game design must account for agent integration. Every feature we build needs clean API coverage.</p>`},
+
+{id:'artifacts',title:'10 Artifact Types',status:'exists',
+  desc:'Equippable artifacts with functional bonuses: fuel, energy, scan, shields, crew, speed, research, damage, flee chance, efficiency.',
+  tags:['backend'],
+  details:`<p>10 equippable artifact types found through exploration and combat. Each provides a unique functional bonus: fuel reduction, energy boost, scan detail, shield boost, crew bonuses, speed boost, research time reduction, damage bonus, flee chance increase, fuel efficiency. Artifacts are rare drops from ruins, derelicts, and boss encounters.</p>`},
+]},
+
+// ============ UI/UX ============
+{id:'ux',title:'UI/UX & Client Features',status:'exists',features:[
+{id:'keyboard',title:'Keyboard Shortcuts',status:'exists',
+  desc:'8 navigation shortcuts (D/S/M/V/T/C/P/I), Esc closes dialogs, ? shows help overlay.',
+  tags:['frontend'],
+  details:`<p>8 keyboard shortcuts for navigation: D=Dashboard, S=Ships, M=Map, V=Systems, T=Trading, C=Colonies, P=Profile, I=Inventory. Esc closes any open dialog. ? opens help overlay showing all shortcuts.</p>`},
+
+{id:'mobile',title:'Mobile Responsive Layout (PWA Priority)',status:'exists',
+  desc:'60% of players expected on mobile. PWA first, native app later. Needs: touch controls, swipe gestures, offline capability, push notifications, pinch zoom on map.',
+  tags:['frontend'],
+  details:`<p><strong>CRITICAL:</strong> Estimated 60% of players will play on mobile (lunch break on phone, PC at home).</p>
+<ul>
+<li>Must be excellent, not just "works."</li>
+<li><strong>PWA first</strong>, native app later.</li>
+<li>Current: collapsible sidebar with hamburger menu.</li>
+<li><strong>Needs:</strong> Touch-optimized controls, swipe gestures for navigation, offline capability, push notifications for attacks/raids, responsive galaxy map with pinch-to-zoom.</li>
+</ul>`},
+
+{id:'accessibility',title:'Basic Accessibility',status:'exists',
+  desc:'ARIA labels on nav/main/modals. aria-current on active nav items.',
+  tags:['frontend'],
+  details:`<p>Basic accessibility implemented: ARIA labels on navigation, main content areas, and modals. aria-current attribute on active nav items. Semantic HTML structure. Further accessibility improvements needed for screen reader support and keyboard navigation of game elements.</p>`},
+
+{id:'faction-theme',title:'Faction-Colored UI Theming',status:'exists',
+  desc:'Sidebar accent, XP bar, and nav states adapt to faction color (Terran=blue, Zythian=red, Automaton=purple).',
+  tags:['frontend'],
+  details:`<p>UI automatically adapts color scheme based on player's faction. Sidebar accent color, XP bar fill, and navigation active states all use faction-specific colors. Terran=cyan/blue, Zythian=red, Automaton=purple.</p>`},
+
+{id:'galaxy-map',title:'Galaxy Map Canvas',status:'exists',
+  desc:'Quadtree-optimized. Start 1,200 sectors, expandable to 3,500. Delaunay triangulation, hyperlanes, fleet selection, route overlay. Print-to-PDF for offline reference.',
+  tags:['frontend'],
+  details:`<p>Quadtree-optimized canvas rendering of the galaxy map.</p>
+<ul>
+<li>Start at 1,200 sectors, architecture supports 3,500.</li>
+<li>Delaunay triangulation for hyperlane rendering.</li>
+<li>Ship badges, fleet selection (Shift+drag), route overlay.</li>
+<li>At 3,500 nodes: needs LOD optimization + possible WebGL upgrade.</li>
+<li><strong>New -- Print-to-PDF:</strong> Players can export the sector map as high-res PNG or PDF with sector names, zone colors, and owned territories marked. For offline reference and strategic planning.</li>
+</ul>`},
+
+{id:'wiki',title:'In-Game Wiki (Web-Accessible)',status:'exists',
+  desc:'19 articles. Must be available via web. No article limit. Extensive coverage of every game element with screenshots. SEO-friendly for organic traffic.',
+  tags:['frontend'],
+  details:`<p>19 articles currently. Must expand to cover every game element.</p>
+<ul>
+<li>Available via web (not just in-game) -- public URL for SEO.</li>
+<li>No limit on articles.</li>
+<li>Extensive coverage with screenshots for every element.</li>
+<li>Goal: a player should never have to leave the wiki to understand something.</li>
+<li>SEO-friendly public wiki drives organic traffic to the game.</li>
+</ul>`},
+
+{id:'notifications',title:'Toast Notification System',status:'exists',
+  desc:'Global NotificationContext with success/info/warning/error types. Auto-dismiss.',
+  tags:['frontend'],
+  details:`<p>Global toast notification system using React Context. Supports success, info, warning, and error types. Auto-dismiss with configurable duration. Stacks multiple notifications.</p>`},
+
+{id:'socket',title:'WebSocket Connection',status:'exists',
+  desc:'Real-time connection indicator (green/red dot). Socket service for live updates.',
+  tags:['frontend','backend'],
+  details:`<p>WebSocket connection for real-time updates. Connection status indicator (green=connected, red=disconnected) in the UI. Socket service handles live data pushes for combat updates, trade notifications, raid alerts, and chat messages.</p>`},
+]},
+
+// ============ SCALING & OPS ============
+{id:'ops',title:'Scaling & Operations',status:'planned',features:[
+{id:'player-spawn',title:'Distributed Player Spawning',status:'new',
+  desc:'New players start in home sector, first jump to 1 of 30-50 Core hubs distributed by faction. Prevents Day 1 congestion.',
+  tags:['backend'],
+  details:`<p>Spread starting sectors across 30-50 Core sectors, distributed by faction.</p>
+<ul>
+<li>Prevents Day 1 congestion at a single starting point.</li>
+<li>New players start in their home sector with a tutorial.</li>
+<li>First jump takes them to their assigned Core hub (faction-based).</li>
+<li>Each faction has 10-15 Core hubs to distribute load.</li>
+</ul>`},
+
+{id:'sector-instance',title:'Sector Instance Limits',status:'new',
+  desc:'Cap 15-25 players per shared sector (revised down from 30-50). Each player in a sector costs ~2-5MB RAM + WebSocket + tick processing. Queue if cap hit. Home sectors: 1 instance per owner.',
+  tags:['backend'],
+  details:`<p><strong>Resource Cost Analysis per Player in Sector:</strong></p>
+<table class="detail-table"><tr><th>Resource</th><th>Per Player</th><th>20 Players</th><th>50 Players</th></tr>
+<tr><td>RAM (player state + ships + cargo)</td><td>~2-5 MB</td><td>~60 MB</td><td>~150 MB</td></tr>
+<tr><td>WebSocket connection</td><td>~50 KB + overhead</td><td>1 MB</td><td>2.5 MB</td></tr>
+<tr><td>Tick processing (movement, combat, NPC AI)</td><td>~1-3ms per tick</td><td>~40ms/tick</td><td>~100ms/tick</td></tr>
+<tr><td>DB queries per tick (position updates, events)</td><td>2-4 queries</td><td>60 queries/tick</td><td>150 queries/tick</td></tr>
+</table>
+<p><strong>Revised cap: 15-25 players per sector</strong> (down from 30-50). At 20 players, a single sector tick takes ~40ms -- safe for 10-tick/second rate. At 50 players, tick time approaches 100ms which risks lag.</p>
+<ul>
+<li><strong>Core hubs (high traffic):</strong> Cap at 25 with overflow instancing.</li>
+<li><strong>Standard sectors:</strong> Cap at 20.</li>
+<li><strong>Adventure sectors:</strong> Instanced per group (5-10 players).</li>
+<li>Home sectors: 1 instance per owner, no cap needed.</li>
+<li>Queue entry with estimated wait time if cap hit.</li>
+<li>Players see a "sector population" indicator before entering.</li>
+</ul>`},
+
+{id:'action-audit',title:'Action Audit & Abuse Detection',status:'new',
+  desc:'Unified server-side audit/event ledger for player, agent, automation, PvP, economy, and moderation actions. Required for anti-cheat, refunds, disputes, and GM tooling.',
+  tags:['backend'],
+  details:`<p>This is a prerequisite platform feature, not optional polish.</p>
+<ul>
+<li><strong>Scope:</strong> Log every state-changing action with actor type (player/agent/automation/admin), actor id, target entity ids, sector/context, request id, result, denial reason, and before/after deltas where practical.</li>
+<li><strong>Use cases:</strong> Anti-cheat review, exploit forensics, refund validation, moderation appeals, economy anomaly detection, agent/governor accountability, PvP grief investigations.</li>
+<li><strong>Storage:</strong> Append-only audit table with retention/archive policy and indexed query paths for actor_id, event_type, sector_id, and time range.</li>
+<li><strong>Derived systems:</strong> Abuse score pipeline, suspicious transfer reports, repeated-attacker detection, GM/admin dashboard, replay/journal support for combat and raids.</li>
+</ul>`},
+
+{id:'job-queue',title:'Asynchronous Job Queue & Scheduler',status:'new',
+  desc:'Queue-backed execution for agents, governors, construction, wormhole timers, raids, notifications, and economy recomputes. Keeps long-running work out of request handlers and hot tick loops.',
+  tags:['backend'],
+  details:`<p>Many planned features implicitly require background execution.</p>
+<ul>
+<li><strong>Queue primitives:</strong> durable jobs, retries, dedupe/idempotency keys, delayed jobs, recurring schedules, and dead-letter handling.</li>
+<li><strong>Consumers:</strong> Agent directives, governor ticks, unstable wormhole expiry, raid scheduling, market recomputes, crafting/build completions, notification fan-out, cleanup/TTL jobs.</li>
+<li><strong>Why now:</strong> If these features are built directly in HTTP requests or monolithic server ticks, latency, reliability, and restart recovery will all degrade fast.</li>
+<li><strong>Rollout:</strong> start with PostgreSQL-backed job tables if needed, but design the abstraction so Redis/worker scaling can be added without rewriting feature logic.</li>
+</ul>`},
+
+{id:'econ-sinks',title:'Economic Credit Sinks',status:'new',
+  desc:'Wormhole fees, gate construction, PvP insurance, adventure entry costs, wonder construction, homestead expansion. Prevent inflation.',
+  tags:['backend'],
+  details:`<p>Credit sinks to prevent inflation as player count grows:</p>
+<ul>
+<li>Wormhole/portal usage fees</li>
+<li>Deep Space Gate construction costs</li>
+<li>PvP ship insurance premiums</li>
+<li>Adventure sector entry costs</li>
+<li>Wonder construction (massive resource sink)</li>
+<li>Homestead expansion purchases</li>
+<li>Crew salaries (ongoing drain)</li>
+<li>Colony maintenance scaling (exponential)</li>
+</ul>
+<p>Must to stabilize the economy as player base grows.</p>`},
+
+{id:'discovery-fog',title:'Discovery & Fog of War',status:'exists',
+  desc:'PlayerDiscovery model tracks visited sectors. Fog reveals adjacent on visit. Scanner upgrades reveal 2-3 hops. Star chart purchases from NPCs.',
+  tags:['backend'],
+  details:`<p>PlayerDiscovery model tracks which sectors each player has visited. Sector fog reveals adjacent sectors on first visit. Scanner upgrades reveal 2-3 hops out. Star chart items purchasable from NPC ports to reveal distant regions without traveling there.</p>`},
+]},
+];
+
+// ===== COMMENT SYSTEM =====
+let _commentsCache = {};
+function getAuthor(){return localStorage.getItem('sw3k_plan_author')||''}
+function saveAuthor(a){localStorage.setItem('sw3k_plan_author',a)}
+async function fetchComments(){try{const r=await fetch('/api/comments');_commentsCache=await r.json()}catch{_commentsCache={}}}
+function getFeatureComments(fid){return _commentsCache[fid]||[]}
+function getTotalComments(){return Object.values(_commentsCache).reduce((s,a)=>s+a.length,0)}
+async function addComment(fid,text){const author=getAuthor()||'Anonymous';await fetch('/api/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({featureId:fid,author,text})});await fetchComments()}
+async function deleteComment(fid,idx){await fetch('/api/comments',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({featureId:fid,index:idx})});await fetchComments()}
+
+// ===== RENDER HELPERS =====
+function statusBadge(s){
+  if(s==='exists')return'<span class="badge badge-exists">Implemented</span>';
+  if(s==='new')return'<span class="badge badge-new">New Concept</span>';
+  return'<span class="badge badge-planned">Planned</span>';
+}
+function statusDot(s){
+  if(s==='exists')return'<span class="dot dot-exists"></span>';
+  if(s==='new')return'<span class="dot dot-new"></span>';
+  return'<span class="dot dot-planned"></span>';
+}
+function tagHTML(t){const cls=t==='pve'?'tag-pve':t==='pvp'?'tag-pvp':t==='store'?'tag-store':t==='backend'?'tag-backend':t==='frontend'?'tag-frontend':'';return`<span class="tag ${cls}">${t}</span>`}
+function timeAgo(ts){const d=Date.now()-ts;if(d<60000)return'just now';if(d<3600000)return Math.floor(d/60000)+'m ago';if(d<86400000)return Math.floor(d/3600000)+'h ago';return Math.floor(d/86400000)+'d ago'}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+function renderCommentsHTML(fid,context){
+  const comments=getFeatureComments(fid);const count=comments.length;
+  const prefix=context==='modal'?'modal-':'';
+  let html=`<div class="comments-toggle" onclick="toggleComments('${prefix}${fid}')">&#x1f4ac; ${count} comment${count!==1?'s':''} &mdash; click to ${count?'view':'add'}</div>`;
+  html+=`<div class="comments-area" id="comments-${prefix}${fid}">`;
+  for(let i=0;i<comments.length;i++){const c=comments[i];
+    html+=`<div class="comment"><div class="comment-header"><span class="comment-author">${esc(c.author)}</span><span><span class="comment-time">${timeAgo(c.time)}</span><span class="comment-delete" onclick="delComment('${fid}',${i})">delete</span></span></div><div class="comment-text">${esc(c.text)}</div></div>`;
+  }
+  html+=`<div class="comment-form"><input type="text" id="input-${prefix}${fid}" placeholder="Add a comment..." onkeydown="if(event.key==='Enter')postComment('${fid}','${context}')"/><button onclick="postComment('${fid}','${context}')">Post</button></div>`;
+  html+='</div>';
+  return html;
+}
+
+// ===== MAIN RENDER =====
+function renderAll(filter){
+  const q=(filter||'').toLowerCase();
+  let navHTML='',contentHTML='',totalFeatures=0,existsCount=0,newCount=0,plannedCount=0;
+  for(const section of PLAN){
+    const features=section.features.filter(f=>!q||f.title.toLowerCase().includes(q)||f.desc.toLowerCase().includes(q)||f.id.includes(q));
+    if(features.length===0&&q)continue;
+    navHTML+=`<div class="nav-section"><div class="nav-section-title">${section.title}</div>`;
+    for(const f of features){const cc=getFeatureComments(f.id).length;
+      navHTML+=`<div class="nav-item" onclick="scrollTo('${f.id}')">${statusDot(f.status)} ${f.title}${cc?`<span class="count">${cc}</span>`:''}</div>`;
+      totalFeatures++;if(f.status==='exists')existsCount++;else if(f.status==='new')newCount++;else plannedCount++;
+    }
+    navHTML+='</div>';
+    contentHTML+=`<div class="section" id="section-${section.id}"><div class="section-header"><h2>${section.title}</h2>${statusBadge(section.status)}</div>`;
+    for(const f of features){
+      contentHTML+=`<div class="feature" id="${f.id}"><div class="feature-title">${f.title} ${statusBadge(f.status)}</div><div class="feature-summary">${f.desc}</div>`;
+      if(f.tags)contentHTML+=`<div class="feature-meta">${f.tags.map(tagHTML).join('')}${f.details?`<span class="details-link" onclick="openModal('${f.id}')">View Details</span>`:''}</div>`;
+      if(f.workflow)contentHTML+=`<div class="workflow">${f.workflow.map((s,i)=>`${i?'<span class="wf-arrow">&#x2192;</span>':''}<span class="wf-step">${s}</span>`).join('')}</div>`;
+      contentHTML+=renderCommentsHTML(f.id,'card');
+      contentHTML+='</div>';
+    }
+    contentHTML+='</div>';
+  }
+  document.getElementById('nav').innerHTML=navHTML;
+  document.getElementById('content').innerHTML=contentHTML;
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="stat-val">${totalFeatures}</div><div class="stat-label">Features</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--green)">${existsCount}</div><div class="stat-label">Built</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--orange)">${newCount}</div><div class="stat-label">New</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--yellow)">${plannedCount}</div><div class="stat-label">Planned</div></div>
+    <div class="stat"><div class="stat-val">${getTotalComments()}</div><div class="stat-label">Comments</div></div>`;
+  document.getElementById('authorName').value=getAuthor();
+  restoreOpenComments();
+}
+
+// ===== MODAL =====
+let _currentModalId=null;
+function findFeature(fid){for(const s of PLAN)for(const f of s.features)if(f.id===fid)return f;return null}
+function openModal(fid){
+  const f=findFeature(fid);if(!f)return;
+  _currentModalId=fid;
+  let html=`<div class="modal-header"><div><h2>${f.title} ${statusBadge(f.status)}</h2>`;
+  if(f.tags)html+=`<div class="feature-meta" style="margin-top:.5rem">${f.tags.map(tagHTML).join('')}</div>`;
+  html+=`</div><button class="modal-close" onclick="closeModal()">&times;</button></div>`;
+  html+=`<div class="modal-body">`;
+  html+=`<div class="modal-section"><div class="modal-section-title">Summary</div><p>${f.desc}</p></div>`;
+  if(f.details)html+=`<div class="modal-section"><div class="modal-section-title">Full Details</div>${f.details}</div>`;
+  if(f.workflow)html+=`<div class="modal-section"><div class="modal-section-title">Implementation Steps</div><div class="workflow">${f.workflow.map((s,i)=>`${i?'<span class="wf-arrow">&#x2192;</span>':''}<span class="wf-step">${s}</span>`).join('')}</div></div>`;
+  html+=`<div class="modal-section"><div class="modal-section-title">Discussion</div>${renderCommentsHTML(fid,'modal')}</div>`;
+  html+=`</div>`;
+  document.getElementById('modal').innerHTML=html;
+  document.getElementById('modalBackdrop').classList.add('open');
+  document.body.style.overflow='hidden';
+  // Restore open state for modal comments
+  const el=document.getElementById('comments-modal-'+fid);
+  if(el&&_openComments.has('modal-'+fid))el.classList.add('open');
+}
+function closeModal(){
+  document.getElementById('modalBackdrop').classList.remove('open');
+  document.body.style.overflow='';
+  _currentModalId=null;
+}
+document.getElementById('modalBackdrop').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&_currentModalId)closeModal()});
+
+// ===== INTERACTIONS =====
+function scrollTo(id){const el=document.getElementById(id);if(el){el.scrollIntoView({behavior:'smooth',block:'start'});el.style.borderColor='rgba(0,255,255,0.5)';setTimeout(()=>el.style.borderColor='',1500)}}
+
+const _openComments=new Set();
+function toggleComments(fid){
+  if(_openComments.has(fid))_openComments.delete(fid);else _openComments.add(fid);
+  restoreOpenComments();
+  if(_openComments.has(fid)){const inp=document.getElementById('input-'+fid);if(inp)inp.focus()}
+}
+function restoreOpenComments(){
+  document.querySelectorAll('.comments-area').forEach(el=>{
+    const fid=el.id.replace('comments-','');
+    if(_openComments.has(fid))el.classList.add('open');else el.classList.remove('open');
+  });
+}
+
+async function postComment(fid,context){
+  const prefix=context==='modal'?'modal-':'';
+  const inp=document.getElementById('input-'+prefix+fid);
+  if(!inp||!inp.value.trim())return;
+  const val=inp.value.trim();inp.value='';
+  _openComments.add(prefix+fid);
+  _openComments.add(fid); // keep both card and modal synced
+  _openComments.add('modal-'+fid);
+  await addComment(fid,val);
+  renderAll(document.getElementById('search').value);
+  if(_currentModalId===fid)openModal(fid);
+}
+
+async function delComment(fid,idx){
+  _openComments.add(fid);_openComments.add('modal-'+fid);
+  await deleteComment(fid,idx);
+  renderAll(document.getElementById('search').value);
+  if(_currentModalId===fid)openModal(fid);
+}
+
+document.getElementById('authorName').addEventListener('input',e=>saveAuthor(e.target.value));
+document.getElementById('search').addEventListener('input',e=>renderAll(e.target.value));
+
+(async()=>{await fetchComments();renderAll()})();
+</script>
+</body>
+</html>

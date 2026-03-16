@@ -1,0 +1,326 @@
+/* ==========================================================================
+   Space Wars 3000 - Interactive Typography Elements
+   Interactive text elements and animations for enhanced documentation
+   ========================================================================== */
+
+/* Expandable section styling */
+.doc-expandable {
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: var(--doc-radius-md);
+  margin: var(--doc-spacing-md) 0;
+  overflow: hidden;
+  background-color: rgba(0, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.doc-expandable:hover {
+  border-color: var(--doc-primary-color);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+}
+
+.doc-expandable-header {
+  padding: var(--doc-spacing-md);
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(124, 77, 255, 0.1) 100%);
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: var(--doc-weight-semibold);
+  color: var(--doc-text-primary);
+  transition: all 0.3s ease;
+}
+
+.doc-expandable-header:hover {
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(124, 77, 255, 0.2) 100%);
+  color: var(--doc-primary-color);
+}
+
+.doc-expandable-icon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+  color: var(--doc-primary-color);
+}
+
+.doc-expandable-icon::before {
+  content: "▼";
+  font-size: 0.8rem;
+}
+
+.doc-expandable.expanded .doc-expandable-icon {
+  transform: rotate(180deg);
+}
+
+.doc-expandable-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.doc-expandable.expanded .doc-expandable-content {
+  max-height: 500px;
+  padding: var(--doc-spacing-md);
+}
+
+/* Tooltip text styling */
+.doc-tooltip {
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dotted var(--doc-primary-color);
+  color: var(--doc-primary-color);
+}
+
+.doc-tooltip::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.9);
+  color: var(--doc-text-primary);
+  padding: var(--doc-spacing-sm);
+  border-radius: var(--doc-radius-sm);
+  font-size: var(--doc-font-sm);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  border: 1px solid var(--doc-primary-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  margin-bottom: 5px;
+  max-width: 250px;
+  white-space: normal;
+}
+
+.doc-tooltip::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--doc-primary-color);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  margin-bottom: -1px;
+}
+
+.doc-tooltip:hover::before,
+.doc-tooltip:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Highlight and selection effects */
+.doc-highlight {
+  background: linear-gradient(120deg, rgba(255, 255, 0, 0.3) 0%, rgba(255, 255, 0, 0.3) 100%);
+  background-size: 100% 0.2em;
+  background-repeat: no-repeat;
+  background-position: 0 88%;
+  transition: background-size 0.25s ease-in;
+  padding: 0 2px;
+}
+
+.doc-highlight:hover {
+  background-size: 100% 88%;
+}
+
+.doc-selection-highlight {
+  background: linear-gradient(120deg, rgba(0, 255, 255, 0.3) 0%, rgba(124, 77, 255, 0.3) 100%);
+  color: var(--doc-text-primary);
+  padding: 0.1em 0.2em;
+  border-radius: var(--doc-radius-sm);
+  animation: selection-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes selection-glow {
+  from {
+    box-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+  }
+  to {
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+  }
+}
+
+/* Text animation keyframes */
+.doc-text-fade-in {
+  animation: fadeInUp 0.6s ease forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.doc-text-slide-in {
+  animation: slideInLeft 0.8s ease forwards;
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+@keyframes slideInLeft {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.doc-text-glow {
+  animation: textGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes textGlow {
+  from {
+    text-shadow: 0 0 5px var(--doc-primary-color);
+  }
+  to {
+    text-shadow: 0 0 15px var(--doc-primary-color), 0 0 25px var(--doc-primary-color);
+  }
+}
+
+/* Interactive text elements */
+.doc-text-interactive {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0.1em 0.2em;
+  border-radius: var(--doc-radius-sm);
+  position: relative;
+}
+
+.doc-text-interactive:hover {
+  background-color: rgba(0, 255, 255, 0.1);
+  color: var(--doc-primary-color);
+  transform: translateY(-1px);
+}
+
+.doc-text-interactive:active {
+  transform: translateY(0);
+}
+
+/* Clickable text effects */
+.doc-clickable-text {
+  color: var(--doc-primary-color);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.doc-clickable-text::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--doc-primary-color), var(--doc-highlight-color));
+  transition: width 0.3s ease;
+}
+
+.doc-clickable-text:hover::after {
+  width: 100%;
+}
+
+.doc-clickable-text:hover {
+  color: var(--doc-highlight-color);
+  text-shadow: 0 0 8px currentColor;
+}
+
+/* Badge and label styling */
+.doc-badge {
+  display: inline-block;
+  padding: 0.2em 0.6em;
+  font-size: var(--doc-font-xs);
+  font-weight: var(--doc-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: var(--doc-radius-sm);
+  background-color: var(--doc-primary-color);
+  color: #000;
+  margin: 0 0.2em;
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.doc-badge.secondary {
+  background-color: var(--doc-highlight-color);
+}
+
+.doc-badge.warning {
+  background-color: var(--doc-warning-color);
+}
+
+.doc-badge.accent {
+  background-color: var(--doc-accent-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .doc-expandable-header {
+    padding: var(--doc-spacing-sm);
+    font-size: var(--doc-font-sm);
+  }
+  
+  .doc-expandable.expanded .doc-expandable-content {
+    padding: var(--doc-spacing-sm);
+  }
+  
+  .doc-tooltip::before {
+    max-width: 200px;
+    font-size: var(--doc-font-xs);
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .doc-expandable-content,
+  .doc-expandable-icon,
+  .doc-text-fade-in,
+  .doc-text-slide-in,
+  .doc-text-glow,
+  .doc-selection-highlight,
+  .doc-badge {
+    animation: none;
+    transition: none;
+  }
+  
+  .doc-expandable.expanded .doc-expandable-content {
+    max-height: none;
+  }
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+  .doc-tooltip::before {
+    background-color: #000;
+    border-color: #fff;
+    color: #fff;
+  }
+  
+  .doc-tooltip::after {
+    border-top-color: #fff;
+  }
+  
+  .doc-highlight {
+    background: #ffff00;
+    color: #000;
+  }
+  
+  .doc-badge {
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #000;
+  }
+}

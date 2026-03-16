@@ -266,6 +266,69 @@ describe('fleetService', () => {
       expect(result.failed[0].reason).toMatch(/combat/i);
     });
 
+    it('should skip ships blocked by sector access policy', async () => {
+      const user = await createTestUser();
+      const owner = await createTestUser({ username: 'fleetowner1' });
+      const sectorA = await createTestSector({ name: 'Sector A' });
+      const sectorB = await createTestSector({
+        name: 'Private Sector B',
+        type: 'Fringe',
+        access_mode: 'owner',
+        owner_user_id: owner.user_id
+      });
+      await createSectorConnection(sectorA.sector_id, sectorB.sector_id);
+
+      const ship1 = await createTestShip(user.user_id, sectorA.sector_id, { fuel: 50 });
+      const fleet = await createTestFleet(user.user_id, [ship1.ship_id]);
+
+      const result = await fleetService.moveFleet(fleet.fleet_id, sectorB.sector_id, user.user_id);
+
+      expect(result.moved.length).toBe(0);
+      expect(result.failed.length).toBe(1);
+      expect(result.failed[0].reason).toMatch(/owner-restricted/i);
+    });
+
+    it('should skip ships blocked by faction-restricted sectors', async () => {
+      const user = await createTestUser({ faction: 'terran_alliance' });
+      const sectorA = await createTestSector({ name: 'Sector A' });
+      const sectorB = await createTestSector({
+        name: 'Faction Sector B',
+        type: 'Fringe',
+        access_mode: 'faction',
+        rule_flags: { allowed_factions: ['zythian_swarm'] }
+      });
+      await createSectorConnection(sectorA.sector_id, sectorB.sector_id);
+
+      const ship1 = await createTestShip(user.user_id, sectorA.sector_id, { fuel: 50 });
+      const fleet = await createTestFleet(user.user_id, [ship1.ship_id]);
+
+      const result = await fleetService.moveFleet(fleet.fleet_id, sectorB.sector_id, user.user_id);
+
+      expect(result.moved.length).toBe(0);
+      expect(result.failed.length).toBe(1);
+      expect(result.failed[0].reason).toMatch(/faction-restricted/i);
+    });
+
+    it('should skip ships blocked by locked sectors', async () => {
+      const user = await createTestUser();
+      const sectorA = await createTestSector({ name: 'Sector A' });
+      const sectorB = await createTestSector({
+        name: 'Locked Sector B',
+        type: 'Unknown',
+        access_mode: 'locked'
+      });
+      await createSectorConnection(sectorA.sector_id, sectorB.sector_id);
+
+      const ship1 = await createTestShip(user.user_id, sectorA.sector_id, { fuel: 50 });
+      const fleet = await createTestFleet(user.user_id, [ship1.ship_id]);
+
+      const result = await fleetService.moveFleet(fleet.fleet_id, sectorB.sector_id, user.user_id);
+
+      expect(result.moved.length).toBe(0);
+      expect(result.failed.length).toBe(1);
+      expect(result.failed[0].reason).toMatch(/locked/i);
+    });
+
     it('should reject if fleet not found', async () => {
       const user = await createTestUser();
       const sector = await createTestSector();

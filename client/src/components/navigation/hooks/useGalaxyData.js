@@ -92,6 +92,8 @@ export default function useGalaxyData() {
         current_sector_id: targetSectorId,
         currentSector: targetSys ? { sector_id: targetSys.sector_id, name: targetSys.name } : prev.currentSector
       }));
+      window.dispatchEvent(new CustomEvent('sw3k:sector-changed', { detail: { sectorId: targetSectorId } }));
+      window.dispatchEvent(new Event('sw3k:profile-dirty'));
       // Clear system detail so it reloads
       setSystemDetail(null);
     } catch (err) {

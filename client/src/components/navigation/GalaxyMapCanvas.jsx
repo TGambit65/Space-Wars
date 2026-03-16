@@ -102,7 +102,10 @@ const GalaxyMapCanvas = ({
   onSystemRightClick,
   selectedSystemId,
   userShipsBySector,
-  onSelectionComplete
+  onSelectionComplete,
+  routePath = [],
+  onCenterReady,
+  highlightedSystemId,
 }) => {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
@@ -162,6 +165,11 @@ const GalaxyMapCanvas = ({
     if (!currentSectorId || !adjacencyMap.has(currentSectorId)) return new Set();
     return new Set(adjacencyMap.get(currentSectorId));
   }, [currentSectorId, adjacencyMap]);
+
+  // Expose centerOn to parent
+  useEffect(() => {
+    if (onCenterReady) onCenterReady(centerOn);
+  }, [centerOn, onCenterReady]);
 
   // Center on ship's position initially
   useEffect(() => {
@@ -289,9 +297,32 @@ const GalaxyMapCanvas = ({
       drawHyperlanes(ctx, mapData.hyperlanes, systemPositions, offset, zoom,
         currentSectorId, adjacentIds, t, viewBounds);
 
+      // Draw route overlay
+      if (routePath.length > 1 && routePath.every(id => systemPositions.has(id))) {
+        ctx.save();
+        ctx.strokeStyle = '#00ffff';
+        ctx.lineWidth = 2.5 / Math.max(zoom, 0.3);
+        ctx.shadowColor = '#00ffff';
+        ctx.shadowBlur = 8;
+        ctx.setLineDash([6 / zoom, 4 / zoom]);
+        ctx.lineDashOffset = -t * 20;
+        ctx.beginPath();
+        for (let i = 0; i < routePath.length; i++) {
+          const pos = systemPositions.get(routePath[i]);
+          const sx = pos.x * zoom + offset.x;
+          const sy = pos.y * zoom + offset.y;
+          if (i === 0) ctx.moveTo(sx, sy);
+          else ctx.lineTo(sx, sy);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      }
+
       // Draw star systems (only visible ones)
       drawSystems(ctx, visibleSystems, offset, zoom, currentSectorId,
-        adjacentIds, hoveredSystem, selectedSystemId, t);
+        adjacentIds, hoveredSystem, selectedSystemId, t, highlightedSystemId);
 
       // Draw labels — LOD: show names at medium zoom, hide at far zoom
       if (zoom > 0.25) {
@@ -332,7 +363,7 @@ const GalaxyMapCanvas = ({
     };
   }, [mapData, offset, zoom, currentSectorId, adjacentIds, hoveredSystem,
     selectedSystemId, systemPositions, worldToScreen, userShipsBySector,
-    isSelecting, selectionRect]);
+    isSelecting, selectionRect, highlightedSystemId]);
 
   return (
     <div
@@ -414,7 +445,9 @@ function drawHyperlanes(ctx, hyperlanes, systemPositions, offset, zoom,
       (lane.from_id === currentSectorId && adjacentIds.has(lane.to_id)) ||
       (lane.to_id === currentSectorId && adjacentIds.has(lane.from_id));
 
-    if (lane.connection_type === 'wormhole' && fromDiscovered && toDiscovered) {
+    const laneKind = lane.lane_class || lane.connection_type;
+
+    if (laneKind === 'wormhole' && fromDiscovered && toDiscovered) {
       // Animated dashed cyan line for wormholes (only if both ends discovered)
       ctx.strokeStyle = 'rgba(6, 182, 212, 0.6)';
       ctx.lineWidth = 1.5;
@@ -425,6 +458,23 @@ function drawHyperlanes(ctx, hyperlanes, systemPositions, offset, zoom,
       ctx.lineTo(x2, y2);
       ctx.stroke();
       ctx.setLineDash([]);
+    } else if (laneKind === 'portal' && fromDiscovered && toDiscovered) {
+      ctx.strokeStyle = 'rgba(249, 115, 22, 0.75)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.lineDashOffset = time * 25;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    } else if (laneKind === 'protected') {
+      ctx.strokeStyle = hasFogEnd ? 'rgba(191, 219, 254, 0.2)' : 'rgba(191, 219, 254, 0.55)';
+      ctx.lineWidth = isAdjacentLane ? 2 : 1.25;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
     } else if (isAdjacentLane) {
       // Highlighted lanes near player
       ctx.strokeStyle = hasFogEnd ? 'rgba(6, 182, 212, 0.2)' : 'rgba(6, 182, 212, 0.5)';
@@ -454,7 +504,7 @@ function drawHyperlanes(ctx, hyperlanes, systemPositions, offset, zoom,
 }
 
 function drawSystems(ctx, systems, offset, zoom, currentSectorId,
-  adjacentIds, hoveredSystem, selectedSystemId, time) {
+  adjacentIds, hoveredSystem, selectedSystemId, time, highlightedSystemId) {
   if (!systems) return;
 
   for (const sys of systems) {
@@ -573,6 +623,16 @@ function drawSystems(ctx, systems, offset, zoom, currentSectorId,
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.arc(sx, sy, baseSize + 5, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // Search highlight
+    if (sys.sector_id === highlightedSystemId) {
+      const pulse = 1 + Math.sin(time * 4) * 0.2;
+      ctx.strokeStyle = `rgba(255, 165, 0, ${0.6 + Math.sin(time * 3) * 0.3})`;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(sx, sy, (baseSize + 12) * pulse, 0, Math.PI * 2);
       ctx.stroke();
     }
   }

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profit Calculation Guide - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+</head>
+<body class="doc-container">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">← Trading Guide</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="market-mechanics.html" class="doc-nav-link">Market Mechanics</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="route-planning.html" class="doc-nav-link">Route Planning</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="profit-calculation.html" class="doc-nav-link active">Profit Calculation</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item">
+                <a href="index.html" class="doc-breadcrumb-link">Trading Guide</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Profit Calculation Guide</div>
+        </nav>
+        
+        <h1 class="doc-h1 holo-text">Profit Calculation Guide</h1>
+        
+        <div class="doc-alert info">
+            <strong>Financial Computer:</strong> Accurate profit calculations are essential for successful trading operations.
+        </div>
+
+        <p class="doc-lead">
+            Master the mathematics of trading profits. Learn to calculate margins, factor in all costs, 
+            and optimize your return on investment across all trading activities.
+        </p>
+
+        <!-- Basic Profit Formula -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Basic Profit Calculation</h2>
+            
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Profit Analysis System</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">GROSS</span>
+                        <span class="terminal-output">Gross_Profit = (Sell_Price - Buy_Price) × Quantity</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">NET</span>
+                        <span class="terminal-output">Net_Profit = Gross_Profit - Total_Costs</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">MARGIN</span>
+                        <span class="terminal-output">Profit_Margin = (Net_Profit / Revenue) × 100%</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">ROI</span>
+                        <span class="terminal-output">ROI = (Net_Profit / Investment) × 100%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>💰 Simple Trade Example</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Basic Food Trade Calculation</h4>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">BUY</span>
+                                <span class="terminal-output">100 units Food @ 8 credits = 800 credits</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">SELL</span>
+                                <span class="terminal-output">100 units Food @ 12 credits = 1,200 credits</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">FUEL</span>
+                                <span class="terminal-output">4 jumps × 10 fuel × 2 credits = 80 credits</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">FEES</span>
+                                <span class="terminal-output">Port fees: 20 credits</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-success">NET PROFIT</span>
+                                <span class="terminal-success">1,200 - 800 - 80 - 20 = 300 credits</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <ul class="doc-list">
+                        <li><strong>Revenue:</strong> 1,200 credits</li>
+                        <li><strong>Investment:</strong> 900 credits (purchase + costs)</li>
+                        <li><strong>Profit Margin:</strong> 25% (300/1,200)</li>
+                        <li><strong>ROI:</strong> 33.3% (300/900)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cost Components -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Cost Analysis and Tracking</h2>
+            
+            <div class="doc-alert warning">
+                <strong>Hidden Costs:</strong> Failing to account for all costs is the most common profit calculation error.
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>⚡ Direct Trading Costs</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Fuel Costs</h4>
+                    <ul class="doc-list">
+                        <li><strong>Travel Fuel:</strong> Distance × Ship_Consumption × Fuel_Price</li>
+                        <li><strong>Cargo Impact:</strong> Heavy loads increase fuel consumption</li>
+                        <li><strong>Efficiency Rating:</strong> Ship engines affect fuel efficiency</li>
+                        <li><strong>Emergency Reserve:</strong> Always budget extra fuel for safety</li>
+                    </ul>
+
+                    <h4 class="doc-h4">Port and Transaction Fees</h4>
+                    <ul class="doc-list">
+                        <li><strong>Docking Fees:</strong> 10-50 credits per port visit</li>
+                        <li><strong>Transaction Fees:</strong> 1-3% of transaction value</li>
+                        <li><strong>Storage Fees:</strong> If cargo sits in port warehouses</li>
+                        <li><strong>Inspection Fees:</strong> Security scans for certain cargo types</li>
+                    </ul>
+
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">FORMULA</span>
+                                <span class="terminal-output">Direct_Costs = Fuel + Port_Fees + Transaction_Fees</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🔧 Operational Costs</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Ship Maintenance</h4>
+                    <ul class="doc-list">
+                        <li><strong>Component Wear:</strong> Regular maintenance costs</li>
+                        <li><strong>Hull Integrity:</strong> Structural repairs from normal use</li>
+                        <li><strong>System Updates:</strong> Software and navigation updates</li>
+                        <li><strong>Emergency Repairs:</strong> Unexpected breakdowns</li>
+                    </ul>
+
+                    <h4 class="doc-h4">Insurance and Security</h4>
+                    <ul class="doc-list">
+                        <li><strong>Cargo Insurance:</strong> Protection against loss</li>
+                        <li><strong>Ship Insurance:</strong> Hull and equipment coverage</li>
+                        <li><strong>Security Escorts:</strong> Hired protection for dangerous routes</li>
+                        <li><strong>Bribes:</strong> Unofficial "fees" in certain sectors</li>
+                    </ul>
+
+                    <div class="doc-alert info">
+                        <strong>Tip:</strong> Amortize maintenance costs across multiple trading runs.
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>⏰ Time and Opportunity Costs</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Time Value Analysis</h4>
+                    <ul class="doc-list">
+                        <li><strong>Hourly Rate:</strong> Your desired credits per hour</li>
+                        <li><strong>Travel Time:</strong> Time spent moving between sectors</li>
+                        <li><strong>Loading Time:</strong> Cargo handling and paperwork</li>
+                        <li><strong>Waiting Time:</strong> Market timing and delays</li>
+                    </ul>
+
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EFFICIENCY</span>
+                                <span class="terminal-output">Profit_Per_Hour = Net_Profit / Total_Time_Hours</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">TARGET</span>
+                                <span class="terminal-output">Aim for 1,000+ credits per hour for sustainable trading</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Profit Optimization -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Advanced Profit Optimization</h2>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">📈 Margin Optimization</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <h4 class="doc-h4">High-Margin Strategies</h4>
+                        <ul class="doc-list">
+                            <li><strong>Luxury Goods:</strong> Higher margins but lower volume</li>
+                            <li><strong>Specialty Items:</strong> Unique or rare commodities</li>
+                            <li><strong>Time-Sensitive:</strong> Emergency or urgent deliveries</li>
+                            <li><strong>Risk Premium:</strong> Dangerous routes with hazard pay</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🔄 Volume Optimization</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <h4 class="doc-h4">High-Volume Strategies</h4>
+                        <ul class="doc-list">
+                            <li><strong>Bulk Commodities:</strong> Lower margins but high volume</li>
+                            <li><strong>Regular Routes:</strong> Predictable, repeatable trades</li>
+                            <li><strong>Cargo Maximization:</strong> Fill every available space</li>
+                            <li><strong>Quick Turnover:</strong> Fast loading/unloading cycles</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">Portfolio Approach to Trading</h3>
+            <div class="terminal-window">
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">DIVERSIFY</span>
+                        <span class="terminal-output">Mix high-margin and high-volume trades</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">BALANCE</span>
+                        <span class="terminal-output">Risk/reward ratio across multiple commodities</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">HEDGE</span>
+                        <span class="terminal-output">Counter-cyclical commodities to reduce volatility</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Risk-Adjusted Returns -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Risk-Adjusted Profit Analysis</h2>
+            
+            <div class="doc-alert info">
+                <strong>Risk Premium:</strong> Higher-risk trades should provide proportionally higher returns.
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>⚖️ Risk Assessment Framework</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Risk Factors and Multipliers</h4>
+                    <ul class="doc-list">
+                        <li><strong>Pirate Risk (1.2-2.0x):</strong> Danger zones require risk premium</li>
+                        <li><strong>Market Volatility (1.1-1.5x):</strong> Unstable prices increase uncertainty</li>
+                        <li><strong>Cargo Value (1.0-1.3x):</strong> Valuable cargo attracts thieves</li>
+                        <li><strong>Route Distance (1.0-1.2x):</strong> Longer routes have more variables</li>
+                    </ul>
+
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">FORMULA</span>
+                                <span class="terminal-output">Risk_Adjusted_Return = Expected_Profit × (1 - Risk_Factor)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EXAMPLE</span>
+                                <span class="terminal-output">10,000cr profit × (1 - 0.15 risk) = 8,500cr expected</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🎯 Expected Value Calculations</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Probability-Weighted Returns</h4>
+                    <p>Calculate expected profit considering various outcomes:</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">SUCCESS</span>
+                                <span class="terminal-output">80% chance: +15,000 credits</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">PROBLEMS</span>
+                                <span class="terminal-output">15% chance: +5,000 credits</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">DISASTER</span>
+                                <span class="terminal-output">5% chance: -20,000 credits</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-success">EXPECTED</span>
+                                <span class="terminal-success">(0.8×15,000) + (0.15×5,000) + (0.05×-20,000) = 11,750 credits</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profit Tracking and Analysis -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Profit Tracking and Performance Analysis</h2>
+            
+            <h3 class="doc-h3">Key Performance Indicators (KPIs)</h3>
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">📊 Financial Metrics</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Net Profit per Trade:</strong> Average profit per transaction</li>
+                            <li><strong>Profit Margin %:</strong> Efficiency of pricing strategy</li>
+                            <li><strong>ROI %:</strong> Return on invested capital</li>
+                            <li><strong>Credits per Hour:</strong> Time efficiency metric</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">⚡ Operational Metrics</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Cargo Utilization %:</strong> How full your cargo holds are</li>
+                            <li><strong>Route Efficiency:</strong> Profit per jump or distance unit</li>
+                            <li><strong>Market Timing:</strong> Success rate of price predictions</li>
+                            <li><strong>Risk Incidents:</strong> Frequency of losses or problems</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">Performance Benchmarks</h3>
+            <div class="terminal-window">
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">NOVICE</span>
+                        <span class="terminal-output">500-1,000 credits/hour, 10-20% profit margin</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">TRADER</span>
+                        <span class="terminal-output">1,000-2,500 credits/hour, 20-35% profit margin</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">EXPERT</span>
+                        <span class="terminal-output">2,500-5,000 credits/hour, 35-50% profit margin</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">MASTER</span>
+                        <span class="terminal-output">5,000+ credits/hour, 50%+ profit margin</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Practical Examples -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Advanced Calculation Examples</h2>
+            
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>💎 Complex Multi-Stop Route Analysis</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Three-Stop Circuit Analysis</h4>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Route: Agricultural → Industrial → Luxury → Agricultural</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">LEG 1</span>
+                                <span class="terminal-output">200 Food (8cr) → sell at 15cr = +1,400cr profit</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">LEG 2</span>
+                                <span class="terminal-output">150 Machinery (25cr) → sell at 40cr = +2,250cr profit</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">LEG 3</span>
+                                <span class="terminal-output">50 Art (80cr) → sell at 140cr = +3,000cr profit</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">COSTS</span>
+                                <span class="terminal-output">Fuel: 300cr | Fees: 180cr | Time: 5 hours</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-success">TOTAL</span>
+                                <span class="terminal-success">Net: 6,170cr | Per Hour: 1,234cr | Margin: 42%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>⚠️ Risk-Adjusted High-Value Trade</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Dangerous Route Risk Assessment</h4>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">SCENARIO</span>
+                                <span class="terminal-output">20 Weapons (500cr) → Warzone (1,200cr each)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">GROSS</span>
+                                <span class="terminal-output">Revenue: 24,000cr | Investment: 10,000cr</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">RISKS</span>
+                                <span class="terminal-output">Pirate attack: 25% | Confiscation: 10%</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">COSTS</span>
+                                <span class="terminal-output">Escort: 2,000cr | Insurance: 1,500cr</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-warning">EXPECTED</span>
+                                <span class="terminal-warning">Expected profit: 6,825cr (factoring 35% total risk)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="route-planning.html" class="doc-nav-link">← Route Planning</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="../index.html" class="doc-nav-link">Back to Wiki Home →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            console.log('Profit Calculation Guide loaded');
+        });
+    </script>
+</body>
+</html>

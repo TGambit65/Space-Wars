@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ship Build Examples - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+    <script src="../../js/wiki-smart-navigation.js"></script>
+    <script src="../../js/wiki-interactive-features.js"></script>
+</head>
+<body class="doc-container ship-design-page">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">← Ship Design</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="component-installation.html" class="doc-nav-link">Components</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="ship-builds.html" class="doc-nav-link active">Ship Builds</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="technology-tree.html" class="doc-nav-link">Technology</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item">
+                <a href="index.html" class="doc-breadcrumb-link">Ship Design</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Ship Builds</div>
+        </nav>
+        
+        <h1 class="doc-h1 holo-text">🛠️ Ship Build Examples: The Ultimate Blueprint Collection!</h1>
+        
+        <div class="doc-alert info">
+            <strong>🏗️ Master Shipwright's Workshop:</strong> Welcome to the galaxy's best ship building guide! 
+            Learn to build amazing ships with step-by-step instructions from legendary space engineers! 🚀⚡
+        </div>
+
+        <p class="doc-lead">
+            Building the perfect ship is like solving the ultimate space puzzle - every piece needs to fit perfectly 
+            with every other piece! In this guide, you'll learn how to build incredible ships for every job in the 
+            galaxy. From zippy fighters that dance through asteroid fields to massive cargo haulers that feed entire 
+            star systems, we'll show you exactly how to build them all! Get ready to become a master shipwright! 🌟🔧
+        </p>
+
+        <!-- Build Philosophy -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🧠 Ship Building Philosophy (Think Like a Space Engineer!)</h2>
+            
+            <div class="doc-alert accent">
+                <strong>🔧 Master Builder's Secret:</strong> Every great ship starts with a clear purpose! 
+                Before placing a single component, ask yourself: "What job will this ship do?" 🎯
+            </div>
+            
+            <p>Building a ship without a plan is like trying to bake a cake by throwing random ingredients together! 
+            The best ships are designed with a specific role in mind - and every single component works together 
+            to excel at that role. Let's learn the master shipwright's approach! 👨‍🔬✨</p>
+
+            <div class="doc-grid doc-grid-3">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🎯 Step 1: Define Purpose</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>What job?</strong> Fighting, trading, exploring?</li>
+                            <li><strong>Where used?</strong> Safe space or danger zones?</li>
+                            <li><strong>How long?</strong> Quick trips or long journeys?</li>
+                            <li><strong>Who flies it?</strong> Beginner or expert pilot?</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">⚖️ Step 2: Balance Resources</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Hull Size:</strong> Bigger = more space, but slower</li>
+                            <li><strong>Power Budget:</strong> Every component needs energy</li>
+                            <li><strong>Weight Limit:</strong> Heavy ships are sluggish</li>
+                            <li><strong>Cost Control:</strong> Stay within your budget!</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🔧 Step 3: Component Synergy</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Match Ranges:</strong> Don't mix snipers with shotguns</li>
+                            <li><strong>Support Systems:</strong> Every weapon needs power</li>
+                            <li><strong>Backup Plans:</strong> What if something breaks?</li>
+                            <li><strong>Upgrade Path:</strong> How will you improve it later?</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Fighter Builds -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">⚔️ Fighter Ship Builds (Space Combat Specialists!)</h2>
+            
+            <p>Fighter ships are the sports cars of space - fast, agile, and deadly! They're built for one thing: 
+            winning battles. Whether you're hunting pirates or defending trade routes, these builds will make you 
+            the terror of the spaceways! 💥🏎️</p>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🥊 Light Fighter: "The Mosquito" (Beginner-Friendly Brawler)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🎯 Build Purpose</h4>
+                    <p><strong>Perfect for:</strong> New pilots, pirate hunting, escort duty, learning combat basics</p>
+                    <p><strong>Combat Style:</strong> Fast hit-and-run attacks, avoid taking heavy damage</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">"Mosquito" Fighter Blueprint</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">HULL</span>
+                                <span class="terminal-output">Light Fighter Chassis (8 slots, fast & cheap)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">WEAPONS</span>
+                                <span class="terminal-output">2x Basic Laser Cannons (reliable, efficient)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">DEFENSE</span>
+                                <span class="terminal-output">1x Light Shield Generator</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ENGINE</span>
+                                <span class="terminal-output">1x Racing Thruster (maximum speed)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">POWER</span>
+                                <span class="terminal-output">1x Fusion Reactor (powers everything)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">UTILITY</span>
+                                <span class="terminal-output">1x Repair Kit (emergency fixes)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">🧠 Design Reasoning</h4>
+                    <ul class="doc-list">
+                        <li><strong>Light Hull:</strong> Fast and affordable - perfect for learning</li>
+                        <li><strong>Dual Lasers:</strong> Reliable damage without complex ammunition</li>
+                        <li><strong>Racing Engine:</strong> Speed is your best defense - outrun bigger ships</li>
+                        <li><strong>Basic Shield:</strong> Protects against small hits while you escape</li>
+                        <li><strong>Repair Kit:</strong> Fix battle damage between fights</li>
+                    </ul>
+
+                    <div class="doc-alert accent">
+                        <strong>🎮 Combat Tactics:</strong> Zoom in fast, blast the enemy, zoom out before they can hit back! 
+                        You're a space ninja - hit and disappear! 🥷
+                    </div>
+
+                    <h4 class="doc-h4">💰 Cost Analysis</h4>
+                    <ul class="doc-list">
+                        <li><strong>Total Cost:</strong> ~15,000 credits (very affordable!)</li>
+                        <li><strong>Operating Cost:</strong> Low fuel consumption, cheap repairs</li>
+                        <li><strong>Effectiveness:</strong> Can defeat pirates and weak enemies</li>
+                        <li><strong>Upgrade Path:</strong> Add armor, better weapons later</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🦅 Heavy Fighter: "The Hawk" (Balanced Combat Destroyer)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🎯 Build Purpose</h4>
+                    <p><strong>Perfect for:</strong> Experienced pilots, serious combat, dangerous sectors</p>
+                    <p><strong>Combat Style:</strong> Stand-up fighter that can take hits while dealing massive damage</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">"Hawk" Heavy Fighter Blueprint</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">HULL</span>
+                                <span class="terminal-output">Heavy Fighter Chassis (12 slots, tough)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">WEAPONS</span>
+                                <span class="terminal-output">2x Plasma Cannons + 2x Missile Launchers</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">DEFENSE</span>
+                                <span class="terminal-output">2x Shield Generators + 1x Armor Plating</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ENGINE</span>
+                                <span class="terminal-output">1x Military Thruster (balanced speed/power)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">POWER</span>
+                                <span class="terminal-output">2x Fusion Reactors (high energy output)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">UTILITY</span>
+                                <span class="terminal-output">1x Advanced Targeting Computer</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">🧠 Design Reasoning</h4>
+                    <ul class="doc-list">
+                        <li><strong>Heavy Hull:</strong> More slots for serious combat equipment</li>
+                        <li><strong>Mixed Weapons:</strong> Plasma for shields, missiles for armor</li>
+                        <li><strong>Layered Defense:</strong> Shields + armor = maximum survival</li>
+                        <li><strong>Dual Reactors:</strong> Powers energy-hungry weapon systems</li>
+                        <li><strong>Targeting Computer:</strong> Better accuracy = more damage</li>
+                    </ul>
+
+                    <div class="doc-alert warning">
+                        <strong>⚡ Power Management:</strong> This build uses lots of energy! Make sure your reactors 
+                        can handle all weapons firing at once! 🔋
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🎯 Sniper Fighter: "The Eagle Eye" (Long-Range Assassin)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🎯 Build Purpose</h4>
+                    <p><strong>Perfect for:</strong> Patient pilots, ambush tactics, eliminating specific targets</p>
+                    <p><strong>Combat Style:</strong> Strike from extreme range, avoid close combat at all costs</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">"Eagle Eye" Sniper Blueprint</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">HULL</span>
+                                <span class="terminal-output">Stealth Fighter Chassis (10 slots, radar-resistant)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">WEAPONS</span>
+                                <span class="terminal-output">1x Heavy Rail Gun + 1x Long-Range Laser</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">DEFENSE</span>
+                                <span class="terminal-output">1x Cloaking Device + 1x ECM Jammer</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ENGINE</span>
+                                <span class="terminal-output">1x Silent Drive (stealth movement)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">SENSORS</span>
+                                <span class="terminal-output">1x Long-Range Scope + 1x Target Painter</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">POWER</span>
+                                <span class="terminal-output">2x Stealth Reactors (low heat signature)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">🧠 Design Reasoning</h4>
+                    <ul class="doc-list">
+                        <li><strong>Stealth Hull:</strong> Harder for enemies to detect and target</li>
+                        <li><strong>Long-Range Weapons:</strong> Strike before enemies can reach you</li>
+                        <li><strong>Stealth Systems:</strong> Invisibility is your best defense</li>
+                        <li><strong>Advanced Sensors:</strong> See enemies before they see you</li>
+                        <li><strong>Silent Drive:</strong> Move without being detected</li>
+                    </ul>
+
+                    <div class="doc-alert info">
+                        <strong>🤫 Stealth Tactics:</strong> This ship is all about patience and positioning! 
+                        Find a good hiding spot, wait for the perfect shot, then disappear! 👻
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trader Builds -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">📦 Trader Ship Builds (Space Merchant Specialists!)</h2>
+            
+            <p>Trader ships are the workhorses of the galaxy - they might not win beauty contests, but they make 
+            the credits that fund everything else! These builds focus on maximum profit while staying alive 
+            in a dangerous universe! 💰🚛</p>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🚚 Small Trader: "The Peddler" (Budget Cargo Hauler)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🎯 Build Purpose</h4>
+                    <p><strong>Perfect for:</strong> New traders, short routes, safe sectors, learning the market</p>
+                    <p><strong>Trading Style:</strong> Small loads, frequent trips, gradual profit building</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">"Peddler" Small Trader Blueprint</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">HULL</span>
+                                <span class="terminal-output">Small Freighter (10 slots, affordable)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">CARGO</span>
+                                <span class="terminal-output">4x Standard Cargo Bays (main income source)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ENGINE</span>
+                                <span class="terminal-output">2x Efficient Drives (fuel economy priority)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">DEFENSE</span>
+                                <span class="terminal-output">1x Basic Shield (protection from accidents)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">WEAPONS</span>
+                                <span class="terminal-output">1x Emergency Laser (scare off small pirates)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">UTILITY</span>
+                                <span class="terminal-output">1x Market Scanner + 1x Emergency Beacon</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">🧠 Design Reasoning</h4>
+                    <ul class="doc-list">
+                        <li><strong>40% Cargo:</strong> Maximum profit per trip</li>
+                        <li><strong>20% Engines:</strong> Fuel efficiency = more profit</li>
+                        <li><strong>Market Scanner:</strong> Find the best deals automatically</li>
+                        <li><strong>Emergency Beacon:</strong> Call for help if pirates attack</li>
+                        <li><strong>Basic Defense:</strong> Just enough to survive small threats</li>
+                    </ul>
+
+                    <div class="doc-alert accent">
+                        <strong>💡 Trading Strategy:</strong> This ship works best on safe, well-patrolled routes! 
+                        Stick to green sectors until you can afford better defenses! 🛡️
+                    </div>
+
+                    <h4 class="doc-h4">💰 Profit Analysis</h4>
+                    <ul class="doc-list">
+                        <li><strong>Cargo Capacity:</strong> ~200 units per trip</li>
+                        <li><strong>Fuel Efficiency:</strong> 15 units fuel per sector</li>
+                        <li><strong>Profit Per Hour:</strong> 500-1,000 credits (safe routes)</li>
+                        <li><strong>Break-Even:</strong> ~20 successful trades</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🛡️ Armored Trader: "The Fortress" (Dangerous Route Specialist)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🎯 Build Purpose</h4>
+                    <p><strong>Perfect for:</strong> Experienced traders, dangerous routes, high-value cargo</p>
+                    <p><strong>Trading Style:</strong> Fewer trips but bigger profits, can handle pirate attacks</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">"Fortress" Armored Trader Blueprint</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">HULL</span>
+                                <span class="terminal-output">Heavy Freighter (16 slots, very tough)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">CARGO</span>
+                                <span class="terminal-output">6x Reinforced Cargo Bays (pirate-resistant)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">DEFENSE</span>
+                                <span class="terminal-output">3x Shield Generators + 2x Armor Plating</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">WEAPONS</span>
+                                <span class="terminal-output">2x Defensive Turrets (automated protection)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ENGINE</span>
+                                <span class="terminal-output">2x Military Thrusters (escape capability)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">UTILITY</span>
+                                <span class="terminal-output">1x Advanced Scanner (spot threats early)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">🧠 Design Reasoning</h4>
+                    <ul class="doc-list">
+                        <li><strong>Heavy Hull:</strong> Can take serious punishment and keep flying</li>
+                        <li><strong>Layered Defense:</strong> Shields regenerate, armor absorbs hits</li>
+                        <li><strong>Auto-Turrets:</strong> Fight back while you focus on escaping</li>
+                        <li><strong>Military Engines:</strong> Fast enough to outrun most pirates</li>
+                        <li><strong>Reinforced Cargo:</strong> Harder for pirates to steal your goods</li>
+                    </ul>
+
+                    <div class="doc-alert warning">
+                        <strong>⚔️ Combat Protocol:</strong> This ship can fight, but running is still safer! 
+                        Use weapons to discourage pursuit, not to start fights! 🏃‍♂️
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🏃‍♂️ Speed Trader: "The Courier" (Express Delivery Specialist)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🎯 Build Purpose</h4>
+                    <p><strong>Perfect for:</strong> Time-sensitive cargo, express deliveries, speed contracts</p>
+                    <p><strong>Trading Style:</strong> Fast delivery of valuable small cargo, premium prices</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">"Courier" Speed Trader Blueprint</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">HULL</span>
+                                <span class="terminal-output">Racing Courier (8 slots, ultra-light)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">CARGO</span>
+                                <span class="terminal-output">2x Secure Cargo Pods (small but protected)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ENGINE</span>
+                                <span class="terminal-output">4x Racing Thrusters (maximum speed)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">DEFENSE</span>
+                                <span class="terminal-output">1x Stealth Field (invisibility while running)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">UTILITY</span>
+                                <span class="terminal-output">1x Jump Drive (instant escape mechanism)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">🧠 Design Reasoning</h4>
+                    <ul class="doc-list">
+                        <li><strong>50% Engines:</strong> Faster than any pirate ship</li>
+                        <li><strong>Small Cargo:</strong> High-value items only (medicines, data, gems)</li>
+                        <li><strong>Stealth Field:</strong> Disappear when chased</li>
+                        <li><strong>Jump Drive:</strong> Instant teleport to safety</li>
+                        <li><strong>No Weapons:</strong> Speed is the only defense needed</li>
+                    </ul>
+
+                    <div class="doc-alert accent">
+                        <strong>💨 Speed Tactics:</strong> This ship is built for one thing - going FAST! 
+                        If you can't outrun it, teleport away from it! ⚡
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cruiser Builds -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🚢 Cruiser Builds (Multi-Role Space Titans!)</h2>
+            
+            <p>Cruisers are the Swiss Army knives of space - bigger than fighters, more versatile than traders, 
+            and tough enough to handle whatever the galaxy throws at them! These builds can adapt to multiple 
+            situations! 🛠️⚓</p>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🛡️ Escort Cruiser: "The Guardian" (Defender of Trade Routes)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🎯 Build Purpose</h4>
+                    <p><strong>Perfect for:</strong> Protecting trader fleets, convoy escort, area defense</p>
+                    <p><strong>Combat Style:</strong> Stay with friendlies, intercept attackers, tank damage</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">"Guardian" Escort Cruiser Blueprint</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">HULL</span>
+                                <span class="terminal-output">Combat Cruiser (20 slots, balanced design)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">WEAPONS</span>
+                                <span class="terminal-output">4x Multi-Role Lasers + 2x Point Defense</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">DEFENSE</span>
+                                <span class="terminal-output">4x Shield Generators + 2x Armor Plates</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ENGINE</span>
+                                <span class="terminal-output">2x Cruiser Drives (escort speed)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">SUPPORT</span>
+                                <span class="terminal-output">2x Shield Boosters (help nearby allies)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">UTILITY</span>
+                                <span class="terminal-output">2x Repair Drones + 2x Sensor Arrays</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">🧠 Design Reasoning</h4>
+                    <ul class="doc-list">
+                        <li><strong>Balanced Weapons:</strong> Can fight any type of enemy</li>
+                        <li><strong>Heavy Defense:</strong> Built to absorb damage for the fleet</li>
+                        <li><strong>Support Systems:</strong> Helps protect and repair nearby ships</li>
+                        <li><strong>Advanced Sensors:</strong> Spots threats before they reach convoy</li>
+                        <li><strong>Repair Drones:</strong> Fixes damage mid-battle</li>
+                    </ul>
+
+                    <div class="doc-alert info">
+                        <strong>🤝 Team Player:</strong> This ship shines when protecting others! 
+                        Position yourself between enemies and the ships you're guarding! 🛡️
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🔍 Explorer Cruiser: "The Pioneer" (Deep Space Discovery Ship)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🎯 Build Purpose</h4>
+                    <p><strong>Perfect for:</strong> Long-range exploration, scientific missions, finding treasures</p>
+                    <p><strong>Exploration Style:</strong> Self-sufficient, can handle dangers alone, find everything</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">"Pioneer" Explorer Cruiser Blueprint</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">HULL</span>
+                                <span class="terminal-output">Science Cruiser (18 slots, research-focused)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">SENSORS</span>
+                                <span class="terminal-output">4x Advanced Scanners + 2x Deep Probes</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ENGINE</span>
+                                <span class="terminal-output">3x Long-Range Drives (efficient exploration)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">DEFENSE</span>
+                                <span class="terminal-output">2x Adaptive Shields + 1x Stealth Field</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">WEAPONS</span>
+                                <span class="terminal-output">2x Defensive Lasers (minimal combat gear)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">UTILITY</span>
+                                <span class="terminal-output">2x Cargo Labs + 2x Life Support + 1x Jump Drive</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">🧠 Design Reasoning</h4>
+                    <ul class="doc-list">
+                        <li><strong>Sensor Array:</strong> Find everything worth finding</li>
+                        <li><strong>Long-Range Engines:</strong> Explore far from civilization</li>
+                        <li><strong>Stealth Capability:</strong> Avoid fights you can't win</li>
+                        <li><strong>Cargo Labs:</strong> Analyze and store discoveries</li>
+                        <li><strong>Extended Life Support:</strong> Stay out longer than anyone else</li>
+                    </ul>
+
+                    <div class="doc-alert accent">
+                        <strong>🌟 Discovery Mission:</strong> This ship finds treasures others miss! 
+                        Use stealth to avoid danger, scanners to find secrets! 🕵️‍♂️
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Faction-Specific Builds -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🌟 Faction-Specific Builds (Embrace Your Heritage!)</h2>
+            
+            <p>Each faction has unique technologies and design philosophies that make their ships special! 
+            These builds take advantage of faction bonuses and signature equipment to create ships that 
+            perfectly embody each civilization's strengths! 🏛️⚡</p>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🌍 Terran Federation Build: "The Versatile" (Human Engineering Excellence)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🎯 Terran Advantages</h4>
+                    <ul class="doc-list">
+                        <li><strong>Balanced Technology:</strong> No major weaknesses, good at everything</li>
+                        <li><strong>Efficient Systems:</strong> Get more performance per credit spent</li>
+                        <li><strong>Modular Design:</strong> Easy to upgrade and modify ships</li>
+                        <li><strong>Reliable Equipment:</strong> Components rarely break down</li>
+                    </ul>
+
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Terran Multi-Role Fighter</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">SPECIAL</span>
+                                <span class="terminal-output">Terran Adaptive Systems (+20% efficiency all components)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">WEAPONS</span>
+                                <span class="terminal-output">2x Terran Pulse Cannons (reliable, versatile)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">DEFENSE</span>
+                                <span class="terminal-output">1x Terran Reactive Armor (adapts to damage types)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ENGINE</span>
+                                <span class="terminal-output">1x Terran Hybrid Drive (speed + efficiency)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="doc-alert info">
+                        <strong>🌟 Terran Philosophy:</strong> "The right tool for every job!" Terran ships excel by 
+                        being prepared for any situation! 🛠️
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🌿 Zynthian Collective Build: "The Living Ship" (Bio-Tech Marvel)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🎯 Zynthian Advantages</h4>
+                    <ul class="doc-list">
+                        <li><strong>Bio-Technology:</strong> Ships that grow and heal themselves</li>
+                        <li><strong>Organic Systems:</strong> Self-repairing, energy-efficient</li>
+                        <li><strong>Symbiotic Design:</strong> Components work together naturally</li>
+                        <li><strong>Environmental Adaptation:</strong> Ships adapt to conditions</li>
+                    </ul>
+
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Zynthian Bio-Fighter</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">SPECIAL</span>
+                                <span class="terminal-output">Living Hull (self-repairs 5% damage per turn)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">WEAPONS</span>
+                                <span class="terminal-output">2x Bio-Plasma Launchers (grow stronger in combat)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">DEFENSE</span>
+                                <span class="terminal-output">1x Organic Carapace (hardens when damaged)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ENGINE</span>
+                                <span class="terminal-output">1x Bio-Electric Propulsion (feeds on radiation)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="doc-alert accent">
+                        <strong>🌱 Zynthian Philosophy:</strong> "Ships should be alive!" Zynthian vessels grow 
+                        stronger and smarter with experience! 🧬
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🤖 Nexus Syndicate Build: "The Calculator" (AI-Powered Perfection)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🎯 Nexus Advantages</h4>
+                    <ul class="doc-list">
+                        <li><strong>AI Integration:</strong> Ships think faster than biological pilots</li>
+                        <li><strong>Mathematical Precision:</strong> Perfect accuracy, optimal efficiency</li>
+                        <li><strong>Networked Systems:</strong> Ships share information instantly</li>
+                        <li><strong>Computational Power:</strong> Predict enemy moves, calculate perfect shots</li>
+                    </ul>
+
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Nexus AI Fighter</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">SPECIAL</span>
+                                <span class="terminal-output">Quantum AI Core (+50% accuracy, +30% efficiency)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">WEAPONS</span>
+                                <span class="terminal-output">2x Precision Beam Arrays (perfect targeting)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">DEFENSE</span>
+                                <span class="terminal-output">1x Predictive Shield Matrix (predicts attacks)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ENGINE</span>
+                                <span class="terminal-output">1x Quantum Drive (calculated perfect movement)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="doc-alert warning">
+                        <strong>🧮 Nexus Philosophy:</strong> "Mathematics is the universe's language!" Nexus ships 
+                        win through superior calculations and logical thinking! 📊
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Reference -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">📋 Build Reference Chart</h2>
+            
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Ship Role Quick Reference</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">FIGHTER</span>
+                        <span class="terminal-output">40% Weapons, 30% Defense, 20% Engines, 10% Utility</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">TRADER</span>
+                        <span class="terminal-output">50% Cargo, 25% Engines, 15% Defense, 10% Weapons</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">EXPLORER</span>
+                        <span class="terminal-output">30% Sensors, 25% Engines, 20% Utility, 15% Defense</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">CRUISER</span>
+                        <span class="terminal-output">30% Weapons, 25% Defense, 20% Engines, 25% Utility</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🎯 Build Success Tips</h3>
+            <ul class="doc-list">
+                <li><strong>Start Small:</strong> Build cheap prototypes to test designs</li>
+                <li><strong>Specialize First:</strong> Master one role before trying multi-role</li>
+                <li><strong>Plan Upgrades:</strong> Leave room for better components later</li>
+                <li><strong>Test in Combat:</strong> Only real battles show design flaws</li>
+                <li><strong>Learn from Losses:</strong> Every explosion teaches valuable lessons!</li>
+            </ul>
+        </section>
+
+        <!-- Cross-References -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🔗 Optimize Your Builds Further</h2>
+            
+            <div class="doc-alert info">
+                <strong>📚 Advanced Build Optimization:</strong> These guides will help you take your ship builds to the next level 
+                and understand how they perform in real situations!
+            </div>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">⚔️ Combat Performance</h3>
+                        <span class="doc-badge warning">Battle Testing</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Test your combat builds against real threats:</p>
+                        <ul class="doc-list">
+                            <li><a href="../combat/weapon-effectiveness.html">Weapon Guide</a> - Optimize your fighter's firepower</li>
+                            <li><a href="../combat/shield-armor.html">Defense Guide</a> - Perfect your cruiser's protection</li>
+                            <li><a href="../combat/damage-calculation.html">Damage Math</a> - Calculate actual combat effectiveness</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">💰 Trading Efficiency</h3>
+                        <span class="doc-badge accent">Economic Testing</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Maximize your trader build profits:</p>
+                        <ul class="doc-list">
+                            <li><a href="../trading/trade-routes.html">Route Planning</a> - Find the best routes for your trader</li>
+                            <li><a href="../trading/commodity-price-analysis.html">Market Analysis</a> - Optimize cargo choices</li>
+                            <li><a href="../navigation/fuel-management.html">Fuel Efficiency</a> - Reduce operating costs</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🏛️ Faction Bonuses</h3>
+                        <span class="doc-badge">Faction Optimization</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Enhance builds with faction-specific technology:</p>
+                        <ul class="doc-list">
+                            <li><a href="../factions/terran-federation.html">Terran Builds</a> - Reliable, balanced designs</li>
+                            <li><a href="../factions/zynthian-collective.html">Zynthian Builds</a> - Bio-enhanced systems</li>
+                            <li><a href="../factions/nexus-syndicate.html">Nexus Builds</a> - Advanced technology integration</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">📊 Advanced Analysis</h3>
+                        <span class="doc-badge secondary">Deep Optimization</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Master advanced ship optimization:</p>
+                        <ul class="doc-list">
+                            <li><a href="comparison-charts.html">Ship Comparisons</a> - Compare hull effectiveness</li>
+                            <li><a href="optimization-guide.html">Optimization Math</a> - Mathematical ship perfection</li>
+                            <li><a href="../strategy/common-mistakes.html">Common Mistakes</a> - Avoid design disasters</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="component-installation.html" class="doc-nav-link">← Components Guide</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="../strategy/common-mistakes.html" class="doc-nav-link">Next: Common Mistakes →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            console.log('Ship Build Examples loaded');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Component Installation Basics - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+</head>
+<body class="doc-container">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">← Ship Design</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="hull-selection.html" class="doc-nav-link">Hull Selection</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="component-installation.html" class="doc-nav-link active">Components</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="stats-calculation.html" class="doc-nav-link">Stats</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item">
+                <a href="index.html" class="doc-breadcrumb-link">Ship Design</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Component Installation</div>
+        </nav>
+        
+        <h1 class="doc-h1 holo-text">🛠️ Equipment & Components Catalog</h1>
+        
+        <div class="doc-alert info">
+            <strong>Ship Parts Database:</strong> Welcome to the coolest spaceship parts catalog in the galaxy! 
+            Think of this as your cosmic hardware store - everything you need to build the most amazing ships! 🚀⚙️
+        </div>
+        
+        <p class="doc-lead">
+            Welcome to the ultimate guide to spaceship parts! Building a ship is like building the ultimate LEGO set, 
+            except way cooler because your creation can actually fly through space and shoot lasers! Every component has 
+            its own special job, from engines that make you go "ZOOM!" to weapons that go "PEW PEW!" Let's explore 
+            all the awesome parts you can use to build your dream spaceship! ✨🔧
+        </p>
+
+        <!-- Component Types Overview -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Component Categories</h2>
+            
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Component Database</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">SCAN</span>
+                        <span class="terminal-output">Detecting available component types...</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-info">6 component categories found</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Engine Components -->
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🚀 Engine Components - Your Ship's Rocket Boosters!</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p><strong>What engines do:</strong> Engines are like the legs of your spaceship - they make you go fast, 
+                    turn quickly, and basically let you zoom around the galaxy like the coolest race car driver ever! 
+                    The better your engines, the faster you can escape from pirates or chase down awesome treasures! 🏎️💨</p>
+                    
+                    <h4 class="doc-h4">🌟 Engine Tier Rankings (From Awesome to SUPER AWESOME!)</h4>
+                    
+                    <div class="doc-grid doc-grid-2">
+                        <div class="doc-card">
+                            <div class="doc-card-header">
+                                <h5 class="doc-card-title">⭐ Tier 1: Starter Engines</h5>
+                                <span class="doc-badge">Beginner Friendly!</span>
+                            </div>
+                            <div class="doc-card-body">
+                                <p><strong>🔥 Chemical Thrusters</strong></p>
+                                <ul class="doc-list">
+                                    <li><strong>Speed:</strong> 2-3 sectors/hour (like a bicycle)</li>
+                                    <li><strong>Power Need:</strong> 10-15 units (very low!)</li>
+                                    <li><strong>Cost:</strong> 500-1,000 credits (super affordable!)</li>
+                                    <li><strong>Best For:</strong> New pilots learning the ropes</li>
+                                </ul>
+                                <div class="doc-alert accent">
+                                    <strong>Kid Tip:</strong> Perfect for your first ship! Like training wheels but for spaceships!
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="doc-card">
+                            <div class="doc-card-header">
+                                <h5 class="doc-card-title">⭐⭐ Tier 2: Getting Better!</h5>
+                                <span class="doc-badge secondary">Good Choice!</span>
+                            </div>
+                            <div class="doc-card-body">
+                                <p><strong>⚡ Ion Drives</strong></p>
+                                <ul class="doc-list">
+                                    <li><strong>Speed:</strong> 4-6 sectors/hour (like a car)</li>
+                                    <li><strong>Power Need:</strong> 20-25 units (reasonable)</li>
+                                    <li><strong>Cost:</strong> 2,000-4,000 credits (worth saving for!)</li>
+                                    <li><strong>Best For:</strong> Traders and explorers</li>
+                                </ul>
+                                <div class="doc-alert info">
+                                    <strong>Fun Fact:</strong> Ion drives use electricity to shoot tiny particles out the back - science is cool!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="doc-grid doc-grid-2">
+                        <div class="doc-card">
+                            <div class="doc-card-header">
+                                <h5 class="doc-card-title">⭐⭐⭐ Tier 3: Now We're Talking!</h5>
+                                <span class="doc-badge accent">Pro Level!</span>
+                            </div>
+                            <div class="doc-card-body">
+                                <p><strong>🌟 Fusion Engines</strong></p>
+                                <ul class="doc-list">
+                                    <li><strong>Speed:</strong> 8-12 sectors/hour (like a sports car!)</li>
+                                    <li><strong>Power Need:</strong> 40-50 units (need good power system)</li>
+                                    <li><strong>Cost:</strong> 8,000-15,000 credits (expensive but worth it!)</li>
+                                    <li><strong>Best For:</strong> Combat ships and speed demons</li>
+                                </ul>
+                                <div class="doc-alert warning">
+                                    <strong>Power Warning:</strong> These engines are hungry! Make sure your power system can feed them!
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="doc-card">
+                            <div class="doc-card-header">
+                                <h5 class="doc-card-title">⭐⭐⭐⭐ Tier 4: LEGENDARY!</h5>
+                                <span class="doc-badge warning">Epic Gear!</span>
+                            </div>
+                            <div class="doc-card-body">
+                                <p><strong>🌌 Quantum Drives</strong></p>
+                                <ul class="doc-list">
+                                    <li><strong>Speed:</strong> 15-25 sectors/hour (like a rocket!)</li>
+                                    <li><strong>Power Need:</strong> 80-100 units (power monster!)</li>
+                                    <li><strong>Cost:</strong> 25,000-50,000 credits (super expensive!)</li>
+                                    <li><strong>Best For:</strong> Elite pilots with deep pockets</li>
+                                </ul>
+                                <div class="doc-alert accent">
+                                    <strong>🏆 Legend Status:</strong> With these engines, you're faster than most pirates can blink!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4 class="doc-h4">🎯 Choosing the Right Engine</h4>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Engine Selection Helper</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">NEW PILOT</span>
+                                <span class="terminal-output">Chemical Thrusters - Learn without breaking the bank!</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">TRADER</span>
+                                <span class="terminal-output">Ion Drives - Efficient for long cargo runs!</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">FIGHTER</span>
+                                <span class="terminal-output">Fusion Engines - Speed kills (the bad guys)!</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">SHOW-OFF</span>
+                                <span class="terminal-output">Quantum Drives - Gotta go fast! 💨</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Power Systems -->
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>⚡ Power Systems - Your Ship's Heart and Soul!</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p><strong>What power systems do:</strong> Think of power systems as your ship's stomach - they "eat" fuel 
+                    and turn it into electricity to power everything else! Without power, your ship is basically a very expensive 
+                    floating metal box. No lights, no engines, no weapons, no life support - just floating around like a sad space rock! 🔋💡</p>
+                    
+                    <h4 class="doc-h4">⚡ Power System Rankings (From Tiny Spark to MEGA POWER!)</h4>
+                    
+                    <div class="doc-grid doc-grid-2">
+                        <div class="doc-card">
+                            <div class="doc-card-header">
+                                <h5 class="doc-card-title">⭐ Tier 1: Baby's First Power!</h5>
+                                <span class="doc-badge">Super Cheap!</span>
+                            </div>
+                            <div class="doc-card-body">
+                                <p><strong>🔋 Battery Packs</strong></p>
+                                <ul class="doc-list">
+                                    <li><strong>Power Output:</strong> 15-25 units (like a big flashlight)</li>
+                                    <li><strong>Duration:</strong> Limited! Runs out eventually!</li>
+                                    <li><strong>Cost:</strong> 200-500 credits (super affordable!)</li>
+                                    <li><strong>Best For:</strong> Emergency backup or tiny ships</li>
+                                </ul>
+                                <div class="doc-alert warning">
+                                    <strong>⚠️ Battery Warning:</strong> These run out! Don't get stuck in space with dead batteries!
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="doc-card">
+                            <div class="doc-card-header">
+                                <h5 class="doc-card-title">⭐⭐ Tier 2: Green Energy!</h5>
+                                <span class="doc-badge secondary">Eco-Friendly!</span>
+                            </div>
+                            <div class="doc-card-body">
+                                <p><strong>☀️ Solar Arrays</strong></p>
+                                <ul class="doc-list">
+                                    <li><strong>Power Output:</strong> 20-40 units (when sunny!)</li>
+                                    <li><strong>Duration:</strong> Forever! (if there's sunlight)</li>
+                                    <li><strong>Cost:</strong> 1,500-3,000 credits (reasonable)</li>
+                                    <li><strong>Best For:</strong> Peaceful traders and explorers</li>
+                                </ul>
+                                <div class="doc-alert info">
+                                    <strong>🌟 Sunny Tip:</strong> These work great near stars but are useless in dark space!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="doc-grid doc-grid-2">
+                        <div class="doc-card">
+                            <div class="doc-card-header">
+                                <h5 class="doc-card-title">⭐⭐⭐ Tier 3: Serious Power!</h5>
+                                <span class="doc-badge accent">Reliable Choice!</span>
+                            </div>
+                            <div class="doc-card-body">
+                                <p><strong>🌟 Fusion Reactors</strong></p>
+                                <ul class="doc-list">
+                                    <li><strong>Power Output:</strong> 60-120 units (like a small power plant!)</li>
+                                    <li><strong>Duration:</strong> Years and years with fuel</li>
+                                    <li><strong>Cost:</strong> 10,000-20,000 credits (worth the investment!)</li>
+                                    <li><strong>Best For:</strong> Combat ships and heavy-duty work</li>
+                                </ul>
+                                <div class="doc-alert accent">
+                                    <strong>🏭 Pro Tip:</strong> This is what most serious pilots use - steady, reliable power!
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="doc-card">
+                            <div class="doc-card-header">
+                                <h5 class="doc-card-title">⭐⭐⭐⭐ Tier 4: ULTIMATE POWER!</h5>
+                                <span class="doc-badge warning">Epic Tier!</span>
+                            </div>
+                            <div class="doc-card-body">
+                                <p><strong>💥 Antimatter Cores</strong></p>
+                                <ul class="doc-list">
+                                    <li><strong>Power Output:</strong> 200-500 units (like a star!)</li>
+                                    <li><strong>Duration:</strong> Decades with proper fuel</li>
+                                    <li><strong>Cost:</strong> 40,000-100,000 credits (super expensive!)</li>
+                                    <li><strong>Best For:</strong> Elite ships and dreadnoughts</li>
+                                </ul>
+                                <div class="doc-alert warning">
+                                    <strong>💥 DANGER:</strong> If this explodes, your ship becomes a tiny sun! Handle with care!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4 class="doc-h4">🧮 Power Math Made Easy!</h4>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Power Calculator Helper</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">BASIC SHIP</span>
+                                <span class="terminal-output">Need 30-50 power units (engines + life support)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">TRADER SHIP</span>
+                                <span class="terminal-output">Need 40-70 power units (efficient engines + cargo)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">COMBAT SHIP</span>
+                                <span class="terminal-output">Need 80-150 power units (weapons are hungry!)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">BATTLESHIP</span>
+                                <span class="terminal-output">Need 200+ power units (everything is BIG!)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="doc-alert accent">
+                        <strong>🎓 Power Rule #1:</strong> Always have 10-20% MORE power than you think you need! 
+                        Running out of power in space is like running out of gas in the middle of a desert, 
+                        except the desert is filled with vacuum and possibly angry pirates!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weapon Systems -->
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>💥 Weapon Systems - The PEW PEW Department!</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p><strong>What weapons do:</strong> Weapons are how you say "Hello!" to pirates and "Goodbye!" to asteroids! 
+                    They're basically the coolest toys in space - laser guns, missile launchers, and other epic space weapons 
+                    that would make any action movie hero jealous! Remember: weapons are for defending yourself and asteroid mining, 
+                    not for being a space bully! 🚀💥</p>
+                    
+                    <h4 class="doc-h4">🎯 Weapon Categories (Choose Your Space Fighting Style!)</h4>
+                    
+                    <div class="doc-grid doc-grid-3">
+                        <div class="doc-card">
+                            <div class="doc-card-header">
+                                <h5 class="doc-card-title">⚡ Energy Weapons</h5>
+                                <span class="doc-badge accent">Pew Pew!</span>
+                            </div>
+                            <div class="doc-card-body">
+                                <p><strong>🔥 Laser Cannons & Plasma Guns</strong></p>
+                                <ul class="doc-list">
+                                    <li><strong>Damage:</strong> 20-80 per shot</li>
+                                    <li><strong>Range:</strong> Long (space sniper!)</li>
+                                    <li><strong>Accuracy:</strong> Super high!</li>
+                                    <li><strong>Power Need:</strong> Lots!</li>
+                                    <li><strong>Ammo:</strong> None needed!</li>
+                                </ul>
+                                <div class="doc-alert info">
+                                    <strong>⚡ Energy Tip:</strong> Perfect for precise shots - never miss what you're aiming at!
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="doc-card">
+                            <div class="doc-card-header">
+                                <h5 class="doc-card-title">🚀 Projectile Weapons</h5>
+                                <span class="doc-badge warning">Big Boom!</span>
+                            </div>
+                            <div class="doc-card-body">
+                                <p><strong>💥 Railguns & Missile Launchers</strong></p>
+                                <ul class="doc-list">
+                                    <li><strong>Damage:</strong> 50-150 per shot</li>
+                                    <li><strong>Range:</strong> Medium to long</li>
+                                    <li><strong>Accuracy:</strong> Good</li>
+                                    <li><strong>Power Need:</strong> Low</li>
+                                    <li><strong>Ammo:</strong> Need to buy bullets!</li>
+                                </ul>
+                                <div class="doc-alert warning">
+                                    <strong>💸 Ammo Warning:</strong> These hit HARD but you need to buy ammunition - can get expensive!
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="doc-card">
+                            <div class="doc-card-header">
+                                <h5 class="doc-card-title">🌟 Exotic Weapons</h5>
+                                <span class="doc-badge">Super Rare!</span>
+                            </div>
+                            <div class="doc-card-body">
+                                <p><strong>🌌 Particle Beams & Gravity Guns</strong></p>
+                                <ul class="doc-list">
+                                    <li><strong>Damage:</strong> Special effects!</li>
+                                    <li><strong>Range:</strong> Varies wildly</li>
+                                    <li><strong>Accuracy:</strong> Depends on type</li>
+                                    <li><strong>Power Need:</strong> EXTREME!</li>
+                                    <li><strong>Ammo:</strong> Exotic materials</li>
+                                </ul>
+                                <div class="doc-alert accent">
+                                    <strong>🏆 Legend Tier:</strong> These do weird and wonderful things - freeze enemies, create black holes, bend time!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4 class="doc-h4">🏆 Weapon Tier Rankings</h4>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Space Weapons Database</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">⭐ BASIC</span>
+                                <span class="terminal-output">Pulse Lasers (5-15 damage) - Perfect for beginners!</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">⭐⭐ GOOD</span>
+                                <span class="terminal-output">Plasma Cannons (15-35 damage) - Solid choice for most fights!</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">⭐⭐⭐ GREAT</span>
+                                <span class="terminal-output">Railguns (30-60 damage) - When you absolutely need something dead!</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">⭐⭐⭐⭐ EPIC</span>
+                                <span class="terminal-output">Particle Beams (50-100+ damage) - Elite pilot weapons!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shield Systems -->
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🛡️ Shield Systems - Your Invisible Armor!</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p><strong>What shields do:</strong> Shields are like invisible force fields that protect your ship! 
+                    Think of them as bubble wrap made of energy - they absorb hits so your ship doesn't get holes! 🛡️✨</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">⚡ ENERGY</span>
+                                <span class="terminal-output">50-200 points protection | Good vs lasers | Recharges fast</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">🚀 KINETIC</span>
+                                <span class="terminal-output">30-150 points protection | Good vs missiles | Slow recharge</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">🌟 ADAPTIVE</span>
+                                <span class="terminal-output">100-300 points protection | Good vs everything | Expensive!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cargo & Utility Systems -->
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>📦 Cargo & Utility Systems - The Useful Stuff!</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">💰 Cargo Systems (For Space Traders!)</h4>
+                    <ul class="doc-list">
+                        <li><strong>📦 Standard Bays:</strong> 50-500 units storage (basic trading)</li>
+                        <li><strong>❄️ Refrigerated:</strong> 30-200 units (for space ice cream!)</li>
+                        <li><strong>🔒 Secure Vaults:</strong> 20-100 units (for expensive stuff)</li>
+                        <li><strong>🛢️ Liquid Tanks:</strong> 100-1000 units (fuel and space juice!)</li>
+                    </ul>
+                    
+                    <h4 class="doc-h4">🔧 Utility Equipment (Cool Gadgets!)</h4>
+                    <ul class="doc-list">
+                        <li><strong>🔍 Sensors:</strong> See further and find hidden treasures</li>
+                        <li><strong>📡 Comms:</strong> Call for help from across the galaxy</li>
+                        <li><strong>⛏️ Mining Tools:</strong> Turn asteroids into money</li>
+                        <li><strong>🤖 Repair Drones:</strong> Fix your ship automatically</li>
+                        <li><strong>👻 Cloaking:</strong> Turn invisible (super rare!)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Beginner's Shopping Guide -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🛍️ Beginner's Component Shopping Guide</h2>
+            
+            <div class="doc-alert info">
+                <strong>💰 Smart Shopping:</strong> Start with basics and upgrade as you earn more credits! 
+                You don't need the most expensive parts to have fun!
+            </div>
+            
+            <div class="doc-grid doc-grid-3">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🚀 First Ship (5,000 credits)</h4>
+                        <span class="doc-badge">Perfect Start!</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li>Chemical Thrusters (cheap & reliable)</li>
+                            <li>Battery Pack (basic power)</li>
+                            <li>Basic Pulse Laser (defend yourself)</li>
+                            <li>Standard Cargo Bay (start trading)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">⚡ Upgrade Ship (25,000 credits)</h4>
+                        <span class="doc-badge secondary">Getting Serious!</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li>Ion Drives (faster travel)</li>
+                            <li>Solar Arrays (reliable power)</li>
+                            <li>Plasma Cannon (better defense)</li>
+                            <li>Energy Shields (stay safe)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">💎 Dream Ship (100,000+ credits)</h4>
+                        <span class="doc-badge accent">Living the Dream!</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li>Fusion Engines (super fast)</li>
+                            <li>Fusion Reactor (tons of power)</li>
+                            <li>Railgun (epic damage)</li>
+                            <li>Adaptive Shields (ultimate protection)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Installation Process -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Installation Process</h2>
+            
+            <div class="doc-alert info">
+                <strong>Installation Sequence:</strong> Components must be installed in the correct order for optimal performance.
+            </div>
+
+            <h3 class="doc-h3">Step-by-Step Installation</h3>
+            
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Installation Procedure</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STEP 1</span>
+                        <span class="terminal-output">Install Power System (Required First)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STEP 2</span>
+                        <span class="terminal-output">Install Engine System (Required for mobility)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STEP 3</span>
+                        <span class="terminal-output">Install Core Systems (Life support, navigation)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STEP 4</span>
+                        <span class="terminal-output">Install Specialized Components (Weapons, cargo, etc.)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STEP 5</span>
+                        <span class="terminal-output">Verify Power Balance and System Integration</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">Compatibility Rules</h3>
+            <ul class="doc-list">
+                <li><strong>Slot Matching:</strong> Components must match available slot types</li>
+                <li><strong>Size Restrictions:</strong> Large components require multiple slots</li>
+                <li><strong>Power Requirements:</strong> Total power draw cannot exceed generation</li>
+                <li><strong>Hull Limitations:</strong> Some components are hull-type restricted</li>
+                <li><strong>Tech Level:</strong> Advanced components require prerequisite technologies</li>
+            </ul>
+        </section>
+
+        <!-- Component Synergies -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Component Synergies</h2>
+            
+            <p>Certain component combinations provide bonus effects beyond their individual contributions:</p>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">Offensive Synergies</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Targeting Computer + Weapons:</strong> +15% accuracy</li>
+                            <li><strong>Multiple Energy Weapons:</strong> Shared power efficiency</li>
+                            <li><strong>Fire Control System:</strong> Coordinated weapon timing</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">Defensive Synergies</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Multiple Shields:</strong> Overlapping protection zones</li>
+                            <li><strong>Shield + Armor:</strong> Damage reduction combo</li>
+                            <li><strong>Point Defense + Shields:</strong> Missile protection</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Common Mistakes -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Common Installation Mistakes</h2>
+            
+            <div class="doc-alert danger">
+                <strong>Power Overload:</strong> Installing more components than your power system can support
+            </div>
+
+            <h3 class="doc-h3">Troubleshooting Guide</h3>
+            <ul class="doc-list">
+                <li><strong>Component Won't Install:</strong> Check slot compatibility and prerequisites</li>
+                <li><strong>Ship Won't Start:</strong> Verify power system is installed and functional</li>
+                <li><strong>Poor Performance:</strong> Check for component conflicts or power shortages</li>
+                <li><strong>System Failures:</strong> Review component dependencies and tech requirements</li>
+            </ul>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="hull-selection.html" class="doc-nav-link">← Hull Selection Guide</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="stats-calculation.html" class="doc-nav-link">Next: Stats Calculation →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            console.log('Component Installation Guide loaded');
+        });
+    </script>
+</body>
+</html>

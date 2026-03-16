@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Wars 3000 — UX Improvement Plan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg-deep: #060612;
+    --bg-card: rgba(12, 12, 35, 0.85);
+    --bg-card-hover: rgba(18, 18, 50, 0.95);
+    --cyan: #00ffff;
+    --orange: #ff6600;
+    --red: #f44336;
+    --green: #4caf50;
+    --purple: #a78bfa;
+    --yellow: #ffc107;
+    --border: rgba(0, 255, 255, 0.12);
+    --border-hover: rgba(0, 255, 255, 0.3);
+    --text: #c8c8d8;
+    --text-dim: #7a7a9a;
+    --text-bright: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg-deep);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* Starfield background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1px 1px at 30% 50%, rgba(255,255,255,0.3), transparent),
+      radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.2), transparent),
+      radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1.5px 1.5px at 15% 70%, rgba(0,255,255,0.3), transparent),
+      radial-gradient(1.5px 1.5px at 85% 15%, rgba(0,255,255,0.2), transparent),
+      radial-gradient(1px 1px at 45% 85%, rgba(255,255,255,0.3), transparent),
+      radial-gradient(1px 1px at 65% 65%, rgba(255,255,255,0.2), transparent),
+      radial-gradient(1px 1px at 25% 35%, rgba(255,255,255,0.4), transparent);
+    background-size: 200px 200px, 300px 300px, 250px 250px, 180px 180px, 220px 220px,
+                     350px 350px, 400px 400px, 280px 280px, 320px 320px, 260px 260px;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* Navigation sidebar */
+  .nav-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 260px;
+    background: rgba(6, 6, 18, 0.95);
+    border-right: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    padding: 24px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+
+  .nav-logo {
+    padding: 0 24px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .nav-logo h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    color: var(--text-bright);
+    letter-spacing: 2px;
+  }
+
+  .nav-logo .sub {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    opacity: 0.6;
+    letter-spacing: 4px;
+  }
+
+  .nav-logo .tagline {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+
+  .nav-section {
+    padding: 0 12px;
+    margin-bottom: 4px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-dim);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-link:hover {
+    color: var(--cyan);
+    background: rgba(0, 255, 255, 0.05);
+  }
+
+  .nav-link .priority {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .p0 { background: rgba(244,67,54,0.15); color: var(--red); border: 1px solid rgba(244,67,54,0.3); }
+  .p1 { background: rgba(255,102,0,0.15); color: var(--orange); border: 1px solid rgba(255,102,0,0.3); }
+  .p2 { background: rgba(0,255,255,0.1); color: var(--cyan); border: 1px solid rgba(0,255,255,0.2); }
+  .p3 { background: rgba(167,139,250,0.1); color: var(--purple); border: 1px solid rgba(167,139,250,0.2); }
+
+  .nav-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(0,255,255,0.08);
+    color: var(--cyan);
+    border: 1px solid rgba(0,255,255,0.15);
+    flex-shrink: 0;
+  }
+
+  /* Main content */
+  .main {
+    margin-left: 260px;
+    padding: 40px 60px 100px;
+    max-width: 1100px;
+  }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 60px 0 50px;
+    position: relative;
+  }
+
+  .hero h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--text-bright);
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+
+  .hero .accent {
+    color: var(--cyan);
+    text-shadow: 0 0 30px rgba(0,255,255,0.3);
+  }
+
+  .hero p {
+    font-size: 16px;
+    color: var(--text-dim);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .stat-card .number {
+    font-family: 'Orbitron', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .stat-card .label {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 48px;
+    scroll-margin-top: 24px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,255,255,0.08);
+    color: var(--cyan);
+    border: 1px solid rgba(0,255,255,0.2);
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: 1px;
+  }
+
+  .section-priority {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  /* Problem box */
+  .problem-box {
+    background: rgba(244, 67, 54, 0.06);
+    border: 1px solid rgba(244, 67, 54, 0.2);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .problem-box::before {
+    content: 'PROBLEM';
+    position: absolute;
+    top: -9px;
+    left: 16px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--red);
+    background: var(--bg-deep);
+    padding: 0 8px;
+  }
+
+  .problem-box p { font-size: 14px; color: #d09090; }
+
+  /* Context box */
+  .context-box {
+    background: rgba(255, 193, 7, 0.05);
+    border: 1px solid rgba(255, 193, 7, 0.15);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .context-box::before {
+    content: 'WHY THIS MATTERS';
+    position: absolute;
+    top: -9px;
+    left: 16px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--yellow);
+    background: var(--bg-deep);
+    padding: 0 8px;
+  }
+
+  .context-box p { font-size: 13px; color: #c8b878; line-height: 1.8; }
+
+  /* Suggestion cards */
+  .suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .suggestion {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    transition: all 0.2s;
+  }
+
+  .suggestion:hover {
+    border-color: var(--border-hover);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.05);
+  }
+
+  .suggestion strong {
+    color: var(--cyan);
+    font-weight: 600;
+  }
+
+  .suggestion p {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .effort-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .effort-low { background: rgba(76,175,80,0.12); color: var(--green); border: 1px solid rgba(76,175,80,0.25); }
+  .effort-med { background: rgba(255,193,7,0.12); color: var(--yellow); border: 1px solid rgba(255,193,7,0.25); }
+  .effort-high { background: rgba(244,67,54,0.12); color: var(--red); border: 1px solid rgba(244,67,54,0.25); }
+
+  /* Priority table */
+  .priority-table-wrapper {
+    overflow-x: auto;
+    margin-top: 32px;
+  }
+
+  .priority-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+  }
+
+  .priority-table thead th {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    padding: 12px 16px;
+    text-align: left;
+    background: rgba(0,255,255,0.04);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .priority-table tbody td {
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    vertical-align: middle;
+  }
+
+  .priority-table tbody tr:hover td {
+    background: rgba(0,255,255,0.02);
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .nav-sidebar { display: none; }
+    .main { margin-left: 0; padding: 24px 20px 80px; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar Navigation -->
+<nav class="nav-sidebar">
+  <div class="nav-logo">
+    <h1>Space Wars</h1>
+    <div class="sub">3000</div>
+    <div class="tagline">UX Improvement Plan</div>
+  </div>
+
+  <div class="nav-section">
+    <a href="#overview" class="nav-link"><span class="nav-num">&#9670;</span> Overview</a>
+    <a href="#s1" class="nav-link"><span class="nav-num">1</span> Onboarding <span class="priority p0">P0</span></a>
+    <a href="#s2" class="nav-link"><span class="nav-num">2</span> Navigation <span class="priority p0">P0</span></a>
+    <a href="#s3" class="nav-link"><span class="nav-num">3</span> Trading <span class="priority p1">P1</span></a>
+    <a href="#s4" class="nav-link"><span class="nav-num">4</span> Combat <span class="priority p1">P1</span></a>
+    <a href="#s5" class="nav-link"><span class="nav-num">5</span> Ships <span class="priority p1">P1</span></a>
+    <a href="#s6" class="nav-link"><span class="nav-num">6</span> Colonies <span class="priority p2">P2</span></a>
+    <a href="#s7" class="nav-link"><span class="nav-num">7</span> Progression <span class="priority p0">P0</span></a>
+    <a href="#s8" class="nav-link"><span class="nav-num">8</span> Social <span class="priority p2">P2</span></a>
+    <a href="#s9" class="nav-link"><span class="nav-num">9</span> Crafting & Auto <span class="priority p0">P0</span></a>
+    <a href="#s10" class="nav-link"><span class="nav-num">10</span> NPC Dialogue <span class="priority p2">P2</span></a>
+    <a href="#s11" class="nav-link"><span class="nav-num">11</span> Events & Factions <span class="priority p2">P2</span></a>
+    <a href="#s12" class="nav-link"><span class="nav-num">12</span> Quality of Life <span class="priority p1">P1</span></a>
+    <a href="#s13" class="nav-link"><span class="nav-num">13</span> Visual Polish <span class="priority p3">P3</span></a>
+    <a href="#priorities" class="nav-link"><span class="nav-num">&#9733;</span> Priority Table</a>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main">
+
+  <!-- Hero -->
+  <div class="hero" id="overview">
+    <h1>Space Wars <span class="accent">3000</span></h1>
+    <p>A player-perspective UX audit covering every page and system in the game. 13 sections, 30 prioritized improvements, sourced from a full codebase review.</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="number" style="color: var(--red);">4</div>
+      <div class="label">P0 Critical</div>
+    </div>
+    <div class="stat-card">
+      <div class="number" style="color: var(--orange);">7</div>
+      <div class="label">P1 High</div>
+    </div>
+    <div class="stat-card">
+      <div class="number" style="color: var(--cyan);">9</div>
+      <div class="label">P2 Medium</div>
+    </div>
+    <div class="stat-card">
+      <div class="number" style="color: var(--purple);">10</div>
+      <div class="label">P3 Polish</div>
+    </div>
+  </div>
+
+  <!-- Section 1: Onboarding -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <div class="section-title">New Player Onboarding</div>
+      <span class="section-priority p0">P0 CRITICAL</span>
+    </div>
+
+    <div class="problem-box">
+      <p>After registration and faction selection, the player lands on a dashboard with no guidance. No tutorial, no tooltips, no first-mission prompt. The sidebar has 23+ nav items &mdash; overwhelming for a new player.</p>
+    </div>
+
+    <div class="context-box">
+      <p>Industry data shows that games lose 60-80% of new players within the first 5 minutes if there's no guided experience. Your game has deep systems (trading, combat, colonization, crafting, crew, factions), but a brand-new player sees all 23 menu items at once with zero indication of where to start. The "Explore. Trade. Conquer." tagline on the login screen is the only guidance they ever get. Every successful MMO gates complexity behind progression &mdash; World of Warcraft didn't show you raids on day one.</p>
+    </div>
+
+    <div class="suggestions">
+      <div class="suggestion">
+        <p><strong>First-login tutorial flow</strong> &mdash; A short guided sequence: "Check your ship &rarr; Navigate to a port &rarr; Make your first trade &rarr; Scan a planet." Track completion via a <code>tutorial_step</code> field on the User model. Each step highlights the relevant sidebar item and shows a brief tooltip explaining the page.</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>"Getting Started" dashboard card</strong> &mdash; For new players (level 1), show a checklist card at the top of the dashboard with 3-4 items linking to their first actions. Disappears once completed or dismissed.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Progressive sidebar disclosure</strong> &mdash; Hide Automation, Crafting, Corporations, Outposts, Events, and Wiki until the player reaches the relevant level or tech prerequisite. Show a locked "More Features" section with unlock hints. This cuts the initial nav from 23 to ~12 items.</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Contextual empty states</strong> &mdash; When a player visits Trading with no port nearby, the current "No trading port in this sector" message is decent, but add: "Nearest port is in Sector X (2 jumps away)" with a link to the map.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Navigation -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <div class="section-title">Navigation & Spatial Awareness</div>
+      <span class="section-priority p0">P0 CRITICAL</span>
+    </div>
+
+    <div class="problem-box">
+      <p>Galaxy map, system view, and sector map are separate full-page views with no persistent spatial context. When a player switches to trading, combat, or colony pages, they lose all sense of where they are in the universe.</p>
+    </div>
+
+    <div class="context-box">
+      <p>Spatial awareness is the backbone of any exploration game. Right now, the sidebar shows the player's credits and faction, but not their location or fuel. A player on the Trading page has no idea what sector they're in without navigating away. Additionally, the backend defines 5 types of space phenomena (ion storms, nebulae, asteroid fields, solar flares, gravity wells) with real gameplay effects like shield reduction and flee prevention &mdash; but none of them are visible anywhere in the UI. Players are being penalized by invisible hazards they can't see or plan around.</p>
+    </div>
+
+    <div class="suggestions">
+      <div class="suggestion">
+        <p><strong>Persistent location bar</strong> &mdash; At the top of every non-map page, show: <code>Sector: Alpha Centauri | Port: Trading Hub | Fuel: 72/100</code>. Always visible, always current.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Mini-map widget</strong> &mdash; Collapsible bottom-left corner widget showing the immediate sector neighborhood with adjacent sectors clickable for quick travel.</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>System View interaction hints</strong> &mdash; Show visual indicators for interactable entities (ports = dock icon, planets = scan icon, NPCs = hail/attack). Currently players must click each entity to discover what actions are available.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Space phenomena on maps</strong> &mdash; Render ion storms, nebulae, asteroid fields, solar flares, and gravity wells as colored overlays or sector badges with tooltip descriptions. The backend has full definitions for all 5 types, but the frontend renders nothing.</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Planet Orbit View discoverability</strong> &mdash; The immersive planet view (<code>/planet/:id</code>) is only reachable by double-clicking a planet on the System View canvas. Add "View Planet" buttons on planet scan results and colony cards. The only way to navigate back is the Escape key, which is undiscoverable &mdash; add a visible back button.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Trading -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <div class="section-title">Trading UX</div>
+      <span class="section-priority p1">P1 HIGH</span>
+    </div>
+
+    <div class="problem-box">
+      <p>The trading table works but lacks decision-support information. Players have no way to know where to sell at a profit without manually visiting ports and mentally comparing prices.</p>
+    </div>
+
+    <div class="context-box">
+      <p>Trading is the primary money-making loop for new players. The game has 32 commodities across 6 categories, 8 port types with supply/demand dynamics, and a dynamic pricing system &mdash; but the UI presents this as a flat table of numbers. The player has to do all the economic reasoning in their head. The Market Data page has price history charts and cross-port comparisons, but there's no connection between "I see prices here" and "I should buy/sell there." Also, commodity volume (how much cargo space each unit takes) is defined in the backend config but never shown to the player &mdash; so a player might buy 100 units of Livestock (volume: 5) thinking it'll fit in 100 cargo, when it actually needs 500.</p>
+    </div>
+
+    <div class="suggestions">
+      <div class="suggestion">
+        <p><strong>Profit/loss indicators</strong> &mdash; Per commodity: "Bought avg: 50 cr, sell here: 72 cr" with green/red coloring.</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>"Best Trades" panel</strong> &mdash; Show top 3 profitable buy&rarr;sell opportunities from the current port based on price data from previously visited ports.</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Separate "Buy Max" / "Sell All" buttons</strong> &mdash; The current single Max button uses a heuristic: if you own the commodity it sets max sell; if you don't, it sets max buy. Confusing when you own some but want to buy more.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Show commodity volume</strong> &mdash; Large volume items fill cargo faster. Livestock takes 5x the space of Electronics. This is invisible to the player &mdash; it's defined in the backend config but never displayed.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Route planner</strong> &mdash; On the Market Data page: "Buy X at Port A, sell at Port B, estimated profit: Z credits" based on explored ports.</p>
+        <span class="effort-tag effort-high">High effort</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Combat -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <div class="section-title">Combat Feedback & Engagement</div>
+      <span class="section-priority p1">P1 HIGH</span>
+    </div>
+
+    <div class="problem-box">
+      <p>Auto-resolve combat shows round-by-round text with fixed 1-second delays &mdash; the player just waits. Real-time socket combat exists but offers limited player agency. Post-combat feedback shows only credits looted.</p>
+    </div>
+
+    <div class="context-box">
+      <p>Combat is one of the three core pillars (trade, fight, explore). The backend combat system is surprisingly deep: critical hits, shield penetration, component degradation, flee mechanics based on speed differential, and an XP system tied to damage dealt. But almost none of this richness surfaces in the UI. After a fight, the player sees "Loot: 150 Credits" and that's it &mdash; no XP earned, no component damage report, no notification that their Plasma Cannon degraded 2%. The game also has a real-time combat mode via WebSocket with a CombatHUD component, which is a solid foundation that could be enhanced.</p>
+    </div>
+
+    <div class="suggestions">
+      <div class="suggestion">
+        <p><strong>Speed control for auto-resolve</strong> &mdash; Add 1x, 2x, 4x, and "Skip to Result" options so players can watch details or skip ahead.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Visual damage indicators</strong> &mdash; Animate hull/shield bars down with screen shake or flash on critical hits.</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Detailed loot breakdown</strong> &mdash; After combat: credits earned, XP gained, items dropped, component damage taken. Currently only credits are shown.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Pre-engagement threat assessment</strong> &mdash; "Enemy estimated power: HIGH. Win probability: ~65%. Recommended: upgrade shields." The combat service already has the math for this.</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Ships -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <div class="section-title">Ship Management & Customization</div>
+      <span class="section-priority p1">P1 HIGH</span>
+    </div>
+
+    <div class="problem-box">
+      <p>Ship management is fragmented across 4 separate pages (Ships, Shipyard, Customize, Engineering) with no cross-linking. The Ship Designer has a broken template feature. The Ship Customizer has no visual preview. Fleet creation uses hidden gestures.</p>
+    </div>
+
+    <div class="context-box">
+      <p>The ship is the player's avatar in this game &mdash; it's the thing they identify with most. Currently they need to visit 4 different pages to understand their ship's full state. The Shipyard's "Design Templates" feature lets you save and delete templates but has no "Load" or "Apply" button &mdash; so saved templates are permanently useless display items. The Ship Customizer lets you pick hull colors, skins, decals, and engine trails, but the "Preview" is just a list of hex codes &mdash; no visual rendering at all. Fleet creation requires Shift+drag on the galaxy map canvas, documented only in 10px gray text at the bottom of the Ship panel.</p>
+    </div>
+
+    <div class="suggestions">
+      <div class="suggestion">
+        <p><strong>Quick-action buttons on Ship Status</strong> &mdash; "Repair Hull" &rarr; Engineering, "Upgrade Components" &rarr; Shipyard, "Customize" &rarr; Customizer.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Component condition warnings</strong> &mdash; Show "3 components need repair" on the Ship Status page. Currently requires navigating to Engineering to discover degradation.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Fix Ship Design Templates</strong> &mdash; Add a "Load/Apply Template" button. Currently templates can only be saved and deleted &mdash; the list is read-only with no way to apply a design.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Ship Customizer visual preview</strong> &mdash; Replace the hex-code text summary with a rendered ship silhouette or 3D preview that updates as the player changes colors and options.</p>
+        <span class="effort-tag effort-high">High effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Fleet discoverability</strong> &mdash; Add an explicit "Create Fleet" button on the Ship panel. Show fleet controls prominently when selected on the map. Currently hidden behind Shift+drag gesture.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Ship comparison in Shipyard</strong> &mdash; When browsing components, show before/after stat comparison (damage +5, accuracy -3).</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>"Buy New Ship" storefront</strong> &mdash; No visible UI exists for purchasing additional ships.</p>
+        <span class="effort-tag effort-high">High effort</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Colonies -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <div class="section-title">Colony Management</div>
+      <span class="section-priority p2">P2 MEDIUM</span>
+    </div>
+
+    <div class="problem-box">
+      <p>Colonies have deep systems (15 building types with production chains, 6 wonders, raids, power grids, workforce) but the UI presents them as a flat list of cards. Players can't see production bottlenecks, power balance, or workforce allocation.</p>
+    </div>
+
+    <div class="context-box">
+      <p>The colony system is probably the deepest feature in the game. Buildings have tiered upgrades (Surface Mine &rarr; Deep Core Drill &rarr; Quantum Extractor), input/output production chains (Refinery: 10 Ore &rarr; 8 Refined Metals), power generation and consumption, workforce requirements, planet-type bonuses, and maintenance costs. On top of that, there are 6 Wonders with multi-phase construction. But the UI doesn't expose most of this complexity &mdash; there's no way to see if your colony is power-starved or labor-short without doing the math yourself from individual building stats.</p>
+    </div>
+
+    <div class="suggestions">
+      <div class="suggestion">
+        <p><strong>Production overview</strong> &mdash; Per colony show net resource flow: "Producing: 20 Ore, 25 Water. Consuming: 10 Ore, 5 Water. Net: +10 Ore, +20 Water."</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Power & workforce indicators</strong> &mdash; Summary bars showing "Power: 250/300 MW" and "Workforce: 400/500 used." Buildings consume both but there's no colony-level dashboard.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Building tech-tree visualization</strong> &mdash; Show which buildings unlock which, with prerequisites, instead of trial-and-error discovery.</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>"Collect All" button</strong> &mdash; For multi-colony players. Currently requires individual collection per colony.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Wonder construction UX</strong> &mdash; 6 wonder types with multi-phase construction need: phase progress visualization, cost for next phase, cumulative bonus being built toward.</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Raid alerts</strong> &mdash; Prominent notification when a colony is under raid, with quick-link to respond.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 7: Progression -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-num">07</div>
+      <div class="section-title">Progression Visibility</div>
+      <span class="section-priority p0">P0 CRITICAL</span>
+    </div>
+
+    <div class="problem-box">
+      <p>Level, XP, and skill points are only visible on the dedicated Progression page. There is zero ambient sense of growth, no notifications for level-ups, and no achievement system.</p>
+    </div>
+
+    <div class="context-box">
+      <p>The game has a 20-level progression system with 8 skills, a tech tree with 7 technologies, and ship/component unlocks tied to levels. But XP is earned silently &mdash; after combat, trading, or exploration, the player gets no feedback that they gained XP. They level up silently. They earn skill points silently. This kills the dopamine loop that keeps players engaged. Every successful game makes progression feel constant: "+50 XP" floating text, level-up fanfares, "NEW UNLOCK" popups. Space Wars has all the systems but none of the feedback.</p>
+    </div>
+
+    <div class="suggestions">
+      <div class="suggestion">
+        <p><strong>XP bar in sidebar/top bar</strong> &mdash; Always visible, showing progress toward next level. This single change makes every action feel like it matters.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Toast notifications</strong> &mdash; For level ups, skill points earned, tech research completed, mission rewards, artifact discovery. Currently all these events are completely silent.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Level-up "What's New" popup</strong> &mdash; "You've unlocked: Corvette ship class. You earned: 1 skill point." Makes leveling feel rewarding.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Achievement system</strong> &mdash; "First Kill," "Traded 10,000 credits," "Colonized a planet," "Explored 50 sectors." Trophy case on Dashboard.</p>
+        <span class="effort-tag effort-high">High effort</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 8: Social -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-num">08</div>
+      <div class="section-title">Social & Multiplayer</div>
+      <span class="section-priority p2">P2 MEDIUM</span>
+    </div>
+
+    <div class="problem-box">
+      <p>Corporations, Messaging, Chat, Factions, and PvP all exist but feel disconnected. No player list, no way to see who's online, chat is a hidden floating button, and messaging requires typing exact usernames.</p>
+    </div>
+
+    <div class="context-box">
+      <p>For an MMO, social presence is what keeps players logging in. The game has real-time WebSocket chat, a full inbox/outbox messaging system, corporations with treasury and agreements, factions with wars, and PvP combat. But the "M" in MMO is invisible: you can't see other players in your sector, you can't tell if anyone is online, and the chat button blends into the background. The messaging compose modal requires typing the exact username with no autocomplete &mdash; if you misspell "xX_StarLord_Xx" you get an error. The corporation agreement proposal requires typing a raw Corporation ID number.</p>
+    </div>
+
+    <div class="suggestions">
+      <div class="suggestion">
+        <p><strong>"Players in Sector" panel</strong> &mdash; On System View, show other players' ships, their faction, PvP status. Creates presence and interaction opportunities.</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Visible chat</strong> &mdash; Move from hidden bottom-right button to a sidebar tab or persistent bottom bar.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Messaging: autocomplete + reply</strong> &mdash; Add player name autocomplete in compose. Add "Reply" button on received messages (currently must manually compose and retype the sender's name).</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Corporation agreement picker</strong> &mdash; Replace raw Corporation ID input with a searchable picker from the leaderboard.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Dashboard leaderboards</strong> &mdash; Top traders, combatants, richest players, biggest corporations.</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 9: Crafting & Automation -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-num">09</div>
+      <div class="section-title">Crafting & Automation UX</div>
+      <span class="section-priority p0">P0 CRITICAL</span>
+    </div>
+
+    <div class="problem-box">
+      <p>Crafting and Automation pages require players to know internal game IDs and provide minimal feedback. Trade route creation needs raw Sector IDs typed manually. Crafting doesn't show if you have the ingredients.</p>
+    </div>
+
+    <div class="context-box">
+      <p>This is the single worst UX pattern in the entire application: <strong>raw numeric ID inputs</strong>. At least 5 different pages require the player to type a raw Sector ID, Corporation ID, or Port ID into a text field with no autocomplete, no search, and no map integration. The Automation trade route builder asks you to type "Sector 847" as a waypoint &mdash; how would a player even know that number? The mining run form asks for "Return Port Sector ID." The Outpost builder asks for a Sector ID. This pattern exists because the forms were built to match the API contract rather than the player's mental model. Players think in terms of "Alpha Centauri Trading Hub," not "sector_id: 847."</p>
+    </div>
+
+    <div class="suggestions">
+      <div class="suggestion">
+        <p><strong>Crafting: ingredient availability</strong> &mdash; Show green/red indicators per ingredient based on the active ship's cargo. Currently lists ingredients but doesn't say if the player can actually craft.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Human-readable crafting time</strong> &mdash; Display "5 minutes" instead of raw seconds. Show ETA on in-progress jobs.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Replace all raw ID inputs with pickers</strong> &mdash; Automation waypoints: searchable dropdown of explored sectors or click-on-map. Mining return port: dropdown of sectors with ports. Outpost building: sector picker or right-click-on-map "Build Outpost Here."</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 10: NPC Dialogue -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-num">10</div>
+      <div class="section-title">NPC Interaction & Dialogue</div>
+      <span class="section-priority p2">P2 MEDIUM</span>
+    </div>
+
+    <div class="problem-box">
+      <p>The game has an AI-powered NPC dialogue system with voice support, personality traits, and scripted conversations &mdash; a major differentiating feature. But entry points are not obvious and errors fail silently.</p>
+    </div>
+
+    <div class="context-box">
+      <p>This is one of the most unique features in the game. The backend has a full dialogue system with AI integration, personality traits (greedy, honorable, cunning, etc.), speech styles (pirate slang, military, cryptic), voice profiles, and even a voice input endpoint. NPCs can hail the player via WebSocket. But in the UI, hail notifications are easy to miss, there's no way to review past conversations, and if the AI service is down the dialogue just silently fails. NPC personality traits that the backend carefully generates are never shown to the player.</p>
+    </div>
+
+    <div class="suggestions">
+      <div class="suggestion">
+        <p><strong>Prominent hail notifications</strong> &mdash; Add sound cue and pulsing indicator. Currently a small overlay easily missed.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>NPC action indicators on System View</strong> &mdash; Color-code NPCs by hostility (friendly/hostile/neutral) and show available actions (Hail, Attack, Trade) without requiring a click.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Dialogue history</strong> &mdash; Players can't review past NPC conversations. Trade tips and quest hints are lost when the chat closes.</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Show NPC personality</strong> &mdash; Display traits like "greedy," "honorable" in the hail notification or chat header.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Graceful AI failure handling</strong> &mdash; If the dialogue AI service is unavailable, show a clear message instead of silently failing.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 11: Events & Factions -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-num">11</div>
+      <div class="section-title">Community Events & Factions</div>
+      <span class="section-priority p2">P2 MEDIUM</span>
+    </div>
+
+    <div class="problem-box">
+      <p>Events page takes raw contribution amounts with no guidance. Faction page shows standings and wars but offers no actionable gameplay.</p>
+    </div>
+
+    <div class="context-box">
+      <p>Community events are a proven engagement mechanic (see: Destiny 2 community challenges, Elite Dangerous CGs). Your implementation has the foundation &mdash; progress bars, leaderboards, contribution tracking &mdash; but lacks the "pull" that makes players want to participate. The contribution input is just a blank number field with no context about what a reasonable amount is or what exactly is being contributed. The Faction page shows your standings and active wars, but there's nothing you can do about it from that page. It's read-only information with no "call to action."</p>
+    </div>
+
+    <div class="suggestions">
+      <div class="suggestion">
+        <p><strong>Event contribution guidance</strong> &mdash; Show player's credits, suggest amounts (10%, 25%, 50%), clarify what's being contributed.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Personal contribution rank on event card</strong> &mdash; Show your own rank and amount on the main card, not hidden behind the leaderboard modal.</p>
+        <span class="effort-tag effort-low">Low effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>Faction actionable gameplay</strong> &mdash; Link to faction-specific missions, show how recent actions changed standing, suggest actions to improve reputation.</p>
+        <span class="effort-tag effort-high">High effort</span>
+      </div>
+      <div class="suggestion">
+        <p><strong>War contribution</strong> &mdash; Show what the player can do to help their faction's war effort.</p>
+        <span class="effort-tag effort-med">Medium effort</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 12: QoL -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-num">12</div>
+      <div class="section-title">Quality of Life</div>
+      <span class="section-priority p1">P1 HIGH</span>
+    </div>
+
+    <div class="problem-box">
+      <p>Dozens of small friction points that collectively degrade the experience: inconsistent error handling, no keyboard shortcuts, no sound, no connection indicator, broken mobile, and more.</p>
+    </div>
+
+    <div class="context-box">
+      <p>Death by a thousand cuts. Each issue is minor, but together they make the game feel unfinished. The most egregious: error handling is different on every page. Some pages use auto-dismissing toasts (5 seconds), some use persistent error banners, and the PvP toggle in ShipPanel uses a raw browser <code>alert()</code> dialog. The WebSocket connection (critical for real-time combat, chat, and NPC hails) has no visible status indicator &mdash; if it disconnects, the player has no idea why combat stopped working. The sidebar is a fixed 264px with no collapse, making the game unusable on any screen under ~1200px wide.</p>
+    </div>
+
+    <div class="suggestions">
+      <div class="suggestion"><p><strong>Consistent error/notification system</strong> &mdash; Standardize on a single toast/notification component with severity levels. Replace all <code>alert()</code> calls.</p><span class="effort-tag effort-med">Medium effort</span></div>
+      <div class="suggestion"><p><strong>Socket connection indicator</strong> &mdash; Small icon in sidebar showing real-time connection status. Critical for combat, chat, NPC hails.</p><span class="effort-tag effort-low">Low effort</span></div>
+      <div class="suggestion"><p><strong>Auto-refuel option</strong> &mdash; "Refuel to max when docking" toggle.</p><span class="effort-tag effort-low">Low effort</span></div>
+      <div class="suggestion"><p><strong>Keyboard shortcuts</strong> &mdash; M=map, T=trading, S=ship, Space=confirm.</p><span class="effort-tag effort-low">Low effort</span></div>
+      <div class="suggestion"><p><strong>Sound effects</strong> &mdash; Zero audio feedback currently. Even basic UI sounds dramatically improve immersion.</p><span class="effort-tag effort-med">Medium effort</span></div>
+      <div class="suggestion"><p><strong>Responsive/mobile layout</strong> &mdash; Collapsible sidebar with hamburger menu.</p><span class="effort-tag effort-high">High effort</span></div>
+      <div class="suggestion"><p><strong>Session persistence</strong> &mdash; Save last page in localStorage so refresh returns to the same place.</p><span class="effort-tag effort-low">Low effort</span></div>
+      <div class="suggestion"><p><strong>Bulk actions</strong> &mdash; Sell all cargo, dismiss unassigned crew, collect all colony resources.</p><span class="effort-tag effort-med">Medium effort</span></div>
+      <div class="suggestion"><p><strong>Basic accessibility</strong> &mdash; ARIA labels, keyboard focus management, skip-navigation links.</p><span class="effort-tag effort-med">Medium effort</span></div>
+    </div>
+  </div>
+
+  <!-- Section 13: Visual Polish -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-num">13</div>
+      <div class="section-title">Visual Polish & Immersion</div>
+      <span class="section-priority p3">P3 POLISH</span>
+    </div>
+
+    <div class="problem-box">
+      <p>The dark space theme is solid but static. Every player sees the same cyan accent regardless of faction. All ships use the same Rocket icon. No page transitions, no ambient life.</p>
+    </div>
+
+    <div class="context-box">
+      <p>The visual design is already above average for a project at this stage &mdash; the holographic panel styles, neon accents, and Orbitron headings create a cohesive space aesthetic. These suggestions are about going from "good" to "immersive." The biggest wins here are low-effort: faction theming just means swapping CSS variables, and ship icons are just SVG swaps. The in-game wiki is surprisingly well-built with markdown articles, search, and nice styling &mdash; but no other page in the game ever links to it.</p>
+    </div>
+
+    <div class="suggestions">
+      <div class="suggestion"><p><strong>Faction theming</strong> &mdash; Tint accent colors per faction: blue for Terran, red for Zythian, purple for Automaton. Just swap CSS variables based on <code>user.faction</code>.</p><span class="effort-tag effort-low">Low effort</span></div>
+      <div class="suggestion"><p><strong>Ship silhouette icons</strong> &mdash; Replace generic Rocket icon with per-ship-type SVGs. Even simple outlines add character.</p><span class="effort-tag effort-low">Low effort</span></div>
+      <div class="suggestion"><p><strong>Dashboard ambient animations</strong> &mdash; Subtle star parallax or animated ship graphic.</p><span class="effort-tag effort-med">Medium effort</span></div>
+      <div class="suggestion"><p><strong>Event/notification ticker</strong> &mdash; Scrolling feed: "Pirate activity in Sector 47," "Trade prices shifted at Mining Outpost 12."</p><span class="effort-tag effort-med">Medium effort</span></div>
+      <div class="suggestion"><p><strong>Wiki cross-linking</strong> &mdash; Add "Learn more" links and tooltips from game pages to wiki articles. The wiki is well-built but invisible.</p><span class="effort-tag effort-low">Low effort</span></div>
+      <div class="suggestion"><p><strong>Page transition animations</strong> &mdash; Quick warp/fade effect between major sections.</p><span class="effort-tag effort-low">Low effort</span></div>
+    </div>
+  </div>
+
+  <!-- Priority Table -->
+  <div class="section" id="priorities">
+    <div class="section-header">
+      <div class="section-num">&#9733;</div>
+      <div class="section-title">Full Priority Ranking</div>
+    </div>
+
+    <div class="priority-table-wrapper">
+      <table class="priority-table">
+        <thead>
+          <tr>
+            <th>Priority</th>
+            <th>Item</th>
+            <th>Impact</th>
+            <th>Effort</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="priority p0">P0</span></td><td>New player onboarding flow</td><td>Players will bounce without guidance</td><td><span class="effort-tag effort-med">Med</span></td></tr>
+          <tr><td><span class="priority p0">P0</span></td><td>Persistent location/status bar</td><td>Core spatial awareness</td><td><span class="effort-tag effort-low">Low</span></td></tr>
+          <tr><td><span class="priority p0">P0</span></td><td>Toast notifications for XP/level/rewards</td><td>Makes progression feel alive</td><td><span class="effort-tag effort-low">Low</span></td></tr>
+          <tr><td><span class="priority p0">P0</span></td><td>Replace all raw ID inputs with pickers</td><td>Fixes worst UX pattern in the app</td><td><span class="effort-tag effort-med">Med</span></td></tr>
+          <tr><td><span class="priority p1">P1</span></td><td>Trading profit indicators &amp; best trades</td><td>Core gameplay loop improvement</td><td><span class="effort-tag effort-med">Med</span></td></tr>
+          <tr><td><span class="priority p1">P1</span></td><td>Combat speed control &amp; loot breakdown</td><td>Combat satisfaction</td><td><span class="effort-tag effort-low">Low</span></td></tr>
+          <tr><td><span class="priority p1">P1</span></td><td>Ship page quick-actions &amp; cross-linking</td><td>Reduces navigation friction</td><td><span class="effort-tag effort-low">Low</span></td></tr>
+          <tr><td><span class="priority p1">P1</span></td><td>Progressive sidebar disclosure</td><td>Reduces overwhelm</td><td><span class="effort-tag effort-med">Med</span></td></tr>
+          <tr><td><span class="priority p1">P1</span></td><td>Consistent error handling</td><td>Professionalism, trust</td><td><span class="effort-tag effort-med">Med</span></td></tr>
+          <tr><td><span class="priority p1">P1</span></td><td>Space phenomena visibility</td><td>Invisible hazards are unfair</td><td><span class="effort-tag effort-med">Med</span></td></tr>
+          <tr><td><span class="priority p1">P1</span></td><td>Fix Ship Design Templates (load/apply)</td><td>Broken feature</td><td><span class="effort-tag effort-low">Low</span></td></tr>
+          <tr><td><span class="priority p2">P2</span></td><td>Colony production overview + power/workforce</td><td>Helps colony management</td><td><span class="effort-tag effort-med">Med</span></td></tr>
+          <tr><td><span class="priority p2">P2</span></td><td>Crafting ingredient availability indicators</td><td>Reduces trial-and-error</td><td><span class="effort-tag effort-low">Low</span></td></tr>
+          <tr><td><span class="priority p2">P2</span></td><td>Achievement/milestone system</td><td>Long-term engagement</td><td><span class="effort-tag effort-high">High</span></td></tr>
+          <tr><td><span class="priority p2">P2</span></td><td>Sound effects</td><td>Immersion</td><td><span class="effort-tag effort-med">Med</span></td></tr>
+          <tr><td><span class="priority p2">P2</span></td><td>Players in sector / social presence</td><td>Multiplayer feel</td><td><span class="effort-tag effort-med">Med</span></td></tr>
+          <tr><td><span class="priority p2">P2</span></td><td>NPC dialogue prominence &amp; history</td><td>Showcases unique feature</td><td><span class="effort-tag effort-med">Med</span></td></tr>
+          <tr><td><span class="priority p2">P2</span></td><td>Messaging reply + autocomplete</td><td>Social friction removal</td><td><span class="effort-tag effort-low">Low</span></td></tr>
+          <tr><td><span class="priority p2">P2</span></td><td>Fleet discoverability</td><td>Hidden feature exposure</td><td><span class="effort-tag effort-low">Low</span></td></tr>
+          <tr><td><span class="priority p2">P2</span></td><td>Socket connection indicator</td><td>Prevents silent failures</td><td><span class="effort-tag effort-low">Low</span></td></tr>
+          <tr><td><span class="priority p3">P3</span></td><td>Faction-colored UI theming</td><td>Visual identity</td><td><span class="effort-tag effort-low">Low</span></td></tr>
+          <tr><td><span class="priority p3">P3</span></td><td>Ship silhouette icons</td><td>Visual variety</td><td><span class="effort-tag effort-low">Low</span></td></tr>
+          <tr><td><span class="priority p3">P3</span></td><td>Ship Customizer live preview</td><td>Makes customization meaningful</td><td><span class="effort-tag effort-high">High</span></td></tr>
+          <tr><td><span class="priority p3">P3</span></td><td>Mobile responsive layout</td><td>Accessibility</td><td><span class="effort-tag effort-high">High</span></td></tr>
+          <tr><td><span class="priority p3">P3</span></td><td>Keyboard shortcuts</td><td>Power user QoL</td><td><span class="effort-tag effort-low">Low</span></td></tr>
+          <tr><td><span class="priority p3">P3</span></td><td>Route planner / trade advisor</td><td>Advanced trading tool</td><td><span class="effort-tag effort-high">High</span></td></tr>
+          <tr><td><span class="priority p3">P3</span></td><td>Wiki cross-linking</td><td>Knowledge discoverability</td><td><span class="effort-tag effort-low">Low</span></td></tr>
+          <tr><td><span class="priority p3">P3</span></td><td>Basic accessibility (ARIA, focus)</td><td>Compliance, inclusion</td><td><span class="effort-tag effort-med">Med</span></td></tr>
+          <tr><td><span class="priority p3">P3</span></td><td>Wonder construction UX</td><td>Colony endgame depth</td><td><span class="effort-tag effort-med">Med</span></td></tr>
+          <tr><td><span class="priority p3">P3</span></td><td>Faction actionable gameplay</td><td>Faction engagement</td><td><span class="effort-tag effort-high">High</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

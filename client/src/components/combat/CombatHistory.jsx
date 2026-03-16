@@ -12,6 +12,7 @@ const CombatHistory = () => {
     const [detailLog, setDetailLog] = useState(null);
     const [detailLoading, setDetailLoading] = useState(false);
     const [logsCache, setLogsCache] = useState({});
+    const [visibleCount, setVisibleCount] = useState(10);
 
     useEffect(() => {
         fetchHistory();
@@ -103,7 +104,7 @@ const CombatHistory = () => {
                 </div>
             ) : (
                 <div className="space-y-4">
-                    {history.map((record) => {
+                    {history.slice(0, visibleCount).map((record) => {
                         const result = mapResult(record.winner_type);
                         const opponentName = record.defenderNpc?.name || record.attackerNpc?.name || "Unknown Hostile";
                         return (
@@ -190,6 +191,14 @@ const CombatHistory = () => {
                         </div>
                     );
                     })}
+                    {visibleCount < history.length && (
+                        <button
+                            onClick={() => setVisibleCount(prev => prev + 10)}
+                            className="btn btn-secondary w-full py-2 text-sm"
+                        >
+                            Load More ({history.length - visibleCount} remaining)
+                        </button>
+                    )}
                 </div>
             )}
         </div>

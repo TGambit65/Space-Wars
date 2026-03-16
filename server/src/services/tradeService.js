@@ -1,5 +1,6 @@
 const { Ship, Port, Commodity, PortCommodity, ShipCargo, Transaction, User, sequelize } = require('../models');
 const pricingService = require('./pricingService');
+const economyAbuseService = require('./economyAbuseService');
 
 /**
  * Get ship's current cargo
@@ -58,7 +59,16 @@ const calculateUsedCargo = async (shipId, transaction = null) => {
 /**
  * Buy commodities from a port (player purchases from port)
  */
-const buyCommodity = async (userId, shipId, portId, commodityId, quantity) => {
+const buyCommodity = async (userId, shipId, portId, commodityId, quantity, options = {}) => {
+  const replay = await economyAbuseService.getReplayResult({
+    userId,
+    idempotencyKey: options.idempotencyKey,
+    transferType: 'trade_buy'
+  });
+  if (replay) {
+    return replay;
+  }
+
   const t = await sequelize.transaction();
 
   try {
@@ -159,7 +169,27 @@ const buyCommodity = async (userId, shipId, portId, commodityId, quantity) => {
       await progressionService.awardXP(userId, tradeXP, 'trade', t);
     } catch (e) { /* XP failure should not block trade */ }
 
+    const resultPayload = { success: true, quantity, unit_price: unitPrice, tax, total, new_balance: user.credits - total };
+
     await t.commit();
+
+    await economyAbuseService.recordTransfer({
+      userId,
+      transferType: 'trade_buy',
+      sourceType: 'user',
+      sourceId: userId,
+      destinationType: 'port',
+      destinationId: portId,
+      creditsAmount: total,
+      commodityId,
+      commodityQuantity: quantity,
+      idempotencyKey: options.idempotencyKey,
+      metadata: {
+        ship_id: shipId,
+        port_id: portId
+      },
+      resultPayload
+    }).catch(() => null);
 
     // Phase 5: Update mission progress (outside transaction)
     try {
@@ -167,7 +197,7 @@ const buyCommodity = async (userId, shipId, portId, commodityId, quantity) => {
       await missionService.updateMissionProgress(userId, 'trade', { type: 'buy', total_value: total });
     } catch (e) { /* Mission progress failure should not block trade */ }
 
-    return { success: true, quantity, unit_price: unitPrice, tax, total, new_balance: user.credits - total };
+    return resultPayload;
   } catch (error) {
     await t.rollback();
     throw error;
@@ -177,7 +207,16 @@ const buyCommodity = async (userId, shipId, portId, commodityId, quantity) => {
 /**
  * Sell commodities to a port (player sells to port)
  */
-const sellCommodity = async (userId, shipId, portId, commodityId, quantity) => {
+const sellCommodity = async (userId, shipId, portId, commodityId, quantity, options = {}) => {
+  const replay = await economyAbuseService.getReplayResult({
+    userId,
+    idempotencyKey: options.idempotencyKey,
+    transferType: 'trade_sell'
+  });
+  if (replay) {
+    return replay;
+  }
+
   const t = await sequelize.transaction();
 
   try {
@@ -244,8 +283,15 @@ const sellCommodity = async (userId, shipId, portId, commodityId, quantity) => {
     );
     const { subtotal, tax, total } = pricingService.calculateSaleRevenue(unitPrice, quantity, port.tax_rate);
 
+    // Apply faction trade bonus to sell revenue
+    let finalTotal = total;
+    try {
+      const factionService = require('./factionService');
+      finalTotal = Math.floor(factionService.applyFactionBonus(total, user.faction, 'trade'));
+    } catch (e) { /* faction bonus failure should not block trade */ }
+
     // Execute trade
-    await user.update({ credits: Number(user.credits) + total }, { transaction: t });
+    await user.update({ credits: Number(user.credits) + finalTotal }, { transaction: t });
 
     // Update port stock (capped at max)
     const newPortQty = Math.min(portCommodity.quantity + quantity, portCommodity.max_quantity);
@@ -272,7 +318,27 @@ const sellCommodity = async (userId, shipId, portId, commodityId, quantity) => {
       await progressionService.awardXP(userId, tradeXP, 'trade', t);
     } catch (e) { /* XP failure should not block trade */ }
 
+    const resultPayload = { success: true, quantity, unit_price: unitPrice, tax, total: finalTotal, new_balance: Number(user.credits) + finalTotal };
+
     await t.commit();
+
+    await economyAbuseService.recordTransfer({
+      userId,
+      transferType: 'trade_sell',
+      sourceType: 'port',
+      sourceId: portId,
+      destinationType: 'user',
+      destinationId: userId,
+      creditsAmount: finalTotal,
+      commodityId,
+      commodityQuantity: quantity,
+      idempotencyKey: options.idempotencyKey,
+      metadata: {
+        ship_id: shipId,
+        port_id: portId
+      },
+      resultPayload
+    }).catch(() => null);
 
     // Phase 5: Update mission progress (outside transaction - needs commodity name)
     try {
@@ -283,7 +349,7 @@ const sellCommodity = async (userId, shipId, portId, commodityId, quantity) => {
       });
     } catch (e) { /* Mission progress failure should not block trade */ }
 
-    return { success: true, quantity, unit_price: unitPrice, tax, total, new_balance: Number(user.credits) + total };
+    return resultPayload;
   } catch (error) {
     await t.rollback();
     throw error;
@@ -370,4 +436,3 @@ const refuelShip = async (userId, shipId, portId, amount = null) => {
 };
 
 module.exports = { getShipCargo, calculateUsedCargo, buyCommodity, sellCommodity, refuelShip };
-

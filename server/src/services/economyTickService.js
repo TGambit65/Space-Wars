@@ -5,37 +5,52 @@ const pricingService = require('./pricingService');
 const config = require('../config');
 
 /**
- * Process one economy tick: production, consumption, and price snapshots
+ * Process one economy tick: production, consumption, and price snapshots.
+ *
+ * PostgreSQL: uses a single batch UPDATE (milliseconds).
+ * SQLite: falls back to row-by-row updates (compatible but slower).
  */
 const processEconomyTick = async () => {
-  const transaction = await sequelize.transaction();
-  try {
-    // Get all port commodities with their commodity data
-    const portCommodities = await PortCommodity.findAll({
-      include: [{ model: Commodity, as: 'commodity' }, { model: Port, as: 'port' }],
-      transaction
-    });
+  const dialect = sequelize.getDialect();
 
-    for (const pc of portCommodities) {
-      const production = pc.production_rate || 0;
-      const consumption = pc.consumption_rate || 0;
-      const delta = production - consumption;
+  if (dialect === 'postgres') {
+    // ── PostgreSQL batch update: single query, no row-by-row loop ──
+    await sequelize.query(`
+      UPDATE port_commodities
+      SET quantity = LEAST(max_quantity, GREATEST(0, quantity + production_rate - consumption_rate))
+      WHERE production_rate != 0 OR consumption_rate != 0
+    `);
+  } else {
+    // ── SQLite: row-by-row inside a transaction ──
+    const transaction = await sequelize.transaction();
+    try {
+      const portCommodities = await PortCommodity.findAll({
+        where: {
+          [Op.or]: [
+            { production_rate: { [Op.ne]: 0 } },
+            { consumption_rate: { [Op.ne]: 0 } }
+          ]
+        },
+        transaction
+      });
 
-      if (delta !== 0) {
-        const newQuantity = Math.max(0, Math.min(pc.max_quantity, pc.quantity + delta));
-        await pc.update({ quantity: newQuantity }, { transaction });
+      for (const pc of portCommodities) {
+        const delta = (pc.production_rate || 0) - (pc.consumption_rate || 0);
+        if (delta !== 0) {
+          const newQuantity = Math.max(0, Math.min(pc.max_quantity, pc.quantity + delta));
+          await pc.update({ quantity: newQuantity }, { transaction });
+        }
       }
+
+      await transaction.commit();
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
     }
-
-    await transaction.commit();
-
-    // Record price snapshots (outside transaction for perf)
-    await recordPriceSnapshot();
-  } catch (err) {
-    await transaction.rollback();
-    console.error('[EconomyTick] Error:', err.message);
-    throw err;
   }
+
+  // Record price snapshots (outside transaction for perf)
+  await recordPriceSnapshot();
 };
 
 /**

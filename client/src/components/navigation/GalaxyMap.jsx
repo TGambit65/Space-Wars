@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Map, AlertTriangle } from 'lucide-react';
+import { Map, AlertTriangle, Route, Home as HomeIcon, Search } from 'lucide-react';
+import { findShortestPath } from '../../utils/pathfinder';
 import useGalaxyData from './hooks/useGalaxyData';
 import GalaxyMapCanvas from './GalaxyMapCanvas';
 import MapHUD from './ui/MapHUD';
@@ -27,15 +28,61 @@ const GalaxyMap = ({ user }) => {
   } = useGalaxyData();
 
   const [selectedSystem, setSelectedSystem] = useState(null);
+  const [routePath, setRoutePath] = useState([]);
   const [moveTarget, setMoveTarget] = useState(null);
   const [moveError, setMoveError] = useState(null);
   const [moveToast, setMoveToast] = useState(null);
   const [showFleetModal, setShowFleetModal] = useState(false);
   const [selectedShipsForFleet, setSelectedShipsForFleet] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [highlightedSystemId, setHighlightedSystemId] = useState(null);
+  const centerOnRef = useRef(null);
+  const highlightTimerRef = useRef(null);
 
   // Refs for selection callback (passed to canvas via useViewport)
   const screenToWorldRef = useRef(null);
   const quadtreeRef = useRef(null);
+
+  // Search results
+  const searchResults = useMemo(() => {
+    if (!searchQuery || searchQuery.length < 2 || !sectorMap) return [];
+    const q = searchQuery.toLowerCase();
+    const results = [];
+    for (const [id, sys] of sectorMap) {
+      if (sys.name && sys.name.toLowerCase().includes(q)) {
+        results.push(sys);
+        if (results.length >= 8) break;
+      }
+    }
+    return results;
+  }, [searchQuery, sectorMap]);
+
+  const handleCenterOnShip = useCallback(() => {
+    if (!centerOnRef.current || !currentSectorId || !sectorMap) return;
+    const sys = sectorMap.get(currentSectorId);
+    if (sys) {
+      centerOnRef.current(sys.x_coord, sys.y_coord, 0.6);
+    }
+  }, [currentSectorId, sectorMap]);
+
+  const handleSearchSelect = useCallback((sys) => {
+    if (!centerOnRef.current) return;
+    centerOnRef.current(sys.x_coord, sys.y_coord, 1.0);
+    setHighlightedSystemId(sys.sector_id);
+    setSearchQuery('');
+    // Clear highlight after 5 seconds (clear any previous timer first)
+    if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    highlightTimerRef.current = setTimeout(() => setHighlightedSystemId(null), 5000);
+  }, []);
+
+  // Cleanup highlight timer on unmount
+  useEffect(() => {
+    return () => { if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current); };
+  }, []);
+
+  const handleCenterReady = useCallback((centerFn) => {
+    centerOnRef.current = centerFn;
+  }, []);
 
   // When clicking a system on the map
   const handleSystemClick = (sectorId) => {
@@ -50,8 +97,10 @@ const GalaxyMap = ({ user }) => {
       // Click adjacent -> movement confirm
       setMoveTarget(system);
     } else {
-      // Click distant -> just show info
+      // Click distant -> show info + compute route
       setSelectedSystem(system);
+      const path = findShortestPath(adjacencyMap, currentSectorId, sectorId);
+      setRoutePath(path);
     }
   };
 
@@ -167,6 +216,9 @@ const GalaxyMap = ({ user }) => {
         selectedSystemId={selectedSystem?.sector_id}
         userShipsBySector={userShipsBySector}
         onSelectionComplete={handleSelectionComplete}
+        routePath={routePath}
+        onCenterReady={handleCenterReady}
+        highlightedSystemId={highlightedSystemId}
       />
 
       {/* Map Controls (zoom buttons, legend) */}
@@ -177,7 +229,7 @@ const GalaxyMap = ({ user }) => {
         currentShip={currentShip}
         selectedSystem={selectedSystem}
         systemDetail={systemDetail}
-        onClose={() => setSelectedSystem(null)}
+        onClose={() => { setSelectedSystem(null); setRoutePath([]); }}
         onEnterCombat={handleEnterCombat}
         isCurrentSector={selectedSystem?.sector_id === currentSectorId}
       />
@@ -210,21 +262,50 @@ const GalaxyMap = ({ user }) => {
       )}
 
       {/* Current location indicator */}
-      <div className="absolute top-4 left-4 bg-space-900/90 border border-space-700 rounded-lg px-4 py-2 backdrop-blur-sm">
+      <div className="absolute top-4 left-4 bg-space-900/90 border border-space-700 rounded-lg px-4 py-2 backdrop-blur-sm max-w-xs">
         <div className="flex items-center gap-2">
           <Map className="w-4 h-4 text-accent-cyan" />
           <span className="text-sm text-gray-400">Location:</span>
           <span className="text-sm text-accent-cyan font-bold">
             {currentShip?.currentSector?.name || sectorMap.get(currentSectorId)?.name || 'Unknown'}
           </span>
+          <button onClick={handleCenterOnShip} className="ml-auto text-accent-cyan hover:text-white transition-colors" title="Center on ship">
+            <HomeIcon className="w-4 h-4" />
+          </button>
         </div>
         {currentShip && (
           <div className="text-xs text-gray-500 mt-1">
             Ship: {currentShip.name} | Explored: {mapData?.discovered_systems || 0}/{mapData?.total_systems || 0}
           </div>
         )}
+        {routePath.length > 1 && (
+          <div className="flex items-center gap-1.5 text-xs text-accent-cyan mt-1">
+            <Route className="w-3 h-3" />
+            <span>Route: {routePath.length - 1} jumps to {sectorMap.get(routePath[routePath.length - 1])?.name || 'destination'}</span>
+          </div>
+        )}
+        <div className="relative mt-2">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
+          <input
+            type="text"
+            placeholder="Search systems..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-space-800 border border-space-700 rounded px-2 py-1 pl-6 text-xs text-white placeholder-gray-600 focus:border-accent-cyan focus:outline-none"
+          />
+        </div>
+        {searchResults.length > 0 && (
+          <div className="mt-1 max-h-32 overflow-y-auto">
+            {searchResults.map(s => (
+              <button key={s.sector_id} onClick={() => handleSearchSelect(s)}
+                className="w-full text-left px-2 py-1 text-xs text-gray-300 hover:text-white hover:bg-space-700/50 rounded transition-colors truncate">
+                {s.name} <span className="text-gray-600">({s.type})</span>
+              </button>
+            ))}
+          </div>
+        )}
         <div className="text-xs text-gray-600 mt-0.5">
-          Shift+drag to select ships
+          Shift+drag to select ships · Press ? for shortcuts
         </div>
       </div>
     </div>

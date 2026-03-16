@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hull Selection Guide - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+    <script src="../../js/wiki-ship-calculator.js"></script>
+    <script src="../../js/wiki-smart-navigation.js"></script>
+    <script src="../../js/wiki-interactive-features.js"></script>
+    <script src="../../js/wiki-metadata.js"></script>
+    <script src="../../js/wiki-fun-facts.js"></script>
+</head>
+<body class="doc-container ship-design-page">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">← Ship Design</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="hull-selection.html" class="doc-nav-link active">Hull Selection</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="component-installation.html" class="doc-nav-link">Components</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="stats-calculation.html" class="doc-nav-link">Stats</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item">
+                <a href="index.html" class="doc-breadcrumb-link">Ship Design</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Hull Selection</div>
+        </nav>
+        
+        <h1 class="doc-h1 holo-text">🚀 Choose Your Epic Space Ride!</h1>
+        
+        <div class="doc-alert info">
+            <strong>Ship Building Time!</strong> Picking your hull is like choosing your superhero costume - 
+            it decides what awesome powers you'll have! ⚡
+        </div>
+        
+        <p class="doc-lead">
+            Time to pick your perfect spaceship! Think of hulls like different types of vehicles - some are 
+            like sports cars (fast and zippy!), others are like trucks (slow but strong!), and some are like 
+            motorcycles (super quick but not much storage). Each hull type is awesome in its own special way, 
+            so let's find the perfect one for YOU! 🌟
+        </p>
+
+        <!-- Hull Overview -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🏗️ Your Hull Options (Pick Your Favorite!)</h2>
+            
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Space Shipyard Computer</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">HELLO</span>
+                        <span class="terminal-command">Welcome to the shipyard! Ready to build something awesome?</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-output">Found 4 amazing hull types for you to choose from!</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fighter Hull -->
+            <div class="doc-card">
+                <div class="doc-card-header">
+                    <h3 class="doc-card-title">⚡ Fighter Hull - The Space Motorcycle!</h3>
+                    <span class="doc-badge">Combat Specialist</span>
+                </div>
+                <div class="doc-card-body">
+                    <p><strong>What it's like:</strong> This is your space motorcycle! Super fast, super agile, and perfect for zooming around space battling bad guys! It's like being a space ninja! 🥷</p>
+                    
+                    <div class="doc-grid doc-grid-2">
+                        <div>
+                            <h4 class="doc-h4">Cool Stats!</h4>
+                            <ul class="doc-list">
+                                <li>❤️ Health: 100 (Not super tough, but tough enough!)</li>
+                                <li>🏃 Speed: 8 (ZOOM! Really fast!)</li>
+                                <li>🎯 Dodge Skills: 9 (Amazing at avoiding enemy shots!)</li>
+                                <li>📦 Storage: 20 (Only room for the essentials!)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="doc-h4">Component Slots</h4>
+                            <ul class="doc-list">
+                                <li>Engine Slots: 2</li>
+                                <li>Weapon Slots: 4</li>
+                                <li>Shield Slots: 2</li>
+                                <li>Utility Slots: 1</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="doc-alert info">
+                        <strong>Best For:</strong> Hit-and-run tactics, escort missions, quick strikes
+                    </div>
+                </div>
+            </div>
+
+            <!-- Freighter Hull -->
+            <div class="doc-card">
+                <div class="doc-card-header">
+                    <h3 class="doc-card-title">📦 Freighter Hull</h3>
+                    <span class="doc-badge secondary">Trading Specialist</span>
+                </div>
+                <div class="doc-card-body">
+                    <p><strong>Role:</strong> Cargo transport vessel with maximum storage capacity</p>
+                    
+                    <div class="doc-grid doc-grid-2">
+                        <div>
+                            <h4 class="doc-h4">Base Statistics</h4>
+                            <ul class="doc-list">
+                                <li>Hull Points: 150</li>
+                                <li>Speed: 4</li>
+                                <li>Maneuverability: 3</li>
+                                <li>Cargo Space: 200</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="doc-h4">Component Slots</h4>
+                            <ul class="doc-list">
+                                <li>Engine Slots: 1</li>
+                                <li>Weapon Slots: 1</li>
+                                <li>Shield Slots: 2</li>
+                                <li>Cargo Slots: 6</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="doc-alert info">
+                        <strong>Best For:</strong> Long-distance trading, bulk cargo transport, economic gameplay
+                    </div>
+                </div>
+            </div>
+
+            <!-- Explorer Hull -->
+            <div class="doc-card">
+                <div class="doc-card-header">
+                    <h3 class="doc-card-title">🔍 Explorer Hull</h3>
+                    <span class="doc-badge accent">Exploration Specialist</span>
+                </div>
+                <div class="doc-card-body">
+                    <p><strong>Role:</strong> Long-range exploration with balanced capabilities</p>
+                    
+                    <div class="doc-grid doc-grid-2">
+                        <div>
+                            <h4 class="doc-h4">Base Statistics</h4>
+                            <ul class="doc-list">
+                                <li>Hull Points: 120</li>
+                                <li>Speed: 6</li>
+                                <li>Maneuverability: 6</li>
+                                <li>Cargo Space: 80</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="doc-h4">Component Slots</h4>
+                            <ul class="doc-list">
+                                <li>Engine Slots: 2</li>
+                                <li>Weapon Slots: 2</li>
+                                <li>Shield Slots: 2</li>
+                                <li>Utility Slots: 4</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="doc-alert info">
+                        <strong>Best For:</strong> Deep space exploration, survey missions, versatile operations
+                    </div>
+                </div>
+            </div>
+
+            <!-- Battleship Hull -->
+            <div class="doc-card">
+                <div class="doc-card-header">
+                    <h3 class="doc-card-title">🛡️ Battleship Hull</h3>
+                    <span class="doc-badge warning">Heavy Combat</span>
+                </div>
+                <div class="doc-card-body">
+                    <p><strong>Role:</strong> Heavy combat vessel with maximum firepower and armor</p>
+                    
+                    <div class="doc-grid doc-grid-2">
+                        <div>
+                            <h4 class="doc-h4">Base Statistics</h4>
+                            <ul class="doc-list">
+                                <li>Hull Points: 300</li>
+                                <li>Speed: 3</li>
+                                <li>Maneuverability: 2</li>
+                                <li>Cargo Space: 50</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="doc-h4">Component Slots</h4>
+                            <ul class="doc-list">
+                                <li>Engine Slots: 2</li>
+                                <li>Weapon Slots: 8</li>
+                                <li>Shield Slots: 4</li>
+                                <li>Armor Slots: 3</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="doc-alert info">
+                        <strong>Best For:</strong> Fleet battles, defensive operations, siege warfare
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Selection Matrix -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Hull Selection Matrix</h2>
+            
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>Role-Based Recommendations</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ROLE</span>
+                                <span class="terminal-command">Combat Pilot</span>
+                                <span class="terminal-output">→ Fighter Hull (Primary), Battleship (Fleet)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ROLE</span>
+                                <span class="terminal-command">Trader</span>
+                                <span class="terminal-output">→ Freighter Hull (Primary), Explorer (Mixed)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ROLE</span>
+                                <span class="terminal-command">Explorer</span>
+                                <span class="terminal-output">→ Explorer Hull (Primary), Fighter (Scout)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ROLE</span>
+                                <span class="terminal-command">Fleet Commander</span>
+                                <span class="terminal-output">→ Battleship Hull (Command), All Types (Fleet)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>Stat Priority Guide</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <ul class="doc-list">
+                        <li><strong>Speed Priority:</strong> Fighter > Explorer > Freighter > Battleship</li>
+                        <li><strong>Durability Priority:</strong> Battleship > Freighter > Explorer > Fighter</li>
+                        <li><strong>Cargo Priority:</strong> Freighter > Explorer > Battleship > Fighter</li>
+                        <li><strong>Weapon Slots:</strong> Battleship > Fighter > Explorer > Freighter</li>
+                        <li><strong>Versatility:</strong> Explorer > Fighter > Freighter > Battleship</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Considerations -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Advanced Hull Selection</h2>
+            
+            <div class="doc-alert warning">
+                <strong>Important:</strong> Hull choice affects upgrade paths and component compatibility.
+            </div>
+
+            <h3 class="doc-h3">Faction Considerations</h3>
+            <p>Different factions may have access to unique hull variants or modifications. 
+            Consider your faction's strengths when selecting hulls.</p>
+
+            <h3 class="doc-h3">Multi-Ship Strategies</h3>
+            <p>Advanced players often maintain multiple ships for different purposes:</p>
+            <ul class="doc-list">
+                <li><strong>Main Ship:</strong> Your primary vessel for your preferred playstyle</li>
+                <li><strong>Specialty Ships:</strong> Specialized vessels for specific missions</li>
+                <li><strong>Fleet Ships:</strong> Additional vessels for fleet operations</li>
+            </ul>
+
+            <h3 class="doc-h3">Upgrade Considerations</h3>
+            <p>Plan for future upgrades when selecting hulls. Some hulls offer better upgrade 
+            paths for certain roles than others.</p>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">← Ship Design Overview</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="component-installation.html" class="doc-nav-link">Next: Component Installation →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            console.log('Hull Selection Guide loaded');
+        });
+    </script>
+</body>
+</html>

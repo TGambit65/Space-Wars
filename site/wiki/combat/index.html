@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Combat - Space Wars 3000 Wiki</title>
+  <link rel="stylesheet" href="/css/wiki-theme.css">
+  <link rel="icon" href="/images/icons/icon-192x192.png">
+</head>
+<body>
+  <div id="reading-progress"></div>
+  <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">&#9776;</button>
+  <div class="wiki-layout">
+    <aside class="wiki-sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="/" class="sidebar-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+        <span>SW3K Wiki</span>
+      </a>
+      <div class="sidebar-badge">Knowledge Database</div>
+    </div>
+    <div class="sidebar-search">
+      <div class="sidebar-search-wrap">
+        <input type="text" placeholder="Search articles..." id="wiki-search" />
+      </div>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav"><div class="sidebar-category">
+      <div class="sidebar-category-title">Getting Started</div><a href="/wiki/getting-started/" class="sidebar-link">Getting Started</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Core Systems</div><a href="/wiki/navigation/" class="sidebar-link">Navigation</a><a href="/wiki/ships/" class="sidebar-link">Ships</a><a href="/wiki/ship-designer/" class="sidebar-link">Ship Designer</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Economy</div><a href="/wiki/trading/" class="sidebar-link">Trading</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Combat</div><a href="/wiki/combat/" class="sidebar-link active">Combat</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">World</div><a href="/wiki/planets/" class="sidebar-link">Planets</a><a href="/wiki/colonies/" class="sidebar-link">Colonies</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Crew & Progression</div><a href="/wiki/crew/" class="sidebar-link">Crew</a><a href="/wiki/progression/" class="sidebar-link">Progression</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Advanced</div><a href="/wiki/crafting/" class="sidebar-link">Crafting</a><a href="/wiki/missions/" class="sidebar-link">Missions</a><a href="/wiki/corporations/" class="sidebar-link">Corporations</a><a href="/wiki/automation/" class="sidebar-link">Automation</a><a href="/wiki/artifacts/" class="sidebar-link">Artifacts</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Guides</div><a href="/wiki/guide-new-player/" class="sidebar-link">New Player Guide</a><a href="/wiki/guide-trading/" class="sidebar-link">Trading Guide</a><a href="/wiki/guide-combat/" class="sidebar-link">Combat Guide</a><a href="/wiki/guide-colonization/" class="sidebar-link">Colonization Guide</a></div></nav>
+    <div class="sidebar-footer">
+      <a href="/">Home</a>
+      <a href="/play">Play Game</a>
+    </div>
+  </aside>
+    <main class="wiki-main">
+      <div class="wiki-content">
+        <nav class="wiki-breadcrumb">
+          <a href="/wiki/">Wiki</a>
+          <span class="sep">/</span>
+          <span>Combat</span>
+          <span class="sep">/</span>
+          <span class="current">Combat</span>
+        </nav>
+        <header class="article-header">
+          <div class="article-category">Combat</div>
+          <h1 class="article-title">Combat</h1>
+        </header>
+        
+        <article class="wiki-article">
+          <p>Combat in Space Wars 3000 is turn-based. Each round, both combatants fire weapons and can attempt to flee. Battles end when one side is destroyed, flees successfully, or 50 rounds elapse.</p>
+<h2 id="damage-formula">Damage Formula</h2>
+<p>Each weapon fires independently per round:</p>
+<ol>
+<li><strong>Accuracy check</strong> — Roll against weapon accuracy (e.g., 85% for Laser Cannon)</li>
+<li><strong>Base damage</strong> — Weapon damage value</li>
+<li><strong>Critical hit</strong> — 10% chance for <strong>2.0× damage</strong></li>
+<li><strong>Shield absorption</strong> — Shields absorb damage first, but 10% of damage <strong>penetrates shields</strong> and hits hull directly</li>
+<li><strong>Armor reduction</strong> — Armor reduces remaining hull damage by its damage reduction percentage</li>
+<li><strong>Minimum damage</strong> — At least 1 damage is always dealt per hit</li>
+</ol>
+<h3 id="shield-mechanics">Shield Mechanics</h3>
+<ul>
+<li>Shields take the brunt of damage (90% of hits)</li>
+<li>10% of each hit bypasses shields entirely (shield penetration)</li>
+<li>Shields recharge each round by their recharge rate</li>
+<li>Once shields are depleted, all damage goes to hull</li>
+</ul>
+<h3 id="critical-hits">Critical Hits</h3>
+<ul>
+<li><strong>Chance</strong>: 10% per weapon hit</li>
+<li><strong>Multiplier</strong>: 2.0× normal damage</li>
+<li>Critical hits can turn the tide of battle quickly</li>
+</ul>
+<h2 id="fleeing">Fleeing</h2>
+<p>You can attempt to flee combat each round:</p>
+<ul>
+<li><strong>Base flee chance</strong>: 30%</li>
+<li><strong>Speed bonus</strong>: +5% per point of speed difference between your ship and the enemy</li>
+<li>Faster ships have a significant advantage when retreating</li>
+</ul>
+<blockquote><p><strong>Tip</strong>: Interceptors with 3 engine slots can reach very high speeds, making them excellent at escaping.</p>
+</blockquote>
+<h2 id="combat-rounds">Combat Rounds</h2>
+<ul>
+<li>Maximum rounds per battle: <strong>50</strong></li>
+<li>If neither side is destroyed or flees after 50 rounds, the battle ends in a draw</li>
+</ul>
+<h2 id="experience-loot">Experience & Loot</h2>
+<ul>
+<li><strong>0.5 XP per damage dealt</strong></li>
+<li><strong>100 XP per kill</strong></li>
+<li><strong>70% chance</strong> for loot drops on kill</li>
+<li>Loot value scales with NPC type (Pirate Lord drops 3× more than standard enemies)</li>
+</ul>
+<h2 id="npc-types">NPC Types</h2>
+<div class="table-wrap"><table><thead><tr><th>NPC Type</th><th>Hostility</th><th>Behavior</th><th>Ships</th><th>Loot Multiplier</th><th>Spawn Chance</th></tr></thead><tbody><tr><td>Pirate</td><td>Hostile</td><td>Aggressive</td><td>Fighter, Corvette</td><td>1.5×</td><td>15%</td></tr><tr><td>Pirate Lord</td><td>Hostile</td><td>Aggressive</td><td>Destroyer</td><td>3.0×</td><td>3%</td></tr><tr><td>Trader</td><td>Neutral</td><td>Flee</td><td>Freighter, Merchant Cruiser</td><td>0.8×</td><td>20%</td></tr><tr><td>System Patrol</td><td>Friendly</td><td>Defensive</td><td>Corvette, Fighter</td><td>0.5×</td><td>10%</td></tr><tr><td>Bounty Hunter</td><td>Neutral</td><td>Opportunistic</td><td>Fighter, Corvette</td><td>2.0×</td><td>5%</td></tr></tbody></table></div>
+<h3 id="npc-behavior">NPC Behavior</h3>
+<ul>
+<li><strong>Aggressive</strong> — Will attack on sight</li>
+<li><strong>Defensive</strong> — Only attacks if provoked</li>
+<li><strong>Flee</strong> — Attempts to run from combat</li>
+<li><strong>Opportunistic</strong> — Engages if they estimate an advantage</li>
+</ul>
+<blockquote><p><strong>Warning</strong>: Pirate Lords fly Destroyers and are very dangerous. Avoid them until you have a well-equipped combat ship.</p>
+</blockquote>
+<h2 id="component-degradation">Component Degradation</h2>
+<p>Combat wears down your components:</p>
+<ul>
+<li>Each combat round degrades all installed components by <strong>2%</strong></li>
+<li>Components at 10% condition break entirely</li>
+<li>Always repair between major engagements at the <strong>Engineering</strong> page</li>
+</ul>
+
+        </article>
+        <nav class="article-nav">
+          <a href="/wiki/trading/" class="nav-prev"><span class="nav-label">Previous</span><span class="nav-title">Trading</span></a>
+          <a href="/wiki/planets/" class="nav-next"><span class="nav-label">Next</span><span class="nav-title">Planets</span></a>
+        </nav>
+      </div>
+    </main>
+  </div>
+  <script>
+    // Reading progress
+    window.addEventListener('scroll', function() {
+      var h = document.documentElement;
+      var pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+      document.getElementById('reading-progress').style.width = Math.min(pct, 100) + '%';
+    });
+    // Sidebar toggle (mobile)
+    document.getElementById('sidebar-toggle').addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('open');
+    });
+    // Search filter
+    document.getElementById('wiki-search').addEventListener('input', function(e) {
+      var q = e.target.value.toLowerCase();
+      document.querySelectorAll('.sidebar-link').forEach(function(link) {
+        link.style.display = link.textContent.toLowerCase().includes(q) || !q ? '' : 'none';
+      });
+      document.querySelectorAll('.sidebar-category').forEach(function(cat) {
+        var visible = cat.querySelectorAll('.sidebar-link[style=""],.sidebar-link:not([style])');
+        cat.style.display = visible.length || !q ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,8 +1,12 @@
-const { Fleet, Ship, Sector, SectorConnection, sequelize } = require('../models');
+const { Fleet, Ship, Sector, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const config = require('../config');
 const maintenanceService = require('./maintenanceService');
 const { discoverSectorAndNeighbors } = require('./discoveryService');
+const worldPolicyService = require('./worldPolicyService');
+const combatPolicyService = require('./combatPolicyService');
+const actionAuditService = require('./actionAuditService');
+const sectorInstanceService = require('./sectorInstanceService');
 
 const createFleet = async (userId, name, shipIds) => {
   if (!name || !name.trim()) {
@@ -324,6 +328,7 @@ const moveFleet = async (fleetId, targetSectorId, userId) => {
 
     const moved = [];
     const failed = [];
+    const failureAudits = [];
 
     for (const ship of fleet.ships) {
       try {
@@ -331,10 +336,40 @@ const moveFleet = async (fleetId, targetSectorId, userId) => {
         moved.push({ ship_id: ship.ship_id, name: ship.name });
       } catch (moveError) {
         failed.push({ ship_id: ship.ship_id, name: ship.name, reason: moveError.message });
+        failureAudits.push({
+          userId,
+          actionType: 'fleet_travel',
+          scopeType: 'fleet',
+          scopeId: fleetId,
+          status: 'deny',
+          reason: moveError.message,
+          metadata: {
+            ship_id: ship.ship_id,
+            from_sector_id: ship.current_sector_id,
+            to_sector_id: targetSectorId
+          }
+        });
       }
     }
 
     await transaction.commit();
+    if (moved.length > 0) {
+      await actionAuditService.record({
+        userId,
+        actionType: 'fleet_travel',
+        scopeType: 'fleet',
+        scopeId: fleetId,
+        status: 'allow',
+        reason: 'authorized',
+        metadata: {
+          to_sector_id: targetSectorId,
+          moved_ship_ids: moved.map((ship) => ship.ship_id)
+        }
+      }).catch(() => null);
+    }
+    for (const audit of failureAudits) {
+      await actionAuditService.record(audit).catch(() => null);
+    }
     return { moved, failed };
   } catch (error) {
     if (!transaction.finished) await transaction.rollback();
@@ -357,24 +392,13 @@ const _moveShipCore = async (ship, targetSectorId, userId, transaction) => {
     throw new Error('Ship is already in the target sector');
   }
 
-  // Check adjacency
-  const connection = await SectorConnection.findOne({
-    where: {
-      [Op.or]: [
-        { sector_a_id: ship.current_sector_id, sector_b_id: targetSectorId },
-        {
-          sector_a_id: targetSectorId,
-          sector_b_id: ship.current_sector_id,
-          is_bidirectional: true
-        }
-      ]
-    },
+  const traversal = await worldPolicyService.resolveTraversal({
+    fromSectorId: ship.current_sector_id,
+    toSectorId: targetSectorId,
+    userId,
     transaction
   });
-
-  if (!connection) {
-    throw new Error('Not adjacent to target sector');
-  }
+  const connection = traversal.connection;
 
   // Calculate fuel cost
   const fuelCost = connection.travel_time || 1;
@@ -402,6 +426,31 @@ const _moveShipCore = async (ship, targetSectorId, userId, transaction) => {
 
   // Discover sector
   await discoverSectorAndNeighbors(userId, targetSectorId, transaction);
+
+  const entryProtection = combatPolicyService.resolveEntryProtection({
+    connectionPolicy: traversal.connectionPolicy,
+    toPolicy: traversal.toPolicy,
+    fleet: true
+  });
+  if (entryProtection) {
+    await combatPolicyService.grantTravelProtection({
+      userId,
+      durationMs: entryProtection.durationMs,
+      reason: entryProtection.reason,
+      transaction
+    });
+  }
+
+  await sectorInstanceService.assignUserToSector({
+    userId,
+    sectorId: targetSectorId,
+    transaction
+  });
+  await sectorInstanceService.releaseUserFromSector({
+    userId,
+    sectorId: traversal.fromSector.sector_id,
+    transaction
+  });
 };
 
 module.exports = {

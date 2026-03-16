@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Mechanics - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+    <script src="../../js/wiki-trade-planner.js"></script>
+    <script src="../../js/wiki-smart-navigation.js"></script>
+    <script src="../../js/wiki-interactive-features.js"></script>
+</head>
+<body class="doc-container trading-page">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">← Trading Guide</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="market-mechanics.html" class="doc-nav-link active">Market Mechanics</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="route-planning.html" class="doc-nav-link">Route Planning</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="profit-calculation.html" class="doc-nav-link">Profit Calculation</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item">
+                <a href="index.html" class="doc-breadcrumb-link">Trading Guide</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Market Mechanics</div>
+        </nav>
+        
+        <h1 class="doc-h1 holo-text">Market Mechanics</h1>
+        
+        <div class="doc-alert info">
+            <strong>Market Analysis:</strong> Understanding supply and demand patterns is essential for profitable trading.
+        </div>
+
+        <p class="doc-lead">
+            Master the underlying economic systems that drive commodity prices across the galaxy. 
+            Learn how supply, demand, and market events create trading opportunities.
+        </p>
+
+        <!-- Supply and Demand ---->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Supply and Demand Fundamentals</h2>
+            
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Economic Analysis System</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">PRINCIPLE</span>
+                        <span class="terminal-output">Price = Base_Value × (Demand/Supply) × Market_Factors</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">SUPPLY</span>
+                        <span class="terminal-output">Local production + Imports - Recent sales</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">DEMAND</span>
+                        <span class="terminal-output">Population needs + Industrial consumption</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>📈 Price Calculation Mechanics</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Base Price Modifiers</h4>
+                    <ul class="doc-list">
+                        <li><strong>Abundance (150%+ supply):</strong> 50-70% of base price</li>
+                        <li><strong>Normal (80-150% supply):</strong> 80-120% of base price</li>
+                        <li><strong>Shortage (50-80% supply):</strong> 120-180% of base price</li>
+                        <li><strong>Critical (0-50% supply):</strong> 180-300% of base price</li>
+                    </ul>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EXAMPLE</span>
+                                <span class="terminal-output">Food (base 10cr) in shortage = 10 × 1.5 = 15cr</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EXAMPLE</span>
+                                <span class="terminal-output">Art (base 100cr) in abundance = 100 × 0.6 = 60cr</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>⚖️ Market Balance Dynamics</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p>Markets naturally tend toward equilibrium, but external factors constantly disrupt this balance:</p>
+                    
+                    <h4 class="doc-h4">Equilibrium Factors</h4>
+                    <ul class="doc-list">
+                        <li><strong>Production Rates:</strong> How quickly sectors generate commodities</li>
+                        <li><strong>Consumption Rates:</strong> How quickly populations use commodities</li>
+                        <li><strong>Trade Volume:</strong> Player and NPC trading activity</li>
+                        <li><strong>Transport Efficiency:</strong> How easily goods move between sectors</li>
+                    </ul>
+
+                    <div class="doc-alert warning">
+                        <strong>Market Memory:</strong> Recent trading activity affects prices for 24-48 hours.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Production and Consumption Centers ---->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Production and Consumption Centers</h2>
+            
+            <p>Different sector types specialize in producing or consuming specific commodities:</p>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🏭 Production Centers</h3>
+                        <span class="doc-badge">Low Prices</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Agricultural Worlds:</strong> Food, organic materials</li>
+                            <li><strong>Mining Colonies:</strong> Raw metals, minerals</li>
+                            <li><strong>Industrial Sectors:</strong> Manufactured goods, machinery</li>
+                            <li><strong>Tech Centers:</strong> Electronics, advanced components</li>
+                            <li><strong>Energy Stations:</strong> Fuel, power cells</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🏢 Consumption Centers</h3>
+                        <span class="doc-badge accent">High Prices</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Urban Centers:</strong> Food, luxury goods, entertainment</li>
+                            <li><strong>Military Bases:</strong> Weapons, armor, medical supplies</li>
+                            <li><strong>Research Stations:</strong> Scientific equipment, rare materials</li>
+                            <li><strong>Tourist Destinations:</strong> Art, entertainment, exotic foods</li>
+                            <li><strong>Construction Sites:</strong> Raw materials, machinery</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">Identifying Market Opportunities</h3>
+            <div class="terminal-window">
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">PROFIT</span>
+                        <span class="terminal-output">Find production centers with surplus goods</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">DEMAND</span>
+                        <span class="terminal-output">Locate consumption centers with shortages</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">ROUTE</span>
+                        <span class="terminal-output">Plan efficient path between source and destination</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">TIMING</span>
+                        <span class="terminal-output">Execute trades before market conditions change</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Market Events ---->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Market Events and Fluctuations</h2>
+            
+            <div class="doc-alert warning">
+                <strong>Dynamic Markets:</strong> Events can rapidly change supply and demand patterns.
+            </div>
+
+            <h3 class="doc-h3">Event Types and Market Impact</h3>
+            
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🚨 Crisis Events</h4>
+                        <span class="doc-badge warning">High Impact</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Pirate Attacks:</strong> Disrupt supply chains</li>
+                            <li><strong>Natural Disasters:</strong> Destroy production facilities</li>
+                            <li><strong>Equipment Failures:</strong> Halt production temporarily</li>
+                            <li><strong>Population Growth:</strong> Increase demand suddenly</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">📈 Growth Events</h4>
+                        <span class="doc-badge secondary">Moderate Impact</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>New Colonies:</strong> Create fresh markets</li>
+                            <li><strong>Tech Breakthroughs:</strong> Change production efficiency</li>
+                            <li><strong>Trade Agreements:</strong> Alter market relationships</li>
+                            <li><strong>Infrastructure:</strong> Improve transport efficiency</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">Seasonal and Cyclical Patterns</h3>
+            <ul class="doc-list">
+                <li><strong>Agricultural Cycles:</strong> Food prices vary with harvest times</li>
+                <li><strong>Industrial Schedules:</strong> Predictable production and maintenance cycles</li>
+                <li><strong>Holiday Periods:</strong> Increased demand for luxury goods</li>
+                <li><strong>Military Exercises:</strong> Temporary spikes in weapons and supplies</li>
+            </ul>
+        </section>
+
+        <!-- Trading Mechanics ---->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Interactive Trading Mechanics</h2>
+            
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>💰 Transaction Mechanics</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Buy/Sell Process</h4>
+                    <ol class="doc-list">
+                        <li><strong>Price Discovery:</strong> Check current market prices at port</li>
+                        <li><strong>Volume Assessment:</strong> Determine available quantity</li>
+                        <li><strong>Transaction Execution:</strong> Complete purchase/sale</li>
+                        <li><strong>Market Impact:</strong> Your trade affects future prices</li>
+                    </ol>
+
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">IMPACT</span>
+                                <span class="terminal-output">Large purchases increase prices</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">IMPACT</span>
+                                <span class="terminal-output">Large sales decrease prices</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">RECOVERY</span>
+                                <span class="terminal-output">Markets gradually return to equilibrium</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>📊 Market Information Systems</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Available Market Data</h4>
+                    <ul class="doc-list">
+                        <li><strong>Current Prices:</strong> Real-time pricing at your location</li>
+                        <li><strong>Price History:</strong> Recent price trends and patterns</li>
+                        <li><strong>Volume Data:</strong> Available quantity for purchase/sale</li>
+                        <li><strong>Market Rumors:</strong> Hints about upcoming events</li>
+                    </ul>
+
+                    <div class="doc-alert info">
+                        <strong>Information Advantage:</strong> Advanced sensors and communication systems provide better market intelligence.
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>⏰ Timing Strategies</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Optimal Trading Windows</h4>
+                    <ul class="doc-list">
+                        <li><strong>Buy Low Periods:</strong> Post-harvest, after large shipments arrive</li>
+                        <li><strong>Sell High Periods:</strong> Pre-shortage, during crisis events</li>
+                        <li><strong>Avoid Rush Periods:</strong> When many traders compete simultaneously</li>
+                        <li><strong>Monitor Cycles:</strong> Learn predictable market rhythms</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Market Concepts ---->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Advanced Market Concepts</h2>
+            
+            <h3 class="doc-h3">Market Manipulation and Ethics</h3>
+            <div class="doc-alert warning">
+                <strong>Market Influence:</strong> Large traders can significantly impact smaller markets.
+            </div>
+            
+            <ul class="doc-list">
+                <li><strong>Monopolization:</strong> Controlling supply of critical commodities</li>
+                <li><strong>Price Fixing:</strong> Coordinating with other traders (risky)</li>
+                <li><strong>Market Cornering:</strong> Buying all available stock to drive prices up</li>
+                <li><strong>Speculation:</strong> Trading on rumors and future events</li>
+            </ul>
+
+            <h3 class="doc-h3">Market Intelligence</h3>
+            <ul class="doc-list">
+                <li><strong>Economic Espionage:</strong> Gathering information about competitor strategies</li>
+                <li><strong>Trend Analysis:</strong> Identifying patterns in price movements</li>
+                <li><strong>Event Prediction:</strong> Anticipating market-moving events</li>
+                <li><strong>Network Building:</strong> Establishing information sources</li>
+            </ul>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">← Trading Overview</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="route-planning.html" class="doc-nav-link">Next: Route Planning →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            console.log('Market Mechanics Guide loaded');
+        });
+    </script>
+</body>
+</html>

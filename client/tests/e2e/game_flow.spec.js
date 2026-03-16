@@ -1,5 +1,16 @@
-
 import { test, expect } from '@playwright/test';
+import { registerFreshCommander } from './helpers/auth';
+
+const nav = async (page, label) => {
+    const link = page.getByRole('link', { name: label, exact: true });
+    if (!(await link.isVisible().catch(() => false))) {
+        const moreBtn = page.getByRole('button', { name: 'More Features', exact: true });
+        if (await moreBtn.isVisible().catch(() => false)) {
+            await moreBtn.click();
+        }
+    }
+    await page.getByRole('link', { name: label, exact: true }).click();
+};
 
 test.describe('Space Wars 3000 - Comprehensive E2E', () => {
 
@@ -10,24 +21,8 @@ test.describe('Space Wars 3000 - Comprehensive E2E', () => {
 
         // === PHASE 1: REGISTRATION & LOGIN ===
         console.log('--- PHASE 1: Registration ---');
-        await page.goto('http://localhost:3080');
-
-        // Handle "Register" toggle
-        const toggleBtn = page.getByRole('button', { name: /Don't have an account\? Register/i });
-        if (await toggleBtn.isVisible()) {
-            await toggleBtn.click();
-        }
-
-        const username = `Cmdr${Math.floor(Math.random() * 100000)}`;
-        const password = 'Password@123';
-        const email = `${username}@example.com`;
-
-        console.log(`Registering new user: ${username}`);
-        await page.getByLabel(/Username/i).fill(username);
-        await page.getByLabel(/Email/i).fill(email);
-        await page.getByLabel(/Password/i).fill(password);
-
-        await page.getByRole('button', { name: /Create Account/i }).click();
+        const account = await registerFreshCommander(page, 'Cmdr');
+        console.log(`Registering new user: ${account.username}`);
 
         // Verify Dashboard
         await expect(page.getByRole('heading', { name: /Welcome, Commander/i })).toBeVisible({ timeout: 15000 });
@@ -35,8 +30,7 @@ test.describe('Space Wars 3000 - Comprehensive E2E', () => {
 
         // === PHASE 2: SHIP STATUS ===
         console.log('--- PHASE 2: Ship Status ---');
-        // Use exact link matching to avoid "Hire Crew" ambiguity
-        await page.getByRole('link', { name: 'Ships', exact: true }).click();
+        await nav(page, 'Ships');
         await expect(page).toHaveURL(/ships/);
 
         // Check for Ship Header
@@ -66,7 +60,7 @@ test.describe('Space Wars 3000 - Comprehensive E2E', () => {
 
         // === PHASE 3: PLANETS & EXPLORATION ===
         console.log('--- PHASE 3: Planets ---');
-        await page.getByRole('link', { name: 'Planets', exact: true }).click();
+        await nav(page, 'Planets');
         await expect(page).toHaveURL(/planets/);
         // Check for "Known Planets" or similar header
         // Use a broad text check for page content to verify no crash
@@ -77,7 +71,7 @@ test.describe('Space Wars 3000 - Comprehensive E2E', () => {
 
         // === PHASE 4: STARMAP ===
         console.log('--- PHASE 4: Star Map ---');
-        await page.getByRole('link', { name: 'Star Map', exact: true }).click();
+        await nav(page, 'Sector Map');
         await expect(page).toHaveURL(/map/);
         // Map should render a grid or canvas
         // Check for "Sector" or "Map" text
@@ -87,7 +81,7 @@ test.describe('Space Wars 3000 - Comprehensive E2E', () => {
 
         // === PHASE 5: SHIPYARD (DESIGNER) ===
         console.log('--- PHASE 5: Shipyard ---');
-        await page.getByRole('link', { name: 'Shipyard', exact: true }).click();
+        await nav(page, 'Shipyard');
         await expect(page).toHaveURL(/designer/);
         // Check for component slots or "Drag and Drop" hint
         await expect(page.locator('body')).not.toBeEmpty();
@@ -96,7 +90,7 @@ test.describe('Space Wars 3000 - Comprehensive E2E', () => {
 
         // === PHASE 6: MARKET (TRADING) ===
         console.log('--- PHASE 6: Market ---');
-        await page.getByRole('link', { name: 'Market', exact: true }).click();
+        await nav(page, 'Trading');
         await expect(page).toHaveURL(/trading/);
         // Check for explicit "Trading" header or commodity list
         await expect(page.locator('body')).not.toBeEmpty();
@@ -106,7 +100,7 @@ test.describe('Space Wars 3000 - Comprehensive E2E', () => {
 
         // === PHASE 7: CREW ===
         console.log('--- PHASE 7: Crew ---');
-        await page.getByRole('link', { name: 'Crew', exact: true }).click();
+        await nav(page, 'Crew');
         await expect(page).toHaveURL(/crew/);
         await expect(page.locator('body')).not.toBeEmpty();
         await page.waitForTimeout(1000);
@@ -114,7 +108,7 @@ test.describe('Space Wars 3000 - Comprehensive E2E', () => {
 
         // === PHASE 8: COLONIES ===
         console.log('--- PHASE 8: Colonies ---');
-        await page.getByRole('link', { name: 'Colonies', exact: true }).click();
+        await nav(page, 'Colonies');
         await expect(page).toHaveURL(/colonies/);
         await expect(page.locator('body')).not.toBeEmpty();
         await page.waitForTimeout(1000);
@@ -122,7 +116,7 @@ test.describe('Space Wars 3000 - Comprehensive E2E', () => {
 
         // === PHASE 9: ENGINEERING (REPAIR) ===
         console.log('--- PHASE 9: Engineering ---');
-        await page.getByRole('link', { name: 'Engineering', exact: true }).click();
+        await nav(page, 'Engineering');
         await expect(page).toHaveURL(/repair/);
         await expect(page.locator('body')).not.toBeEmpty();
         await page.waitForTimeout(1000);

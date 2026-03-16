@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Send, Volume2, Loader } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { X, Send, Volume2, Loader, History } from 'lucide-react';
 import { dialogue } from '../../services/api';
 import useVoiceChat from '../../hooks/useVoiceChat';
 import NPCPortrait from './NPCPortrait';
@@ -29,7 +29,35 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
   const { playAudio, isPlaying, stopPlayback } = useVoiceChat();
   const [playingMsgTs, setPlayingMsgTs] = useState(null);
 
+  const [showHistory, setShowHistory] = useState(false);
+  const [history, setHistory] = useState([]);
+
   const isPremium = subscriptionTier === 'premium' || subscriptionTier === 'elite';
+
+  const HISTORY_KEY = useMemo(() => `npc_history_${npc.npc_id}`, [npc.npc_id]);
+  const MAX_HISTORY = 50;
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      setHistory(saved);
+    } catch { setHistory([]); }
+  }, [npc.npc_id]);
+
+  const saveHistory = useCallback((msgs) => {
+    try {
+      const toSave = msgs.filter(m => m.text && m.text !== '(voice message)').map(m => ({
+        sender: m.sender,
+        text: m.text,
+        timestamp: m.timestamp,
+      }));
+      const prev = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      const existingTimestamps = new Set(prev.map(m => m.timestamp));
+      const newOnly = toSave.filter(m => !existingTimestamps.has(m.timestamp));
+      const merged = [...prev, ...newOnly].slice(-MAX_HISTORY);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(merged));
+    } catch { /* storage full — ignore */ }
+  }, [HISTORY_KEY]);
 
   // Scroll to bottom when messages change
   const scrollToBottom = useCallback(() => {
@@ -243,6 +271,7 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
 
   // Handle close
   const handleClose = async () => {
+    saveHistory(messages);
     try {
       await dialogue.end(npc.npc_id);
     } catch {
@@ -266,14 +295,42 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
         <NPCPortrait npcType={npc.npc_type} size="md" />
         <div className="flex-1 min-w-0">
           <div className="text-white font-bold text-sm truncate">{npc.name}</div>
-          <span className={`badge ${TYPE_BADGE[npc.npc_type] || 'badge-cyan'} text-[10px]`}>
-            {npc.npc_type?.replace('_', ' ')}
-          </span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className={`badge ${TYPE_BADGE[npc.npc_type] || 'badge-cyan'} text-[10px]`}>
+              {npc.npc_type?.replace('_', ' ')}
+            </span>
+            {npc.ai_personality?.trait_primary && (
+              <span className="text-[10px] text-gray-500 italic truncate">
+                {npc.ai_personality.trait_primary}{npc.ai_personality.trait_secondary ? `, ${npc.ai_personality.trait_secondary}` : ''}
+              </span>
+            )}
+          </div>
         </div>
+        {history.length > 0 && (
+          <button onClick={() => setShowHistory(!showHistory)} className={`p-1 transition-colors ${showHistory ? 'text-accent-cyan' : 'text-gray-400 hover:text-white'}`} title="View History">
+            <History className="w-5 h-5" />
+          </button>
+        )}
         <button onClick={handleClose} className="text-gray-400 hover:text-white p-1">
           <X className="w-5 h-5" />
         </button>
       </div>
+
+      {/* History Panel */}
+      {showHistory && history.length > 0 && (
+        <div className="border-b border-space-700 max-h-48 overflow-y-auto p-3 space-y-2" style={{ background: 'rgba(0,0,0,0.3)' }}>
+          <div className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Previous Conversations</div>
+          {history.map((msg, i) => (
+            <div key={i} className={`text-xs ${msg.sender === 'npc' ? 'text-gray-400' : 'text-accent-cyan'}`}>
+              <span className="text-gray-600 font-mono text-[10px] mr-1.5">
+                {new Date(msg.timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+              </span>
+              <span className="font-medium">{msg.sender === 'npc' ? npc.name : 'You'}:</span>{' '}
+              <span className="text-gray-400">{msg.text.length > 120 ? msg.text.slice(0, 120) + '...' : msg.text}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Error */}
       {error && (

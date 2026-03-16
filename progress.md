@@ -1,0 +1,140 @@
+Original prompt: Debug the entire codebase and fix any issues
+
+Stabilization pass started.
+- Repo already contains extensive user/uncommitted changes across client, server, site, planner, and generated assets.
+- Strategy: run existing backend tests, frontend build, and browser smoke checks; fix only reproducible failures found in this pass.
+- Skills in use: develop-web-game, playwright.
+
+Findings so far.
+- `client` production build passes.
+- `build:wiki` passes.
+- First backend regression found in `server/src/app.js`: express-rate-limit custom `keyGenerator` used raw `req.ip`, which now throws `ERR_ERL_KEY_GEN_IPV6`.
+- Patched API rate-limit fallback to use the library IPv6-aware helper.
+- Backend integration suite `tests/integration/api.test.js` passes when rerun outside the sandbox; in-sandbox failures were due to blocked local socket binds and a stale Jest process holding SQLite open.
+- Browser smoke against `http://127.0.0.1:5080/play/` succeeded through fresh account registration and dashboard load.
+- Additional live-app fixes from the smoke pass:
+  - `Dashboard.jsx` now requests trade history with `limit: 100`, matching backend validation and removing a dashboard console error.
+  - `Login.jsx` now sets appropriate `autocomplete` attributes for username, email, and password fields.
+- Rebuilt the client after the fixes and reloaded `/play`; auth screen console is now clean, and the earlier dashboard trade-history 400 no longer reproduces during the registered-session smoke flow.
+- Full backend validation follow-up:
+  - A monolithic `npm test` run remained slow and buffered, so I switched to a per-file Jest sweep to isolate failures quickly.
+  - Result: all 40 backend Jest files passed individually, including the integration suite and the later AI/dialogue/service suites.
+  - No additional backend test regressions were found after the earlier `express-rate-limit` fix.
+- Frontend E2E stabilization follow-up:
+  - `server/src/config/database.js` now uses SQLite WAL mode, `busy_timeout`, a single pooled connection, and limited retry handling for `SQLITE_BUSY` to reduce write contention during browser tests.
+  - `client/playwright.config.js` now honors `PLAYWRIGHT_BASE_URL` and runs locally with `workers: 1` / `fullyParallel: false`, which avoids false failures against the shared SQLite dev backend while keeping CI defaults intact.
+  - Added `client/tests/e2e/helpers/auth.js` and migrated stale specs to the current faction-based registration flow.
+  - Hardened `client/tests/e2e/colonize.spec.js` to create its own account, choose a colonizable planet by habitability, seed a colony through authenticated API calls, and wait until the colony exists before opening `/colonies`.
+  - Updated stale E2E specs to match current UI behavior:
+    - `game_flow.spec.js`
+    - `gameplay-deep.spec.js`
+    - `login-logout.spec.js`
+    - `crash-sweep.spec.js`
+    - `polish-pass.spec.js`
+    - `system-nav.spec.js`
+    - `stale-token.spec.js`
+    - `repro-thoder.spec.js`
+    - `ships-edge-cases.spec.js`
+  - `gameplay-deep.spec.js` now supports the current system-view action panel and has a realistic timeout for the full flow.
+  - Verified passing targeted reruns after the fixes:
+    - `colonize.spec.js`
+    - `crash-sweep.spec.js`
+    - `polish-pass.spec.js`
+    - `game_flow.spec.js`
+    - `gameplay-deep.spec.js`
+    - `login-logout.spec.js`
+    - `system-nav.spec.js`
+  - `stale-token.spec.js`
+  - `repro-thoder.spec.js`
+  - `ships-edge-cases.spec.js`
+  - Important: I did run repeated full Playwright sweeps and fixed every failure they surfaced, but I did not wait for one final post-fix monolithic `npx playwright test` run to complete after the last batch of stale-spec updates. The remaining risk is verification completeness, not a currently known failing spec.
+- Security and reliability hardening pass:
+  - tightened API trust-proxy/CORS behavior to avoid permissive `*` + credentials defaults and removed the `X-Powered-By` header
+  - replaced client-trusted Socket.IO room targeting with server-authorized sector/corporation/faction access and blocked unauthorized realtime combat commands
+  - fixed realtime chat payload mismatches, auto-synced sector socket membership after ship movement, and consolidated sidebar/status polling through a shared session provider instead of multiple overlapping timers
+- Sprint-prep refactor pass:
+  - added explicit world-policy metadata on sectors and sector connections (`zone_class`, `security_class`, `access_mode`, `lane_class`, `rule_flags`) plus `owner_user_id` / `owner_corporation_id` hooks and indexes to prepare owned sectors, protected lanes, portals, and zone-rule enforcement
+  - introduced `server/src/services/worldPolicyService.js` as the shared policy engine for legacy zone defaults, access checks, allied-corporation traversal, and movement authorization
+  - introduced `server/src/services/schemaPatchService.js` and wired it into server startup so existing databases get the new sprint-prep columns without relying on `sequelize.sync({ alter: true })`
+  - updated universe generation to stamp the new policy metadata onto generated sectors/connections and to keep the sector map cache coherent after regeneration
+  - updated ship movement and sector/map APIs to use the shared world-policy layer instead of raw adjacency-only semantics
+  - sanitized public sector payloads so the new ownership fields are not exposed directly via anonymous sector endpoints
+  - hardened `planner/server.js` by removing hardcoded fallback credentials, requiring auth for the comments API and static assets, validating/sanitizing comment writes, and using atomic comment-file updates
+  - prepared the navigation UI for new lane types by teaching the galaxy/system views and HUD panels about `lane_class` values such as `protected` and `portal`
+  - verified:
+    - `npm test -- --runInBand tests/services/worldPolicyService.test.js tests/services/shipService.test.js tests/integration/api.test.js`
+    - `npm run build` in `client/`
+    - syntax checks for the new/edited policy and planner server files
+    - direct planner auth verification against `/api/comments` with and without valid Basic auth
+    - real server startup on a throwaway port after wiring `ensureSprintWorldSchema`, confirming the app still reaches the listening state with the startup schema patch enabled
+- Anti-cheat / anti-grief program pass:
+  - created `docs/anti-cheat-program.md` as the persistent execution tracker with task IDs, dependencies, and verification gates
+  - added persistent protection and audit primitives through `PlayerProtectionState`, `ActionAuditLog`, `combatPolicyService`, `combatCommandGuard`, and `actionAuditService`
+  - routed PvP toggle and realtime PvP initiation through shared server-owned policy checks with audit logs for allow/deny decisions
+  - unified fleet travel with world-policy traversal and added allow/deny audit records for ship and fleet movement
+  - added explicit portal/wormhole/gate/safe-harbor/home-style entry protection mapping instead of only sector-flag-driven protection windows
+  - closed a multi-tab realtime-combat spam bypass by keying command throttles on player identity rather than `socket.id`
+  - added moderation visibility through `/api/admin/action-audit`
+  - verification target now includes:
+    - `npm test -- --runInBand tests/services/combatPolicyService.test.js tests/services/combatCommandGuard.test.js tests/services/fleetService.test.js tests/services/shipService.test.js tests/integration/api.test.js`
+  - final anti-cheat foundation verification passed with `71` tests, including route-level portal-entry immunity expiration and admin audit retrieval coverage
+- Anti-cheat completion pass for the remaining expansion blockers:
+  - added persistent sector instancing state through `SectorInstanceAssignment` and `sectorInstanceService`
+  - wired ship and fleet movement to assign/release server-owned sector instances and expose the active assignment on successful ship travel responses
+  - added `TransferLedger` and `economyAbuseService` for idempotent trade / corporation treasury actions and suspicious transfer flagging
+  - added `ColonyRaidProtection` and `raidProtectionService` for offline protection, raid cooldowns, and repeated-attacker throttling inside ground combat invasion authorization
+  - extended service coverage:
+    - `sectorInstanceService.test.js`
+    - `raidProtectionService.test.js`
+    - `tradeService.test.js`
+    - `corporationService.test.js`
+    - `shipService.test.js`
+    - `groundCombatService.test.js`
+    - `integration/api.test.js`
+  - verification passed:
+    - `npm test -- --runInBand tests/services/sectorInstanceService.test.js tests/services/raidProtectionService.test.js tests/services/tradeService.test.js tests/services/corporationService.test.js tests/services/shipService.test.js tests/services/groundCombatService.test.js tests/integration/api.test.js`
+    - result: `7` suites passed, `115` tests passed
+  - tracker updated:
+    - `AC-008` verified
+    - `AC-009` verified
+    - `AC-010` verified
+- Browser E2E verification pass:
+  - reran the full Playwright suite outside the sandbox after updating stale specs for cookie-backed auth, current system-view interactions, and UI-only ship-state mocks
+  - hardened `client/tests/e2e/helpers/auth.js` to retry transient `SQLITE_BUSY` registration collisions during live browser runs
+  - updated E2E coverage in:
+    - `colonize.spec.js`
+    - `gameplay-deep.spec.js`
+    - `login-logout.spec.js`
+    - `polish-pass.spec.js`
+    - `ship-dropdown.spec.js`
+    - `ships-edge-cases.spec.js`
+    - `stale-token.spec.js`
+    - `system-interactions.spec.js`
+  - verification passed:
+    - `npx playwright test`
+    - result: `26` passed in `4.8m`
+- Voxel colony surface stabilization pass:
+  - fixed a route bootstrap deadlock in `client/src/components/colonies/VoxelSurface.jsx` by always rendering the Three.js container instead of gating it behind the loading state
+  - fixed worker protocol drift between `ChunkManager` and the terrain/mesh workers so chunk generation and meshing use the same coordinate/message fields
+  - moved spawn selection to the nearest buildable colony-center chunk, prefetched voxel deltas around that chunk, and synced the camera before spawn waits so chunk streaming targets the actual landing area
+  - added recovery guards for bad falls during chunk streaming and exposed `window.render_game_to_text` state for browser validation
+  - added deterministic landing-site generation in `client/src/engine/TerrainGenerator.js` for the spawn chunk and tuned voxel/water presentation in `voxelShader.js`, `WaterRenderer.js`, and `TextureAtlas.js`
+  - added focused browser coverage in `client/tests/e2e/voxel-surface.spec.js`
+  - verification passed:
+    - `npm run build` in `client/`
+    - `npx playwright test tests/e2e/voxel-surface.spec.js`
+    - result: `1` passed in `~9s`
+  - latest visual check:
+    - screenshot written to `client/test-results/screenshots/voxel-surface-overview.png`
+    - runtime is stable and lands on a deterministic pad, but the scene still needs more art/lighting polish before it reads as fully production-grade
+- Voxel surface presentation follow-up:
+  - hardened `client/tests/e2e/helpers/auth.js` so the focused voxel browser test recovers cleanly when auth state advances faster than the helper expects
+  - expanded `client/src/engine/TerrainGenerator.js` landing-site blockout with a west overlook, larger east-side hangar facade, control spire, logistics clutter, approach lighting, and updated landmark coordinates
+  - taught `client/src/components/colonies/VoxelSurface.jsx` about landing-site spawn/focus/preview camera positions and extended `window.render_game_to_text` with camera/landing-site state for browser validation
+  - verification re-passed repeatedly:
+    - `npx playwright test tests/e2e/voxel-surface.spec.js`
+    - result: `1` passed
+  - current state:
+    - route boot, persistence, spawn stability, and browser coverage are solid
+    - the default camera is now intentional rather than accidental
+    - remaining blocker is visual readability: the scene still reads too flat/dark in the captured overview, so another dedicated art/lighting pass is still needed before calling it fully production-grade

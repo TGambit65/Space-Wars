@@ -1,0 +1,933 @@
+/**
+ * Campaign UI Styles
+ */
+
+/* Campaign Menu */
+.campaign-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 1500;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.campaign-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border-bottom: 2px solid #FFD700;
+}
+
+.campaign-header h1 {
+    color: #FFD700;
+    margin: 0;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-campaign {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px 10px;
+    transition: color 0.3s ease;
+}
+
+.close-campaign:hover {
+    color: #E74C3C;
+}
+
+/* Campaign Selection */
+.campaign-selection {
+    padding: 20px 30px;
+    background: rgba(0, 0, 0, 0.7);
+    border-bottom: 1px solid #333;
+}
+
+.campaign-tabs {
+    display: flex;
+    gap: 10px;
+}
+
+.campaign-tab {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #333;
+    border-radius: 25px;
+    color: #fff;
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.campaign-tab:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #4A90E2;
+}
+
+.campaign-tab.active {
+    background: linear-gradient(135deg, #4A90E2, #357ABD);
+    border-color: #4A90E2;
+    color: #fff;
+}
+
+/* Campaign Overview */
+.campaign-overview {
+    display: flex;
+    gap: 30px;
+    padding: 30px;
+    background: rgba(0, 0, 0, 0.5);
+    border-bottom: 1px solid #333;
+}
+
+.campaign-info {
+    flex: 2;
+}
+
+.campaign-info h2 {
+    color: #FFD700;
+    margin: 0 0 10px 0;
+    font-size: 24px;
+}
+
+.campaign-info p {
+    color: #ccc;
+    margin: 0 0 20px 0;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.progress-overview {
+    display: flex;
+    gap: 30px;
+}
+
+.progress-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.progress-stat .label {
+    color: #888;
+    font-size: 14px;
+}
+
+.progress-stat .value {
+    color: #FFD700;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.player-stats {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    min-width: 120px;
+}
+
+.stat-value {
+    color: #4A90E2;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.stat-label {
+    color: #888;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Chapter Navigation */
+.chapter-navigation {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+    overflow: hidden;
+}
+
+.chapter-navigation h3 {
+    color: #FFD700;
+    margin: 0 0 20px 0;
+    font-size: 20px;
+}
+
+.chapter-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chapter-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.chapter-item:hover:not(.locked) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #4A90E2;
+}
+
+.chapter-item.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.chapter-item.completed {
+    border-color: #27AE60;
+}
+
+.chapter-item.current {
+    border-color: #FFD700;
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.chapter-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #4A90E2;
+    color: #fff;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.chapter-item.completed .chapter-number {
+    background: #27AE60;
+}
+
+.chapter-item.current .chapter-number {
+    background: #FFD700;
+    color: #000;
+}
+
+.chapter-info {
+    flex: 1;
+}
+
+.chapter-info h4 {
+    color: #fff;
+    margin: 0 0 5px 0;
+    font-size: 16px;
+}
+
+.chapter-info p {
+    color: #888;
+    margin: 0;
+    font-size: 14px;
+}
+
+.chapter-status {
+    font-size: 20px;
+}
+
+.completed-icon {
+    color: #27AE60;
+}
+
+.current-icon {
+    color: #FFD700;
+}
+
+.available-icon {
+    color: #4A90E2;
+}
+
+.locked-icon {
+    color: #666;
+}
+
+/* Mission List */
+.mission-list-container {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+    overflow: hidden;
+}
+
+.mission-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.mission-list-header h3 {
+    color: #FFD700;
+    margin: 0;
+    font-size: 20px;
+}
+
+.chapter-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-bar {
+    width: 200px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4A90E2, #FFD700);
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    color: #888;
+    font-size: 14px;
+}
+
+.mission-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mission-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.mission-item:hover:not(.locked) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #4A90E2;
+}
+
+.mission-item.completed {
+    border-color: #27AE60;
+    background: rgba(39, 174, 96, 0.1);
+}
+
+.mission-item.locked {
+    opacity: 0.5;
+}
+
+.mission-icon {
+    font-size: 24px;
+    width: 40px;
+    text-align: center;
+}
+
+.mission-info {
+    flex: 1;
+}
+
+.mission-info h4 {
+    color: #fff;
+    margin: 0 0 8px 0;
+    font-size: 18px;
+}
+
+.mission-info p {
+    color: #ccc;
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.mission-meta {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.mission-type {
+    background: #4A90E2;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.mission-difficulty {
+    color: #FFD700;
+    font-size: 14px;
+}
+
+.required-tag {
+    background: #E74C3C;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.optional-tag {
+    background: #666;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.mission-rewards {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    color: #FFD700;
+    font-size: 14px;
+}
+
+.mission-status .start-mission-btn {
+    background: #27AE60;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.mission-status .start-mission-btn:hover {
+    background: #229954;
+}
+
+.mission-status .completed-icon {
+    color: #27AE60;
+    font-size: 24px;
+}
+
+.mission-status .locked-icon {
+    color: #666;
+    font-size: 20px;
+}
+
+/* Mission Briefing */
+.mission-briefing {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    border: 2px solid #4A90E2;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.briefing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border-bottom: 1px solid #333;
+}
+
+.briefing-header h2 {
+    color: #FFD700;
+    margin: 0;
+    font-size: 22px;
+}
+
+.close-briefing {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
+.briefing-content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.mission-details h3 {
+    color: #FFD700;
+    margin: 0 0 10px 0;
+    font-size: 20px;
+}
+
+.mission-details p {
+    color: #ccc;
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+}
+
+.mission-info {
+    display: flex;
+    gap: 30px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.info-item .label {
+    color: #888;
+    font-size: 14px;
+}
+
+.info-item .value {
+    color: #fff;
+    font-weight: 500;
+}
+
+.difficulty-rating {
+    color: #FFD700;
+    font-size: 16px;
+}
+
+.mission-objectives h4,
+.mission-rewards h4,
+.loadout-selection h4 {
+    color: #FFD700;
+    margin: 0 0 15px 0;
+    font-size: 18px;
+}
+
+.mission-objectives ul {
+    color: #ccc;
+    margin: 0;
+    padding-left: 20px;
+}
+
+.mission-objectives li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.reward-items {
+    display: flex;
+    gap: 20px;
+}
+
+.reward-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+.reward-icon {
+    font-size: 20px;
+}
+
+.reward-value {
+    color: #FFD700;
+    font-weight: 500;
+}
+
+.current-ship {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #333;
+}
+
+.ship-preview {
+    width: 80px;
+    height: 60px;
+    background: #333;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+}
+
+.ship-stats {
+    flex: 1;
+    display: flex;
+    gap: 20px;
+}
+
+.ship-stats .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.ship-stats .label {
+    color: #888;
+    font-size: 12px;
+}
+
+.ship-stats .value {
+    color: #4A90E2;
+    font-weight: bold;
+}
+
+.modify-ship {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #333;
+    border-radius: 5px;
+    color: #fff;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modify-ship:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #4A90E2;
+}
+
+.briefing-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    padding: 20px 30px;
+    border-top: 1px solid #333;
+}
+
+.btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid #333;
+}
+
+.btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.btn.primary {
+    background: linear-gradient(135deg, #27AE60, #229954);
+    color: #fff;
+}
+
+.btn.primary:hover {
+    background: linear-gradient(135deg, #229954, #1E8449);
+}
+
+/* Story Dialog */
+.story-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dialog-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.dialog-content {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 2px solid #FFD700;
+    border-radius: 15px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+}
+
+.story-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid #333;
+}
+
+.story-header h3 {
+    color: #FFD700;
+    margin: 0;
+    font-size: 22px;
+}
+
+.story-body {
+    padding: 30px;
+}
+
+.story-body p {
+    color: #ccc;
+    margin: 0 0 30px 0;
+    line-height: 1.6;
+    font-size: 16px;
+}
+
+.story-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.story-choice-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #fff;
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    font-size: 15px;
+}
+
+.story-choice-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #4A90E2;
+}
+
+/* Campaign Progress Tracker */
+.campaign-progress {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    width: 300px;
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid #333;
+    border-radius: 10px;
+    z-index: 1000;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #333;
+}
+
+.progress-header h3 {
+    color: #FFD700;
+    margin: 0;
+    font-size: 16px;
+}
+
+.minimize-progress {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.progress-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.current-objective h4,
+.recent-achievements h4 {
+    color: #4A90E2;
+    margin: 0 0 10px 0;
+    font-size: 14px;
+}
+
+.current-objective p {
+    color: #ccc;
+    margin: 0 0 10px 0;
+    font-size: 14px;
+}
+
+.objective-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.objective-progress .progress-bar {
+    width: 150px;
+    height: 6px;
+}
+
+.objective-progress .progress-text {
+    color: #888;
+    font-size: 12px;
+}
+
+.achievement-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.achievement-item {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid #FFD700;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 12px;
+}
+
+.achievement-item .name {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+.achievement-item .description {
+    color: #ccc;
+    margin-top: 3px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .campaign-overview {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .player-stats {
+        flex-direction: row;
+        justify-content: space-around;
+    }
+}
+
+@media (max-width: 768px) {
+    .campaign-header {
+        padding: 15px 20px;
+    }
+    
+    .campaign-header h1 {
+        font-size: 22px;
+    }
+    
+    .campaign-selection {
+        padding: 15px 20px;
+    }
+    
+    .campaign-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .mission-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .mission-meta {
+        flex-wrap: wrap;
+    }
+    
+    .briefing-content {
+        padding: 20px;
+    }
+    
+    .mission-info {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .reward-items {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .current-ship {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .ship-stats {
+        justify-content: space-around;
+    }
+}
+
+/* Scrollbars */
+.chapter-list::-webkit-scrollbar,
+.mission-list::-webkit-scrollbar,
+.briefing-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chapter-list::-webkit-scrollbar-track,
+.mission-list::-webkit-scrollbar-track,
+.briefing-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.chapter-list::-webkit-scrollbar-thumb,
+.mission-list::-webkit-scrollbar-thumb,
+.briefing-content::-webkit-scrollbar-thumb {
+    background: #4A90E2;
+    border-radius: 4px;
+}
+
+/* Hidden state */
+.hidden {
+    display: none !important;
+}

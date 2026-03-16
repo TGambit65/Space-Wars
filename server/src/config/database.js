@@ -18,9 +18,9 @@ if (usePostgres) {
       dialect: 'postgres',
       logging: process.env.NODE_ENV === 'development' ? console.log : false,
       pool: {
-        max: 10,
-        min: 0,
-        acquire: 30000,
+        max: parseInt(process.env.DB_POOL_MAX) || 50,
+        min: parseInt(process.env.DB_POOL_MIN) || 5,
+        acquire: 60000,
         idle: 10000
       }
     }
@@ -30,7 +30,34 @@ if (usePostgres) {
   sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: path.join(__dirname, '../../data/spacewars.sqlite'),
-    logging: false  // Disable verbose SQL logging for cleaner output
+    logging: false,  // Disable verbose SQL logging for cleaner output
+    // SQLite handles concurrent writes poorly; keep a single connection and retry briefly on lock contention.
+    pool: {
+      max: 1,
+      min: 1,
+      idle: 10000,
+      acquire: 60000
+    },
+    retry: {
+      match: [/SQLITE_BUSY/],
+      max: 5
+    },
+    hooks: {
+      afterConnect: async (connection) => {
+        await new Promise((resolve, reject) => {
+          connection.run('PRAGMA journal_mode = WAL;', (err) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+        await new Promise((resolve, reject) => {
+          connection.run('PRAGMA busy_timeout = 5000;', (err) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+      }
+    }
   });
 }
 
@@ -61,4 +88,3 @@ module.exports = {
   connectDatabase,
   syncDatabase
 };
-

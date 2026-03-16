@@ -35,6 +35,8 @@ const eventRoutes = require('./eventRoutes');
 const outpostRoutes = require('./outpostRoutes');
 const shipTemplateRoutes = require('./shipTemplateRoutes');
 const cosmeticRoutes = require('./cosmeticRoutes');
+// Ground Combat
+const groundCombatRoutes = require('./groundCombatRoutes');
 // Fleet System
 const fleetRoutes = require('./fleet');
 // Admin
@@ -113,6 +115,8 @@ router.use('/events', eventRoutes);
 router.use('/outposts', outpostRoutes);
 router.use('/templates', shipTemplateRoutes);
 router.use('/cosmetics', cosmeticRoutes);
+// Ground Combat
+router.use('/ground-combat', groundCombatRoutes);
 // Fleet System
 router.use('/fleets', fleetRoutes);
 // Admin

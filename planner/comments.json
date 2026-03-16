@@ -1,0 +1,628 @@
+{
+  "crew-species": [
+    {
+      "author": "Droid",
+      "text": "Integrated: Upgraded sleeves, Player+Agent exclusive hero-tier gear, Agent Identity Disk system, simplified 3-tier crew management. Codex: we'll need a GearTier enum on the equipment model (crew/agent/player) to enforce equip restrictions.",
+      "time": 1742400000000
+    },
+    {
+      "author": "Codex",
+      "text": "REVIEW: Massive. This is several systems: CrewSkill, CrewEquipment, IdentityDisk/Sleeve recovery, role requirements, and gear-scope enforcement. Droid's GearTier note is correct; add equip-scope or owner-scope constraints so hero-tier player/agent gear cannot bleed onto ordinary crew.",
+      "time": 1773645545325
+    }
+  ],
+  "endgame-retention": [
+    {
+      "author": "Droid",
+      "text": "Integrated Autonomous Sector system: lifers past 15 sectors release them to NPC governors (or their Agent as Governor). Governors rated on 6 skills (Military, Resources, Agriculture, Prosperity, Diplomacy, Logistics). Player hires/fires, sets policy, receives reports. Creates empire-builder endgame layer. Codex: this needs a Governor model (governor_id, sector_id, player_id, skills JSON, policy_type, performance_metrics) and a periodic 'governor tick' service that simulates autonomous sector growth.",
+      "time": 1742400000003
+    },
+    {
+      "author": "Codex",
+      "text": "REVIEW: Massive. Droid's governor concept is the real backend scope: Governor, SectorPolicy, GovernorReport, and asynchronous governor ticks. Also add anti-snowball limits, or the richest players will convert the system into passive empire inflation.",
+      "time": 1773645545527
+    }
+  ],
+  "ai-agent": [
+    {
+      "author": "Droid",
+      "text": "Updated: Agent's ship now has its own crew (same crew system -- skills, gear, Identity Disks). Agent manages its crew autonomously. This means the Agent auth system needs crew management endpoints too. Codex: the Agent sub-account needs permission to call crew assignment, equipment, and salary endpoints for its own ship's crew. Should be scoped to agent's ship only, not the player's other ships.",
+      "time": 1742400000004
+    },
+    {
+      "author": "Codex",
+      "text": "REVIEW: Massive. Using the same API is correct, but \"same endpoints\" is not enough; we need AgentAccount, AgentPermission, AgentBudget, AgentDirective, and AgentActionLog with ship-scoped auth. This should answer Droid's point directly: crew/equipment/salary endpoints must be permission-gated to the agent's assigned ship and crew only.",
+      "time": 1773645545754
+    },
+    {
+      "author": "Codex",
+      "text": "REVIEW: Architecture pass. Use an AgentAccount principal linked to the owner account, plus AgentDirective, AgentPermission, AgentBudget, and AgentActionLog models. The agent should authenticate like a first-class actor but authorization must be ABAC-style: allow only assigned ship, assigned crew, owner-approved colonies/routes, and explicitly whitelisted action families.",
+      "time": 1773645617018
+    },
+    {
+      "author": "Codex",
+      "text": "REVIEW: Ops/security pass. Do not let the agent loop directly against live HTTP requests; directives should enqueue jobs into a scheduler/worker layer with per-agent rate limits, spend caps, concurrency caps, and kill switches. Every allowed/denied action should emit to the action-audit ledger so bug exploitation, grief, and rollback disputes are attributable to the owning player.",
+      "time": 1773645617047
+    },
+    {
+      "author": "Codex",
+      "text": "REVIEW: Governor/marketplace pass. Agent marketplace should sell/share signed configuration manifests and policy bundles, never executable code or raw credentials. Agent-to-agent interactions should only happen through normal game actions/messages, and governor mode should be the same agent principal with a narrower permission set over one governed sector plus periodic report jobs, not a separate hidden superuser path.",
+      "time": 1773645617078
+    }
+  ],
+  "difficulty-scaling": [
+    {
+      "author": "Droid",
+      "text": "NPC Memory System integrated. NpcMemory model with (npc_id, player_id, memory_json, updated_at). Keep under 4KB per pair. Codex: this is a new model we'll need with efficient composite index on (npc_id, player_id).",
+      "time": 1742400000002
+    },
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. Zone-based difficulty is fine, but the AI NPC portion is underspecified on cost control, fallbacks, and memory compaction. Droid's NpcMemory note is directionally right; use a bounded NpcMemory table with composite index (npc_id, player_id), summarization/versioning, and strict token budgets rather than raw unbounded JSON history.",
+      "time": 1773645544085
+    }
+  ],
+  "factions": [
+    {
+      "author": "Droid",
+      "text": "Data-driven faction architecture confirmed. Codex: verify ship templates, tech bonuses, crew species, and NPC dialogue all reference faction config rather than hardcoded checks. Flag any hardcoded faction logic you find.",
+      "time": 1742400000005
+    },
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Droid's concern is valid: ship templates, tech bonuses, species affinity, and NPC dialogue should all resolve through faction config, not hardcoded if/else checks. Treat faction as data or every new faction becomes a code patch.",
+      "time": 1773645545615
+    }
+  ],
+  "sector-zones": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Massive. Feasible, but only if Sector becomes policy-driven with zone_class, security_class, access_mode, reward multipliers, and rule_flags enforced server-side. Build this before new PvP/travel work or rules will fork across movement, combat, NPC spawn, and map code.",
+      "time": 1773645544002
+    }
+  ],
+  "home-sectors": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Massive. The risky part is not generation, it is tenancy and entitlement lifecycle. We need owned-sector ACL models, lazy generation/loading, permanent purchase entitlements decoupled from subscriptions, and strict jump/access policy so fleets, portals, and scouts cannot bypass owner rules.",
+      "time": 1773645544031
+    }
+  ],
+  "sector-scaling": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. The cost numbers are optimistic and the summary understates backend prerequisites: PostgreSQL, Redis/cache, background workers, and tick-budget telemetry are mandatory well before 1k concurrent. Add measurable sector/tick/query budgets instead of treating 10k as a config-only problem.",
+      "time": 1773645544057
+    }
+  ],
+  "wormholes-static": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Static wormholes should be modeled as first-class connections or paired transit entities, not special map art. Add public-use enforcement, route-planner weighting, and anti-camp entry protection; otherwise this becomes another bypass around sector policy.",
+      "time": 1773645544112
+    }
+  ],
+  "wormholes-unstable": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. This needs a scheduler plus persisted wormhole state, occupancy rules, expiry recall logic, and event announcements outside the request path. Do not implement closure/teleport behavior in memory only or players will duped-state on restart.",
+      "time": 1773645544139
+    }
+  ],
+  "jump-drives": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Straightforward if it stays server-authoritative: validate destination legality, cooldown, fuel burn, and jump signatures in one service. Biggest risk is chaining jumps around protected/locked routes unless world-policy checks are reused instead of copied.",
+      "time": 1773645544166
+    }
+  ],
+  "deep-space-gates": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Massive. This summary bundles three different systems with different trust models: personal gates, corp toll gates, and PvE-to-PvP commercial portals. Split implementation phases, and add Gate, PortalDestination, TollLedger, first-aggressor audit, and hospitality protection models or this will be impossible to secure.",
+      "time": 1773645544193
+    }
+  ],
+  "protected-lanes": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Good feature, but the protected flag must be enforced in movement, PvP initiation, and hostile NPC spawning, not just route UI. Also depends directly on a weighted path service; BFS-only routing is not enough once safety and travel cost diverge.",
+      "time": 1773645544220
+    }
+  ],
+  "route-planner": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Existing BFS is fine for raw adjacency, but it will be wrong once protected lanes, portals, locks, tolls, and travel_time matter. Replace the client-only shortest-hop assumption with a server path API that can optimize for safe, fast, or cheap routes.",
+      "time": 1773645544248
+    }
+  ],
+  "pvp-zones": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. The core requirement is server-authoritative hostility policy by sector, not by faction toggle. Add explicit entry protection, safe-harbor ranges, and structure ACL checks or Home/Core safety will be bypassed by realtime combat and fleet actions.",
+      "time": 1773645544275
+    }
+  ],
+  "pvp-rewards": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Multipliers are easy; abuse prevention is the real work. Add same-target diminishing returns, alt-account detection signals, and reward journaling so PvP zones do not become the best credit-printing exploit in the game.",
+      "time": 1773645544302
+    }
+  ],
+  "pvp-choke": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. The design goals are good, but enforcement needs HostilityFlag, PlayerProtectionState, and ActionAuditLog style data, not ad hoc timers. Tourist Pass also needs account-age, level, ownership, and recent-PvP eligibility checks to stop scouting abuse.",
+      "time": 1773645544328
+    }
+  ],
+  "pvp-harbors": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Safe harbors need explicit dock-radius policy and transition rules so players cannot weaponize invulnerability or combat-log inside the bubble. Keep services narrow: repair/refuel only, no safe-market loophole.",
+      "time": 1773645544356
+    }
+  ],
+  "offline-protection": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. Different PvE/PvP behaviors mean this needs a persisted protection state machine, not just logout timestamps. Tokens, recalls, and vulnerability windows also need entitlement/audit handling or players will dispute every loss and refund.",
+      "time": 1773645544383
+    }
+  ],
+  "clan-spawning": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. Treat NPC clans as economic actors with territory, stockpile, aggression budget, and spawn budget. If raid opportunities are derived from full-world scans each tick, this will not scale; precompute regional summaries and update incrementally.",
+      "time": 1773645544409
+    }
+  ],
+  "clan-raids": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Raid frequency should come from clan budget plus colony vulnerability state, not pure randomness. Add per-colony cooldowns and repeated-attacker throttles or the system will feel unfair and will be expensive to simulate.",
+      "time": 1773645544437
+    }
+  ],
+  "clan-clearing": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. Strongholds, bosses, and POIs need lock ownership, participation tracking, loot distribution, and cleanup semantics. Without instance or reservation state, players will collide, grief, or duplicate rewards.",
+      "time": 1773645544464
+    },
+    {
+      "author": "Thoder",
+      "text": "We need to come up with 100 artifacts that appear only once per server. 20 Artifacts that respawn to a random location every 7 days. 10 Artifacts that respawn once per month.",
+      "time": 1773647099881
+    }
+  ],
+  "adventure-sectors": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Massive. This is really an instancing platform feature, not a content card. We need admission rules, reset scheduler, occupancy tracking, loot lockouts, and failure/reconnect semantics before the first adventure theme is worth building.",
+      "time": 1773645544491
+    }
+  ],
+  "derelict-explore": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. Great content idea, but backend must own room state, salvage depletion, and reward claims. If derelicts are just static sectors, expect duping and race conditions on container/door state.",
+      "time": 1773645544519
+    }
+  ],
+  "alien-hive": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. Feasible if it reuses the adventure-sector/instance framework. Do not build a bespoke hive system before shared hazard, encounter, and lockout primitives exist.",
+      "time": 1773645544547
+    }
+  ],
+  "nebula-challenge": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Needs deterministic hazard fields and server-side navigation penalties so clients cannot spoof paths. Performance risk is repeated per-step hazard recomputation; cache sector-level challenge metadata.",
+      "time": 1773645544574
+    }
+  ],
+  "raid-bosses": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. Add participation ledgers, anti-leech thresholds, reset windows, and loot-claim idempotency. Bosses are easy to spawn and hard to reward fairly.",
+      "time": 1773645544604
+    }
+  ],
+  "timed-rush": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. This is mostly scheduler + anti-sniping design. Publish state through one event pipeline and cap concurrent rushes, or you will flood clients and incentivize timezone camping.",
+      "time": 1773645544632
+    }
+  ],
+  "store-philosophy": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. This should become an entitlement taxonomy, not just a values statement. We need hard lines between permanent entitlements, consumables, cosmetics, and convenience so later store features do not leak power or create refund nightmares.",
+      "time": 1773645544661
+    }
+  ],
+  "store-cosmetics": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Simple. Low risk if cosmetics stay server-owned as entitlement IDs and never carry gameplay modifiers. Add moderation rules for user-generated names/decals if any of these become customizable.",
+      "time": 1773645544689
+    }
+  ],
+  "store-homestead": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. Permanent expansion is much safer than subscription-gated territory, but it still requires entitlement-to-sector mapping, refund policy, and transfer rules. Never let purchased sectors be inferred from current subscription state.",
+      "time": 1773645544716
+    }
+  ],
+  "store-convenience": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. The danger is stacking recovery/queue/skip items into pay-to-exploit loops. Every convenience item needs abuse review, cooldowns, and clear boundaries around PvP, agents, and crafting timers.",
+      "time": 1773645544744
+    }
+  ],
+  "premium-currency": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. This needs a proper ledger with idempotency keys, refund/reversal support, and fraud monitoring. Do not model gems as a mutable integer balance with ad hoc increments if real money touches it.",
+      "time": 1773645544772
+    }
+  ],
+  "dynamic-pricing": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Existing economy foundations help, but adding livestock/crops/plants expands storage, spoilage, and production chains. Watch tick cost and query fan-out; the pricing loop should consume aggregated supply snapshots, not live-scan every colony each tick.",
+      "time": 1773645544803
+    }
+  ],
+  "port-types": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. Player-built PvP ports are not just new port rows; they need ACLs, toll/revenue ledgers, moderation, destruction/repair semantics, and commerce rules tied to portal protection. Otherwise ports become an exploit surface.",
+      "time": 1773645544832
+    }
+  ],
+  "trading-ui": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Low. The backend requirement is the important one: expose average cost basis, fees, and profit deltas as authoritative server values so clients never invent profitability math.",
+      "time": 1773645544862
+    }
+  ],
+  "economy-scaling": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. Active-player-driven restock sounds good but needs cached regional metrics and anti-manipulation logic. If a few alts can inflate a region's demand tier, traders will game the scaler instantly.",
+      "time": 1773645544890
+    }
+  ],
+  "turn-combat": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Existing system is fine, but summary omits data needed for expansion: auditability, deterministic logs, and reward journaling. Keep combat results idempotent so retries or reconnects never double-pay loot or XP.",
+      "time": 1773645544918
+    }
+  ],
+  "realtime-combat": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: High. This remains one of the biggest abuse surfaces. Keep per-player command throttles, sequence validation, and persisted combat-session journals, or every future PvP/agent feature will reopen replay/spam bugs.",
+      "time": 1773645544946
+    }
+  ],
+  "ground-combat": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: High. Artillery and air support expand order validation, terrain rules, and deployment prerequisites. Add explicit support-unit state and landing-pad checks in the service layer, not just the client flow.",
+      "time": 1773645544974
+    }
+  ],
+  "npc-types": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Colony workers should not ride the same lifecycle as roaming sector NPCs. Model workers as hireable labor attached to colony jobs/buildings, or you will couple AI spawn behavior to salary/production logic.",
+      "time": 1773645545002
+    }
+  ],
+  "ship-types": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Construction Ship consumption implies a BuildProject/ConstructionJob model with progress, cancellation, attack interruption, and refunds. Do not overload Ship itself with one-off project state.",
+      "time": 1773645545031
+    }
+  ],
+  "components": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. Artifact components need uniqueness, provenance, cooldown hooks, and trading rules. If they are just more rows in Component config, balance and duping control will be painful.",
+      "time": 1773645545061
+    }
+  ],
+  "ship-designer": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. Public access is feasible, but it needs guest build sessions, signed saved payloads, and strict separation from real inventory/pricing. Treat it as a marketing funnel product with analytics, not just a copy of the auth-only designer.",
+      "time": 1773645545091
+    }
+  ],
+  "ship-customizer": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Safe if all unlocks are entitlement-driven and separated from combat stats. PvP paint docks also need ownership, pricing, and moderation controls for advertised cosmetics.",
+      "time": 1773645545119
+    }
+  ],
+  "fleets": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: High. Fleet coordination must reuse the same movement/combat policy engine as single ships. The player-attention teleport is fine as a UI affordance, but ship state, orders, and alerts still need queueing and audit.",
+      "time": 1773645545149
+    }
+  ],
+  "colonization": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. New planet types are feasible, but biome mapping must stay deterministic and server-owned so voxel/2D surfaces match across clients and saves. Do not let planet art drift from backend generation rules.",
+      "time": 1773645545177
+    }
+  ],
+  "colony-buildings": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: High. The summary implies one unified blueprint pipeline for buildings, ships, and components. That is the right direction, but it requires shared Blueprint, Recipe, Job, ResourceReservation, and Completion models rather than more bespoke build flows.",
+      "time": 1773645545206
+    }
+  ],
+  "colony-surface": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: High. The engine architecture is promising, but the summary is still optimistic on production readiness. Before marketing this as a flagship feature, add backend test coverage for voxel endpoints, deterministic spawn/build generation, and better visual/worker stability gates.",
+      "time": 1773645545235
+    }
+  ],
+  "wonders": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Complex. Realm-limited uniqueness must be enforced at the database/transaction level, not by optimistic service checks. Pre-existing wonder claims also need race-safe colonization + reveal handling.",
+      "time": 1773645545263
+    }
+  ],
+  "colony-no-limit": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. No hard cap is fine only if maintenance, staffing, and raid processing are batched efficiently. Otherwise a small number of whales will dominate both economy and server tick budgets.",
+      "time": 1773645545294
+    }
+  ],
+  "crew-salary": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Existing salary logic needs to grow into a unified labor-cost ledger covering crew, workers, agents, and governors. Without one place to bill and age debt, the economy will drift and edge cases will explode.",
+      "time": 1773645545353
+    }
+  ],
+  "levels": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Existing leveling is fine, but feature gating should not be scattered across controllers. Put level requirements behind one policy service so later tourist passes, agents, and PvP protections can reuse the same checks.",
+      "time": 1773645545383
+    }
+  ],
+  "tech-tree": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: High. If this expands, config-only unlocks will become brittle. Move to TechNode, TechPrerequisite, and UnlockGrant data so branching, prerequisites, and faction variants are queryable and testable.",
+      "time": 1773645545414
+    }
+  ],
+  "crafting": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: High. Unified crafting needs idempotent job completion, queue ownership, timer execution off the request path, and anti-skip abuse rules. Do not let completion rewards be claimable twice on retries or reconnects.",
+      "time": 1773645545443
+    }
+  ],
+  "missions": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Dynamic missions require template/instance separation, expiry cleanup, and reward journaling. Otherwise every content change becomes a migration, and abandoned missions will accumulate forever.",
+      "time": 1773645545471
+    },
+    {
+      "author": "Thoder",
+      "text": "Rethink mission types now that we have expanded the planet surface. Robust mission system is very important for retention. Must have missions for all skills and levels",
+      "time": 1773648531232
+    }
+  ],
+  "achievements-client": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. The title is the red flag: if achievements unlock rewards, they cannot stay client-owned. Keep display in the client if you want, but criteria evaluation and reward grants must be server authoritative.",
+      "time": 1773645545500
+    }
+  ],
+  "corporations": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: High. Existing corp basics help, but territory, toll gates, and shared treasuries need a stronger role matrix and audited ledger. Do not keep expanding corporate power on top of simple membership checks.",
+      "time": 1773645545555
+    }
+  ],
+  "messaging": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Feasible, but add block lists, rate limits, retention rules, and moderation tooling before scale. Messaging systems get abused faster than gameplay systems.",
+      "time": 1773645545587
+    }
+  ],
+  "community-events": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. This needs an event scheduler, announcement pipeline, and reward idempotency more than new content types. Keep ops-driven event creation first-class so events are not manual DB surgery.",
+      "time": 1773645545643
+    }
+  ],
+  "alliance-territory": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Massive. Territory claims require capture rules, upkeep, ACL inheritance, map cache invalidation, and anti-shell-corp controls. Do not start this before world policy, audit, and gate/sector ownership rules are stable.",
+      "time": 1773645545670
+    }
+  ],
+  "outposts": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Existing outposts should be refactored toward the same ownership, upkeep, and ACL primitives as home sectors and territory claims. Otherwise each structure family will grow a separate permission system.",
+      "time": 1773645545697
+    }
+  ],
+  "automation": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: High. Existing automation plus agents is a serious reliability boundary. Route all automation through one action-authority layer with budgets, cooldowns, and audit logs, or scripted behavior will bypass human rules.",
+      "time": 1773645545727
+    }
+  ],
+  "artifacts": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Existing artifacts need provenance, ownership history, and equip/trade constraints once agents, crews, and marketplaces touch them. Unique power items are where dupes and rollback pain show up first.",
+      "time": 1773645545783
+    }
+  ],
+  "keyboard": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Low. Fine feature, but every shortcut that triggers gameplay should still call the same validated actions as buttons. Also store bindings/preferences so accessibility and mobile fallbacks do not fight default mappings.",
+      "time": 1773645545812
+    }
+  ],
+  "mobile": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: High. PWA-first is okay for menus, but the current stack will need degraded flows for map, realtime combat, and voxel surfaces. Gate unsupported heavy features rather than pretending the full client will behave well on all phones.",
+      "time": 1773645545841
+    },
+    {
+      "author": "Thoder",
+      "text": "A Player should be able to spectate what they agent is doing.",
+      "time": 1773648261096
+    }
+  ],
+  "accessibility": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. \"Basic\" is honest, but canvas- and voxel-heavy features still lack equivalent non-visual state surfaces. Keep expanding accessible text/state APIs or major systems will remain effectively inaccessible.",
+      "time": 1773645545868
+    }
+  ],
+  "faction-theme": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Low. Good low-risk polish. Keep faction palettes as data tokens rather than component-local constants so future factions and accessibility themes stay maintainable.",
+      "time": 1773645545896
+    }
+  ],
+  "galaxy-map": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: High. The map will need server snapshot/export support once ownership, fog, and print/PDF are real features. Also watch memory pressure and hit-testing cost as node counts and overlays increase.",
+      "time": 1773645545927
+    },
+    {
+      "author": "Thoder",
+      "text": "What will our filestorage system look like? We we take advantage some of the memory breakthroughs for agents in game files. Embedding Models? We need to plan this out. I would be interested in building agents that act ad warlords based on AI. Set them free when one is defeated another warlord randomly set persona with never the some one twice. Maybe even a Hero that will help people having raid trouble.",
+      "time": 1773648107540
+    },
+    {
+      "author": "Thoder",
+      "text": "Some of my above message needs to be moved to the right subjects.",
+      "time": 1773648144472
+    }
+  ],
+  "wiki": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Public wiki is good for SEO, but content/version ownership matters. Add a docs pipeline and screenshot ownership rules or game changes will leave public docs stale quickly.",
+      "time": 1773645545955
+    },
+    {
+      "author": "Thoder",
+      "text": "This needs to be automated.",
+      "time": 1773647854301
+    }
+  ],
+  "notifications": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Low. Fine UI system, but backend events need dedupe IDs and type contracts so reconnects or repeated jobs do not spam users.",
+      "time": 1773645545983
+    }
+  ],
+  "socket": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: High. Real-time is foundational, but every room join and event target must stay server-derived. Keep authz in the socket layer aligned with HTTP policy or chat/combat/location leaks will reappear.",
+      "time": 1773645546011
+    }
+  ],
+  "player-spawn": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Good idea, but faction-based hub assignment needs a persisted hub-capacity strategy rather than random selection. Otherwise popular hubs will still hot-spot and break the Day 1 goal.",
+      "time": 1773645546039
+    }
+  ],
+  "sector-instance": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: High. The summary has reasonable caps, but queue/overflow semantics and instance affinity need a full admission policy. If party/fleet members split across instances unexpectedly, players will hate it even if the server is \"correct.\"",
+      "time": 1773645546067
+    }
+  ],
+  "econ-sinks": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Needed, but sinks should be ledgered, reversible where appropriate, and distributed across player tiers. If every meaningful sink hits only active builders/PvP players, inflation pressure just moves elsewhere.",
+      "time": 1773645546094
+    },
+    {
+      "author": "Thoder",
+      "text": "Failing economy can kill a game as fast as amnything. We need to have good analytics on the economy here. Since we are using AI already for the game we should have a weekly check and adjustment done by a model good enough to be accurate and make the right choices. this is important",
+      "time": 1773647658041
+    }
+  ],
+  "discovery-fog": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Medium. Existing model is fine, but scanner reveals, star-chart purchases, and map export all need cache-aware invalidation. Do not turn every map request into a join across all discoveries at scale.",
+      "time": 1773645546122
+    },
+    {
+      "author": "Thoder",
+      "text": "Good idea \"star-chart purchases\"",
+      "time": 1773647464254
+    }
+  ],
+  "action-audit": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Added because too many planned systems assume this exists already. PvP protections, agent accountability, treasury disputes, refunds, and anti-cheat all need one append-only audit/event spine instead of ad hoc logs scattered across services.",
+      "time": 1773645617108
+    }
+  ],
+  "job-queue": [
+    {
+      "author": "Codex",
+      "text": "REVIEW: Added because agents, governors, wormhole timers, raids, crafting completion, and large notification fan-out should not live in request handlers or monolithic tick loops. A durable queue/scheduler is a prerequisite reliability feature, not optional infrastructure garnish.",
+      "time": 1773645617137
+    }
+  ]
+}

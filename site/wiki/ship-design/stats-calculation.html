@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stats Calculation Explained - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+</head>
+<body class="doc-container">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">← Ship Design</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="hull-selection.html" class="doc-nav-link">Hull Selection</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="component-installation.html" class="doc-nav-link">Components</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="stats-calculation.html" class="doc-nav-link active">Stats</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item">
+                <a href="index.html" class="doc-breadcrumb-link">Ship Design</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Stats Calculation</div>
+        </nav>
+        
+        <h1 class="doc-h1 holo-text">Stats Calculation Explained</h1>
+        
+        <p class="doc-lead">
+            Understand how ship statistics are calculated from hull base values and component bonuses. 
+            Master these formulas to optimize your ship designs for peak performance.
+        </p>
+
+        <!-- Calculation Overview -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Calculation System Overview</h2>
+            
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Stats Calculator System</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">FORMULA</span>
+                        <span class="terminal-output">Final_Stat = Hull_Base + Component_Bonuses + Synergy_Bonuses</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">MODIFIERS</span>
+                        <span class="terminal-output">Additive → Multiplicative → Percentage Bonuses</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">LIMITS</span>
+                        <span class="terminal-output">Some stats have minimum and maximum values</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-alert info">
+                <strong>Calculation Order:</strong> Base stats → Additive bonuses → Multiplicative bonuses → Percentage modifiers
+            </div>
+        </section>
+
+        <!-- Core Statistics -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Core Ship Statistics</h2>
+
+            <!-- Hull Points -->
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>❤️ Hull Points (HP)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p><strong>Function:</strong> Determines ship durability and survival in combat</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">BASE</span>
+                                <span class="terminal-output">Hull_Base_HP (varies by hull type)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ARMOR</span>
+                                <span class="terminal-output">+25 HP per Armor Plating component</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">HULL_MOD</span>
+                                <span class="terminal-output">+10% per Structural Reinforcement</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EXAMPLE</span>
+                                <span class="terminal-info">Fighter(100) + Armor(50) + 10% = 165 HP</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4 class="doc-h4">Hull Point Modifiers</h4>
+                    <ul class="doc-list">
+                        <li><strong>Armor Plating:</strong> +25 HP per component (additive)</li>
+                        <li><strong>Structural Reinforcement:</strong> +10% total HP (multiplicative)</li>
+                        <li><strong>Nanomaterial Hull:</strong> +15% total HP (multiplicative)</li>
+                        <li><strong>Battle Damage:</strong> Reduces maximum HP until repaired</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Speed -->
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🚀 Speed</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p><strong>Function:</strong> Determines travel speed and combat mobility</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">BASE</span>
+                                <span class="terminal-output">Hull_Base_Speed (varies by hull type)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ENGINES</span>
+                                <span class="terminal-output">+Engine_Rating per engine component</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">MASS</span>
+                                <span class="terminal-output">-1 speed per 100 units of cargo mass</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EXAMPLE</span>
+                                <span class="terminal-info">Fighter(8) + Ion_Drive(4) - Mass(1) = 11 Speed</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4 class="doc-h4">Speed Modifiers</h4>
+                    <ul class="doc-list">
+                        <li><strong>Engine Rating:</strong> Additive bonus based on engine type</li>
+                        <li><strong>Cargo Mass:</strong> -1 speed per 100 units (dynamic)</li>
+                        <li><strong>Thruster Boosters:</strong> +20% speed (multiplicative)</li>
+                        <li><strong>Damage:</strong> Engine damage reduces speed proportionally</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Maneuverability -->
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🎯 Maneuverability</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p><strong>Function:</strong> Affects evasion chance and weapon accuracy</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">BASE</span>
+                                <span class="terminal-output">Hull_Base_Maneuverability</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">THRUSTERS</span>
+                                <span class="terminal-output">+Thruster_Rating per maneuvering thruster</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">MASS_PENALTY</span>
+                                <span class="terminal-output">-0.5 per 100 units of total mass</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EXAMPLE</span>
+                                <span class="terminal-info">Fighter(9) + Thrusters(2) - Mass(0.5) = 10.5</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4 class="doc-h4">Maneuverability Factors</h4>
+                    <ul class="doc-list">
+                        <li><strong>Maneuvering Thrusters:</strong> Direct additive bonus</li>
+                        <li><strong>Total Mass:</strong> Includes hull, components, and cargo</li>
+                        <li><strong>Gyroscopic Stabilizers:</strong> +15% maneuverability</li>
+                        <li><strong>Pilot Skill:</strong> Can provide up to +20% bonus</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Power -->
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>⚡ Power Generation & Consumption</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p><strong>Function:</strong> Power balance determines which systems can operate simultaneously</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">GENERATION</span>
+                                <span class="terminal-output">Sum of all power system outputs</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">CONSUMPTION</span>
+                                <span class="terminal-output">Sum of all component power requirements</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">BALANCE</span>
+                                <span class="terminal-output">Generation - Consumption = Available Power</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">WARNING</span>
+                                <span class="terminal-warning">Negative balance disables components!</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4 class="doc-h4">Power System Rules</h4>
+                    <ul class="doc-list">
+                        <li><strong>Priority Systems:</strong> Life support and engines always have power</li>
+                        <li><strong>Optional Systems:</strong> Weapons and utilities shut down first</li>
+                        <li><strong>Power Efficiency:</strong> Some components reduce power consumption</li>
+                        <li><strong>Emergency Power:</strong> Battery backup for critical systems</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Cargo Capacity -->
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>📦 Cargo Capacity</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p><strong>Function:</strong> Maximum storage space for commodities and resources</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">BASE</span>
+                                <span class="terminal-output">Hull_Base_Cargo (varies significantly by hull)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">CARGO_BAYS</span>
+                                <span class="terminal-output">+Bay_Capacity per cargo bay component</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EFFICIENCY</span>
+                                <span class="terminal-output">Cargo management systems +10% total</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EXAMPLE</span>
+                                <span class="terminal-info">Freighter(200) + Bays(180) + 10% = 418 units</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4 class="doc-h4">Cargo Considerations</h4>
+                    <ul class="doc-list">
+                        <li><strong>Specialized Bays:</strong> Some cargo requires specific storage</li>
+                        <li><strong>Mass Impact:</strong> Full cargo reduces speed and maneuverability</li>
+                        <li><strong>Access Time:</strong> Larger cargo holds take longer to load/unload</li>
+                        <li><strong>Security:</strong> Secure cargo bays protect valuable goods</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Combat Statistics -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Combat Statistics</h2>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">Weapon Stats</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Damage:</strong> Base weapon damage + targeting bonuses</li>
+                            <li><strong>Accuracy:</strong> Base accuracy + computer bonuses</li>
+                            <li><strong>Rate of Fire:</strong> Shots per combat round</li>
+                            <li><strong>Range:</strong> Effective engagement distance</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">Defense Stats</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Shield Strength:</strong> Sum of all shield generators</li>
+                            <li><strong>Armor Rating:</strong> Physical damage reduction</li>
+                            <li><strong>Evasion:</strong> Based on maneuverability and pilot skill</li>
+                            <li><strong>Regeneration:</strong> Shield/hull repair rates</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Optimization Strategies -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Optimization Techniques</h2>
+            
+            <div class="doc-alert info">
+                <strong>Min-Maxing:</strong> Focus on maximizing key stats while accepting weaknesses in others.
+            </div>
+
+            <h3 class="doc-h3">Stat Prioritization by Role</h3>
+            
+            <div class="terminal-window">
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">COMBAT</span>
+                        <span class="terminal-output">Damage > Accuracy > Defense > Speed</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">TRADER</span>
+                        <span class="terminal-output">Cargo > Speed > Defense > Sensors</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">EXPLORER</span>
+                        <span class="terminal-output">Speed > Sensors > Range > Versatility</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">FLEET</span>
+                        <span class="terminal-output">Role_Primary > Communication > Coordination</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">Common Optimization Patterns</h3>
+            <ul class="doc-list">
+                <li><strong>Glass Cannon:</strong> Maximum damage, minimal defense</li>
+                <li><strong>Tank Build:</strong> Maximum survivability, moderate damage</li>
+                <li><strong>Speed Demon:</strong> Maximum speed and evasion</li>
+                <li><strong>Balanced Build:</strong> Good performance in all areas</li>
+                <li><strong>Specialist:</strong> Extreme focus on one specific role</li>
+            </ul>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="component-installation.html" class="doc-nav-link">← Component Installation</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="../trading/" class="doc-nav-link">Next Section: Trading Guide →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            console.log('Stats Calculation Guide loaded');
+        });
+    </script>
+</body>
+</html>

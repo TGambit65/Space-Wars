@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navigation - Space Wars 3000 Wiki</title>
+  <link rel="stylesheet" href="/css/wiki-theme.css">
+  <link rel="icon" href="/images/icons/icon-192x192.png">
+</head>
+<body>
+  <div id="reading-progress"></div>
+  <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">&#9776;</button>
+  <div class="wiki-layout">
+    <aside class="wiki-sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="/" class="sidebar-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+        <span>SW3K Wiki</span>
+      </a>
+      <div class="sidebar-badge">Knowledge Database</div>
+    </div>
+    <div class="sidebar-search">
+      <div class="sidebar-search-wrap">
+        <input type="text" placeholder="Search articles..." id="wiki-search" />
+      </div>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav"><div class="sidebar-category">
+      <div class="sidebar-category-title">Getting Started</div><a href="/wiki/getting-started/" class="sidebar-link">Getting Started</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Core Systems</div><a href="/wiki/navigation/" class="sidebar-link active">Navigation</a><a href="/wiki/ships/" class="sidebar-link">Ships</a><a href="/wiki/ship-designer/" class="sidebar-link">Ship Designer</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Economy</div><a href="/wiki/trading/" class="sidebar-link">Trading</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Combat</div><a href="/wiki/combat/" class="sidebar-link">Combat</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">World</div><a href="/wiki/planets/" class="sidebar-link">Planets</a><a href="/wiki/colonies/" class="sidebar-link">Colonies</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Crew & Progression</div><a href="/wiki/crew/" class="sidebar-link">Crew</a><a href="/wiki/progression/" class="sidebar-link">Progression</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Advanced</div><a href="/wiki/crafting/" class="sidebar-link">Crafting</a><a href="/wiki/missions/" class="sidebar-link">Missions</a><a href="/wiki/corporations/" class="sidebar-link">Corporations</a><a href="/wiki/automation/" class="sidebar-link">Automation</a><a href="/wiki/artifacts/" class="sidebar-link">Artifacts</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Guides</div><a href="/wiki/guide-new-player/" class="sidebar-link">New Player Guide</a><a href="/wiki/guide-trading/" class="sidebar-link">Trading Guide</a><a href="/wiki/guide-combat/" class="sidebar-link">Combat Guide</a><a href="/wiki/guide-colonization/" class="sidebar-link">Colonization Guide</a></div></nav>
+    <div class="sidebar-footer">
+      <a href="/">Home</a>
+      <a href="/play">Play Game</a>
+    </div>
+  </aside>
+    <main class="wiki-main">
+      <div class="wiki-content">
+        <nav class="wiki-breadcrumb">
+          <a href="/wiki/">Wiki</a>
+          <span class="sep">/</span>
+          <span>Core Systems</span>
+          <span class="sep">/</span>
+          <span class="current">Navigation</span>
+        </nav>
+        <header class="article-header">
+          <div class="article-category">Core Systems</div>
+          <h1 class="article-title">Navigation</h1>
+        </header>
+        
+        <article class="wiki-article">
+          <p>Space Wars 3000 features a procedurally generated galaxy with ~400 star systems arranged in a spiral pattern within a radius of 500 light-years.</p>
+<h2 id="galaxy-map">Galaxy Map</h2>
+<p>The <strong>Sector Map</strong> (<code>/map</code>) displays the entire galaxy as a 2D canvas view. Systems are shown as colored dots based on their star class, connected by hyperlane lines.</p>
+<h3 id="hyperlanes">Hyperlanes</h3>
+<p>Hyperlanes are the primary travel routes between star systems. They are generated using Delaunay triangulation, creating a natural-looking network. Each jump along a hyperlane costs fuel based on distance.</p>
+<h3 id="wormholes">Wormholes</h3>
+<p>Wormholes are rare long-distance connections that link distant parts of the galaxy. They appear as special connections on the map and allow rapid traversal across the galaxy.</p>
+<h3 id="jumping-between-systems">Jumping Between Systems</h3>
+<p>To travel:</p>
+<ol>
+<li>Open the Sector Map</li>
+<li>Click on a connected (adjacent) system</li>
+<li>Your ship will jump there, consuming fuel</li>
+</ol>
+<p>Fuel cost scales with distance. Upgrade your engines for better fuel efficiency.</p>
+<h2 id="system-view">System View</h2>
+<p>The <strong>System</strong> page (<code>/system</code>) shows a 3D orbital view of your current star system using Three.js rendering. You&#39;ll see:</p>
+<ul>
+<li><strong>The Star</strong> — rendered with a glow effect at the center</li>
+<li><strong>Planets</strong> — orbiting at their assigned positions (1–15 per system)</li>
+<li><strong>Ports</strong> — shown as octahedrons</li>
+<li><strong>NPCs</strong> — shown as cones</li>
+<li><strong>Your Ship</strong> — positioned near the star</li>
+</ul>
+<h3 id="scanning">Scanning</h3>
+<p>Unscanned planets appear as dim anonymous spheres labeled &quot;SIG-DETECTED&quot;. Use your ship&#39;s scanners to reveal planet details including:</p>
+<ul>
+<li>Planet type and habitability</li>
+<li>Available resources</li>
+<li>Whether the planet can be colonized</li>
+</ul>
+<p>Better scanners reveal more detail at greater range.</p>
+<h2 id="star-classes">Star Classes</h2>
+<p>Each system has a star class that determines its color, maximum planet count, and what types of planets are likely to appear.</p>
+<div class="table-wrap"><table><thead><tr><th>Star Class</th><th>Color</th><th>Max Planets</th><th>Likely Planet Types</th></tr></thead><tbody><tr><td>O (Blue Supergiant)</td><td>Blue</td><td>5</td><td>Barren, Volcanic, Gas Giant</td></tr><tr><td>B (Blue Giant)</td><td>Light Blue</td><td>7</td><td>Barren, Volcanic, Gas Giant, Crystalline</td></tr><tr><td>A (White)</td><td>White</td><td>8</td><td>Desert, Barren, Gas Giant, Ice</td></tr><tr><td>F (Yellow-White)</td><td>Pale Yellow</td><td>10</td><td>Terran, Oceanic, Desert, Gas Giant</td></tr><tr><td>G (Yellow)</td><td>Yellow</td><td>15</td><td>Terran, Oceanic, Jungle, Desert, Gas Giant</td></tr><tr><td>K (Orange)</td><td>Orange</td><td>12</td><td>Desert, Ice, Barren, Toxic, Gas Giant</td></tr><tr><td>M (Red Dwarf)</td><td>Red</td><td>8</td><td>Ice, Barren, Toxic, Volcanic</td></tr><tr><td>Neutron Star</td><td>Pale Blue</td><td>3</td><td>Barren, Crystalline</td></tr><tr><td>Black Hole</td><td>Purple</td><td>0</td><td>None</td></tr></tbody></table></div>
+<blockquote><p><strong>Tip</strong>: Class F and G stars are the best places to find habitable (Terran, Oceanic, Jungle) planets for colonization.</p>
+</blockquote>
+<h2 id="orbital-position">Orbital Position</h2>
+<p>Planets are placed at orbital positions 1–15 from the star. Position affects planet type:</p>
+<ul>
+<li><strong>Inner orbits (1–3)</strong> — Biased toward hot types (Volcanic, Desert, Barren)</li>
+<li><strong>Mid orbits (4–9)</strong> — Mixed types, best chance for habitable worlds</li>
+<li><strong>Outer orbits (10+)</strong> — Biased toward cold types (Ice, Gas Giant)</li>
+</ul>
+<h2 id="planet-naming">Planet Naming</h2>
+<p>Planets are named after their parent system followed by a Roman numeral based on orbital position. For example, the third planet orbiting &quot;Alpha Centauri&quot; would be <strong>Alpha Centauri III</strong>.</p>
+
+        </article>
+        <nav class="article-nav">
+          <a href="/wiki/getting-started/" class="nav-prev"><span class="nav-label">Previous</span><span class="nav-title">Getting Started</span></a>
+          <a href="/wiki/ships/" class="nav-next"><span class="nav-label">Next</span><span class="nav-title">Ships</span></a>
+        </nav>
+      </div>
+    </main>
+  </div>
+  <script>
+    // Reading progress
+    window.addEventListener('scroll', function() {
+      var h = document.documentElement;
+      var pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+      document.getElementById('reading-progress').style.width = Math.min(pct, 100) + '%';
+    });
+    // Sidebar toggle (mobile)
+    document.getElementById('sidebar-toggle').addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('open');
+    });
+    // Search filter
+    document.getElementById('wiki-search').addEventListener('input', function(e) {
+      var q = e.target.value.toLowerCase();
+      document.querySelectorAll('.sidebar-link').forEach(function(link) {
+        link.style.display = link.textContent.toLowerCase().includes(q) || !q ? '' : 'none';
+      });
+      document.querySelectorAll('.sidebar-category').forEach(function(cat) {
+        var visible = cat.querySelectorAll('.sidebar-link[style=""],.sidebar-link:not([style])');
+        cat.style.display = visible.length || !q ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>

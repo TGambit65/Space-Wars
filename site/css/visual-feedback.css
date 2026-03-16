@@ -1,0 +1,403 @@
+/* ==========================================================================
+   Space Wars 3000 - Visual Feedback Animation System
+   Consistent visual feedback patterns for user interactions
+   ========================================================================== */
+
+/* Hover effect animations */
+.doc-hover-glow {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.doc-hover-glow:hover {
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.doc-hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.doc-hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.doc-hover-scale {
+  transition: transform 0.3s ease;
+}
+
+.doc-hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.doc-hover-brightness {
+  transition: filter 0.3s ease;
+}
+
+.doc-hover-brightness:hover {
+  filter: brightness(1.2);
+}
+
+.doc-hover-border-glow {
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.doc-hover-border-glow:hover {
+  border-color: var(--doc-primary-color);
+  box-shadow: 
+    0 0 10px rgba(0, 255, 255, 0.3),
+    inset 0 0 10px rgba(0, 255, 255, 0.1);
+}
+
+/* Loading state animations */
+.doc-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.doc-loading::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--doc-primary-color);
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: doc-spin 1s linear infinite;
+  z-index: 10;
+}
+
+@keyframes doc-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.doc-loading-dots {
+  position: relative;
+}
+
+.doc-loading-dots::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -30px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--doc-primary-color);
+  animation: doc-loading-dots 1.4s infinite linear;
+  transform: translateY(-50%);
+}
+
+@keyframes doc-loading-dots {
+  0%, 20% {
+    box-shadow: 
+      0 0 var(--doc-primary-color),
+      8px 0 var(--doc-primary-color),
+      16px 0 var(--doc-primary-color);
+  }
+  40% {
+    box-shadow: 
+      0 0 var(--doc-primary-color),
+      8px 0 transparent,
+      16px 0 var(--doc-primary-color);
+  }
+  60% {
+    box-shadow: 
+      0 0 transparent,
+      8px 0 var(--doc-primary-color),
+      16px 0 transparent;
+  }
+  80%, 100% {
+    box-shadow: 
+      0 0 var(--doc-primary-color),
+      8px 0 transparent,
+      16px 0 var(--doc-primary-color);
+  }
+}
+
+.doc-loading-pulse {
+  animation: doc-pulse 2s ease-in-out infinite;
+}
+
+@keyframes doc-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+}
+
+/* Success/error state animations */
+.doc-success {
+  animation: doc-success-flash 0.6s ease;
+  border-color: #00aa00 !important;
+  box-shadow: 0 0 15px rgba(0, 170, 0, 0.3);
+}
+
+@keyframes doc-success-flash {
+  0% {
+    background-color: rgba(0, 170, 0, 0.3);
+    transform: scale(1);
+  }
+  50% {
+    background-color: rgba(0, 170, 0, 0.6);
+    transform: scale(1.02);
+  }
+  100% {
+    background-color: transparent;
+    transform: scale(1);
+  }
+}
+
+.doc-error {
+  animation: doc-error-shake 0.6s ease;
+  border-color: var(--doc-warning-color) !important;
+  box-shadow: 0 0 15px rgba(255, 64, 129, 0.3);
+}
+
+@keyframes doc-error-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+  20%, 40%, 60%, 80% { transform: translateX(3px); }
+}
+
+.doc-warning {
+  animation: doc-warning-glow 2s ease-in-out infinite;
+  border-color: var(--doc-accent-color) !important;
+}
+
+@keyframes doc-warning-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(255, 102, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 102, 0, 0.6);
+  }
+}
+
+/* Micro-interactions for user actions */
+.doc-click-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.doc-click-ripple::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+  pointer-events: none;
+}
+
+.doc-click-ripple:active::before {
+  width: 200px;
+  height: 200px;
+}
+
+.doc-button-press {
+  transition: all 0.1s ease;
+}
+
+.doc-button-press:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.doc-focus-ring {
+  transition: all 0.3s ease;
+}
+
+.doc-focus-ring:focus {
+  outline: none;
+  box-shadow: 
+    0 0 0 2px var(--doc-primary-color),
+    0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+/* Progress and completion animations */
+.doc-progress-bar {
+  width: 100%;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.doc-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--doc-primary-color), var(--doc-highlight-color));
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.doc-progress-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: doc-progress-shine 2s ease-in-out infinite;
+}
+
+@keyframes doc-progress-shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.doc-completion-check {
+  animation: doc-check-draw 0.8s ease forwards;
+}
+
+@keyframes doc-check-draw {
+  0% {
+    stroke-dasharray: 0, 100;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dasharray: 100, 0;
+    opacity: 1;
+  }
+}
+
+/* Attention-grabbing animations */
+.doc-pulse-attention {
+  animation: doc-pulse-attention 2s ease-in-out infinite;
+}
+
+@keyframes doc-pulse-attention {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+    transform: scale(1.02);
+  }
+}
+
+.doc-bounce-attention {
+  animation: doc-bounce 2s ease-in-out infinite;
+}
+
+@keyframes doc-bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+  60% {
+    transform: translateY(-3px);
+  }
+}
+
+.doc-glow-attention {
+  animation: doc-glow-cycle 3s ease-in-out infinite;
+}
+
+@keyframes doc-glow-cycle {
+  0%, 100% {
+    text-shadow: 0 0 5px var(--doc-primary-color);
+    color: var(--doc-primary-color);
+  }
+  33% {
+    text-shadow: 0 0 15px var(--doc-highlight-color);
+    color: var(--doc-highlight-color);
+  }
+  66% {
+    text-shadow: 0 0 15px var(--doc-accent-color);
+    color: var(--doc-accent-color);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .doc-hover-lift:hover,
+  .doc-hover-scale:hover {
+    transform: none;
+  }
+  
+  .doc-click-ripple::before {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* Accessibility and reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .doc-hover-glow:hover,
+  .doc-hover-lift:hover,
+  .doc-hover-scale:hover {
+    transform: none;
+  }
+  
+  .doc-loading::before,
+  .doc-loading-dots::after,
+  .doc-progress-fill::after {
+    animation: none;
+  }
+  
+  .doc-pulse-attention,
+  .doc-bounce-attention,
+  .doc-glow-attention {
+    animation: none;
+  }
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+  .doc-success {
+    border-color: #00ff00 !important;
+    background-color: rgba(0, 255, 0, 0.2);
+  }
+  
+  .doc-error {
+    border-color: #ff0000 !important;
+    background-color: rgba(255, 0, 0, 0.2);
+  }
+  
+  .doc-warning {
+    border-color: #ffff00 !important;
+    background-color: rgba(255, 255, 0, 0.2);
+  }
+  
+  .doc-focus-ring:focus {
+    box-shadow: 0 0 0 3px #ffffff;
+  }
+}

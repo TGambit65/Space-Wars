@@ -355,6 +355,9 @@ const SystemViewCanvas = ({
   currentShip,
   selectedEntityId,
   onEntityClick,
+  onEntityDoubleClick,
+  neighbors,
+  onEntityRightClick,
 }) => {
   const containerRef = useRef(null);
   const sceneRef = useRef(null);
@@ -368,6 +371,13 @@ const SystemViewCanvas = ({
   const sceneObjectsRef = useRef([]); // all disposable objects for cleanup
   const habLinesRef = useRef([]);
   const selectedRingRef = useRef(null);
+  const shipMeshRef = useRef(null);
+  const shipPulseRef = useRef(null);
+  const jumpPointObjectsRef = useRef([]);
+  const shipTargetPosRef = useRef(null); // Vector3 target for ship flight
+  const shipTrailRef = useRef(null); // engine trail line
+  const shipVelocityRef = useRef(new THREE.Vector3(0, 0, 0));
+  const shipSpeedRef = useRef(10); // derived from ship stats
 
   // Compute entity data from system detail
   const entityData = useMemo(() => {
@@ -412,6 +422,9 @@ const SystemViewCanvas = ({
     return { sector, starConfig, planets, ports, npcs };
   }, [systemDetail]);
 
+  // Memoize neighbors for buildScene dependency
+  const neighborsKey = useMemo(() => (neighbors || []).map(n => n.sector_id).join(','), [neighbors]);
+
   // Build/rebuild the scene when data changes
   const buildScene = useCallback(() => {
     if (!sceneRef.current || !entityData) return;
@@ -432,6 +445,16 @@ const SystemViewCanvas = ({
     planetObjectsRef.current = [];
     meshToEntityRef.current.clear();
     habLinesRef.current = [];
+    shipMeshRef.current = null;
+    shipPulseRef.current = null;
+    shipTargetPosRef.current = null;
+    if (shipTrailRef.current) {
+      scene.remove(shipTrailRef.current);
+      shipTrailRef.current.geometry?.dispose();
+      shipTrailRef.current.material?.dispose();
+      shipTrailRef.current = null;
+    }
+    jumpPointObjectsRef.current = [];
 
     const { sector, starConfig, planets, ports, npcs } = entityData;
     const isBlackHole = sector?.star_class === 'BlackHole';
@@ -671,7 +694,14 @@ const SystemViewCanvas = ({
 
     // --- Player ship near star ---
     if (currentShip) {
-      const shipGeo = new THREE.ConeGeometry(0.6, 2, 4);
+      // Derive in-system flight speed from ship's speed stat + engine components
+      // speed stat ranges from 10 (Ion Drive) to 50 (Hyperspace Drive)
+      // Map to visual in-system speed: slow, deliberate movement
+      const baseSpeed = currentShip.speed || 10;
+      shipSpeedRef.current = 0.3 + baseSpeed * 0.02; // 0.5 – 1.3 units/tick
+      shipVelocityRef.current.set(0, 0, 0);
+
+      const shipGeo = new THREE.ConeGeometry(1.0, 3, 6);
       const shipMat = new THREE.MeshPhongMaterial({
         color: 0x06b6d4,
         emissive: 0x06b6d4,
@@ -682,9 +712,126 @@ const SystemViewCanvas = ({
       shipMesh.position.set(starConfig.radius + 5, 2, 0);
       scene.add(shipMesh);
       sceneObjectsRef.current.push(shipMesh);
+      meshToEntityRef.current.set(shipMesh, { type: 'ship', entity: currentShip });
+      shipMeshRef.current = shipMesh;
+
+      // Pulsing cyan glow ring
+      const pulseGeo = new THREE.TorusGeometry(2.0, 0.1, 16, 64);
+      const pulseMat = new THREE.MeshBasicMaterial({
+        color: 0x06b6d4, transparent: true, opacity: 0.6,
+      });
+      const pulseRing = new THREE.Mesh(pulseGeo, pulseMat);
+      pulseRing.rotation.x = Math.PI / 2;
+      pulseRing.userData.isShipPulse = true;
+      shipMesh.add(pulseRing);
+      shipPulseRef.current = pulseRing;
+
+      // Ship name label
+      const shipLabelTex = createLabelTexture(currentShip.name, '#06b6d4');
+      const shipLabelMat = new THREE.SpriteMaterial({
+        map: shipLabelTex, transparent: true, depthTest: false,
+      });
+      const shipLabel = new THREE.Sprite(shipLabelMat);
+      shipLabel.scale.set(10, 2.5, 1);
+      shipLabel.position.set(0, 4, 0);
+      shipMesh.add(shipLabel);
     }
 
-  }, [entityData, currentShip]);
+    // --- Jump Points (connected systems) ---
+    const jumpNeighbors = neighbors || [];
+    if (jumpNeighbors.length > 0) {
+      const jumpRadius = 120;
+      const angleStep = (Math.PI * 2) / jumpNeighbors.length;
+
+      for (let i = 0; i < jumpNeighbors.length; i++) {
+        const neighbor = jumpNeighbors[i];
+        const angle = angleStep * i;
+        const px = Math.cos(angle) * jumpRadius;
+        const pz = Math.sin(angle) * jumpRadius;
+        const py = 5; // Above orbital plane
+
+        const laneKind = neighbor.lane_class || neighbor.connection_type;
+        const isWormhole = laneKind === 'wormhole';
+        const isPortal = laneKind === 'portal';
+        const isProtected = laneKind === 'protected';
+
+        let portalMesh;
+        if (isWormhole) {
+          // Wormhole: purple dodecahedron
+          const wormGeo = new THREE.DodecahedronGeometry(5, 0);
+          const wormMat = new THREE.MeshPhongMaterial({
+            color: 0x9b59b6, emissive: 0x9b59b6, emissiveIntensity: 0.4,
+            transparent: true, opacity: 0.8,
+          });
+          portalMesh = new THREE.Mesh(wormGeo, wormMat);
+        } else if (isPortal) {
+          const portalGeo = new THREE.TorusKnotGeometry(4.5, 0.9, 72, 10);
+          const portalMat = new THREE.MeshPhongMaterial({
+            color: 0xf97316, emissive: 0xf97316, emissiveIntensity: 0.45,
+            transparent: true, opacity: 0.85,
+          });
+          portalMesh = new THREE.Mesh(portalGeo, portalMat);
+        } else if (isProtected) {
+          const shieldGeo = new THREE.OctahedronGeometry(5.5, 0);
+          const shieldMat = new THREE.MeshPhongMaterial({
+            color: 0xbfdbfe, emissive: 0x60a5fa, emissiveIntensity: 0.35,
+            transparent: true, opacity: 0.75,
+          });
+          portalMesh = new THREE.Mesh(shieldGeo, shieldMat);
+        } else {
+          // Standard: cyan torus portal ring
+          const portalGeo = new THREE.TorusGeometry(5, 0.5, 16, 48);
+          const portalMat = new THREE.MeshPhongMaterial({
+            color: 0x06b6d4, emissive: 0x06b6d4, emissiveIntensity: 0.3,
+            transparent: true, opacity: 0.8,
+          });
+          portalMesh = new THREE.Mesh(portalGeo, portalMat);
+          // Orient torus facing outward from center
+          portalMesh.lookAt(0, py, 0);
+
+          // Glowing inner disc for visibility
+          const discGeo = new THREE.CircleGeometry(4.5, 32);
+          const discMat = new THREE.MeshBasicMaterial({
+            color: 0x06b6d4, transparent: true, opacity: 0.12,
+            side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+            depthWrite: false,
+          });
+          const disc = new THREE.Mesh(discGeo, discMat);
+          portalMesh.add(disc);
+        }
+        portalMesh.position.set(px, py, pz);
+        scene.add(portalMesh);
+        sceneObjectsRef.current.push(portalMesh);
+        meshToEntityRef.current.set(portalMesh, { type: 'jumpPoint', entity: neighbor });
+
+        // Destination label
+        const jpLabelTex = createLabelTexture(neighbor.name || `Sector ${neighbor.sector_id}`, isWormhole ? '#9b59b6' : '#06b6d4');
+        const jpLabelMat = new THREE.SpriteMaterial({
+          map: jpLabelTex, transparent: true, depthTest: false,
+        });
+        const jpLabel = new THREE.Sprite(jpLabelMat);
+        jpLabel.scale.set(14, 3.5, 1);
+        jpLabel.position.set(0, 8, 0);
+        portalMesh.add(jpLabel);
+
+        // Lane line from near star to jump point
+        const laneGeo = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(px * 0.08, 1, pz * 0.08),
+          new THREE.Vector3(px, py, pz),
+        ]);
+        const laneMat = new THREE.LineBasicMaterial({
+          color: isWormhole ? 0x9b59b6 : 0x06b6d4,
+          transparent: true, opacity: 0.25,
+        });
+        const lane = new THREE.Line(laneGeo, laneMat);
+        scene.add(lane);
+        sceneObjectsRef.current.push(lane);
+
+        jumpPointObjectsRef.current.push({ mesh: portalMesh, isWormhole });
+      }
+    }
+
+  }, [entityData, currentShip, neighborsKey]);
 
   // Initialize Three.js scene
   useEffect(() => {
@@ -716,6 +863,13 @@ const SystemViewCanvas = ({
     controls.dampingFactor = 0.05;
     controls.minDistance = 20;
     controls.maxDistance = 800;
+    controls.enablePan = true;
+    controls.enableZoom = true;
+    controls.enableRotate = true;
+    controls.touches = {
+      ONE: THREE.TOUCH.ROTATE,
+      TWO: THREE.TOUCH.DOLLY_PAN,
+    };
     controlsRef.current = controls;
 
     // Ambient light
@@ -756,6 +910,101 @@ const SystemViewCanvas = ({
             child.scale.set(s, s, s);
           }
         });
+      }
+
+      // Animate ship flight — velocity-based physics with gravity
+      if (shipMeshRef.current) {
+        const ship = shipMeshRef.current;
+        const vel = shipVelocityRef.current;
+        const maxSpeed = shipSpeedRef.current;
+        const GRAVITY_STRENGTH = 0.003; // gentle pull toward orbital plane (Y=0)
+        const DRAG = 0.985; // velocity damping when no target
+
+        if (shipTargetPosRef.current) {
+          const target = shipTargetPosRef.current;
+          const toTarget = new THREE.Vector3().subVectors(target, ship.position);
+          const dist = toTarget.length();
+
+          if (dist < 0.5) {
+            // Arrived
+            ship.position.copy(target);
+            shipTargetPosRef.current = null;
+            vel.set(0, 0, 0);
+            ship.rotation.set(-Math.PI / 2, 0, 0);
+            // Remove trail
+            if (shipTrailRef.current) {
+              scene.remove(shipTrailRef.current);
+              shipTrailRef.current.geometry?.dispose();
+              shipTrailRef.current.material?.dispose();
+              shipTrailRef.current = null;
+            }
+          } else {
+            // Thrust toward target — accelerate, don't teleport
+            const dir = toTarget.normalize();
+            // Decelerate when close to target (brake zone = 5x speed)
+            const brakeZone = maxSpeed * 5;
+            const throttle = dist < brakeZone ? (dist / brakeZone) * 0.6 + 0.1 : 1.0;
+            const accel = maxSpeed * 0.04 * throttle;
+            vel.addScaledVector(dir, accel);
+
+            // Apply gravity — pull toward Y=0 orbital plane (before clamp)
+            vel.y -= ship.position.y * GRAVITY_STRENGTH;
+
+            // Clamp velocity to max speed
+            if (vel.length() > maxSpeed) {
+              vel.normalize().multiplyScalar(maxSpeed);
+            }
+
+            // Move ship
+            ship.position.add(vel);
+
+            // Rotate ship to face velocity direction
+            if (vel.length() > 0.01) {
+              const flyDir = vel.clone().normalize();
+              const up = new THREE.Vector3(0, 1, 0);
+              const qTarget = new THREE.Quaternion().setFromUnitVectors(up, flyDir);
+              ship.quaternion.slerp(qTarget, 0.06);
+            }
+
+            // Engine trail
+            if (!shipTrailRef.current) {
+              const trailGeo = new THREE.BufferGeometry().setFromPoints([ship.position.clone(), ship.position.clone()]);
+              const trailMat = new THREE.LineBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.4 });
+              shipTrailRef.current = new THREE.Line(trailGeo, trailMat);
+              scene.add(shipTrailRef.current);
+            }
+            const positions = shipTrailRef.current.geometry.attributes.position;
+            positions.setXYZ(1, ship.position.x, ship.position.y, ship.position.z);
+            positions.needsUpdate = true;
+          }
+        } else {
+          // No target — apply gravity + drag (ship drifts and settles)
+          if (vel.length() > 0.001) {
+            vel.multiplyScalar(DRAG);
+            vel.y -= ship.position.y * GRAVITY_STRENGTH;
+            ship.position.add(vel);
+          } else if (Math.abs(ship.position.y) > 0.05) {
+            // Gentle gravity settle toward orbital plane even when still
+            ship.position.y *= (1 - GRAVITY_STRENGTH * 2);
+          }
+        }
+      }
+
+      // Animate ship pulse ring
+      if (shipPulseRef.current) {
+        const pulse = 0.3 + Math.sin(t * 60) * 0.3;
+        shipPulseRef.current.material.opacity = pulse;
+        const s = 1.0 + Math.sin(t * 60) * 0.1;
+        shipPulseRef.current.scale.set(s, s, s);
+      }
+
+      // Animate jump points
+      for (const jp of jumpPointObjectsRef.current) {
+        jp.mesh.rotation.y += 0.005;
+        if (jp.mesh.material) {
+          const emPulse = 0.2 + Math.sin(t * 40) * 0.15;
+          jp.mesh.material.emissiveIntensity = emPulse;
+        }
       }
 
       // Animate selection ring
@@ -813,35 +1062,99 @@ const SystemViewCanvas = ({
     }
   }, [selectedEntityId]);
 
-  // Click handler with raycasting
-  const handleClick = useCallback((e) => {
-    if (!rendererRef.current || !cameraRef.current) return;
+  // Raycast helper
+  const raycastEntities = useCallback((e) => {
+    if (!rendererRef.current || !cameraRef.current) return null;
     const rect = rendererRef.current.domElement.getBoundingClientRect();
     const mouse = new THREE.Vector2(
       ((e.clientX - rect.left) / rect.width) * 2 - 1,
       -((e.clientY - rect.top) / rect.height) * 2 + 1
     );
-
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse, cameraRef.current);
-
-    // Get all clickable meshes
     const clickables = Array.from(meshToEntityRef.current.keys());
     const hits = raycaster.intersectObjects(clickables);
-
     if (hits.length > 0) {
-      const hitData = meshToEntityRef.current.get(hits[0].object);
-      if (hitData) {
-        onEntityClick?.(hitData.type, hitData.entity);
+      return meshToEntityRef.current.get(hits[0].object) || null;
+    }
+    return null;
+  }, []);
+
+  // Get world position of a hit entity for ship flight target
+  const getEntityWorldPos = useCallback((hitObject, hitType) => {
+    if (!hitObject) return null;
+    // Don't fly to the star or to self
+    if (hitType === 'star' || hitType === 'ship') return null;
+    const pos = new THREE.Vector3();
+    hitObject.getWorldPosition(pos);
+    // Offset slightly so ship doesn't overlap the entity
+    const shipPos = shipMeshRef.current?.position;
+    if (shipPos) {
+      const dir = new THREE.Vector3().subVectors(shipPos, pos).normalize();
+      // For planets, offset more (they're bigger)
+      const offset = hitType === 'planet' ? 5 : hitType === 'jumpPoint' ? 6 : 3;
+      pos.add(dir.multiplyScalar(offset));
+    }
+    pos.y = 0.5; // near orbital plane, gravity will settle
+    return pos;
+  }, []);
+
+  // Click handler with raycasting (left-click selects entities only, no ship movement)
+  const handleClick = useCallback((e) => {
+    const hitData = raycastEntities(e);
+    if (hitData) {
+      onEntityClick?.(hitData.type, hitData.entity);
+    }
+  }, [onEntityClick, raycastEntities]);
+
+  // Double-click handler
+  const handleDoubleClick = useCallback((e) => {
+    const hitData = raycastEntities(e);
+    if (hitData) {
+      onEntityDoubleClick?.(hitData.type, hitData.entity);
+    }
+  }, [onEntityDoubleClick, raycastEntities]);
+
+  // Right-click handler for entities and empty space
+  const handleContextMenu = useCallback((e) => {
+    e.preventDefault();
+    const hitData = raycastEntities(e);
+    if (hitData) {
+      onEntityRightClick?.(hitData.type, hitData.entity);
+    } else if (shipMeshRef.current) {
+      // Right-click empty space — fly ship to that point on the orbital plane
+      if (!rendererRef.current || !cameraRef.current) return;
+      const rect = rendererRef.current.domElement.getBoundingClientRect();
+      const mouse = new THREE.Vector2(
+        ((e.clientX - rect.left) / rect.width) * 2 - 1,
+        -((e.clientY - rect.top) / rect.height) * 2 + 1
+      );
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(mouse, cameraRef.current);
+      const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+      const point = new THREE.Vector3();
+      if (raycaster.ray.intersectPlane(plane, point)) {
+        point.y = 0.5; // slight offset, gravity will settle ship down
+        shipTargetPosRef.current = point;
       }
     }
-  }, [onEntityClick]);
+  }, [raycastEntities, onEntityRightClick]);
+
+  // Hover cursor feedback
+  const handleMouseMove = useCallback((e) => {
+    if (!containerRef.current) return;
+    const hitData = raycastEntities(e);
+    containerRef.current.style.cursor = hitData ? 'pointer' : 'crosshair';
+  }, [raycastEntities]);
 
   return (
     <div
       ref={containerRef}
       className="w-full h-full"
       onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
+      onMouseMove={handleMouseMove}
+      onContextMenu={handleContextMenu}
       style={{ cursor: 'grab' }}
     />
   );

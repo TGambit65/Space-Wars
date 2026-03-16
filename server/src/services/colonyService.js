@@ -108,6 +108,15 @@ const colonizePlanet = async (planetId, userId, shipId, colonyName) => {
       developing_until: developingUntil
     }, { transaction });
 
+    // Clear active_ship_id if it points to the colony ship being consumed
+    if (user.active_ship_id === ship.ship_id) {
+      const otherShip = await Ship.findOne({
+        where: { owner_user_id: userId, ship_id: { [require('sequelize').Op.ne]: ship.ship_id }, is_active: true },
+        transaction
+      });
+      await user.update({ active_ship_id: otherShip ? otherShip.ship_id : null }, { transaction });
+    }
+
     // Consume the colony ship
     await ship.destroy({ transaction });
 

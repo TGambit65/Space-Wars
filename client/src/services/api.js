@@ -1,7 +1,9 @@
 import axios from 'axios';
+import { clearToken, getToken, redirectToGameLogin } from './session';
 
 const api = axios.create({
   baseURL: '/api',
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -9,7 +11,7 @@ const api = axios.create({
 
 // Add auth token to requests
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = getToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -24,9 +26,9 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       const requestUrl = error.config?.url || '';
       const isAuthEndpoint = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register');
-      if (!isAuthEndpoint) {
-        localStorage.removeItem('token');
-        window.location.href = '/';
+      if (!isAuthEndpoint && !error.config?.skipAuthRedirect) {
+        clearToken();
+        redirectToGameLogin();
       }
     }
     return Promise.reject(error);
@@ -37,7 +39,8 @@ api.interceptors.response.use(
 export const auth = {
   login: (username, password) => api.post('/auth/login', { username, password }),
   register: (data) => api.post('/auth/register', data),
-  getProfile: () => api.get('/auth/profile'),
+  logout: () => api.post('/auth/logout'),
+  getProfile: (config = {}) => api.get('/auth/profile', config),
   togglePvP: () => api.post('/auth/pvp-toggle'),
 };
 
@@ -78,6 +81,43 @@ export const colonies = {
   upgrade: (colonyId) => api.post(`/colonies/${colonyId}/upgrade`),
   abandon: (colonyId) => api.delete(`/colonies/${colonyId}`),
   getRaids: () => api.get('/colonies/raids'),
+  // Surface endpoints
+  getSurface: (colonyId) => api.get(`/colonies/${colonyId}/surface`),
+  initializeSurface: (colonyId) => api.post(`/colonies/${colonyId}/surface/initialize`),
+  placeBuilding: (colonyId, type, x, y) => api.post(`/colonies/${colonyId}/surface/place`, { building_type: type, grid_x: x, grid_y: y }),
+  moveBuilding: (colonyId, buildingId, x, y) => api.post(`/colonies/${colonyId}/surface/move`, { building_id: buildingId, grid_x: x, grid_y: y }),
+  undoPlacement: (colonyId, buildingId) => api.post(`/colonies/${colonyId}/surface/undo`, { building_id: buildingId }),
+  claimAnomaly: (colonyId, anomalyId) => api.post(`/colonies/${colonyId}/surface/anomaly`, { anomaly_id: anomalyId }),
+  repairBuildings: (colonyId, data) => api.post(`/colonies/${colonyId}/surface/repair`, data),
+  // Custom block endpoints
+  getBlocks: (colonyId) => api.get(`/colonies/${colonyId}/blocks`),
+  placeBlock: (colonyId, data) => api.post(`/colonies/${colonyId}/blocks`, data),
+  placeBlocks: (colonyId, blocks) => api.post(`/colonies/${colonyId}/blocks`, { blocks }),
+  removeBlock: (colonyId, blockId) => api.delete(`/colonies/${colonyId}/blocks`, { data: { block_id: blockId } }),
+  removeBlocks: (colonyId, blockIds) => api.delete(`/colonies/${colonyId}/blocks`, { data: { block_ids: blockIds } }),
+  // Phase 4 endpoints
+  getPublicSurface: (colonyId) => api.get(`/colonies/${colonyId}/surface/public`),
+  getLeaderboard: (sortBy = 'production', limit = 20) => api.get(`/colonies/leaderboard?sortBy=${sortBy}&limit=${limit}`),
+  getDailyQuests: () => api.get('/colonies/daily-quests'),
+  claimDailyQuest: (questId) => api.post(`/colonies/daily-quests/${questId}/claim`),
+  // Voxel 3D endpoints
+  getVoxelChunk: (colonyId, cx, cz) => api.get(`/colonies/${colonyId}/voxels/chunk?cx=${cx}&cz=${cz}`),
+  placeVoxel: (colonyId, data) => api.post(`/colonies/${colonyId}/voxels`, data),
+  removeVoxel: (colonyId, data) => api.delete(`/colonies/${colonyId}/voxels`, { data }),
+  bulkVoxelOp: (colonyId, ops) => api.post(`/colonies/${colonyId}/voxels/bulk`, { operations: ops }),
+};
+
+// Ground Combat
+export const groundCombatApi = {
+  trainUnit: (colonyId, unitType) => api.post('/ground-combat/train', { colony_id: colonyId, unit_type: unitType }),
+  getGarrison: (colonyId) => api.get(`/ground-combat/garrison/${colonyId}`),
+  setDefensePolicy: (colonyId, policy) => api.patch(`/ground-combat/policy/${colonyId}`, { policy }),
+  disbandUnit: (colonyId, unitId) => api.post(`/ground-combat/disband/${colonyId}`, { unit_id: unitId }),
+  getCombatHistory: (colonyId) => api.get(`/ground-combat/history/${colonyId}`),
+  initiateInvasion: (colonyId, shipId, unitIds) => api.post('/ground-combat/invade', { colony_id: colonyId, ship_id: shipId, unit_ids: unitIds }),
+  getCombatState: (instanceId) => api.get(`/ground-combat/${instanceId}`),
+  processCombatTurn: (instanceId, orders) => api.post(`/ground-combat/${instanceId}/orders`, { orders }),
+  retreat: (instanceId) => api.post(`/ground-combat/${instanceId}/retreat`),
 };
 
 // Crew
@@ -332,4 +372,3 @@ export const admin = {
 };
 
 export default api;
-

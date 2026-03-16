@@ -1,6 +1,7 @@
 const { Corporation, CorporationMember, User } = require('../models');
 const { sequelize } = require('../config/database');
 const config = require('../config');
+const economyAbuseService = require('./economyAbuseService');
 
 /**
  * Create a new corporation
@@ -336,11 +337,20 @@ const disbandCorporation = async (leaderId) => {
 /**
  * Contribute credits to corporation treasury
  */
-const contributeToTreasury = async (userId, amount) => {
+const contributeToTreasury = async (userId, amount, options = {}) => {
   if (amount <= 0) {
     const error = new Error('Amount must be positive');
     error.statusCode = 400;
     throw error;
+  }
+
+  const replay = await economyAbuseService.getReplayResult({
+    userId,
+    idempotencyKey: options.idempotencyKey,
+    transferType: 'corporation_treasury_contribution'
+  });
+  if (replay) {
+    return replay;
   }
 
   const transaction = await sequelize.transaction();
@@ -376,8 +386,23 @@ const contributeToTreasury = async (userId, amount) => {
       await member.update({ contribution: Number(member.contribution) + amount }, { transaction });
     }
 
+    const resultPayload = { treasury: Number(corp.treasury), contribution: Number(member?.contribution || 0) };
     await transaction.commit();
-    return { treasury: Number(corp.treasury), contribution: Number(member?.contribution || 0) };
+    await economyAbuseService.recordTransfer({
+      userId,
+      transferType: 'corporation_treasury_contribution',
+      sourceType: 'user',
+      sourceId: userId,
+      destinationType: 'corporation',
+      destinationId: user.corporation_id,
+      creditsAmount: amount,
+      idempotencyKey: options.idempotencyKey,
+      metadata: {
+        corporation_id: user.corporation_id
+      },
+      resultPayload
+    }).catch(() => null);
+    return resultPayload;
   } catch (err) {
     await transaction.rollback();
     throw err;
@@ -387,11 +412,20 @@ const contributeToTreasury = async (userId, amount) => {
 /**
  * Withdraw from treasury (leader only)
  */
-const withdrawFromTreasury = async (userId, amount) => {
+const withdrawFromTreasury = async (userId, amount, options = {}) => {
   if (amount <= 0) {
     const error = new Error('Amount must be positive');
     error.statusCode = 400;
     throw error;
+  }
+
+  const replay = await economyAbuseService.getReplayResult({
+    userId,
+    idempotencyKey: options.idempotencyKey,
+    transferType: 'corporation_treasury_withdrawal'
+  });
+  if (replay) {
+    return replay;
   }
 
   let corp;
@@ -417,13 +451,27 @@ const withdrawFromTreasury = async (userId, amount) => {
     const user = await User.findByPk(userId, { transaction, lock: true });
     await user.update({ credits: Number(user.credits) + amount }, { transaction });
     await corp.update({ treasury: Number(corp.treasury) - amount }, { transaction });
+    const resultPayload = { treasury: Number(corp.treasury) };
     await transaction.commit();
+    await economyAbuseService.recordTransfer({
+      userId,
+      transferType: 'corporation_treasury_withdrawal',
+      sourceType: 'corporation',
+      sourceId: corp.corporation_id,
+      destinationType: 'user',
+      destinationId: userId,
+      creditsAmount: amount,
+      idempotencyKey: options.idempotencyKey,
+      metadata: {
+        corporation_id: corp.corporation_id
+      },
+      resultPayload
+    }).catch(() => null);
+    return resultPayload;
   } catch (err) {
     await transaction.rollback();
     throw err;
   }
-
-  return { treasury: Number(corp.treasury) };
 };
 
 /**

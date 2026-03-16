@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Planning Guide - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+</head>
+<body class="doc-container">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">← Trading Guide</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="market-mechanics.html" class="doc-nav-link">Market Mechanics</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="route-planning.html" class="doc-nav-link active">Route Planning</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="profit-calculation.html" class="doc-nav-link">Profit Calculation</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item">
+                <a href="index.html" class="doc-breadcrumb-link">Trading Guide</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Route Planning Guide</div>
+        </nav>
+        
+        <h1 class="doc-h1 holo-text">Route Planning Guide</h1>
+        
+        <div class="doc-alert info">
+            <strong>Navigation Computer:</strong> Efficient route planning maximizes profit per time unit.
+        </div>
+
+        <p class="doc-lead">
+            Master the art of planning efficient trading routes. Learn to balance distance, fuel costs, 
+            cargo capacity, and risk to maximize your trading profits.
+        </p>
+
+        <!-- Route Planning Basics -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Route Planning Fundamentals</h2>
+            
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Route Optimization System</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">OBJECTIVE</span>
+                        <span class="terminal-output">Maximize: (Revenue - Costs) / Time</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">VARIABLES</span>
+                        <span class="terminal-output">Distance, Fuel, Cargo Value, Risk, Market Timing</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">CONSTRAINTS</span>
+                        <span class="terminal-output">Ship capacity, Fuel range, Market availability</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🗺️ Basic Route Types</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Point-to-Point Routes</h4>
+                    <p><strong>Best for:</strong> High-value, single commodity trading</p>
+                    <ul class="doc-list">
+                        <li>Direct path between two sectors</li>
+                        <li>Minimize travel time and fuel cost</li>
+                        <li>Simple profit calculation</li>
+                        <li>Lower risk exposure</li>
+                    </ul>
+
+                    <h4 class="doc-h4">Circuit Routes</h4>
+                    <p><strong>Best for:</strong> Multi-commodity trading with regular schedules</p>
+                    <ul class="doc-list">
+                        <li>Visit multiple sectors in sequence</li>
+                        <li>Buy and sell different commodities at each stop</li>
+                        <li>Return to starting point to repeat</li>
+                        <li>Maximize cargo utilization</li>
+                    </ul>
+
+                    <h4 class="doc-h4">Opportunistic Routes</h4>
+                    <p><strong>Best for:</strong> Experienced traders with market knowledge</p>
+                    <ul class="doc-list">
+                        <li>Flexible routing based on current market conditions</li>
+                        <li>Adapt to emerging opportunities</li>
+                        <li>Higher potential profits but more complex</li>
+                        <li>Requires excellent market intelligence</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>⚡ Fuel Efficiency Planning</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p>Fuel is both a cost and a constraint. Plan fuel consumption carefully:</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">FORMULA</span>
+                                <span class="terminal-output">Fuel_Cost = Distance × Ship_Consumption × Fuel_Price</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">RANGE</span>
+                                <span class="terminal-output">Max_Distance = Fuel_Capacity / Consumption_Rate</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">SAFETY</span>
+                                <span class="terminal-output">Always plan 20% fuel reserve for emergencies</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">Fuel Optimization Strategies</h4>
+                    <ul class="doc-list">
+                        <li><strong>Fuel Stops:</strong> Plan refueling at cheapest fuel stations</li>
+                        <li><strong>Ship Configuration:</strong> Use fuel-efficient engines for long routes</li>
+                        <li><strong>Cargo Weight:</strong> Heavy cargo increases fuel consumption</li>
+                        <li><strong>Flight Paths:</strong> Direct routes save fuel vs. detours</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Route Planning Tools -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Route Planning Tools and Techniques</h2>
+            
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">📡 Navigation Tools</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Sector Maps:</strong> Physical layout of space regions</li>
+                            <li><strong>Navigation Computer:</strong> Automated route calculation</li>
+                            <li><strong>Trade Scanner:</strong> Real-time commodity pricing</li>
+                            <li><strong>Communication Array:</strong> Market intelligence network</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">📊 Analysis Methods</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Profit Per Jump:</strong> Revenue divided by route segments</li>
+                            <li><strong>Time Efficiency:</strong> Credits earned per hour</li>
+                            <li><strong>Risk Assessment:</strong> Probability-weighted returns</li>
+                            <li><strong>Opportunity Cost:</strong> Compare alternative routes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">Manual Route Planning Process</h3>
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Planning Procedure</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STEP 1</span>
+                        <span class="terminal-output">Identify profitable price differences between sectors</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STEP 2</span>
+                        <span class="terminal-output">Calculate distance and fuel requirements</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STEP 3</span>
+                        <span class="terminal-output">Assess cargo capacity vs. commodity availability</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STEP 4</span>
+                        <span class="terminal-output">Evaluate security risks along route</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STEP 5</span>
+                        <span class="terminal-output">Calculate net profit and time requirements</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STEP 6</span>
+                        <span class="terminal-output">Compare with alternative routes</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Risk Assessment -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Risk Assessment and Mitigation</h2>
+            
+            <div class="doc-alert warning">
+                <strong>Risk Factors:</strong> Higher profit routes often involve higher risks.
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🚨 Security Risks</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Pirate Activity Zones</h4>
+                    <ul class="doc-list">
+                        <li><strong>Border Regions:</strong> Areas between major faction territories</li>
+                        <li><strong>Asteroid Fields:</strong> Natural hiding places for ambush</li>
+                        <li><strong>Remote Sectors:</strong> Low patrol frequency areas</li>
+                        <li><strong>Trade Lanes:</strong> High-traffic routes attract pirates</li>
+                    </ul>
+
+                    <h4 class="doc-h4">Risk Mitigation Strategies</h4>
+                    <ul class="doc-list">
+                        <li><strong>Convoy Travel:</strong> Travel with other traders for protection</li>
+                        <li><strong>Escort Hire:</strong> Pay for military protection</li>
+                        <li><strong>Route Variation:</strong> Use unpredictable paths</li>
+                        <li><strong>Speed Builds:</strong> Fast ships can outrun threats</li>
+                        <li><strong>Low Profile:</strong> Avoid carrying obviously valuable cargo</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>⚠️ Market Risks</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Price Volatility Factors</h4>
+                    <ul class="doc-list">
+                        <li><strong>Long Transit Times:</strong> Markets can change during travel</li>
+                        <li><strong>Competition:</strong> Other traders affecting prices</li>
+                        <li><strong>Market Events:</strong> Sudden supply/demand changes</li>
+                        <li><strong>Information Lag:</strong> Outdated market intelligence</li>
+                    </ul>
+
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">RULE</span>
+                                <span class="terminal-output">Longer routes = Higher price volatility risk</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">STRATEGY</span>
+                                <span class="terminal-output">Diversify cargo to spread market risk</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🔧 Operational Risks</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Equipment and Navigation Hazards</h4>
+                    <ul class="doc-list">
+                        <li><strong>Mechanical Failures:</strong> Engine or system breakdowns</li>
+                        <li><strong>Navigation Errors:</strong> Getting lost or taking wrong routes</li>
+                        <li><strong>Environmental Hazards:</strong> Stellar phenomena, asteroid fields</li>
+                        <li><strong>Fuel Shortages:</strong> Running out of fuel mid-route</li>
+                    </ul>
+
+                    <h4 class="doc-h4">Operational Risk Prevention</h4>
+                    <ul class="doc-list">
+                        <li><strong>Maintenance:</strong> Keep ship in good repair</li>
+                        <li><strong>Backup Systems:</strong> Redundant navigation and communication</li>
+                        <li><strong>Emergency Supplies:</strong> Extra fuel, parts, and provisions</li>
+                        <li><strong>Route Documentation:</strong> Detailed flight plans and backups</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Route Strategies -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Advanced Route Strategies</h2>
+            
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🔄 Multi-Stop Optimization</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <h4 class="doc-h4">Cargo Chain Planning</h4>
+                        <ul class="doc-list">
+                            <li>Buy at production center</li>
+                            <li>Sell at consumption center</li>
+                            <li>Buy different commodity for return trip</li>
+                            <li>Maximize cargo space utilization</li>
+                        </ul>
+                        
+                        <p><strong>Example:</strong> Agricultural world → Urban center → Industrial world → Agricultural world</p>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">⏰ Timing Optimization</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <h4 class="doc-h4">Market Timing Strategies</h4>
+                        <ul class="doc-list">
+                            <li>Arrive during high-demand periods</li>
+                            <li>Avoid oversupplied markets</li>
+                            <li>Coordinate with production cycles</li>
+                            <li>Account for travel time in planning</li>
+                        </ul>
+                        
+                        <div class="doc-alert info">
+                            <strong>Tip:</strong> Factor in 1-2 hour buffer for market changes.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">Route Optimization Algorithms</h3>
+            <div class="terminal-window">
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">SIMPLE</span>
+                        <span class="terminal-output">Highest profit margin per jump</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">TIME</span>
+                        <span class="terminal-output">Highest profit per hour traveled</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">RISK</span>
+                        <span class="terminal-output">Risk-adjusted returns (profit × safety)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">CAPACITY</span>
+                        <span class="terminal-output">Highest profit per cargo unit</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Route Planning Examples -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Practical Route Examples</h2>
+            
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🚀 Beginner Route: Agricultural Loop</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Route Analysis: Safe Agricultural Circuit</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ROUTE</span>
+                                <span class="terminal-output">Farm World → Mining Colony → Industrial Sector → Farm World</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">CARGO</span>
+                                <span class="terminal-output">Food → Mining Equipment → Manufactured Goods</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">DISTANCE</span>
+                                <span class="terminal-output">12 jumps total, 4 jumps per leg</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">PROFIT</span>
+                                <span class="terminal-output">8,000-12,000 credits per circuit</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">TIME</span>
+                                <span class="terminal-output">3-4 hours per complete circuit</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">RISK</span>
+                                <span class="terminal-output">Low - Well-patrolled sectors</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>💎 Advanced Route: Luxury Courier</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Route Analysis: High-Value Express</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ROUTE</span>
+                                <span class="terminal-output">Art Center → Wealthy Resort Colony</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">CARGO</span>
+                                <span class="terminal-output">Art Objects, Entertainment, Exotic Foods</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">DISTANCE</span>
+                                <span class="terminal-output">8 jumps direct path</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">PROFIT</span>
+                                <span class="terminal-output">25,000-40,000 credits per run</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">TIME</span>
+                                <span class="terminal-output">1.5-2 hours with fast ship</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">RISK</span>
+                                <span class="terminal-output">Medium - Valuable cargo attracts pirates</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="market-mechanics.html" class="doc-nav-link">← Market Mechanics</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="profit-calculation.html" class="doc-nav-link">Next: Profit Calculation →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            console.log('Route Planning Guide loaded');
+        });
+    </script>
+</body>
+</html>

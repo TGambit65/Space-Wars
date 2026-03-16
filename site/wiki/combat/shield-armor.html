@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shield & Armor Mechanics - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+    <script src="../../js/wiki-smart-navigation.js"></script>
+    <script src="../../js/wiki-interactive-features.js"></script>
+</head>
+<body class="doc-container combat-page">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">← Combat Guide</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="damage-calculation.html" class="doc-nav-link">Damage System</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="weapon-effectiveness.html" class="doc-nav-link">Weapons</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="shield-armor.html" class="doc-nav-link active">Defense</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item">
+                <a href="index.html" class="doc-breadcrumb-link">Combat Guide</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Shield & Armor Mechanics</div>
+        </nav>
+        
+        <h1 class="doc-h1 holo-text">🛡️ Shield & Armor Mechanics: Your Space Survival Guide!</h1>
+        
+        <div class="doc-alert info">
+            <strong>🏰 Defensive Systems Academy:</strong> Welcome to the complete guide on not exploding! 
+            Learn how shields and armor work together to keep you alive in space battles! 💫🚀
+        </div>
+
+        <p class="doc-lead">
+            In space, the difference between victory and becoming space dust often comes down to your defenses! 
+            Shields and armor aren't just health bars - they're complex systems with strengths, weaknesses, and 
+            cool interactions. Think of shields as your energy bubble and armor as your metal skin. Together, 
+            they create layers of protection that can turn you into an unstoppable space fortress! Let's learn 
+            how to never explode again! 🛡️⚡
+        </p>
+
+        <!-- Shield Mechanics -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">⚡ How Shields Work (Your Energy Bubble!)</h2>
+            
+            <div class="doc-alert accent">
+                <strong>🌟 Shield Basics:</strong> Shields are energy fields that absorb damage before it hits 
+                your ship. They regenerate over time but can be overloaded! Think of them as rechargeable armor! 🔋
+            </div>
+
+            <p>Shields are your first line of defense - they take damage so your ship doesn't have to! But shields 
+            aren't just simple hit points. They have special properties that make them amazing against some attacks 
+            and terrible against others! Let's dive into the science! 🔬</p>
+
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Shield System Properties</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">PROPERTY</span>
+                        <span class="terminal-output">DESCRIPTION | EFFECT</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-info">═══════════════════════════════════════════════════════</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">CAPACITY</span>
+                        <span class="terminal-output">Total shield HP | How much damage before failing</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">REGEN RATE</span>
+                        <span class="terminal-output">HP per second | How fast shields come back</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">REGEN DELAY</span>
+                        <span class="terminal-output">Seconds after hit | Wait time before regen starts</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">RESISTANCE</span>
+                        <span class="terminal-output">Damage reduction | % less damage from certain types</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🛡️ Shield Types Explained</h3>
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">⚡ Standard Shields</h4>
+                        <span class="doc-badge">Balanced</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p><strong>The All-Rounder!</strong></p>
+                        <ul class="doc-list">
+                            <li>💚 Capacity: 1000 HP</li>
+                            <li>🔄 Regen: 20 HP/sec</li>
+                            <li>⏱️ Delay: 3 seconds</li>
+                            <li>🛡️ No special resistances</li>
+                        </ul>
+                        <div class="doc-alert info">
+                            <strong>Best For:</strong> General combat, new pilots, versatile builds
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🌊 Adaptive Shields</h4>
+                        <span class="doc-badge accent">Smart Defense</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p><strong>The Learning Shield!</strong></p>
+                        <ul class="doc-list">
+                            <li>💚 Capacity: 800 HP</li>
+                            <li>🔄 Regen: 25 HP/sec</li>
+                            <li>⏱️ Delay: 2.5 seconds</li>
+                            <li>🧠 Adapts: +10% resist per hit type</li>
+                        </ul>
+                        <div class="doc-alert info">
+                            <strong>Best For:</strong> Long fights, smart pilots, anti-spam
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🔬 Advanced Shield Mechanics</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">⚡ Shield Regeneration Formula</h4>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Shield Regen Calculation</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">BASE REGEN</span>
+                                <span class="terminal-output">20 HP/second (standard shield)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">IN COMBAT</span>
+                                <span class="terminal-output">0 HP/second (hit in last 3 seconds)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">BOOSTED</span>
+                                <span class="terminal-output">40 HP/second (with shield booster)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">OVERCHARGED</span>
+                                <span class="terminal-output">60 HP/second (special ability)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">🌟 Shield Overload Effects</h4>
+                    <p>When shields take too much damage too fast, they can overload!</p>
+                    <ul class="doc-list">
+                        <li><strong>Overload Threshold:</strong> 50% capacity in 1 second</li>
+                        <li><strong>Overload Effect:</strong> Shields drop to 0 instantly</li>
+                        <li><strong>Recovery Time:</strong> 2x normal regen delay</li>
+                        <li><strong>Prevention:</strong> Layer shields or use capacitors</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Armor Mechanics -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🛡️ How Armor Works (Your Metal Skin!)</h2>
+            
+            <div class="doc-alert warning">
+                <strong>🔩 Armor Basics:</strong> Unlike shields, armor doesn't regenerate - but it provides 
+                consistent protection and can't be overloaded! Think of it as permanent damage reduction! 🏗️
+            </div>
+
+            <p>Armor is your ship's tough outer shell. While it doesn't regenerate like shields, armor provides 
+            reliable protection that works differently - it reduces incoming damage rather than absorbing it! 🛡️</p>
+
+            <h3 class="doc-h3">🔧 Armor Types & Properties</h3>
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Armor Comparison Matrix</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">ARMOR TYPE</span>
+                        <span class="terminal-output">DR% | WEIGHT | SPECIAL | WEAKNESS</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-info">════════════════════════════════════════════════════════</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">Standard</span>
+                        <span class="terminal-output">25% | Medium | None | Armor Piercing</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">Reactive</span>
+                        <span class="terminal-output">30% | Heavy | Anti-explosive | Energy</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">Ablative</span>
+                        <span class="terminal-output">40% | Light | Degrades | Sustained Fire</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">Composite</span>
+                        <span class="terminal-output">20% | Light | All-round | None</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🎯 Armor Penetration Mechanics</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">How Armor Penetration Works</h4>
+                    <p>Some weapons are designed to punch through armor like it's paper! Here's how it works:</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Penetration Calculation</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">STEP 1</span>
+                                <span class="terminal-output">Check weapon's AP (Armor Penetration) value</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">STEP 2</span>
+                                <span class="terminal-output">Compare to target's armor thickness</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">IF AP > ARMOR</span>
+                                <span class="terminal-output">Full damage bypasses armor!</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">IF AP < ARMOR</span>
+                                <span class="terminal-output">Damage reduced by armor %</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">🔫 Weapons with Armor Penetration</h4>
+                    <ul class="doc-list">
+                        <li><strong>Railgun:</strong> 80% AP - Goes through most armor</li>
+                        <li><strong>Gauss Cannon:</strong> 60% AP - Good vs medium armor</li>
+                        <li><strong>AP Missiles:</strong> 50% AP - Specialized rounds</li>
+                        <li><strong>Plasma:</strong> 30% AP - Some penetration</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Layered Defense Strategies -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🏰 Layered Defense Strategies</h2>
+            
+            <div class="doc-alert info">
+                <strong>🧅 Like an Onion:</strong> The best defense has multiple layers! Each layer protects 
+                against different threats, making you nearly invincible! 🛡️🛡️🛡️
+            </div>
+
+            <p>Smart pilots don't rely on just shields OR armor - they use both together in clever ways! 
+            Here are the best layered defense strategies used by legendary space captains! 🎖️</p>
+
+            <h3 class="doc-h3">🎯 Defense Layer Combinations</h3>
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🌟 The Classic Tank</h4>
+                        <span class="doc-badge secondary">Beginner Friendly</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p><strong>Layers:</strong></p>
+                        <ol class="doc-list">
+                            <li>Heavy Shields (1500 HP)</li>
+                            <li>Standard Armor (25% DR)</li>
+                            <li>Hull Reinforcement (+500 HP)</li>
+                        </ol>
+                        <div class="terminal-window">
+                            <div class="terminal-header">
+                                <span class="terminal-title">Damage Example</span>
+                            </div>
+                            <div class="terminal-content">
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">INCOMING</span>
+                                    <span class="terminal-output">1000 damage laser shot</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">SHIELDS</span>
+                                    <span class="terminal-output">Absorb all 1000 (500 shields left)</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">RESULT</span>
+                                    <span class="terminal-output">0 hull damage - still at 100%!</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">⚡ The Regenerator</h4>
+                        <span class="doc-badge accent">Advanced Build</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p><strong>Layers:</strong></p>
+                        <ol class="doc-list">
+                            <li>Fast-Regen Shields (800 HP, 40/sec)</li>
+                            <li>Nano-Repair Armor (15% DR, self-heal)</li>
+                            <li>Emergency Repair Drones</li>
+                        </ol>
+                        <div class="terminal-window">
+                            <div class="terminal-header">
+                                <span class="terminal-title">Sustained Combat</span>
+                            </div>
+                            <div class="terminal-content">
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">DPS IN</span>
+                                    <span class="terminal-output">50 damage/second</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">REGEN</span>
+                                    <span class="terminal-output">40 shield + 5 armor = 45/sec</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">NET</span>
+                                    <span class="terminal-output">Only 5 DPS gets through!</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🛡️ Advanced Layering Techniques</h3>
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🔄 Shield Cycling Strategy</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">How Shield Cycling Works</h4>
+                    <p>Use multiple shield generators that activate in sequence!</p>
+                    <ul class="doc-list">
+                        <li><strong>Primary Shield:</strong> Takes damage first</li>
+                        <li><strong>Secondary Shield:</strong> Activates when primary fails</li>
+                        <li><strong>Primary Regenerates:</strong> While secondary is active</li>
+                        <li><strong>Swap Back:</strong> Infinite shield regeneration!</li>
+                    </ul>
+                    <div class="doc-alert accent">
+                        <strong>🔄 Pro Tip:</strong> With 3 shield generators, you can have nearly 
+                        permanent shield coverage in extended fights!
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🎭 Damage Type Specialization</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Counter-Building for Specific Threats</h4>
+                    <div class="doc-grid doc-grid-3">
+                        <div>
+                            <h5 class="doc-h5">vs Energy Weapons</h5>
+                            <ul class="doc-list">
+                                <li>Reflective Shields (50% resist)</li>
+                                <li>Heat-Sink Armor</li>
+                                <li>Energy Dampeners</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5 class="doc-h5">vs Kinetic Weapons</h5>
+                            <ul class="doc-list">
+                                <li>Deflector Shields</li>
+                                <li>Reactive Armor (30% DR)</li>
+                                <li>Inertial Dampeners</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5 class="doc-h5">vs Explosives</h5>
+                            <ul class="doc-list">
+                                <li>Barrier Shields</li>
+                                <li>Spaced Armor</li>
+                                <li>Blast Dampeners</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Repair and Regeneration -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🔧 Repair & Regeneration Systems</h2>
+            
+            <p>Staying alive isn't just about having good defenses - it's about fixing them when they break! 
+            Let's learn about all the ways to heal your ship in combat and between fights! 🏥</p>
+
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Repair System Comparison</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">SYSTEM</span>
+                        <span class="terminal-output">RATE | COMBAT | COST | SPECIAL</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-info">═══════════════════════════════════════════════════════</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">Shield Regen</span>
+                        <span class="terminal-output">Fast | Yes* | Free | *After delay</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">Nano-Repair</span>
+                        <span class="terminal-output">Slow | Yes | Energy | Constant heal</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">Repair Drones</span>
+                        <span class="terminal-output">Med | Yes | Drones | Targeted repair</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">Station Repair</span>
+                        <span class="terminal-output">Fast | No | Credits | Full restore</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🏥 Combat Repair Options</h3>
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🤖 Repair Drones</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p><strong>Active healing in combat!</strong></p>
+                        <ul class="doc-list">
+                            <li>Heal Rate: 10-20 HP/second</li>
+                            <li>Can repair hull and systems</li>
+                            <li>Limited drone supply</li>
+                            <li>Can be shot down</li>
+                        </ul>
+                        <div class="doc-alert info">
+                            <strong>Best Use:</strong> Between combat waves or while kiting
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🧬 Nano-Repair Systems</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p><strong>Slow but steady healing!</strong></p>
+                        <ul class="doc-list">
+                            <li>Heal Rate: 5-10 HP/second</li>
+                            <li>Works on armor only</li>
+                            <li>Always active</li>
+                            <li>Uses ship power</li>
+                        </ul>
+                        <div class="doc-alert info">
+                            <strong>Best Use:</strong> Long battles and sieges
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">⚡ Emergency Defense Systems</h3>
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🚨 Panic Button Abilities</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">Emergency Shield Overcharge</h4>
+                    <ul class="doc-list">
+                        <li><strong>Effect:</strong> Instant +50% shield capacity for 10 seconds</li>
+                        <li><strong>Cooldown:</strong> 60 seconds</li>
+                        <li><strong>Best Use:</strong> Surviving alpha strikes</li>
+                    </ul>
+
+                    <h4 class="doc-h4">Armor Lock</h4>
+                    <ul class="doc-list">
+                        <li><strong>Effect:</strong> +90% damage reduction but can't move</li>
+                        <li><strong>Duration:</strong> 5 seconds</li>
+                        <li><strong>Best Use:</strong> Tanking massive damage spikes</li>
+                    </ul>
+
+                    <h4 class="doc-h4">Emergency Repairs</h4>
+                    <ul class="doc-list">
+                        <li><strong>Effect:</strong> Instant 30% hull repair</li>
+                        <li><strong>Cost:</strong> All remaining energy</li>
+                        <li><strong>Best Use:</strong> Last-second survival</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Defense Optimization -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🎯 Defense Optimization Guide</h2>
+            
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Defense Priority Calculator</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">YOUR PLAYSTYLE</span>
+                        <span class="terminal-output">RECOMMENDED DEFENSE SETUP</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-info">═══════════════════════════════════════════════════</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">Hit & Run</span>
+                        <span class="terminal-output">Fast shields + light armor + speed</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">Brawler</span>
+                        <span class="terminal-output">Heavy armor + repair systems + HP</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">Sniper</span>
+                        <span class="terminal-output">Adaptive shields + stealth + range</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">Tank</span>
+                        <span class="terminal-output">Max shields + max armor + regen</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🏆 Golden Rules of Defense</h3>
+            <ul class="doc-list">
+                <li>🛡️ Shields for burst damage, armor for sustained damage</li>
+                <li>🔄 Always have some form of regeneration</li>
+                <li>⚖️ Balance defense with mobility - can't tank everything</li>
+                <li>🎯 Specialize against your biggest threats</li>
+                <li>💰 Good defense saves money on repairs</li>
+                <li>🧠 Know when to run - best defense is not getting hit!</li>
+            </ul>
+        </section>
+
+        <!-- Cross-References -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🔗 Master Defensive Ship Design</h2>
+            
+            <div class="doc-alert info">
+                <strong>🛡️ Defense Integration:</strong> Understanding shields and armor is crucial for survival! 
+                These guides will help you design ships that can take a beating and keep fighting.
+            </div>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🛠️ Defensive Ship Design</h3>
+                        <span class="doc-badge warning">Build for Survival</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Design ships with optimal defense systems:</p>
+                        <ul class="doc-list">
+                            <li><a href="../ship-design/ship-builds.html">Tank Builds</a> - Heavy defense ship configurations</li>
+                            <li><a href="../ship-design/optimization-guide.html">EHP Optimization</a> - Maximize effective hit points</li>
+                            <li><a href="../ship-design/comparison-charts.html">Hull Defense Ratings</a> - Which hulls excel at defense</li>
+                        </ul>
+                        <div class="doc-alert accent">
+                            <strong>💡 Design Tip:</strong> Layer your defenses - shields first, then armor, then hull!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">⚔️ Countering Enemy Weapons</h3>
+                        <span class="doc-badge secondary">Tactical Defense</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Use defensive knowledge to counter enemy attacks:</p>
+                        <ul class="doc-list">
+                            <li><a href="weapon-effectiveness.html">Weapon Effectiveness</a> - Know which weapons threaten your defenses</li>
+                            <li><a href="damage-calculation.html">Damage Math</a> - Calculate how long you can survive</li>
+                            <li><a href="../navigation/sector-movement.html">Evasive Maneuvering</a> - Position to minimize damage</li>
+                        </ul>
+                        <div class="doc-alert secondary">
+                            <strong>🎯 Tactical Tip:</strong> Different damage types require different defensive strategies!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🏛️ Faction Defense Specialties</h3>
+                        <span class="doc-badge">Defensive Advantages</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Leverage faction-specific defensive technologies:</p>
+                        <ul class="doc-list">
+                            <li><a href="../factions/terran-federation.html">Terran Armor</a> - Reliable composite armor systems</li>
+                            <li><a href="../factions/zynthian-collective.html">Zynthian Regeneration</a> - Self-healing bio-armor</li>
+                            <li><a href="../factions/nexus-syndicate.html">Nexus Shields</a> - Advanced energy barriers</li>
+                        </ul>
+                        <div class="doc-alert info">
+                            <strong>🎯 Faction Tip:</strong> Zynthian ships regenerate 1% hull per minute automatically!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">💰 Defense Economics</h3>
+                        <span class="doc-badge accent">Survival Pays</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Turn your defensive expertise into profit:</p>
+                        <ul class="doc-list">
+                            <li><a href="../trading/risk-reward-analysis.html">Dangerous Route Defense</a> - Survive high-risk, high-reward trading</li>
+                            <li><a href="../trading/trade-routes.html">Escort Tank Builds</a> - Protect traders for profit</li>
+                            <li><a href="../trading/beginner-trading.html">Safe Trading Ships</a> - Defensive trading designs</li>
+                        </ul>
+                        <div class="doc-alert accent">
+                            <strong>💰 Profit Tip:</strong> Well-defended ships can run dangerous routes worth 3x normal profit!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="weapon-effectiveness.html" class="doc-nav-link">← Weapons Guide</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="../trading/market-mechanics.html" class="doc-nav-link">Next: Market Mechanics →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            console.log('Shield & Armor Mechanics loaded');
+        });
+    </script>
+</body>
+</html>

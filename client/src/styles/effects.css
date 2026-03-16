@@ -1,0 +1,383 @@
+/* =============================================================
+   Holographic Effect Utilities — Space Wars 3000
+   Ported from old repo's holographic-effects.css + terminal-components.css
+   ============================================================= */
+
+/* --- Holographic Panel --- */
+.holo-panel {
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.15), inset 0 0 20px rgba(0, 255, 255, 0.05);
+  backdrop-filter: blur(2px);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.holo-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 255, 255, 0.06),
+    transparent
+  );
+  animation: holo-sweep 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* --- Glass Morphism --- */
+.holo-glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px) brightness(110%);
+  -webkit-backdrop-filter: blur(20px) brightness(110%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+/* --- CRT Scanlines --- */
+.holo-scanlines {
+  position: relative;
+}
+
+.holo-scanlines::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 255, 255, 0.03) 2px,
+    rgba(0, 255, 255, 0.03) 3px
+  );
+  animation: holo-scanlines-move 2s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* --- Animated Gradient Border --- */
+.holo-border {
+  position: relative;
+  border-radius: 8px;
+}
+
+.holo-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    90deg,
+    #00ffff,
+    #8b5cf6,
+    #ff6600,
+    #ff69b4,
+    #00ffff
+  );
+  background-size: 400% 100%;
+  animation: holo-border-rotate 3s linear infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* --- Holographic Text --- */
+.holo-text {
+  color: #00ffff;
+  text-shadow:
+    0 0 5px rgba(0, 255, 255, 0.5),
+    0 0 10px rgba(0, 255, 255, 0.3),
+    0 0 20px rgba(0, 255, 255, 0.15);
+  animation: holo-text-flicker 2s ease-in-out infinite;
+}
+
+/* --- Holographic Button (shared base) --- */
+.holo-button,
+.holo-button-orange,
+.holo-button-danger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  border-radius: 6px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.holo-button:disabled,
+.holo-button-orange:disabled,
+.holo-button-danger:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.holo-button {
+  border: 1px solid rgba(0, 255, 255, 0.4);
+  background: rgba(0, 255, 255, 0.08);
+  color: #00ffff;
+}
+
+.holo-button:hover {
+  background: rgba(0, 255, 255, 0.15);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  transform: translateY(-1px);
+  border-color: rgba(0, 255, 255, 0.6);
+}
+
+.holo-button:active {
+  transform: translateY(0);
+}
+
+.holo-button::before,
+.holo-button-orange::before,
+.holo-button-danger::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  transition: none;
+}
+
+.holo-button::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 255, 255, 0.15),
+    transparent
+  );
+}
+
+.holo-button:hover::before,
+.holo-button-orange:hover::before,
+.holo-button-danger:hover::before {
+  animation: shine 1.5s ease-in-out;
+}
+
+/* --- Orange variant --- */
+.holo-button-orange {
+  border: 1px solid rgba(255, 102, 0, 0.4);
+  background: rgba(255, 102, 0, 0.08);
+  color: #ff6600;
+}
+
+.holo-button-orange:hover {
+  background: rgba(255, 102, 0, 0.15);
+  box-shadow: 0 0 20px rgba(255, 102, 0, 0.3);
+  transform: translateY(-1px);
+  border-color: rgba(255, 102, 0, 0.6);
+}
+
+.holo-button-orange:active {
+  transform: translateY(0);
+}
+
+.holo-button-orange::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 102, 0, 0.15),
+    transparent
+  );
+}
+
+/* --- Danger variant --- */
+.holo-button-danger {
+  border: 1px solid rgba(244, 67, 54, 0.4);
+  background: rgba(244, 67, 54, 0.08);
+  color: #f44336;
+}
+
+.holo-button-danger:hover {
+  background: rgba(244, 67, 54, 0.15);
+  box-shadow: 0 0 20px rgba(244, 67, 54, 0.3);
+  transform: translateY(-1px);
+  border-color: rgba(244, 67, 54, 0.6);
+}
+
+.holo-button-danger:active {
+  transform: translateY(0);
+}
+
+/* --- Sweep pseudo-element (standalone utility) --- */
+.holo-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.holo-sweep::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 255, 255, 0.06),
+    transparent
+  );
+  animation: holo-sweep 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* --- Pulse glow (for highlighted elements) --- */
+.holo-pulse {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* --- Terminal window (for logs, data displays) --- */
+.terminal-window {
+  background: #000;
+  border: 2px solid rgba(0, 255, 255, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+  font-family: 'Courier New', Monaco, monospace;
+  font-size: 0.9rem;
+  overflow: hidden;
+}
+
+.terminal-header {
+  background: linear-gradient(135deg, #1a237e 0%, #0d1557 100%);
+  border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.terminal-title {
+  color: #00ffff;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.terminal-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.terminal-controls span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.terminal-controls .close { background: #ff4444; }
+.terminal-controls .minimize { background: #ffaa00; }
+.terminal-controls .maximize { background: #00aa00; }
+
+.terminal-content {
+  padding: 1rem;
+  color: #00ff00;
+  line-height: 1.5;
+}
+
+/* =============================================================
+   Keyframes
+   ============================================================= */
+
+@keyframes holo-sweep {
+  0%, 100% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes holo-scanlines-move {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(4px); }
+}
+
+@keyframes holo-text-flicker {
+  0%, 100% {
+    opacity: 1;
+    text-shadow:
+      0 0 5px rgba(0, 255, 255, 0.5),
+      0 0 10px rgba(0, 255, 255, 0.3),
+      0 0 20px rgba(0, 255, 255, 0.15);
+  }
+  50% {
+    opacity: 0.85;
+    text-shadow:
+      0 0 3px rgba(0, 255, 255, 0.4),
+      0 0 6px rgba(0, 255, 255, 0.2);
+  }
+}
+
+@keyframes holo-border-rotate {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.2); }
+  50% { box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
+}
+
+/* =============================================================
+   Accessibility — Reduced Motion
+   ============================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .holo-panel::before,
+  .holo-sweep::before,
+  .holo-button::before {
+    animation: none;
+  }
+
+  .holo-scanlines::after {
+    animation: none;
+  }
+
+  .holo-border::before {
+    animation: none;
+  }
+
+  .holo-text {
+    animation: none;
+  }
+
+  .holo-button:hover,
+  .holo-button-orange:hover,
+  .holo-button-danger:hover {
+    transform: none;
+  }
+
+  .holo-pulse {
+    animation: none;
+  }
+}

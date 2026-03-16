@@ -9,7 +9,8 @@ const automationService = require('./automationService');
 const missionService = require('./missionService');
 const { NPC, Ship, Port, User } = require('../models');
 const { Op, col } = require('sequelize');
-const { getAdjacentSectorIds, getPortSectorIds } = require('./sectorGraphService');
+const { getAdjacentSectorIds, getPortSectorIds, buildAdjacencyMap } = require('./sectorGraphService');
+const groupBy = require('../utils/groupBy');
 const config = require('../config');
 
 // ─── Module State ────────────────────────────────────────────────
@@ -131,14 +132,17 @@ const processTacticalTick = async () => {
 
     const difficulty = Number(gameSettingsService.getSetting('npc.difficulty', 3));
 
-    // Process each NPC sequentially
+    // ── Batch pre-fetch all context data (replaces per-NPC queries) ──
+    const tickCache = await buildBatchTickCache(npcs, difficulty);
+
+    // Process each NPC sequentially (actions may mutate DB)
     for (const npc of npcs) {
       try {
         // Skip NPCs in active dialogue
         if (npc.dialogue_state && npc.dialogue_state.active) continue;
 
-        // Build context for this NPC
-        const context = await buildTickContext(npc, difficulty);
+        // Build context from pre-fetched cache (no DB queries)
+        const context = buildTickContextFromCache(npc, tickCache);
 
         // Get scripted decision from behavior tree
         let decision = await behaviorTreeService.evaluateNPCDecision(npc, context);
@@ -420,84 +424,73 @@ const processAutomationTick = async () => {
   }
 };
 
-// ─── Context Builder ─────────────────────────────────────────────
+// ─── Batch Context Builder ───────────────────────────────────────
 
 /**
- * Build the context object needed by behaviorTreeService.evaluateNPCDecision().
- * @param {Object} npc - NPC model instance
+ * Pre-fetch all data needed for NPC tick context in bulk (~5 queries total).
+ * Replaces the per-NPC buildTickContext() which ran ~7 queries per NPC.
+ *
+ * @param {Object[]} activeNPCs - Array of NPC model instances
  * @param {number} difficulty - Game difficulty (1-5)
- * @returns {Promise<Object>} Context for behavior tree
+ * @returns {Promise<Object>} Shared cache for buildTickContextFromCache()
  */
-const buildTickContext = async (npc, difficulty) => {
-  const sectorId = npc.current_sector_id;
+const buildBatchTickCache = async (activeNPCs, difficulty) => {
+  // 1. Collect all NPC sector IDs
+  const npcSectorIds = new Set(activeNPCs.map(n => n.current_sector_id));
 
-  // Get player ships in the NPC's sector
-  const playersInSector = await Ship.findAll({
-    where: { current_sector_id: sectorId, is_active: true },
-    attributes: ['ship_id', 'name', 'owner_user_id', 'hull_points', 'max_hull_points',
-      'shield_points', 'max_shield_points', 'attack_power', 'defense_rating', 'speed']
-  });
-
-  // Get other NPCs in sector
-  const npcsInSector = await NPC.findAll({
-    where: {
-      current_sector_id: sectorId,
-      is_alive: true,
-      npc_id: { [Op.ne]: npc.npc_id }
-    },
-    attributes: ['npc_id', 'name', 'npc_type', 'hull_points', 'max_hull_points',
-      'shield_points', 'attack_power', 'behavior_state']
-  });
-
-  // Check if current sector has a port
-  const portInSector = await Port.findOne({
-    where: { sector_id: sectorId, is_active: true },
-    attributes: ['port_id']
-  });
-
-  // Get adjacent sector info
-  const adjacentIds = await getAdjacentSectorIds(sectorId);
-  let adjacentSectors = [];
-
-  if (adjacentIds.length > 0) {
-    // Batch-fetch port sectors
-    const portSectorSet = await getPortSectorIds(adjacentIds);
-
-    // Count hostiles per adjacent sector
-    const hostileNpcs = await NPC.findAll({
-      where: {
-        current_sector_id: { [Op.in]: adjacentIds },
-        is_alive: true,
-        aggression_level: { [Op.gte]: 0.7 }
-      },
-      attributes: ['current_sector_id']
-    });
-    const hostileCounts = {};
-    hostileNpcs.forEach(n => {
-      hostileCounts[n.current_sector_id] = (hostileCounts[n.current_sector_id] || 0) + 1;
-    });
-
-    // Count players per adjacent sector
-    const adjacentPlayers = await Ship.findAll({
-      where: {
-        current_sector_id: { [Op.in]: adjacentIds },
-        is_active: true
-      },
-      attributes: ['current_sector_id']
-    });
-    const playerCounts = {};
-    adjacentPlayers.forEach(s => {
-      playerCounts[s.current_sector_id] = (playerCounts[s.current_sector_id] || 0) + 1;
-    });
-
-    adjacentSectors = adjacentIds.map(id => ({
-      sector_id: id,
-      name: id, // Name not critical for decision-making
-      hasPort: portSectorSet.has(id),
-      hostileCount: hostileCounts[id] || 0,
-      playerCount: playerCounts[id] || 0
-    }));
+  // 2. Get adjacency for all NPC sectors (1 query via buildAdjacencyMap)
+  const adjacencyMap = await buildAdjacencyMap(npcSectorIds);
+  const allRelevantSectors = new Set(npcSectorIds);
+  for (const [, neighbors] of adjacencyMap) {
+    neighbors.forEach(n => allRelevantSectors.add(n));
   }
+
+  // 3. Batch-fetch all player ships in relevant sectors (1 query)
+  const allPlayerShips = await Ship.findAll({
+    where: { current_sector_id: { [Op.in]: [...allRelevantSectors] }, is_active: true },
+    attributes: ['ship_id', 'name', 'owner_user_id', 'hull_points', 'max_hull_points',
+      'shield_points', 'max_shield_points', 'attack_power', 'defense_rating', 'speed',
+      'current_sector_id']
+  });
+  const shipsBySector = groupBy(allPlayerShips, 'current_sector_id');
+
+  // 4. Batch-fetch all ports in relevant sectors (1 query)
+  const allPorts = await Port.findAll({
+    where: { sector_id: { [Op.in]: [...allRelevantSectors] }, is_active: true },
+    attributes: ['port_id', 'sector_id']
+  });
+  const portsBySector = new Set(allPorts.map(p => p.sector_id));
+
+  // 5. Group NPCs by sector from the already-fetched array (no query)
+  const npcsBySector = groupBy(activeNPCs, 'current_sector_id');
+
+  return { adjacencyMap, shipsBySector, portsBySector, npcsBySector, difficulty };
+};
+
+/**
+ * Build context for a single NPC from the pre-fetched batch cache.
+ * Zero DB queries — pure in-memory lookups.
+ *
+ * @param {Object} npc - NPC model instance
+ * @param {Object} cache - Cache from buildBatchTickCache()
+ * @returns {Object} Context for behavior tree (same shape as old buildTickContext)
+ */
+const buildTickContextFromCache = (npc, cache) => {
+  const sectorId = npc.current_sector_id;
+  const adjacentIds = cache.adjacencyMap.get(sectorId) || [];
+
+  const playersInSector = cache.shipsBySector.get(sectorId) || [];
+  const npcsInSector = (cache.npcsBySector.get(sectorId) || [])
+    .filter(n => n.npc_id !== npc.npc_id);
+
+  const adjacentSectors = adjacentIds.map(id => ({
+    sector_id: id,
+    name: id,
+    hasPort: cache.portsBySector.has(id),
+    hostileCount: (cache.npcsBySector.get(id) || [])
+      .filter(n => n.aggression_level >= 0.7).length,
+    playerCount: (cache.shipsBySector.get(id) || []).length
+  }));
 
   // For engaging NPCs, identify the weakest player ship as their combat target
   let currentTarget = null;
@@ -513,8 +506,8 @@ const buildTickContext = async (npc, difficulty) => {
     playersInSector,
     npcsInSector,
     adjacentSectors,
-    sectorHasPort: !!portInSector,
-    difficulty,
+    sectorHasPort: cache.portsBySector.has(sectorId),
+    difficulty: cache.difficulty,
     currentTarget
   };
 };

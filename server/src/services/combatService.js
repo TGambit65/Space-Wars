@@ -162,11 +162,21 @@ const attackNPC = async (userId, shipId, npcId) => {
     const combatRounds = [];
     let totalAttackerDamage = 0, totalDefenderDamage = 0;
     
+    // Apply faction combat bonus to attack power
+    let factionAttackPower = ship.attack_power;
+    try {
+      const user = await User.findByPk(userId, { transaction: t });
+      if (user && user.faction) {
+        const factionService = require('./factionService');
+        factionAttackPower = Math.floor(factionService.applyFactionBonus(ship.attack_power, user.faction, 'combat'));
+      }
+    } catch (e) { /* faction bonus failure should not block combat */ }
+
     // Create combat state objects
     const attackerState = {
       hull_points: ship.hull_points,
       shield_points: ship.shield_points,
-      attack_power: ship.attack_power,
+      attack_power: factionAttackPower,
       defense_rating: ship.defense_rating,
       speed: ship.speed,
       scanner_range: ship.scanner_range || 1,
@@ -183,6 +193,28 @@ const attackNPC = async (userId, shipId, npcId) => {
       energy: 100, // NPCs have unlimited effective energy
       energy_per_round: 0
     };
+
+    // Apply sector phenomena effects to combat
+    try {
+      const phenomenaService = require('./phenomenaService');
+      const effects = await phenomenaService.applyPhenomenaEffects(ship.current_sector_id);
+      if (effects.shield_recharge) {
+        // Ion storm reduces starting shields
+        attackerState.shield_points = Math.floor(attackerState.shield_points * (1 + effects.shield_recharge));
+        defenderState.shield_points = Math.floor(defenderState.shield_points * (1 + effects.shield_recharge));
+      }
+      if (effects.weapon_bonus) {
+        attackerState.attack_power = Math.floor(attackerState.attack_power * effects.weapon_bonus);
+        defenderState.attack_power = Math.floor(defenderState.attack_power * effects.weapon_bonus);
+      }
+      if (effects.shield_disable_seconds) {
+        attackerState.shield_points = 0;
+        defenderState.shield_points = 0;
+      }
+      if (effects.flee_disabled) {
+        attackerState.flee_disabled = true;
+      }
+    } catch (e) { /* phenomena failure should not block combat */ }
 
     for (let i = 1; i <= config.combat.maxRoundsPerBattle; i++) {
       const round = executeCombatRound(attackerState, defenderState, i);

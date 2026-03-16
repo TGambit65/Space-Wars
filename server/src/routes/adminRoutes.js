@@ -12,6 +12,7 @@ router.use(adminMiddleware);
 // Universe
 router.post('/universe/generate', adminController.generateUniverse);
 router.get('/universe/config', adminController.getUniverseConfig);
+router.get('/action-audit', adminController.getActionAuditLogs);
 
 // Settings
 router.get('/settings', gameSettingsController.getSettings);

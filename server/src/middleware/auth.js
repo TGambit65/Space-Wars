@@ -1,20 +1,18 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const { User } = require('../models');
+const { getAuthTokenFromRequest, getCookieToken, setAuthCookie } = require('../utils/authCookie');
 
 const authMiddleware = async (req, res, next) => {
   try {
-    // Get token from header
-    const authHeader = req.headers.authorization;
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const token = getAuthTokenFromRequest(req);
+
+    if (!token) {
       return res.status(401).json({
         success: false,
         message: 'Access denied. No token provided.'
       });
     }
-
-    const token = authHeader.split(' ')[1];
 
     // Verify token
     const decoded = jwt.verify(token, config.jwt.secret);
@@ -32,6 +30,9 @@ const authMiddleware = async (req, res, next) => {
     // Attach user to request
     req.user = user;
     req.userId = user.user_id;
+    if (req.headers.authorization?.startsWith('Bearer ') && !getCookieToken(req.headers.cookie)) {
+      setAuthCookie(res, token, req);
+    }
     
     next();
   } catch (error) {
@@ -59,16 +60,17 @@ const authMiddleware = async (req, res, next) => {
 // Optional auth - doesn't fail if no token, but populates user if present
 const optionalAuth = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.split(' ')[1];
+    const token = getAuthTokenFromRequest(req);
+    if (token) {
       const decoded = jwt.verify(token, config.jwt.secret);
       const user = await User.findByPk(decoded.user_id);
 
       if (user) {
         req.user = user;
         req.userId = user.user_id;
+        if (req.headers.authorization?.startsWith('Bearer ') && !getCookieToken(req.headers.cookie)) {
+          setAuthCookie(res, token, req);
+        }
       }
     }
 
@@ -104,4 +106,3 @@ module.exports = {
   optionalAuth,
   adminMiddleware
 };
-

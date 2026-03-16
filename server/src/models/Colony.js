@@ -60,6 +60,43 @@ const Colony = sequelize.define('Colony', {
   is_active: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
+  },
+  defense_rating: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    comment: 'Colony defense strength from buildings and garrison'
+  },
+  last_raid: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
+    comment: 'Timestamp of most recent raid event'
+  },
+  raid_damage: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    comment: 'Accumulated unrepaired damage from raids'
+  },
+  surface_initialized: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    comment: 'Whether the colony surface grid has been initialized'
+  },
+  surface_version: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1,
+    comment: 'Terrain generation algorithm version for seed versioning'
+  },
+  last_anomaly_spawn: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
+    comment: 'Last UTC day bucket when anomalies were spawned'
+  },
+  defender_policy: {
+    type: DataTypes.STRING(50),
+    defaultValue: 'hold_the_line',
+    comment: 'AI behavior policy when colony is attacked while owner offline'
   }
 }, {
   tableName: 'colonies',

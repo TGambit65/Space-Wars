@@ -6,6 +6,7 @@ const { connectDatabase, syncDatabase, sequelize } = require('./config/database'
 const { generateUniverse, generateFullUniverse, seedCommodities } = require('./services/universeGenerator');
 const gameSettingsService = require('./services/gameSettingsService');
 const socketService = require('./services/socketService');
+const { ensureSprintWorldSchema } = require('./services/schemaPatchService');
 const tickService = require('./services/tickService');
 const { Sector, Commodity, Port } = require('./models');
 
@@ -28,6 +29,8 @@ const startServer = async () => {
     } else {
       await syncDatabase({ alter: false });  // Don't alter existing tables
     }
+
+    await ensureSprintWorldSchema();
 
     // Check if universe needs to be generated
     if (sectorCount === 0) {
@@ -127,4 +130,3 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 startServer();
-

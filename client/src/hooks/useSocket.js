@@ -1,5 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
+import { getToken } from '../services/session';
+
+const getActiveSectorId = (user) => {
+  const ships = Array.isArray(user?.ships) ? user.ships : [];
+  const activeShip = ships.find(ship => ship.ship_id === user?.active_ship_id)
+    || ships.find(ship => ship.is_active !== false)
+    || ships[0];
+
+  return activeShip?.currentSector?.sector_id || activeShip?.current_sector_id || null;
+};
 
 /**
  * React hook for managing a Socket.io connection with JWT auth.
@@ -9,27 +19,38 @@ import { io } from 'socket.io-client';
  * @returns {{ socket: object|null, connected: boolean, joinSector: function, changeSector: function }}
  */
 const useSocket = (user) => {
-  const [connected, setConnected] = useState(false);
+  const [connected, setConnected] = useState(null);
   const socketRef = useRef(null);
+  const activeSectorId = getActiveSectorId(user);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token || !user) {
+    const token = getToken();
+    if (!user) {
       // Disconnect if previously connected (logout)
       if (socketRef.current) {
         socketRef.current.disconnect();
         socketRef.current = null;
-        setConnected(false);
       }
+      setConnected(null);
       return;
     }
 
-    const newSocket = io('/', {
-      auth: { token },
-      transports: ['websocket', 'polling']
-    });
+    const socketOptions = {
+      transports: ['websocket', 'polling'],
+      withCredentials: true
+    };
+    if (token) {
+      socketOptions.auth = { token };
+    }
 
-    newSocket.on('connect', () => setConnected(true));
+    const newSocket = io('/', socketOptions);
+
+    newSocket.on('connect', () => {
+      setConnected(true);
+      if (activeSectorId) {
+        newSocket.emit('join_sector', { sector_id: activeSectorId });
+      }
+    });
     newSocket.on('disconnect', () => setConnected(false));
     newSocket.on('connect_error', (err) => {
       console.error('[Socket] Connection error:', err.message);
@@ -42,7 +63,24 @@ const useSocket = (user) => {
       newSocket.disconnect();
       socketRef.current = null;
     };
-  }, [user]);
+  }, [user?.user_id]);
+
+  useEffect(() => {
+    if (!socketRef.current || !activeSectorId || !connected) return;
+    socketRef.current.emit('join_sector', { sector_id: activeSectorId });
+  }, [activeSectorId, connected]);
+
+  useEffect(() => {
+    const handleSectorChange = (event) => {
+      const sectorId = event.detail?.sectorId;
+      if (sectorId) {
+        socketRef.current?.emit('change_sector', { sector_id: sectorId });
+      }
+    };
+
+    window.addEventListener('sw3k:sector-changed', handleSectorChange);
+    return () => window.removeEventListener('sw3k:sector-changed', handleSectorChange);
+  }, []);
 
   const joinSector = (sectorId) => {
     socketRef.current?.emit('join_sector', { sector_id: sectorId });

@@ -107,12 +107,23 @@ const abandonColony = async (req, res, next) => {
   }
 };
 
+const getRecentRaids = async (req, res) => {
+  try {
+    const colonyRaidService = require('../services/colonyRaidService');
+    const raids = await colonyRaidService.getRecentRaids(req.userId);
+    res.json({ success: true, data: raids });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   colonizePlanet,
   getUserColonies,
   getColonyDetails,
   collectResources,
   upgradeInfrastructure,
-  abandonColony
+  abandonColony,
+  getRecentRaids
 };
 

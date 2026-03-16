@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { trade, ports, ships, auth } from '../../services/api';
-import { ShoppingCart, Package, DollarSign, TrendingUp, TrendingDown, Anchor, AlertCircle, RefreshCw } from 'lucide-react';
+import { ShoppingCart, Package, DollarSign, TrendingUp, TrendingDown, Anchor, AlertCircle, RefreshCw, Fuel, AlertTriangle, Star } from 'lucide-react';
+import { useNotifications } from '../../contexts/NotificationContext';
 
 const TradingPage = ({ user: initialUser }) => {
     const navigate = useNavigate();
-    // We track user credits locally to update UI immediately after trades
-    // In a real app, this might come from a global context
+    const notify = useNotifications();
     const [userCredits, setUserCredits] = useState(initialUser?.credits || 0);
 
     const [currentShip, setCurrentShip] = useState(null);
@@ -20,6 +20,10 @@ const TradingPage = ({ user: initialUser }) => {
 
     // Track quantities for each commodity: { commodityId: quantity }
     const [tradeQuantities, setTradeQuantities] = useState({});
+    const [refuelAmount, setRefuelAmount] = useState('');
+    const [refuelLoading, setRefuelLoading] = useState(false);
+    const [avgCosts, setAvgCosts] = useState({});
+    const [bestTrades, setBestTrades] = useState([]);
 
     useEffect(() => {
         // If user prop changes (e.g. from parent re-fetch), update credits
@@ -39,7 +43,8 @@ const TradingPage = ({ user: initialUser }) => {
                 if (shipList.length === 0) {
                     throw new Error("No active ship found.");
                 }
-                const ship = shipList[0];
+                const activeId = shipsRes.data.data?.active_ship_id;
+                const ship = (activeId && shipList.find(s => s.ship_id === activeId)) || shipList[0];
                 // Get full details including fresh cargo
                 const shipRes = await ships.getById(ship.ship_id);
                 setCurrentShip(shipRes.data.data.ship);
@@ -87,6 +92,41 @@ const TradingPage = ({ user: initialUser }) => {
                 const profileRes = await auth.getProfile();
                 if (profileRes.data?.data) setUserCredits(profileRes.data.data.credits);
 
+                // 5. Fetch avg purchase costs for cargo items + market summary for best trades
+                try {
+                    const [historyRes, marketRes] = await Promise.all([
+                        trade.getHistory({ type: 'BUY', limit: 100 }),
+                        trade.getMarketSummary(),
+                    ]);
+                    const txns = historyRes.data.data?.transactions || [];
+                    const costs = {};
+                    for (const tx of txns) {
+                        const cid = tx.commodity_id;
+                        if (!costs[cid]) costs[cid] = { totalSpent: 0, totalQty: 0 };
+                        costs[cid].totalSpent += Number(tx.total_price || 0);
+                        costs[cid].totalQty += tx.quantity || 0;
+                    }
+                    const avgMap = {};
+                    for (const [cid, v] of Object.entries(costs)) {
+                        if (v.totalQty > 0) avgMap[cid] = Math.round(v.totalSpent / v.totalQty);
+                    }
+                    setAvgCosts(avgMap);
+
+                    const portComms = portData?.commodities || [];
+                    const mktSummary = marketRes.data.data?.market_summary || [];
+                    const trades = [];
+                    for (const pc of portComms) {
+                        const mkt = mktSummary.find(m => m.commodity_id === pc.commodity_id);
+                        if (!mkt || !mkt.avg_sell_price || !pc.buy_price) continue;
+                        const profit = mkt.avg_sell_price - pc.buy_price;
+                        if (profit > 0) {
+                            trades.push({ name: pc.name, buyHere: pc.buy_price, avgSellElsewhere: mkt.avg_sell_price, profit });
+                        }
+                    }
+                    trades.sort((a, b) => b.profit - a.profit);
+                    setBestTrades(trades.slice(0, 5));
+                } catch { /* non-critical */ }
+
             } catch (err) {
                 console.error("Failed to load trading data", err);
                 setError(err.message || "Failed to load market data.");
@@ -117,12 +157,12 @@ const TradingPage = ({ user: initialUser }) => {
             setTradeLoading(true);
             if (action === 'buy') {
                 await trade.buy(currentShip.ship_id, currentPort.port_id, commodity.commodity_id, qty);
-                // Optimistic Updates
                 setUserCredits(prev => prev - (commodity.buy_price * qty));
+                notify.success(`Bought ${qty} ${commodity.name} for ${(commodity.buy_price * qty).toLocaleString()} cr`);
             } else {
                 await trade.sell(currentShip.ship_id, currentPort.port_id, commodity.commodity_id, qty);
-                // Optimistic Updates
                 setUserCredits(prev => prev + (commodity.sell_price * qty));
+                notify.success(`Sold ${qty} ${commodity.name} for ${(commodity.sell_price * qty).toLocaleString()} cr`);
             }
 
             // Refresh Data to ensure consistency
@@ -141,13 +181,51 @@ const TradingPage = ({ user: initialUser }) => {
             setCurrentPort(portData);
             setCommodities(portData?.commodities || []);
             setCargo(cargoRes.data.data?.items || []);
-            setTradeQuantities({ ...tradeQuantities, [commodity.commodity_id]: 0 }); // Reset input
+            setTradeQuantities({ ...tradeQuantities, [commodity.commodity_id]: 0 });
+
+            // Refresh avg costs for profit indicators
+            try {
+                const historyRes = await trade.getHistory({ type: 'BUY', limit: 100 });
+                const txns = historyRes.data.data?.transactions || [];
+                const costs = {};
+                for (const tx of txns) {
+                    const cid = tx.commodity_id;
+                    if (!costs[cid]) costs[cid] = { totalSpent: 0, totalQty: 0 };
+                    costs[cid].totalSpent += Number(tx.total_price || 0);
+                    costs[cid].totalQty += tx.quantity || 0;
+                }
+                const avgMap = {};
+                for (const [cid, v] of Object.entries(costs)) {
+                    if (v.totalQty > 0) avgMap[cid] = Math.round(v.totalSpent / v.totalQty);
+                }
+                setAvgCosts(avgMap);
+            } catch { /* non-critical */ }
 
         } catch (err) {
             console.error("Trade failed", err);
-            alert(err.response?.data?.error || "Transaction declined by port authority.");
+            notify.error(err.response?.data?.error || "Transaction declined by port authority.");
         } finally {
             setTradeLoading(false);
+        }
+    };
+
+    const handleRefuel = async () => {
+        const amt = parseInt(refuelAmount) || 0;
+        if (amt <= 0 || !currentShip || !currentPort) return;
+        try {
+            setRefuelLoading(true);
+            await trade.refuel(currentShip.ship_id, currentPort.port_id, amt);
+            // Refresh ship data
+            const shipRes = await ships.getById(currentShip.ship_id);
+            setCurrentShip(prev => ({ ...shipRes.data.data.ship, cargo_used: prev.cargo_used }));
+            const profileRes = await auth.getProfile();
+            if (profileRes.data?.data) setUserCredits(profileRes.data.data.credits);
+            setRefuelAmount('');
+            notify.success(`Refueled ${amt} units successfully.`);
+        } catch (err) {
+            notify.error(err.response?.data?.error || "Refuel failed.");
+        } finally {
+            setRefuelLoading(false);
         }
     };
 
@@ -170,6 +248,7 @@ const TradingPage = ({ user: initialUser }) => {
 
     return (
         <div className="max-w-6xl mx-auto space-y-6">
+            {/* Notifications via global toast system */}
             <header className="flex justify-between items-end mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-white flex items-center gap-3">
@@ -200,6 +279,31 @@ const TradingPage = ({ user: initialUser }) => {
                 </div>
             </header>
 
+            {/* Best Trades Panel */}
+            {bestTrades.length > 0 && (
+                <div className="card p-4">
+                    <h2 className="text-sm font-display text-neon-cyan flex items-center gap-2 mb-3">
+                        <Star className="w-4 h-4" /> Best Trade Opportunities
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {bestTrades.map(t => (
+                            <div key={t.name} className="flex items-center justify-between p-2.5 rounded-lg"
+                                style={{ background: 'rgba(76, 175, 80, 0.06)', border: '1px solid rgba(76, 175, 80, 0.15)' }}>
+                                <div>
+                                    <p className="text-sm text-white font-medium">{t.name}</p>
+                                    <p className="text-[10px] text-gray-500">Buy here: {t.buyHere.toLocaleString()} cr</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-sm text-green-400 font-mono">+{t.profit.toLocaleString()} cr</p>
+                                    <p className="text-[10px] text-gray-500">avg sell: {t.avgSellElsewhere.toLocaleString()}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <p className="text-[10px] text-gray-600 mt-2">Based on average sell prices across all known ports</p>
+                </div>
+            )}
+
             <div className="card overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
@@ -210,6 +314,7 @@ const TradingPage = ({ user: initialUser }) => {
                                 <th className="p-4 text-right text-accent-green">Buy Price</th>
                                 <th className="p-4 text-right text-accent-orange">Sell Price</th>
                                 <th className="p-4 text-right">In Cargo</th>
+                                <th className="p-4 text-right">Profit/Loss</th>
                                 <th className="p-4 text-center">Trade Actions</th>
                             </tr>
                         </thead>
@@ -238,6 +343,25 @@ const TradingPage = ({ user: initialUser }) => {
                                         </td>
                                         <td className="p-4 text-right font-mono text-white">
                                             {owned}
+                                        </td>
+                                        <td className="p-4 text-right font-mono text-sm">
+                                            {owned > 0 && avgCosts[commodity.commodity_id] ? (() => {
+                                                const avg = avgCosts[commodity.commodity_id];
+                                                const diff = commodity.sell_price - avg;
+                                                const pct = avg > 0 ? ((diff / avg) * 100).toFixed(0) : 0;
+                                                return (
+                                                    <div>
+                                                        <span className={diff >= 0 ? 'text-green-400' : 'text-red-400'}>
+                                                            {diff >= 0 ? '+' : ''}{diff.toLocaleString()} cr
+                                                        </span>
+                                                        <div className="text-[10px] text-gray-500">
+                                                            avg cost: {avg.toLocaleString()} ({pct >= 0 ? '+' : ''}{pct}%)
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })() : (
+                                                <span className="text-gray-600">—</span>
+                                            )}
                                         </td>
                                         <td className="p-4">
                                             <div className="flex items-center justify-center gap-2">
@@ -301,6 +425,55 @@ const TradingPage = ({ user: initialUser }) => {
                     </table>
                 </div>
             </div>
+
+            {/* Refuel Section */}
+            {currentShip && currentPort && (
+                <div className="card p-6">
+                    <h2 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
+                        <Fuel className="w-5 h-5 text-accent-orange" /> Refuel Station
+                    </h2>
+                    <div className="space-y-3">
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-400">Current Fuel</span>
+                            <span className="text-white font-mono">{currentShip.fuel} / {currentShip.max_fuel}</span>
+                        </div>
+                        <div className="w-full bg-space-900 h-3 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-accent-orange rounded-full transition-all"
+                                style={{ width: `${currentShip.max_fuel > 0 ? (currentShip.fuel / currentShip.max_fuel) * 100 : 0}%` }}
+                            />
+                        </div>
+                        {currentShip.fuel < currentShip.max_fuel ? (
+                            <div className="flex items-center gap-3 mt-2">
+                                <input
+                                    type="number"
+                                    placeholder="Amount"
+                                    value={refuelAmount}
+                                    onChange={(e) => setRefuelAmount(e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))}
+                                    className="w-28 bg-space-900 border border-space-600 rounded px-2 py-1 text-white text-right focus:border-accent-orange outline-none"
+                                    min="0"
+                                    max={currentShip.max_fuel - currentShip.fuel}
+                                />
+                                <button
+                                    onClick={() => setRefuelAmount(currentShip.max_fuel - currentShip.fuel)}
+                                    className="px-2 py-1 bg-space-700 hover:bg-space-600 text-xs text-accent-orange rounded"
+                                >
+                                    Max
+                                </button>
+                                <button
+                                    onClick={handleRefuel}
+                                    disabled={refuelLoading || !refuelAmount || parseInt(refuelAmount) <= 0}
+                                    className="btn btn-primary text-sm px-4 py-1 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <Fuel className="w-4 h-4" /> {refuelLoading ? 'Refueling...' : 'Refuel'}
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="text-accent-green text-sm">Fuel tanks are full.</div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

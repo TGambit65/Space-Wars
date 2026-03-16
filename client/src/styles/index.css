@@ -4,102 +4,214 @@
 
 @layer base {
   body {
-    @apply antialiased;
+    @apply antialiased font-body;
     background: linear-gradient(135deg, #0a0a1a 0%, #12122e 50%, #1a1a42 100%);
     min-height: 100vh;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Orbitron', sans-serif;
   }
 }
 
 @layer components {
   .card {
-    @apply bg-space-800/80 backdrop-blur-sm border border-space-600 rounded-lg p-4;
+    @apply bg-space-800/80 backdrop-blur-sm rounded-lg p-4 transition-all duration-200;
+    border: 1px solid rgba(0, 255, 255, 0.15);
   }
-  
+
+  .card:hover {
+    border-color: rgba(0, 255, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.08);
+  }
+
   .card-header {
-    @apply text-lg font-semibold text-accent-cyan mb-3 flex items-center gap-2;
+    @apply text-lg font-semibold text-neon-cyan mb-3 flex items-center gap-2 font-display;
   }
-  
+
   .btn {
     @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    position: relative;
+    overflow: hidden;
   }
-  
+
   .btn-primary {
-    @apply bg-accent-cyan text-space-900 hover:bg-accent-cyan/80 hover:shadow-lg hover:shadow-accent-cyan/20;
+    background: linear-gradient(135deg, #00cccc 0%, #00ffff 50%, #00cccc 100%);
+    @apply text-space-900 font-semibold;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
   }
-  
+
+  .btn-primary:hover {
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: none;
+  }
+
+  .btn-primary:hover::before {
+    animation: shine 1.5s ease-in-out;
+  }
+
   .btn-secondary {
-    @apply bg-space-600 text-white hover:bg-space-500 border border-space-500;
+    background: linear-gradient(135deg, #cc5200 0%, #ff6600 50%, #cc5200 100%);
+    @apply text-white font-semibold;
+    box-shadow: 0 0 15px rgba(255, 102, 0, 0.2);
   }
-  
+
+  .btn-secondary:hover {
+    box-shadow: 0 0 25px rgba(255, 102, 0, 0.4);
+    transform: translateY(-1px);
+  }
+
   .btn-danger {
-    @apply bg-accent-red/20 text-accent-red border border-accent-red/50 hover:bg-accent-red/30;
+    @apply text-status-danger border font-semibold;
+    background: rgba(244, 67, 54, 0.1);
+    border-color: rgba(244, 67, 54, 0.4);
   }
-  
+
+  .btn-danger:hover {
+    background: rgba(244, 67, 54, 0.2);
+    box-shadow: 0 0 15px rgba(244, 67, 54, 0.2);
+  }
+
   .btn-success {
-    @apply bg-accent-green/20 text-accent-green border border-accent-green/50 hover:bg-accent-green/30;
+    @apply text-status-success border font-semibold;
+    background: rgba(76, 175, 80, 0.1);
+    border-color: rgba(76, 175, 80, 0.4);
   }
-  
+
+  .btn-success:hover {
+    background: rgba(76, 175, 80, 0.2);
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.2);
+  }
+
+  .btn-ghost {
+    @apply text-gray-300 bg-transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .btn-ghost:hover {
+    @apply text-white;
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(0, 255, 255, 0.3);
+  }
+
   .input {
-    @apply bg-space-700 border border-space-500 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan;
+    @apply rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none;
+    background: rgba(10, 10, 26, 0.8);
+    border: 1px solid rgba(0, 255, 255, 0.15);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
-  
+
+  .input:focus {
+    border-color: rgba(0, 255, 255, 0.5);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.15);
+  }
+
   .badge {
-    @apply px-2 py-0.5 rounded-full text-xs font-medium;
+    @apply px-2 py-0.5 rounded-full text-xs font-semibold tracking-wide;
   }
-  
+
   .badge-cyan {
-    @apply bg-accent-cyan/20 text-accent-cyan border border-accent-cyan/30;
+    background: rgba(0, 255, 255, 0.12);
+    color: #00ffff;
+    border: 1px solid rgba(0, 255, 255, 0.25);
+    text-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
   }
-  
+
   .badge-purple {
-    @apply bg-accent-purple/20 text-accent-purple border border-accent-purple/30;
+    background: rgba(139, 92, 246, 0.12);
+    color: #a78bfa;
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    text-shadow: 0 0 6px rgba(139, 92, 246, 0.3);
   }
-  
+
   .badge-green {
-    @apply bg-accent-green/20 text-accent-green border border-accent-green/30;
+    background: rgba(76, 175, 80, 0.12);
+    color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.25);
+    text-shadow: 0 0 6px rgba(76, 175, 80, 0.3);
   }
-  
+
   .badge-orange {
-    @apply bg-accent-orange/20 text-accent-orange border border-accent-orange/30;
+    background: rgba(255, 102, 0, 0.12);
+    color: #ff6600;
+    border: 1px solid rgba(255, 102, 0, 0.25);
+    text-shadow: 0 0 6px rgba(255, 102, 0, 0.3);
   }
-  
+
   .badge-red {
-    @apply bg-accent-red/20 text-accent-red border border-accent-red/30;
+    background: rgba(244, 67, 54, 0.12);
+    color: #f44336;
+    border: 1px solid rgba(244, 67, 54, 0.25);
+    text-shadow: 0 0 6px rgba(244, 67, 54, 0.3);
   }
-  
+
   .progress-bar {
-    @apply h-2 bg-space-700 rounded-full overflow-hidden;
+    @apply h-2 rounded-full overflow-hidden;
+    background: rgba(10, 10, 26, 0.6);
+    border: 1px solid rgba(0, 255, 255, 0.1);
   }
-  
+
   .progress-fill {
     @apply h-full rounded-full transition-all duration-300;
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
   }
-  
+
   .stat-value {
-    @apply text-2xl font-bold text-white;
+    @apply text-2xl font-bold text-white font-display;
   }
-  
+
   .stat-label {
-    @apply text-sm text-gray-400;
+    @apply text-sm text-gray-400 uppercase tracking-wider;
+    font-size: 0.7rem;
   }
-  
+
   .glow-effect {
-    @apply shadow-lg shadow-accent-cyan/20;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+  }
+
+  /* Table styling */
+  .table-header {
+    @apply text-xs uppercase tracking-wider text-gray-400 font-display;
+  }
+
+  .table-row {
+    @apply border-b transition-colors;
+    border-color: rgba(0, 255, 255, 0.06);
+  }
+
+  .table-row:hover {
+    background: rgba(0, 255, 255, 0.03);
   }
 }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-space-800;
+  background: rgba(10, 10, 26, 0.5);
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-space-500 rounded-full hover:bg-space-400;
+  background: rgba(0, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 255, 0.35);
 }
 
 /* Custom animations */
@@ -170,4 +282,3 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-

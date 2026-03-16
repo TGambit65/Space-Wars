@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sector Movement - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+    <script src="../../js/wiki-smart-navigation.js"></script>
+    <script src="../../js/wiki-interactive-features.js"></script>
+</head>
+<body class="doc-container navigation-page">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">← Navigation Guide</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="sector-movement.html" class="doc-nav-link active">Sector Movement</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="fuel-management.html" class="doc-nav-link">Fuel Management</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="exploration.html" class="doc-nav-link">Exploration</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item">
+                <a href="index.html" class="doc-breadcrumb-link">Navigation Guide</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Sector Movement</div>
+        </nav>
+
+        <h1 class="doc-h1 holo-text">🎯 Sector Movement</h1>
+        
+        <div class="doc-alert info">
+            <strong>Movement Systems:</strong> Time to learn how to actually GET places in space! It's like driving, 
+            but in three dimensions and with explosions. 🚀
+        </div>
+
+        <p class="doc-lead">
+            Moving between sectors is the bread and butter of space travel. Think of it like changing rooms in a video game, 
+            except instead of walking through a door, you're bending space-time and hoping you don't end up inside a star. 
+            Don't worry though - our navigation computers are pretty good at the "not ending up inside a star" part!
+        </p>
+
+        <!-- Basic Movement -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🚀 How Sector Jumping Works</h2>
+            
+            <p>Imagine the galaxy as a giant board game where each sector is a space you can land on. You move by 
+            "jumping" from one sector to another using your ship's jump drive. It's instant travel, but it costs fuel 
+            and you can only move to adjacent sectors (unless you have special technology).</p>
+
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Jump Sequence Initiated</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">PHASE 1</span>
+                        <span class="terminal-output">Calculate jump coordinates</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">PHASE 2</span>
+                        <span class="terminal-output">Charge jump capacitors</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">PHASE 3</span>
+                        <span class="terminal-output">Fold space-time</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">PHASE 4</span>
+                        <span class="terminal-output">Execute jump</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">SUCCESS</span>
+                        <span class="terminal-info">Welcome to your destination! ✨</span>
+                        <span class="terminal-cursor"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-alert warning">
+                <strong>Fun Fact:</strong> The first successful jump drive test was performed by a hamster named 
+                Professor Whiskers in 2845. He successfully jumped from one side of a laboratory to the other. 
+                Unfortunately, he arrived upside down and slightly purple, but otherwise unharmed!
+            </div>
+        </section>
+
+        <!-- Movement Rules -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">📏 Movement Rules</h2>
+            
+            <p>Space has rules, just like any good game. Break them and the universe gets cranky (and explodey).</p>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🗺️ Adjacency Rules</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>You can only jump to sectors that are next to your current one (think chess knight moves, but simpler):</p>
+                        <ul class="doc-list">
+                            <li><strong>Direct neighbors:</strong> Up, down, left, right</li>
+                            <li><strong>Diagonal moves:</strong> Also allowed (space is 3D!)</li>
+                            <li><strong>Multiple jumps:</strong> Chain them together for long trips</li>
+                            <li><strong>Blocked sectors:</strong> Some areas are off-limits or dangerous</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">⛽ Fuel Costs</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Every jump costs fuel. The amount depends on:</p>
+                        <ul class="doc-list">
+                            <li><strong>Distance:</strong> Farther jumps cost more</li>
+                            <li><strong>Ship size:</strong> Bigger ships are thirstier</li>
+                            <li><strong>Engine quality:</strong> Better engines are more efficient</li>
+                            <li><strong>Cargo load:</strong> Heavy loads slow you down</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Movement Interface -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🖥️ Using the Movement Interface</h2>
+            
+            <p>Your ship's movement computer is like GPS for space travelers. Here's how to use it without accidentally 
+            jumping into a black hole (which, according to the manual, "voids your warranty").</p>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🎮 Step-by-Step Movement</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4>Moving Your Ship:</h4>
+                    <ol class="doc-list">
+                        <li><strong>Open Navigation:</strong> Press N or click the Navigation button</li>
+                        <li><strong>View Available Sectors:</strong> Adjacent sectors will be highlighted</li>
+                        <li><strong>Check Fuel Cost:</strong> Hover over a sector to see jump requirements</li>
+                        <li><strong>Select Destination:</strong> Click on your chosen sector</li>
+                        <li><strong>Confirm Jump:</strong> Click "Execute Jump" (no takebacks!)</li>
+                        <li><strong>Arrive Safely:</strong> Hopefully! Space doesn't come with guarantees</li>
+                    </ol>
+                    
+                    <div class="doc-alert accent">
+                        <strong>Pro Tip:</strong> Double-check your destination before jumping. Captain Rodriguez 
+                        once tried to jump to "Paradise Station" but accidentally went to "Piranha Station" instead. 
+                        The names were very similar, the welcome parties were not.
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🔍 Reading Sector Information</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p>When you hover over a sector, you'll see important information:</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Sector Analysis: Alpha Centauri B</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">NAME</span>
+                                <span class="terminal-output">Alpha Centauri B</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">TYPE</span>
+                                <span class="terminal-output">Core World - Safe Zone</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">FUEL</span>
+                                <span class="terminal-output">12 units required</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">THREAT</span>
+                                <span class="terminal-info">Low - Patrol presence</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">FEATURES</span>
+                                <span class="terminal-output">Trading Station, Repair Yard</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Movement Types -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🌟 Types of Movement</h2>
+            
+            <p>Not all jumps are created equal! There are different ways to get around the galaxy, 
+            each with its own pros, cons, and potential for embarrassing disasters.</p>
+
+            <div class="doc-grid doc-grid-3">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🎯 Standard Jumps</h3>
+                        <span class="doc-badge">Most Common</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Regular sector-to-sector movement. Safe, reliable, and boring (which is good in space).</p>
+                        <ul class="doc-list">
+                            <li>Moderate fuel cost</li>
+                            <li>Predictable arrival</li>
+                            <li>Can be interrupted by events</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">⚡ Emergency Jumps</h3>
+                        <span class="doc-badge warning">High Risk</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Quick escape jumps when things go wrong. Fast but unpredictable.</p>
+                        <ul class="doc-list">
+                            <li>Higher fuel cost</li>
+                            <li>Random destination</li>
+                            <li>Might arrive damaged</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🌀 Long-Range Jumps</h3>
+                        <span class="doc-badge accent">Advanced</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Skip multiple sectors with advanced jump drives. Efficient but expensive.</p>
+                        <ul class="doc-list">
+                            <li>Very high fuel cost</li>
+                            <li>Requires special equipment</li>
+                            <li>Bypasses intermediate sectors</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Movement Hazards -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">⚠️ Movement Hazards</h2>
+            
+            <p>Space travel isn't all cosmic vistas and zero-gravity fun. Sometimes the universe tries to kill you. 
+            Here are the most common ways your peaceful journey can turn into a thrilling adventure (whether you want it to or not).</p>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🏴‍☠️ Pirate Encounters</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p>Pirates are like space mosquitoes - annoying, persistent, and they want your stuff. 
+                    They often lurk near trade routes and poorly defended sectors.</p>
+                    
+                    <h4>How to Handle Pirates:</h4>
+                    <ul class="doc-list">
+                        <li><strong>Run:</strong> Usually the smartest option (heroes are overrated)</li>
+                        <li><strong>Fight:</strong> If you have good weapons and a death wish</li>
+                        <li><strong>Pay:</strong> Sometimes cheaper than repairs (or funerals)</li>
+                        <li><strong>Negotiate:</strong> Pirates aren't always unreasonable (just mostly)</li>
+                    </ul>
+
+                    <div class="doc-alert warning">
+                        <strong>Pirate Translation Guide:</strong><br>
+                        "Prepare to be boarded!" = "Give us your stuff!"<br>
+                        "Surrender now!" = "Give us your stuff faster!"<br>
+                        "We come in peace!" = "We're about to take your stuff!"
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🌀 Space Anomalies</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p>Space is weird, and sometimes it gets even weirder. Anomalies are cosmic hiccups that can 
+                    help or hinder your journey.</p>
+                    
+                    <h4>Common Anomalies:</h4>
+                    <ul class="doc-list">
+                        <li><strong>Gravity Wells:</strong> Space potholes that slow you down</li>
+                        <li><strong>Energy Storms:</strong> Cosmic lightning that damages electronics</li>
+                        <li><strong>Time Distortions:</strong> Where you arrive before you left (confusing but useful)</li>
+                        <li><strong>Dimensional Rifts:</strong> Shortcuts through reality (warranty void if used)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🛠️ Mechanical Failures</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p>Ships are complicated machines, and complicated machines love to break at the worst possible moments. 
+                    It's like they have a sense of dramatic timing.</p>
+                    
+                    <h4>Common Problems:</h4>
+                    <ul class="doc-list">
+                        <li><strong>Jump Drive Malfunction:</strong> You end up somewhere unexpected</li>
+                        <li><strong>Navigation Computer Glitch:</strong> "Recalculating route... recalculating..."</li>
+                        <li><strong>Fuel Leak:</strong> Watch your fuel disappear like money at a casino</li>
+                        <li><strong>Life Support Issues:</strong> When breathing becomes optional</li>
+                    </ul>
+                    
+                    <div class="doc-alert accent">
+                        <strong>Engineer's Wisdom:</strong> "Any ship can be fixed with enough duct tape, prayer, 
+                        and profanity. The trick is finding the right combination." - Chief Engineer O'Brien
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Movement Techniques -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🎓 Advanced Movement Techniques</h2>
+            
+            <p>Ready to move beyond "point and click" navigation? These techniques will make you a space travel expert 
+            (and significantly less likely to accidentally visit a black hole).</p>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🗺️ Route Planning</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Plan efficient multi-jump routes with fuel stops and safety considerations:</p>
+                        <ul class="doc-list">
+                            <li>Calculate total fuel needs</li>
+                            <li>Identify refueling stations</li>
+                            <li>Plan alternate routes</li>
+                            <li>Consider threat levels</li>
+                        </ul>
+                        <a href="fuel-management.html" class="doc-button secondary">Learn Route Planning</a>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">⏰ Jump Timing</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Master the art of when to jump for maximum efficiency:</p>
+                        <ul class="doc-list">
+                            <li>Avoid peak pirate hours</li>
+                            <li>Time jumps with market cycles</li>
+                            <li>Coordinate with fleet movements</li>
+                            <li>Use events to your advantage</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🌟 Pro Tips for Smooth Travel</h3>
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Expert Navigation Advice</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">TIP 1</span>
+                        <span class="terminal-output">Always jump with 20% extra fuel (Murphy's Law applies in space)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">TIP 2</span>
+                        <span class="terminal-output">Save before dangerous jumps (reloading beats respawning)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">TIP 3</span>
+                        <span class="terminal-output">Learn sector patterns (pirates have favorite hangouts)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">TIP 4</span>
+                        <span class="terminal-output">Keep emergency supplies (space is not delivery-friendly)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">TIP 5</span>
+                        <span class="terminal-output">Trust your instincts (if it feels wrong, it probably is)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">← Navigation Guide</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="fuel-management.html" class="doc-nav-link">Next: Fuel Management →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            console.log('Sector Movement Guide loaded');
+        });
+    </script>
+</body>
+</html>

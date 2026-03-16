@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Ship Optimization Guide - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+    <script src="../../js/wiki-smart-navigation.js"></script>
+    <script src="../../js/wiki-interactive-features.js"></script>
+</head>
+<body class="doc-container ship-design-page">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">← Ship Design</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="ship-builds.html" class="doc-nav-link">Ship Builds</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="optimization-guide.html" class="doc-nav-link active">Optimization</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="stats-calculation.html" class="doc-nav-link">Stats</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item">
+                <a href="index.html" class="doc-breadcrumb-link">Ship Design</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Optimization Guide</div>
+        </nav>
+        
+        <h1 class="doc-h1 holo-text">🧮 Advanced Ship Optimization: The Math of Space Supremacy!</h1>
+        
+        <div class="doc-alert info">
+            <strong>🤓 Space Math Academy:</strong> Welcome to the ultimate ship optimization guide! This is where 
+            we turn good ships into LEGENDARY ships using the power of MATH! Get ready to become a space engineer! 📐🚀
+        </div>
+
+        <p class="doc-lead">
+            Ship optimization is like solving the coolest math puzzle ever - except the prize is dominating the galaxy! 
+            In this guide, you'll learn the secret formulas that professional space captains use to squeeze every drop 
+            of performance from their ships. We'll show you how to calculate efficiency, balance trade-offs, and create 
+            ships that are mathematically perfect for their roles! Time to unleash your inner space nerd! 🤓⚡
+        </p>
+
+        <!-- Core Optimization Principles -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">📊 The Science of Ship Optimization</h2>
+            
+            <div class="doc-alert accent">
+                <strong>🎯 The Golden Rule:</strong> Optimization isn't about making everything maximum - it's about 
+                finding the perfect balance for your specific goal! A racing car doesn't need armor! 🏎️
+            </div>
+            
+            <p>Ship optimization is all about understanding the relationships between different stats and finding 
+            the sweet spot where everything works together perfectly. Let's learn the fundamental principles!</p>
+
+            <h3 class="doc-h3">🔍 Key Optimization Metrics</h3>
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">⚡ Efficiency Ratios</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Power Efficiency:</strong> Damage per energy unit</li>
+                            <li><strong>Mass Efficiency:</strong> Performance per ton</li>
+                            <li><strong>Slot Efficiency:</strong> Value per component slot</li>
+                            <li><strong>Cost Efficiency:</strong> Performance per credit</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🎯 Performance Indicators</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>DPS (Damage Per Second):</strong> Raw combat power</li>
+                            <li><strong>EHP (Effective Hit Points):</strong> Total survivability</li>
+                            <li><strong>TTK (Time To Kill):</strong> Combat efficiency</li>
+                            <li><strong>ROI (Return On Investment):</strong> Economic value</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mathematical Formulas -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🧮 Essential Optimization Formulas</h2>
+            
+            <p>These are the mathematical formulas that separate good ship designers from GREAT ones! 
+            Don't worry if math isn't your favorite subject - we'll explain everything step by step! 📈</p>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>💥 Combat Efficiency Formulas</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">⚔️ Damage Per Second (DPS) Calculation</h4>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">DPS Formula</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">FORMULA</span>
+                                <span class="terminal-output">DPS = (Weapon Damage × Fire Rate) × Accuracy</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EXAMPLE</span>
+                                <span class="terminal-output">Laser: (100 damage × 2 shots/sec) × 0.8 accuracy = 160 DPS</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">MULTI-WEAPON</span>
+                                <span class="terminal-output">Total DPS = Sum of all weapon DPS values</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">🛡️ Effective Hit Points (EHP) Calculation</h4>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">EHP Formula</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">FORMULA</span>
+                                <span class="terminal-output">EHP = Hull HP × (1 + Damage Reduction)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">WITH SHIELDS</span>
+                                <span class="terminal-output">EHP = (Hull HP + Shield HP) × (1 + DR)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EXAMPLE</span>
+                                <span class="terminal-output">1000 HP + 500 shields × 1.25 (25% armor) = 1,875 EHP</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">⏱️ Time To Kill (TTK) Optimization</h4>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">TTK Formula</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">YOUR TTK</span>
+                                <span class="terminal-output">TTK = Enemy EHP ÷ Your DPS</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ENEMY TTK</span>
+                                <span class="terminal-output">TTK = Your EHP ÷ Enemy DPS</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">WIN CONDITION</span>
+                                <span class="terminal-output">You win if: Your TTK < Enemy TTK</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="doc-alert info">
+                        <strong>💡 Pro Tip:</strong> The ship that kills faster wins! Focus on either increasing 
+                        your DPS or your EHP to improve your combat efficiency! 🎯
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>💰 Economic Efficiency Formulas</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">📈 Trading Profit Optimization</h4>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Profit Formula</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">NET PROFIT</span>
+                                <span class="terminal-output">Profit = (Sell Price - Buy Price) × Cargo - Fuel Cost</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">PROFIT/HOUR</span>
+                                <span class="terminal-output">P/H = Net Profit ÷ (Travel Time + Trade Time)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EFFICIENCY</span>
+                                <span class="terminal-output">Efficiency = Profit per Hour ÷ Ship Cost</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">⛽ Fuel Efficiency Optimization</h4>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Fuel Efficiency Formula</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">FUEL/SECTOR</span>
+                                <span class="terminal-output">Fuel Use = Base Consumption × Mass Modifier × Engine Efficiency</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">OPTIMAL MASS</span>
+                                <span class="terminal-output">Best Mass = √(Cargo Value ÷ Fuel Price)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">BREAK-EVEN</span>
+                                <span class="terminal-output">Min Profit = Fuel Cost × Safety Margin (1.5x)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="doc-alert accent">
+                        <strong>🚀 Efficiency Secret:</strong> Better engines might cost more upfront but save 
+                        thousands of credits in fuel over time! Do the math! 🧮
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>⚖️ Balance & Trade-off Formulas</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🎯 Optimal Component Balance</h4>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Balance Ratios</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">POWER BALANCE</span>
+                                <span class="terminal-output">Total Power Need ≤ Total Power Generation × 0.9</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">MASS BALANCE</span>
+                                <span class="terminal-output">Speed = Base Speed × (1 - Mass/Max Mass)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">HEAT BALANCE</span>
+                                <span class="terminal-output">Heat Generation ≤ Heat Dissipation × 0.8</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">📊 Efficiency Score Calculation</h4>
+                    <p>The ultimate optimization formula that combines everything!</p>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Master Efficiency Formula</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">COMBAT SCORE</span>
+                                <span class="terminal-output">CS = (DPS × EHP) ÷ (Ship Cost × 100)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">TRADE SCORE</span>
+                                <span class="terminal-output">TS = (Cargo × Speed) ÷ (Fuel Use × 10)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">OVERALL</span>
+                                <span class="terminal-output">Ship Score = Role Weight × Primary Score + Secondary Scores</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Min-Maxing Strategies -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🎯 Min-Maxing Strategies (Become Overpowered!)</h2>
+            
+            <p>Min-maxing is the art of minimizing weaknesses while maximizing strengths - it's how you create 
+            ships that are absolutely unstoppable at their chosen role! Here are the secret strategies! 🏆</p>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">⚔️ Combat Min-Maxing</h3>
+                        <span class="doc-badge warning">Advanced</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <h4 class="doc-h4">Alpha Strike Build</h4>
+                        <ul class="doc-list">
+                            <li><strong>MAX:</strong> First-shot damage (one-shot enemies)</li>
+                            <li><strong>MIN:</strong> Sustained combat ability</li>
+                            <li><strong>Formula:</strong> All power → biggest weapons</li>
+                            <li><strong>Result:</strong> Delete enemies before they shoot!</li>
+                        </ul>
+                        
+                        <h4 class="doc-h4">Tank Build</h4>
+                        <ul class="doc-list">
+                            <li><strong>MAX:</strong> EHP and regeneration</li>
+                            <li><strong>MIN:</strong> Speed and damage</li>
+                            <li><strong>Formula:</strong> Stack armor + shields + repair</li>
+                            <li><strong>Result:</strong> Outlast any opponent!</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">💰 Economic Min-Maxing</h3>
+                        <span class="doc-badge accent">Advanced</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <h4 class="doc-h4">Speed Trader Build</h4>
+                        <ul class="doc-list">
+                            <li><strong>MAX:</strong> Credits per hour</li>
+                            <li><strong>MIN:</strong> Everything else</li>
+                            <li><strong>Formula:</strong> Small cargo + max engines</li>
+                            <li><strong>Result:</strong> 10x trips = huge profits!</li>
+                        </ul>
+                        
+                        <h4 class="doc-h4">Bulk Hauler Build</h4>
+                        <ul class="doc-list">
+                            <li><strong>MAX:</strong> Cargo capacity</li>
+                            <li><strong>MIN:</strong> Speed and defense</li>
+                            <li><strong>Formula:</strong> Every slot → cargo bays</li>
+                            <li><strong>Result:</strong> Move entire markets!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🧬 Advanced Min-Max Techniques</h3>
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🔬 Component Synergy Stacking</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🔗 Synergy Multipliers</h4>
+                    <p>Some components work better together - stacking them creates exponential power!</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Synergy Examples</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">SHIELD SYNERGY</span>
+                                <span class="terminal-output">2 shields = 150% effectiveness (not 200%)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">BUT WAIT</span>
+                                <span class="terminal-output">2 shields + Shield Booster = 250% effectiveness!</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">WEAPON SYNERGY</span>
+                                <span class="terminal-output">Laser + Target Painter = +50% accuracy bonus!</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="doc-alert warning">
+                        <strong>⚡ Power Play:</strong> Always check if components have synergy bonuses - 
+                        two synergistic components can outperform three regular ones! 🔋
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>📐 Breakpoint Optimization</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🎯 Finding Critical Breakpoints</h4>
+                    <p>Breakpoints are magic numbers where your ship suddenly becomes way more effective!</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Common Breakpoints</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">2-SHOT BREAKPOINT</span>
+                                <span class="terminal-output">Weapon damage = Enemy HP ÷ 2 (kill in 2 shots!)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">SPEED BREAKPOINT</span>
+                                <span class="terminal-output">Speed > 150 = Can outrun all pirates</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">TANK BREAKPOINT</span>
+                                <span class="terminal-output">EHP > 5000 = Survive any alpha strike</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">💡 Breakpoint Strategy</h4>
+                    <ul class="doc-list">
+                        <li><strong>Identify:</strong> Find the key numbers for your ship role</li>
+                        <li><strong>Calculate:</strong> How many components to reach breakpoint</li>
+                        <li><strong>Optimize:</strong> Use minimum components to hit breakpoint</li>
+                        <li><strong>Reinvest:</strong> Use saved slots for other improvements</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Meta-Game Considerations -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🎮 Meta-Game Optimization</h2>
+            
+            <div class="doc-alert info">
+                <strong>🧠 Meta Wisdom:</strong> The "meta" is what strategies everyone else is using - 
+                knowing the meta lets you counter it and stay ahead! 🏁
+            </div>
+
+            <h3 class="doc-h3">📊 Current Meta Analysis</h3>
+            <div class="doc-grid doc-grid-3">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🔥 Popular Builds</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Glass Cannons:</strong> High damage, low defense</li>
+                            <li><strong>Speed Demons:</strong> Can't hit what you can't catch</li>
+                            <li><strong>Turtle Tanks:</strong> Slow but unkillable</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🛡️ Counter Strategies</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>vs Glass:</strong> Any defense beats them</li>
+                            <li><strong>vs Speed:</strong> Area weapons, prediction</li>
+                            <li><strong>vs Tanks:</strong> Sustained DPS, debuffs</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🌟 Meta Breakers</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Hybrid Builds:</strong> Good at everything</li>
+                            <li><strong>Specialty Counters:</strong> Built to beat meta</li>
+                            <li><strong>Tech Rush:</strong> Use advanced components</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🔮 Future-Proofing Your Builds</h3>
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Meta-Resistant Design Principles</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">FLEXIBILITY</span>
+                        <span class="terminal-output">Leave 10-20% slots for adaptation</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">UPGRADE PATH</span>
+                        <span class="terminal-output">Design with component upgrades in mind</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">BALANCE</span>
+                        <span class="terminal-output">Avoid extreme min-maxing (gets nerfed!)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">INNOVATION</span>
+                        <span class="terminal-output">Try weird combos - find new meta!</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Practical Examples -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">📋 Optimization Case Studies</h2>
+            
+            <p>Let's apply all this math to real ship designs and see the magic happen! 🎩✨</p>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>📈 Case Study: Optimizing a Fighter for Maximum DPS</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🎯 Starting Build (Unoptimized)</h4>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Basic Fighter Stats</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">WEAPONS</span>
+                                <span class="terminal-output">4x Basic Lasers = 200 DPS total</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">DEFENSE</span>
+                                <span class="terminal-output">2x Shields = 1000 EHP</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EFFICIENCY</span>
+                                <span class="terminal-output">DPS/Slot = 200/4 = 50 per slot</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="doc-h4">🔧 Optimization Process</h4>
+                    <ol class="doc-list">
+                        <li><strong>Replace basic lasers with plasma cannons:</strong> 2x Plasma = 300 DPS (2 slots)</li>
+                        <li><strong>Add targeting computer:</strong> +30% accuracy = 390 DPS (3 slots)</li>
+                        <li><strong>Add power amplifier:</strong> +25% damage = 487 DPS (4 slots)</li>
+                        <li><strong>Result:</strong> 487 DPS in 4 slots = 121 DPS per slot!</li>
+                    </ol>
+
+                    <div class="doc-alert accent">
+                        <strong>💪 143% Improvement:</strong> Same number of slots, but 2.4x more damage! 
+                        That's the power of optimization! 🚀
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>💰 Case Study: Maximizing Trading Profit Per Hour</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">📊 Trade Route Analysis</h4>
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Route Optimization Math</span>
+                        </div>
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ROUTE A</span>
+                                <span class="terminal-output">10 sectors, 100 profit/unit, safe</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ROUTE B</span>
+                                <span class="terminal-output">20 sectors, 250 profit/unit, dangerous</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">TIME CALC</span>
+                                <span class="terminal-output">Route A: 20 min round trip, Route B: 40 min</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">PROFIT/HOUR</span>
+                                <span class="terminal-output">A: 3,000/hr (safe), B: 3,750/hr (15% loss risk)</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">OPTIMIZED</span>
+                                <span class="terminal-output">Route A with speed build = 4,500/hr!</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="doc-alert info">
+                        <strong>🏃 Speed Secret:</strong> Sometimes the "worse" route with a faster ship 
+                        beats the "better" route with a slow ship! Do the math! 🧮
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Reference -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">📋 Optimization Quick Reference</h2>
+            
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Key Optimization Formulas</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">DPS</span>
+                        <span class="terminal-output">(Damage × Fire Rate) × Accuracy</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">EHP</span>
+                        <span class="terminal-output">(Hull + Shields) × (1 + Damage Reduction)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">PROFIT</span>
+                        <span class="terminal-output">(Sell - Buy) × Cargo - Fuel Cost</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">EFFICIENCY</span>
+                        <span class="terminal-output">Performance ÷ (Cost × Slots)</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🎯 Optimization Checklist</h3>
+            <ul class="doc-list">
+                <li>☑️ Calculate current efficiency metrics</li>
+                <li>☑️ Identify optimization goals (DPS, tank, speed, etc.)</li>
+                <li>☑️ Find component synergies and breakpoints</li>
+                <li>☑️ Test builds with real numbers</li>
+                <li>☑️ Compare before/after performance</li>
+                <li>☑️ Consider meta and counter-strategies</li>
+                <li>☑️ Plan upgrade paths for future</li>
+            </ul>
+        </section>
+
+        <!-- Cross-References -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🔗 Apply Your Optimization Knowledge</h2>
+            
+            <div class="doc-alert info">
+                <strong>🚀 Take Your Optimized Ships Further:</strong> Now that you know the math behind perfect ships, 
+                these guides will help you put your optimized designs to work in the real galaxy!
+            </div>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">⚔️ Combat Performance Testing</h3>
+                        <span class="doc-badge warning">Put Theory Into Practice</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Test your optimized ship designs in actual combat scenarios:</p>
+                        <ul class="doc-list">
+                            <li><a href="../combat/weapon-effectiveness.html">Weapon Effectiveness</a> - Verify your DPS calculations in battle</li>
+                            <li><a href="../combat/shield-armor.html">Defense Systems</a> - Test your EHP calculations against real damage</li>
+                            <li><a href="../combat/damage-calculation.html">Damage Mechanics</a> - See how your optimization formulas play out</li>
+                        </ul>
+                        <div class="doc-alert accent">
+                            <strong>💡 Testing Tip:</strong> Your optimized ships should dominate the battlefield - if they don't, check your math!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">💰 Economic Efficiency Validation</h3>
+                        <span class="doc-badge accent">Profit Optimization</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Validate your trading optimization with real profit calculations:</p>
+                        <ul class="doc-list">
+                            <li><a href="../trading/trade-routes.html">Trading Routes</a> - Test your fuel efficiency formulas</li>
+                            <li><a href="../trading/commodity-price-analysis.html">Price Analysis</a> - Apply profit optimization strategies</li>
+                            <li><a href="../trading/risk-reward-analysis.html">Risk Analysis</a> - Verify your economic calculations</li>
+                        </ul>
+                        <div class="doc-alert info">
+                            <strong>💰 Profit Tip:</strong> An optimized trading ship should pay for itself within 20 trades - track your results!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🚀 Navigation Optimization</h3>
+                        <span class="doc-badge secondary">Operational Efficiency</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Optimize your ships for exploration and navigation efficiency:</p>
+                        <ul class="doc-list">
+                            <li><a href="../navigation/fuel-management.html">Fuel Management</a> - Real-world fuel efficiency testing</li>
+                            <li><a href="../navigation/exploration.html">Exploration Guide</a> - Scanner optimization verification</li>
+                            <li><a href="../navigation/jump-drives.html">Jump Drive Tech</a> - Advanced propulsion optimization</li>
+                        </ul>
+                        <div class="doc-alert secondary">
+                            <strong>🔍 Navigation Tip:</strong> An optimized explorer should discover 50% more secrets per hour than a standard ship!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🏛️ Faction-Specific Optimization</h3>
+                        <span class="doc-badge">Specialized Builds</span>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Apply optimization principles to faction-specific ship designs:</p>
+                        <ul class="doc-list">
+                            <li><a href="../factions/terran-federation.html">Terran Optimization</a> - Balanced, efficient designs</li>
+                            <li><a href="../factions/zynthian-collective.html">Zynthian Bio-Tech</a> - Organic optimization bonuses</li>
+                            <li><a href="../factions/nexus-syndicate.html">Nexus Innovation</a> - Cutting-edge optimization techniques</li>
+                        </ul>
+                        <div class="doc-alert info">
+                            <strong>🎯 Faction Tip:</strong> Faction-specific components can boost your optimization by 20-30% when used correctly!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="ship-builds.html" class="doc-nav-link">← Ship Builds</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="stats-calculation.html" class="doc-nav-link">Next: Stats Guide →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            console.log('Advanced Ship Optimization Guide loaded');
+        });
+    </script>
+</body>
+</html>

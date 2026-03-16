@@ -1,25 +1,35 @@
 import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { colonies as coloniesApi, ships } from '../../services/api';
-import { Building2, Package, ArrowUp, Trash2, Users, AlertCircle, RefreshCw } from 'lucide-react';
+import { Building2, Package, ArrowUp, Trash2, Users, AlertCircle, RefreshCw, Globe, Rocket, Shield, Map, Trophy } from 'lucide-react';
 import ColonyCard from './ColonyCard';
 import ColonyDetails from './ColonyDetails';
 
 function ColoniesPage({ user }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [colonizePlanet, setColonizePlanet] = useState(location.state?.colonizePlanet || null);
+  const [colonizeShipId, setColonizeShipId] = useState('');
+  const [colonizeName, setColonizeName] = useState('');
+  const [colonizeLoading, setColonizeLoading] = useState(false);
   const [userColonies, setUserColonies] = useState([]);
   const [userShips, setUserShips] = useState([]);
   const [selectedColony, setSelectedColony] = useState(null);
+  const [raids, setRaids] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const fetchData = async () => {
     try {
-      const [coloniesRes, shipsRes] = await Promise.all([
+      const [coloniesRes, shipsRes, raidsRes] = await Promise.all([
         coloniesApi.getAll(),
         ships.getAll(),
+        coloniesApi.getRaids().catch(() => ({ data: { data: [] } })),
       ]);
       // Handle different response formats
       setUserColonies(Array.isArray(coloniesRes.data) ? coloniesRes.data : (coloniesRes.data?.colonies || []));
       setUserShips(shipsRes.data.data?.ships || []);
+      setRaids(raidsRes.data?.data || raidsRes.data || []);
     } catch (err) {
       setError('Failed to load colonies');
     } finally {
@@ -60,6 +70,29 @@ function ColoniesPage({ user }) {
     }
   };
 
+  const handleColonize = async () => {
+    if (!colonizeShipId || !colonizePlanet) return;
+    setColonizeLoading(true);
+    setError('');
+    try {
+      await coloniesApi.colonize(colonizePlanet.planet_id, colonizeShipId, colonizeName || undefined);
+      setColonizePlanet(null);
+      setColonizeShipId('');
+      setColonizeName('');
+      // Clear navigation state so refresh doesn't re-show prompt
+      window.history.replaceState({}, '');
+      await fetchData();
+    } catch (err) {
+      setError(err.response?.data?.error || err.response?.data?.message || 'Colonization failed');
+    } finally {
+      setColonizeLoading(false);
+    }
+  };
+
+  const colonyShips = userShips.filter(s =>
+    s.ship_type === 'Colony Ship' || s.ship_type === 'Insta Colony Ship'
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -78,9 +111,14 @@ function ColoniesPage({ user }) {
           </h1>
           <p className="text-gray-400">Manage your planetary colonies and collect resources</p>
         </div>
-        <button onClick={fetchData} className="btn btn-secondary flex items-center gap-2">
-          <RefreshCw className="w-4 h-4" /> Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => navigate('/colony-leaderboard')} className="btn btn-secondary flex items-center gap-2">
+            <Trophy className="w-4 h-4" /> Leaderboard
+          </button>
+          <button onClick={fetchData} className="btn btn-secondary flex items-center gap-2">
+            <RefreshCw className="w-4 h-4" /> Refresh
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -91,8 +129,53 @@ function ColoniesPage({ user }) {
         </div>
       )}
 
+      {/* Colonization Prompt */}
+      {colonizePlanet && (
+        <div className="card p-6 space-y-4" style={{ borderColor: 'rgba(76, 175, 80, 0.3)', background: 'rgba(76, 175, 80, 0.05)' }}>
+          <div className="flex items-center gap-3">
+            <Globe className="w-6 h-6 text-accent-green" />
+            <div>
+              <h2 className="text-lg font-bold text-white">Colonize {colonizePlanet.name}</h2>
+              <p className="text-sm text-gray-400">
+                {colonizePlanet.planet_type && <span className="capitalize">{colonizePlanet.planet_type}</span>}
+                {colonizePlanet.habitability != null && <span> — Habitability: {colonizePlanet.habitability}%</span>}
+              </p>
+            </div>
+            <button onClick={() => { setColonizePlanet(null); window.history.replaceState({}, ''); }}
+              className="ml-auto text-gray-500 hover:text-white text-sm">Cancel</button>
+          </div>
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex-1 min-w-[180px]">
+              <label className="text-xs text-gray-400 block mb-1">Colony Ship</label>
+              <select value={colonizeShipId} onChange={e => setColonizeShipId(e.target.value)}
+                className="w-full bg-space-800 border border-space-600 text-white rounded px-3 py-2 text-sm">
+                <option value="">Select a colony ship...</option>
+                {colonyShips.map(s => (
+                  <option key={s.ship_id} value={s.ship_id}>{s.name} ({s.ship_type})</option>
+                ))}
+              </select>
+              {colonyShips.length === 0 && (
+                <p className="text-xs text-accent-red mt-1">No colony ships available. Build or purchase one first.</p>
+              )}
+            </div>
+            <div className="flex-1 min-w-[140px]">
+              <label className="text-xs text-gray-400 block mb-1">Colony Name (optional)</label>
+              <input value={colonizeName} onChange={e => setColonizeName(e.target.value)}
+                placeholder={colonizePlanet.name + ' Colony'}
+                className="w-full bg-space-800 border border-space-600 text-white rounded px-3 py-2 text-sm" />
+            </div>
+            <button onClick={handleColonize} disabled={!colonizeShipId || colonizeLoading}
+              className="btn btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: '#4caf50', borderColor: '#4caf50' }}>
+              <Rocket className="w-4 h-4" />
+              {colonizeLoading ? 'Colonizing...' : `Colonize ${colonizePlanet.name}`}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="card flex items-center gap-4">
           <div className="p-3 rounded-lg bg-accent-green/10 border border-accent-green/30 text-accent-green">
             <Building2 className="w-6 h-6" />
@@ -120,7 +203,38 @@ function ColoniesPage({ user }) {
             <p className="stat-label">Avg Infrastructure</p>
           </div>
         </div>
+        <div className="card flex items-center gap-4">
+          <div className="p-3 rounded-lg bg-accent-orange/10 border border-accent-orange/30 text-accent-orange">
+            <Shield className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="stat-value">{raids.length}</p>
+            <p className="stat-label">Recent Raids</p>
+          </div>
+        </div>
       </div>
+
+      {raids.length > 0 && (
+        <div className="card">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2 mb-3">
+            <Shield className="w-5 h-5 text-accent-orange" /> Recent Raid Activity
+          </h2>
+          <div className="space-y-2">
+            {raids.slice(0, 5).map(raid => (
+              <div key={raid.colony_id} className="flex items-center justify-between p-2 bg-space-800 rounded border border-space-700">
+                <div>
+                  <span className="text-white text-sm font-medium">{raid.colony_name}</span>
+                  <span className="text-gray-500 text-xs ml-2">Defense: {raid.defense_rating}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-accent-orange text-xs">{raid.raid_damage > 0 ? `${raid.raid_damage} damage` : 'No damage'}</span>
+                  {raid.last_raid && <span className="text-gray-600 text-xs ml-2">{new Date(raid.last_raid).toLocaleDateString()}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Colonies Grid */}
       {userColonies.length === 0 ? (
@@ -135,11 +249,19 @@ function ColoniesPage({ user }) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {userColonies.map(colony => (
-            <ColonyCard 
-              key={colony.colony_id} 
-              colony={colony} 
-              onClick={() => setSelectedColony(colony)}
-            />
+            <div key={colony.colony_id} className="relative">
+              <ColonyCard
+                colony={colony}
+                onClick={() => setSelectedColony(colony)}
+              />
+              <button
+                onClick={(e) => { e.stopPropagation(); navigate(`/colony/${colony.colony_id}/surface`); }}
+                className="absolute top-2 right-2 bg-space-800/90 border border-accent-cyan/30 rounded px-2 py-1 text-xs text-accent-cyan hover:bg-accent-cyan/10 flex items-center gap-1 transition-colors"
+                title="View Surface"
+              >
+                <Map className="w-3 h-3" /> Surface
+              </button>
+            </div>
           ))}
         </div>
       )}

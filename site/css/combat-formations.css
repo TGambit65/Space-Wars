@@ -1,0 +1,400 @@
+/* Combat Formations and Fleet Command Styles */
+
+/* Formation Controls */
+.formation-controls {
+  background: var(--combat-bg-primary);
+  border: 1px solid var(--combat-border-primary);
+  border-radius: var(--combat-border-radius);
+  padding: 15px;
+  margin: 10px 0;
+  box-shadow: var(--combat-shadow);
+}
+
+.formation-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.formation-btn {
+  background: var(--combat-bg-secondary);
+  border: 2px solid var(--combat-border-secondary);
+  border-radius: var(--combat-border-radius-small);
+  color: var(--combat-text-primary);
+  cursor: pointer;
+  padding: 12px 8px;
+  font-size: 11px;
+  font-weight: bold;
+  transition: var(--combat-transition);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-height: 70px;
+}
+
+.formation-btn:hover {
+  background: rgba(40, 40, 80, 0.9);
+  border-color: var(--combat-accent);
+  transform: translateY(-2px);
+}
+
+.formation-btn.active {
+  border-color: var(--combat-accent);
+  background: rgba(74, 158, 255, 0.2);
+  box-shadow: 0 0 10px rgba(74, 158, 255, 0.3);
+}
+
+.formation-icon {
+  font-size: 18px;
+  color: var(--combat-accent);
+}
+
+.formation-name {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.formation-description {
+  font-size: 9px;
+  color: var(--combat-text-secondary);
+  text-align: center;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+/* Formation Visual Representation */
+.formation-preview {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--combat-border-secondary);
+  border-radius: var(--combat-border-radius-small);
+  padding: 10px;
+  margin: 10px 0;
+  height: 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.formation-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 2px;
+  height: 100%;
+  width: 100%;
+}
+
+.formation-slot {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: var(--combat-text-secondary);
+}
+
+.formation-slot.occupied {
+  background: var(--combat-accent);
+  color: white;
+  border-color: var(--combat-accent);
+}
+
+.formation-slot.leader {
+  background: var(--combat-warning);
+  border-color: var(--combat-warning);
+  color: black;
+  font-weight: bold;
+}
+
+/* Formation Notifications */
+.formation-notification {
+  background: rgba(74, 158, 255, 0.1);
+  border: 1px solid var(--combat-accent);
+  border-radius: var(--combat-border-radius-small);
+  padding: 8px 12px;
+  margin: 5px 0;
+  color: var(--combat-accent);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.formation-notification.warning {
+  background: rgba(255, 170, 0, 0.1);
+  border-color: var(--combat-warning);
+  color: var(--combat-warning);
+}
+
+.formation-notification.error {
+  background: rgba(255, 68, 68, 0.1);
+  border-color: var(--combat-danger);
+  color: var(--combat-danger);
+}
+
+/* Spacing Indicator */
+.spacing-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  padding: 8px;
+  background: var(--combat-bg-secondary);
+  border-radius: var(--combat-border-radius-small);
+}
+
+.spacing-label {
+  color: var(--combat-text-secondary);
+  font-size: 11px;
+  min-width: 50px;
+}
+
+.spacing-slider {
+  flex: 1;
+  height: 4px;
+  background: var(--combat-border-secondary);
+  outline: none;
+  border-radius: 2px;
+}
+
+.spacing-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--combat-accent);
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.spacing-value {
+  color: var(--combat-text-primary);
+  font-size: 11px;
+  font-weight: bold;
+  min-width: 30px;
+  text-align: right;
+}
+
+/* Formation-specific ship indicators */
+.ship-card.formation-leader {
+  border-left: 4px solid var(--combat-warning);
+}
+
+.ship-card.formation-leader .ship-name::before {
+  content: "⭐ ";
+  color: var(--combat-warning);
+}
+
+.ship-card.out-of-formation {
+  border-left: 4px solid var(--combat-danger);
+  opacity: 0.7;
+}
+
+.ship-position {
+  font-size: 10px;
+  color: var(--combat-text-secondary);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: auto;
+}
+
+/* Fleet UI Panel Updates */
+.fleet-panel {
+  background: var(--combat-bg-primary);
+  border: 1px solid var(--combat-border-primary);
+  border-radius: var(--combat-border-radius);
+  padding: 15px;
+  margin: 10px 0;
+}
+
+.fleet-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.fleet-stat {
+  text-align: center;
+  padding: 8px;
+  background: var(--combat-bg-secondary);
+  border-radius: var(--combat-border-radius-small);
+}
+
+.fleet-stat-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--combat-text-primary);
+}
+
+.fleet-stat-label {
+  font-size: 10px;
+  color: var(--combat-text-secondary);
+  text-transform: uppercase;
+}
+
+/* Formation Commands */
+.formation-commands {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.formation-command-btn {
+  padding: 8px 12px;
+  font-size: 11px;
+  background: var(--combat-bg-secondary);
+  border: 1px solid var(--combat-border-secondary);
+  color: var(--combat-text-primary);
+  border-radius: var(--combat-border-radius-small);
+  cursor: pointer;
+  transition: var(--combat-transition);
+  text-align: center;
+}
+
+.formation-command-btn:hover {
+  border-color: var(--combat-accent);
+  background: rgba(74, 158, 255, 0.1);
+}
+
+.formation-command-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Formation Status */
+.formation-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--combat-border-radius-small);
+  margin: 5px 0;
+  font-size: 11px;
+}
+
+.formation-status.active {
+  background: rgba(0, 255, 0, 0.1);
+  color: var(--combat-success);
+}
+
+.formation-status.breaking {
+  background: rgba(255, 170, 0, 0.1);
+  color: var(--combat-warning);
+}
+
+.formation-status.broken {
+  background: rgba(255, 68, 68, 0.1);
+  color: var(--combat-danger);
+}
+
+/* Formation Efficiency Indicator */
+.formation-efficiency {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.efficiency-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.efficiency-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--combat-danger), var(--combat-warning), var(--combat-success));
+  transition: width 0.3s ease;
+}
+
+.efficiency-text {
+  font-size: 10px;
+  color: var(--combat-text-secondary);
+  min-width: 40px;
+  text-align: right;
+}
+
+/* Fleet Command Interface */
+.fleet-command {
+  background: var(--combat-bg-primary);
+  border: 1px solid var(--combat-border-primary);
+  border-radius: var(--combat-border-radius);
+  padding: 15px;
+  margin: 10px 0;
+}
+
+.command-targets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 8px 0;
+}
+
+.target-ship {
+  padding: 4px 8px;
+  background: var(--combat-bg-secondary);
+  border: 1px solid var(--combat-border-secondary);
+  border-radius: var(--combat-border-radius-small);
+  font-size: 10px;
+  color: var(--combat-text-primary);
+  cursor: pointer;
+  transition: var(--combat-transition);
+}
+
+.target-ship:hover {
+  border-color: var(--combat-accent);
+}
+
+.target-ship.selected {
+  border-color: var(--combat-danger);
+  background: rgba(255, 68, 68, 0.2);
+}
+
+/* Command Queue */
+.command-queue {
+  max-height: 100px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--combat-border-radius-small);
+  padding: 8px;
+  margin: 8px 0;
+}
+
+.command-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 10px;
+}
+
+.command-item:last-child {
+  border-bottom: none;
+}
+
+.command-text {
+  color: var(--combat-text-primary);
+}
+
+.command-remove {
+  color: var(--combat-danger);
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.command-remove:hover {
+  background: rgba(255, 68, 68, 0.2);
+  border-radius: 2px;
+  padding: 2px 4px;
+}

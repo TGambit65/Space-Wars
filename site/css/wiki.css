@@ -1,0 +1,57 @@
+/* Wiki Page Styles */
+.wiki-container {
+  display: flex;
+  min-height: 90vh;
+  background: var(--dark-bg);
+}
+.wiki-sidebar {
+  width: 260px;
+  background: #181828;
+  color: #fff;
+  padding: 2rem 1rem 2rem 2rem;
+  border-right: 2px solid var(--primary-color);
+  min-height: 100vh;
+}
+.wiki-sidebar h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--primary-color);
+  letter-spacing: 1px;
+}
+.wiki-sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+.wiki-sidebar ul li {
+  margin-bottom: 1.25rem;
+}
+.wiki-sidebar ul li a {
+  color: #fff;
+  font-weight: 500;
+  font-size: 1.1rem;
+  transition: color 0.2s;
+}
+.wiki-sidebar ul li a:hover {
+  color: var(--accent-color);
+}
+.wiki-main {
+  flex: 1;
+  padding: 2.5rem 3vw 2.5rem 3vw;
+  background: var(--dark-bg);
+}
+.wiki-main section {
+  margin-bottom: 2.5rem;
+}
+.wiki-main h1, .wiki-main h2 {
+  color: var(--primary-color);
+  font-family: 'Exo 2', 'Roboto', sans-serif;
+  font-weight: 700;
+}
+@media (max-width: 900px) {
+  .wiki-container { flex-direction: column; }
+  .wiki-sidebar { width: 100%; border-right: none; border-bottom: 2px solid var(--primary-color); min-height: unset; }
+}
+@media (max-width: 600px) {
+  .wiki-main { padding: 1.2rem 1vw; }
+  .wiki-sidebar { padding: 1.2rem 1vw; }
+}

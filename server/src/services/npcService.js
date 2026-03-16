@@ -123,7 +123,7 @@ const getNPCsInSector = async (sectorId) => {
       'npc_id', 'name', 'npc_type', 'ship_type',
       'hull_points', 'max_hull_points', 'shield_points', 'max_shield_points',
       'attack_power', 'defense_rating',
-      'behavior_state', 'intelligence_tier'
+      'behavior_state', 'intelligence_tier', 'ai_personality'
     ]
   });
 };

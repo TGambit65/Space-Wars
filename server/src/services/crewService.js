@@ -73,9 +73,16 @@ const hireCrew = async (crewId, shipId, userId) => {
       throw Object.assign(new Error(`Ship crew capacity reached (${crewCapacity})`), { statusCode: 400 });
     }
 
-    // Get user and check credits
+    // Get user and check credits (faction diplomacy bonus reduces hiring cost)
     const user = await User.findByPk(userId, { transaction, lock: transaction.LOCK.UPDATE });
-    const hiringFee = crew.salary * config.crew.hiringFeeMultiplier;
+    let hiringFee = crew.salary * config.crew.hiringFeeMultiplier;
+    try {
+      const factionConfig = config.factions[user.faction];
+      if (factionConfig && factionConfig.bonuses.diplomacy) {
+        // Higher diplomacy = lower hiring cost (inverse)
+        hiringFee = Math.floor(hiringFee / factionConfig.bonuses.diplomacy);
+      }
+    } catch (e) { /* faction bonus failure should not block hiring */ }
 
     if (user.credits < hiringFee) {
       throw Object.assign(new Error(`Insufficient credits. Hiring fee is ${hiringFee} credits.`), { statusCode: 400 });

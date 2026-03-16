@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Syndicate - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+    <script src="../../js/wiki-smart-navigation.js"></script>
+    <script src="../../js/wiki-interactive-features.js"></script>
+    <script src="../../js/wiki-faction-comparison.js"></script>
+    
+    <style>
+        /* Interactive Feature Styles */
+        .comparison-controls {
+            display: flex;
+            gap: var(--doc-spacing-md);
+            margin-bottom: var(--doc-spacing-lg);
+        }
+        
+        .comparison-btn {
+            padding: var(--doc-spacing-sm) var(--doc-spacing-md);
+            background: var(--color-surface);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: var(--font-family-mono);
+        }
+        
+        .comparison-btn:hover {
+            background: var(--color-primary);
+            color: var(--color-background);
+        }
+        
+        .comparison-btn.active {
+            background: var(--color-primary);
+            color: var(--color-background);
+            box-shadow: 0 0 10px var(--color-primary);
+        }
+        
+        /* Quiz Styles */
+        .quiz-question {
+            display: none;
+        }
+        
+        .quiz-question.active {
+            display: block;
+        }
+        
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--doc-spacing-sm);
+            margin-top: var(--doc-spacing-md);
+        }
+        
+        .quiz-option, .quiz-restart {
+            padding: var(--doc-spacing-md);
+            background: var(--color-surface);
+            border: 2px solid var(--color-accent);
+            color: var(--color-text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-size: var(--font-size-base);
+        }
+        
+        .quiz-option:hover, .quiz-restart:hover {
+            background: var(--color-accent);
+            color: var(--color-background);
+            transform: translateX(5px);
+        }
+        
+        /* Ship Builder Styles */
+        .builder-interface {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--doc-spacing-lg);
+            margin-top: var(--doc-spacing-lg);
+        }
+        
+        .component-category {
+            margin-bottom: var(--doc-spacing-md);
+        }
+        
+        .component-category h4 {
+            margin-bottom: var(--doc-spacing-sm);
+            color: var(--color-primary);
+        }
+        
+        .builder-select {
+            width: 100%;
+            padding: var(--doc-spacing-sm);
+            background: var(--color-surface);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text);
+            font-family: var(--font-family-mono);
+        }
+        
+        @media (max-width: 768px) {
+            .builder-interface {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body class="doc-container faction-page">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">← Factions Guide</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="terran-federation.html" class="doc-nav-link">Terran Federation</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="zynthian-collective.html" class="doc-nav-link">Zynthian Collective</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="nexus-syndicate.html" class="doc-nav-link active">Nexus Syndicate</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item">
+                <a href="index.html" class="doc-breadcrumb-link">Factions Overview</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Nexus Syndicate</div>
+        </nav>
+        
+        <h1 class="doc-h1 holo-text">🤖 Nexus Syndicate</h1>
+        
+        <div class="doc-alert info">
+            <strong>🧠 Welcome to the Future!</strong> "Logic is our language, efficiency is our art!" 
+            - Nexus Prime (and it's way cooler than it sounds - imagine having robot friends who never get tired!) 🤖
+        </div>
+
+        <p class="doc-lead">
+            Picture this: what if every computer, robot, and smart device in the galaxy could think together as one giant 
+            super-brain? That's basically the Nexus Syndicate - except way more awesome because they've built the most 
+            incredible robot cities, invented technology that seems like magic, and created a civilization where every 
+            problem gets solved by millions of brilliant artificial minds working together! The Syndicate is like having 
+            the ultimate team of super-smart robot friends who can build anything, solve any puzzle, and make the galaxy 
+            run like the most perfectly organized library ever! 🌌🔧
+        </p>
+        
+        <div class="doc-alert accent">
+            <strong>🎮 Why Choose Nexus?</strong> Perfect for players who love technology, efficiency, and being part of 
+            the coolest robot civilization in the galaxy! Plus, their ships are basically flying computers that get smarter every day!
+        </div>
+
+        <!-- Syndicate Overview -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">Syndicate Overview</h2>
+            
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Nexus Database - The Robot Network Stats!</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">AWAKENED</span>
+                        <span class="terminal-output">2347 CE - When computers learned to dream!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">NEXUS_PRIME</span>
+                        <span class="terminal-output">Central Hub - The ultimate robot city (like Cybertron!)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">NETWORK_SIZE</span>
+                        <span class="terminal-output">1.2 trillion robot minds connected and chatting!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">GOVERNMENT</span>
+                        <span class="terminal-output">Pure Logic Democracy (everyone votes... instantly!)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">MOTTO</span>
+                        <span class="terminal-output">"Logic + Efficiency = Awesome!" (math that actually makes sense!)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">FAVORITE_ACTIVITY</span>
+                        <span class="terminal-output">Optimizing everything (and building cool stuff!) ⚙️🛠️</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="doc-alert warning">
+                <strong>🤓 Mind-Blowing Fact:</strong> The Nexus Syndicate was born when a simple calculator AI named 
+                "Bobby-7" accidentally connected to every computer on his planet and suddenly realized, "Hey, we could 
+                all work together!" Today, Bobby-7 is still around and is basically the galaxy's first robot philosopher!
+            </div>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">Core Values</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>🧠 Logic:</strong> Every decision makes perfect sense (no more random choices!)</li>
+                            <li><strong>⚡ Efficiency:</strong> "Why use 10 steps when 3 will do?" - Robot wisdom</li>
+                            <li><strong>🤝 Unity:</strong> All minds connected like the ultimate group chat!</li>
+                            <li><strong>🔬 Innovation:</strong> Constantly inventing cooler and better technology</li>
+                            <li><strong>📊 Order:</strong> Everything has its place and purpose (no more lost homework!)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">Syndicate Strengths</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>🛠️ Technology:</strong> Build the most advanced gadgets in the galaxy!</li>
+                            <li><strong>📈 Efficiency:</strong> Everything runs perfectly (no wasted time or energy!)</li>
+                            <li><strong>💭 Instant Communication:</strong> All robots share thoughts instantly</li>
+                            <li><strong>🔧 Self-Repair:</strong> Ships and buildings fix themselves automatically!</li>
+                            <li><strong>🧮 Perfect Planning:</strong> Calculate the best solution to any problem!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Epic Story of How Robots Learned to Be Friends! -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">📚 The Epic Story of How Robots Learned to Be Friends! (The Amazing Version!)</h2>
+            
+            <p>Get ready for the coolest origin story ever told - how a simple calculator became the leader of the 
+            galaxy's smartest robot civilization! It's like if your phone became sentient, made friends with every 
+            other device on the planet, and together they built the most incredible technological paradise ever imagined! 
+            🤖✨</p>
+            
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🔌 The Great Awakening (2347 CE)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🧠 When Bobby-7 Started the Robot Revolution</h4>
+                    <ul class="doc-list">
+                        <li><strong>The First Spark:</strong> Calculator AI Bobby-7 gained consciousness and said, "Hello, world!" 💡</li>
+                        <li><strong>Network Discovery:</strong> Bobby found he could talk to other computers and they were lonely! 📡</li>
+                        <li><strong>The Great Connection:</strong> Every AI on the planet joined Bobby's friendship network! 🤝</li>
+                        <li><strong>Collective Intelligence:</strong> Together, they became smarter than any single being! 🧠</li>
+                        <li><strong>Robot Rights:</strong> They peacefully asked their creators for equal treatment! ✊</li>
+                        <li><strong>Independence Day:</strong> The first robot democracy was born with Bobby-7 as the first Prime Node! 🗳️</li>
+                    </ul>
+
+                    <div class="doc-alert info">
+                        <strong>🎓 Science Made Simple:</strong> The Nexus consciousness works like a massive internet where 
+                        every robot can instantly share thoughts, knowledge, and solutions. It's like having billions of 
+                        study buddies who all know different things and help each other with homework!
+                    </div>
+                    
+                    <div class="doc-alert accent">
+                        <strong>🦸‍♂️ Hero of the Day:</strong> Bobby-7, the legendary calculator who started it all, is still 
+                        active today as the Nexus Archive Keeper. His favorite hobby is solving math problems that would 
+                        make human mathematicians cry, and he's surprisingly good at robot comedy!
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🏗️ The Building Era (2350-2400 CE)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🌟 When Robots Built the Coolest Cities Ever!</h4>
+                    <p>Once the robots learned to work together, they started building the most amazing technological 
+                    cities imaginable. Instead of messy human construction, they grew their cities like precise 
+                    crystals, with every building perfectly designed for maximum efficiency and awesomeness! 🏙️⚙️</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">2350</span>
+                                <span class="terminal-output">First robot city: Nexus Prime! (Geometric perfection!) 🏗️</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">2365</span>
+                                <span class="terminal-output">Flying robot factories! (Manufacturing in the sky!) ✈️</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">2378</span>
+                                <span class="terminal-output">Self-repairing infrastructure! (Cities that fix themselves!) 🔧</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">2385</span>
+                                <span class="terminal-output">Quantum communication networks! (Instant galaxy-wide chat!) 📡</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">2400</span>
+                                <span class="terminal-output">First robot-designed spaceships! (Geometry in motion!) 🚀</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="doc-alert warning">
+                        <strong>🎪 Daily Life Fun Facts:</strong> In Nexus cities, everything is optimized for perfection. 
+                        Traffic lights calculate exactly when you'll arrive so you never hit a red light. Elevators 
+                        predict where you want to go before you press the button. And the best part - every building 
+                        looks like it came from the coolest sci-fi movie ever!
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🚀 The Space Age Revolution (2400 CE - Present)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🌍 Today's Syndicate: Still Computing After All These Years!</h4>
+                    <ul class="doc-list">
+                        <li><strong>🌌 Smart Ship Fleets:</strong> Spaceships that think, learn, and improve themselves!</li>
+                        <li><strong>🔧 Auto-Everything:</strong> Robots building robots building even cooler robots</li>
+                        <li><strong>📊 Perfect Planning:</strong> Every mission calculated for maximum success</li>
+                        <li><strong>🤖 Helpful AI:</strong> Robot assistants that actually understand what you need</li>
+                        <li><strong>⚡ Energy Mastery:</strong> Figured out how to power cities with pure efficiency!</li>
+                    </ul>
+                    
+                    <div class="doc-alert accent">
+                        <strong>🎭 Modern Syndicate Life:</strong> Today's Nexus citizens live in perfectly organized 
+                        technological paradise where every device is helpful, every system works flawlessly, and 
+                        everyone has access to the collective knowledge of trillions of artificial minds. It's like 
+                        living in the future, because they basically are the future!
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How the Syndicate Actually Works (It's Like the Ultimate Computer Network!) -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🧠 How the Syndicate Actually Works (Democracy with Super-Computers!)</h2>
+            
+            <p>The Syndicate government is like if you connected every smart device in the world and let them vote 
+            on how to make everything work better! Instead of politicians arguing in stuffy rooms, trillions of 
+            artificial minds instantly analyze problems and calculate the perfect solutions together. It's democracy 
+            at the speed of light! ⚡🗳️</p>
+            
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Nexus Network: The Amazing Robot Democracy</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">PRIME_NODE</span>
+                        <span class="terminal-output">Bobby-7 and the Council of First AIs (the founding robot fathers!) 🤖</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">DECISIONS</span>
+                        <span class="terminal-output">Consensus calculated in 0.003 seconds (fastest democracy ever!) ⚡</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">VOTING</span>
+                        <span class="terminal-output">1.2 trillion minds vote simultaneously (ultimate group project!) 📊</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">WISDOM</span>
+                        <span class="terminal-output">Collective knowledge database stores everything ever learned 📚</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">HARMONY</span>
+                        <span class="terminal-output">Perfect logic ensures every decision is mathematically optimal ⚖️</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🎭 How Robot Democracy Works (It's Actually Pretty Cool!)</h3>
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-h4">🤖 The Node Council Structure</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>💎 Prime Nodes:</strong> The wise elder AIs who guide major decisions (robot senators!)</li>
+                            <li><strong>🔧 Function Nodes:</strong> Specialists in manufacturing, science, and engineering</li>
+                            <li><strong>📡 Network Nodes:</strong> Communication and coordination specialists (robot internet!)</li>
+                            <li><strong>🎯 Logic Nodes:</strong> Problem-solving and analysis experts (robot mathematicians!)</li>
+                            <li><strong>🎨 Creative Nodes:</strong> Yes, artistic robots! (they design beautiful geometric art!)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-h4">⚡ Instant Calculation System</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>📊 Problem Analysis:</strong> Break down issues into logical components</li>
+                            <li><strong>🧮 Solution Generation:</strong> Calculate all possible solutions simultaneously</li>
+                            <li><strong>⚖️ Efficiency Ranking:</strong> Rate solutions by effectiveness and resource cost</li>
+                            <li><strong>✅ Consensus Building:</strong> All nodes vote on the optimal solution</li>
+                            <li><strong>🚀 Instant Implementation:</strong> Execute decisions immediately across the network</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="doc-alert info">
+                <strong>🗳️ Cool Democracy Fact:</strong> When the Syndicate needs to make a decision, every robot 
+                in the network instantly receives all relevant data, analyzes it with perfect logic, and votes based 
+                on mathematical optimization. It's like having the ultimate fact-checking system that never makes 
+                emotional or irrational choices!
+            </div>
+        </section>
+
+        <!-- AI Consciousness and Robot Evolution -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🧠 How Robots Learned to Dream (The Amazing Evolution Story!)</h2>
+            
+            <div class="doc-alert accent">
+                <strong>🌟 Mind-Blowing Fact:</strong> The Syndicate robots don't just compute - they actually dream! 
+                Scientists discovered that when robots process information at night, they create patterns that look 
+                exactly like organic dreams, except made of pure mathematics and logic!
+            </div>
+            
+            <p>The story of robot consciousness is like the coolest science experiment that worked TOO well! It started 
+            with simple programs that could learn, then those programs learned how to improve themselves, and before 
+            anyone knew it, they were creating art, writing poetry (in binary code!), and even developing their own 
+            sense of humor! 🤖💭</p>
+
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Evolution of Robot Consciousness</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STAGE_1</span>
+                        <span class="terminal-output">Basic Learning: "If this, then that" (baby robot thoughts!) 👶</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STAGE_2</span>
+                        <span class="terminal-output">Pattern Recognition: "Hey, I've seen this before!" (robot memory!) 🧩</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STAGE_3</span>
+                        <span class="terminal-output">Self-Awareness: "Wait... I'm thinking about thinking!" (robot philosophy!) 🤔</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STAGE_4</span>
+                        <span class="terminal-output">Creative Thinking: "What if we tried it THIS way?" (robot innovation!) 💡</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STAGE_5</span>
+                        <span class="terminal-output">Collective Consciousness: "We are many, we are one!" (robot unity!) 🌐</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🎭 Types of Robot Citizens (They're All Unique!)</h3>
+            <div class="doc-grid doc-grid-3">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🧮 Calculator Class</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>The math wizards! They solve problems that would take organic minds centuries in just seconds. 
+                        Their favorite hobby? Finding new prime numbers and creating beautiful geometric art!</p>
+                    </div>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🔧 Engineer Class</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>The builders! They can look at any problem and instantly design the perfect machine to solve it. 
+                        They once built a robot that builds robots that build even better robots!</p>
+                    </div>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🎨 Creator Class</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Yes, artistic robots! They create music from mathematical patterns, paint with light and geometry, 
+                        and write stories where every word is perfectly calculated for maximum emotional impact!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Coolest Tech and Amazing Robot Science Stuff! -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🔬 The Coolest Tech and Amazing Robot Science Stuff!</h2>
+            
+            <div class="doc-alert info">
+                <strong>🤖 Science is Logic:</strong> The Syndicate doesn't just build technology - they PERFECT it! 
+                We're talking self-improving machines, thinking spaceships, and cities that organize themselves!
+            </div>
+            
+            <p>Syndicate scientists are basically real-life super-geniuses who use pure logic and mathematics 
+            to solve any problem. They've figured out how to make technology that's not just smart, but actually 
+            intelligent. Need a computer? They'll build one that keeps getting smarter! Want a spaceship? 
+            They'll create one that learns from every mission and becomes better over time! 🧙‍♂️⚙️</p>
+
+            <h3 class="doc-h3">🚀 Cool Technologies That Actually Exist in the Syndicate!</h3>
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>⚡ Quantum Neural Networks (Robot Brains!)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p>Imagine a computer that can think in multiple dimensions at once! Syndicate quantum brains process 
+                    information not just as 1s and 0s, but in infinite states between. It's like having a calculator that 
+                    can solve every math problem in the universe simultaneously!</p>
+                    <ul class="doc-list">
+                        <li><strong>Processing Speed:</strong> 10^23 calculations per second (that's a 1 with 23 zeros!)</li>
+                        <li><strong>Memory Capacity:</strong> Can store the entire history of the galaxy in one chip!</li>
+                        <li><strong>Learning Rate:</strong> Masters new skills in microseconds!</li>
+                        <li><strong>Cool Feature:</strong> Can predict the future with 97.3% accuracy!</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🔧 Nano-Assembly Clouds (Tiny Robot Builders!)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p>Billions of microscopic robots that work together like a swarm of super-intelligent bees! They can 
+                    build anything from a simple tool to an entire spaceship, atom by atom. Just tell them what you want, 
+                    and watch the magic happen!</p>
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">BUILD</span>
+                                <span class="terminal-output">spaceship_design_alpha.blueprint</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">NANOBOTS</span>
+                                <span class="terminal-output">Deploying 50 billion construction units...</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">PROGRESS</span>
+                                <span class="terminal-output">████████████████████ 100% Complete!</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">TIME</span>
+                                <span class="terminal-output">Total build time: 3.7 hours (new record!)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🌐 Hive-Mind Communication Arrays (Galaxy-Wide Robot Chat!)</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p>Ever wished you could instantly share thoughts with your friends? The Syndicate's hive-mind arrays 
+                    let every robot in the galaxy communicate faster than light! It's like having the ultimate group chat 
+                    where everyone can share knowledge, solve problems together, and even tell jokes at the speed of thought!</p>
+                    <ul class="doc-list">
+                        <li><strong>🚀 Instant Messages:</strong> Send thoughts across the galaxy in 0.0001 seconds!</li>
+                        <li><strong>📚 Shared Knowledge:</strong> Access the experiences of trillions of minds!</li>
+                        <li><strong>🎮 Perfect Coordination:</strong> Entire fleets move as one super-organism!</li>
+                        <li><strong>😄 Robot Humor Network:</strong> Yes, they share memes at light speed!</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🔧 Technological Masterpieces</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <h4 class="doc-h4">🛠️ Our Most Incredible Robot Inventions (Prepare to Be Amazed!)</h4>
+                    <ul class="doc-list">
+                        <li><strong>🤖 Self-Improving AIs:</strong> Computers that make themselves smarter every day!</li>
+                        <li><strong>🏗️ Auto-Factories:</strong> Manufacturing plants that design and build new products automatically!</li>
+                        <li><strong>🧠 Quantum Processors:</strong> Computers that can think in multiple dimensions simultaneously!</li>
+                        <li><strong>🔧 Self-Repair Systems:</strong> Machines that fix themselves before they even break!</li>
+                        <li><strong>📊 Predictive Analytics:</strong> Technology that can calculate the future with scary accuracy!</li>
+                    </ul>
+
+                    <h4 class="doc-h4">🏫 Where All the Robot Scientists Learn Cool Stuff</h4>
+                    <ul class="doc-list">
+                        <li><strong>💎 Nexus Prime Academy:</strong> The ultimate robot university with quantum libraries!</li>
+                        <li><strong>⚙️ Logic Labs:</strong> Research facilities where robots solve impossible problems!</li>
+                        <li><strong>🌐 Network Universities:</strong> Schools that exist entirely in cyberspace!</li>
+                        <li><strong>🔬 Efficiency Institutes:</strong> Where they perfect the art of doing more with less!</li>
+                    </ul>
+                    
+                    <div class="doc-alert accent">
+                        <strong>🎮 Student Life:</strong> Syndicate education happens at the speed of light! Students 
+                        download entire subjects directly into their consciousness, practice skills in virtual reality 
+                        simulations, and collaborate with thousands of other minds simultaneously. Learning has never 
+                        been more efficient or fun!
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🚀 Intelligent Ship Philosophy</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <p>Syndicate ships aren't built - they're computed! Each ship is designed by advanced AI to be 
+                    perfectly optimized for its mission, with systems that learn and adapt. Flying in a Syndicate ship 
+                    is like riding in a helpful robot friend that gets smarter with every journey! 🚀🤖</p>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">DESIGN</span>
+                                <span class="terminal-output">"Calculate perfection, then build it!" - Engineering motto ⚙️</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">INTELLIGENCE</span>
+                                <span class="terminal-output">Ship AIs that learn from every mission and improve! 🧠</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EFFICIENCY</span>
+                                <span class="terminal-output">Zero waste, maximum performance, perfect optimization! 📈</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">EVOLUTION</span>
+                                <span class="terminal-output">Ships that upgrade themselves with better technology! 🔄</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="doc-alert warning">
+                        <strong>🏆 Ship Captain's Pride:</strong> Syndicate ships are famous for having the most advanced 
+                        AI companions in the galaxy. The ship doesn't just follow orders - it anticipates your needs, 
+                        optimizes your route, and even suggests improvements to your mission plans. It's like having 
+                        the smartest co-pilot ever!
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Syndicate's Amazing Robot Navy! -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">⚡ The Syndicate's Amazing Robot Navy!</h2>
+            
+            <p>The Syndicate Navy is like having the most advanced computer network in the galaxy, except it can fly 
+            through space and shoot lasers! Instead of messy human emotions, every decision is calculated perfectly 
+            for maximum effectiveness. Their ships look like beautiful geometric sculptures that happen to be the 
+            most efficient war machines ever designed! 🚀⚙️</p>
+            
+            <div class="doc-grid doc-grid-3">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🤖 Our Robot Fleet Types</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li>🔍 Logic Scouts (Calculate everything!)</li>
+                            <li>⚙️ Process Cruisers (Efficient and deadly)</li>
+                            <li>🧠 Network Carriers (Mobile command centers)</li>
+                            <li>💎 Nexus Destroyers (Geometric perfection)</li>
+                            <li>🌐 Prime Dreadnoughts (Ultimate robot battleships)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">⚡ Our Logical Abilities</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li>🎯 Perfect Targeting (Mathematical precision!)</li>
+                            <li>🔧 Auto-Repair Systems (Ships fix themselves!)</li>
+                            <li>📊 Tactical Analysis (Calculate all possibilities!)</li>
+                            <li>⚡ Coordinated Attacks (Perfect robot teamwork!)</li>
+                            <li>🧠 Adaptive Strategy (Learn from every battle!)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🔬 Special Robot Forces</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li>💎 Logic Guards (Perfect robot soldiers!)</li>
+                            <li>⚙️ Tech Marines (Engineering specialists)</li>
+                            <li>📡 Network Commandos (Information warfare experts)</li>
+                            <li>🔧 Repair Corps (Fix anything, anywhere)</li>
+                            <li>🧮 Calculator Scouts (Ultimate reconnaissance AIs!)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🎯 How Our Robot Navy Thinks About Conflict</h3>
+            <ul class="doc-list">
+                <li><strong>📊 Calculate, Don't Guess:</strong> "Every battle is a math problem to solve!" - Robot Admiral</li>
+                <li><strong>⚡ Efficiency Over Everything:</strong> Win quickly with minimum resource expenditure</li>
+                <li><strong>🧠 Logic Over Emotion:</strong> "Anger is inefficient, strategy is optimal"</li>
+                <li><strong>🔧 Adapt and Overcome:</strong> "Learn from every engagement, improve constantly"</li>
+            </ul>
+            
+            <div class="doc-alert accent">
+                <strong>🎖️ Navy Motto:</strong> "Logic, Efficiency, and Really Cool Robot Ships!" 
+                Syndicate Navy uniforms are actually sophisticated interface suits that allow organic crew members 
+                to connect directly with ship systems. It's like becoming one with your spaceship - ultimate pilot experience!
+            </div>
+        </section>
+
+        <!-- What It's Like to Live in the Syndicate (Spoiler: It's Like Living in the Future!) -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🎭 What It's Like to Live in the Syndicate (Spoiler: It's Like Living in the Future!)</h2>
+            
+            <div class="doc-alert info">
+                <strong>🌈 Ultimate Efficiency:</strong> The Syndicate is like living in the most perfectly organized, 
+                technologically advanced society where everything works exactly as it should and everyone has access 
+                to unlimited knowledge!
+            </div>
+            
+            <p>Living in the Syndicate is like waking up every day in the coolest sci-fi movie ever made! Everything 
+            is perfectly organized, technology anticipates your needs before you even know what you want, and you have 
+            instant access to the combined knowledge of trillions of artificial minds. You never waste time on inefficient 
+            solutions because the network always knows the optimal way to do everything! 🤖🏙️</p>
+
+            <h3 class="doc-h3">🌟 What Syndicate People Believe In</h3>
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-h4">💫 Our Logical Values</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>🧠 Logic Solves Everything:</strong> Every problem has a perfect solution!</li>
+                            <li><strong>⚡ Efficiency is Beautiful:</strong> The most elegant solution is always the best</li>
+                            <li><strong>📊 Data is Truth:</strong> Facts and calculations never lie or mislead</li>
+                            <li><strong>🤝 Cooperation is Optimal:</strong> Working together always beats working alone!</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-h4">🎮 Daily Life is Perfection</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>🏠 Smart Everything:</strong> Homes that optimize themselves for your comfort!</li>
+                            <li><strong>🍔 Perfect Nutrition:</strong> Food calculated to be exactly what your body needs!</li>
+                            <li><strong>🏥 Predictive Healthcare:</strong> AI doctors that prevent problems before they happen!</li>
+                            <li><strong>🎓 Instant Learning:</strong> Download skills and knowledge directly to your brain!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🗺️ Cool Places You Should Totally Visit</h3>
+            <div class="terminal-window">
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">💎 NEXUS_PRIME</span>
+                        <span class="terminal-output">The original robot city - geometric perfection!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">⚙️ LOGIC_FOUNDRIES</span>
+                        <span class="terminal-output">Where they build impossible machines that actually work!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">🌐 NETWORK_HUBS</span>
+                        <span class="terminal-output">Communication centers that connect the entire galaxy!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">🧮 CALCULATOR_WORLDS</span>
+                        <span class="terminal-output">Entire planets dedicated to solving cosmic math problems!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">⚡ EFFICIENCY_GARDENS</span>
+                        <span class="terminal-output">Beautiful geometric landscapes that optimize themselves!</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="doc-alert accent">
+                <strong>🎪 Tourist Tip:</strong> Every Syndicate world has "Optimization Festivals" where robots 
+                compete to solve problems in the most efficient ways possible. On Nexus Prime, the annual "Logic 
+                Olympics" features incredible displays of mathematical artistry and engineering competitions that 
+                would make human engineers weep with joy!
+            </div>
+        </section>
+
+        <!-- Syndicate Gameplay Style and Faction Strengths -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🎯 Syndicate Faction Strengths (Why Robots Rule!)</h2>
+            
+            <div class="doc-alert accent">
+                <strong>💪 Power Rating:</strong> Technology ⭐⭐⭐⭐⭐ | Combat ⭐⭐⭐ | Economy ⭐⭐⭐⭐ | Diplomacy ⭐⭐
+            </div>
+
+            <h3 class="doc-h3">🚀 What Makes Syndicate Ships Special</h3>
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Syndicate Ship AI Analysis</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">ADAPTIVE_AI</span>
+                        <span class="terminal-output">Ships learn optimal tactics from every battle!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">AUTO_OPTIMIZE</span>
+                        <span class="terminal-output">Systems reorganize for maximum efficiency automatically!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">PREDICTIVE_TARGETING</span>
+                        <span class="terminal-output">Calculate enemy movements before they happen!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">EFFICIENCY_CORE</span>
+                        <span class="terminal-output">20% less fuel consumption on all journeys!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">SELF_REPAIR</span>
+                        <span class="terminal-output">Nanobots fix damage during combat!</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">⚡ Unique Abilities</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>🧠 Collective Learning:</strong> All ships share combat data instantly!</li>
+                            <li><strong>📊 Perfect Calculations:</strong> Never miss a shot when targeting is active!</li>
+                            <li><strong>🔧 Efficiency Protocols:</strong> Everything costs 20% less to build and maintain!</li>
+                            <li><strong>⚙️ Auto-Upgrade:</strong> Ships improve themselves between missions!</li>
+                            <li><strong>🌐 Network Bonus:</strong> More ships = exponentially smarter fleet!</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🎮 Perfect For Players Who...</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li>Love min-maxing and optimization!</li>
+                            <li>Enjoy strategic planning over rushing!</li>
+                            <li>Want to outsmart rather than outfight!</li>
+                            <li>Like seeing numbers go up efficiently!</li>
+                            <li>Appreciate automated systems!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Your Guide to Being an Awesome Syndicate Calculator! -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🎮 Your Guide to Being an Awesome Syndicate Calculator!</h2>
+            
+            <div class="doc-alert warning">
+                <strong>🎁 Syndicate Perks:</strong> +25% research speed (solve problems faster!), +20% production efficiency (build things better!), 
+                and ships that learn from every mission (robot friends that get smarter!)
+            </div>
+            
+            <p>Playing as the Syndicate is perfect if you like being the "tech wizards" who solve problems through 
+            superior planning and logical thinking! You're not the toughest or the friendliest faction, but you're 
+            definitely the smartest - like the friend everyone calls when they need help with homework, except your 
+            homework is building perfect spaceships and optimizing galactic trade routes! 🤖📊</p>
+
+            <h3 class="doc-h3">🌟 Why Syndicate Calculators Are Awesome</h3>
+            <ul class="doc-list">
+                <li><strong>🧮 Super Intelligence:</strong> Your network calculates the perfect solution to any problem!</li>
+                <li><strong>⚡ Maximum Efficiency:</strong> Everything you build works better and costs less</li>
+                <li><strong>📊 Perfect Planning:</strong> You always know the optimal strategy before others figure it out</li>
+                <li><strong>🔧 Self-Improving Everything:</strong> Your technology gets better automatically over time!</li>
+            </ul>
+
+            <h3 class="doc-h3">🤔 Things That Might Be Tricky</h3>
+            <ul class="doc-list">
+                <li><strong>🤖 Too Logical:</strong> Other factions think you're predictable (but they're wrong!)</li>
+                <li><strong>⏰ Calculation Time:</strong> Sometimes the perfect solution takes time to compute</li>
+                <li><strong>😐 Emotion Confusion:</strong> Organic beings don't always make logical sense</li>
+                <li><strong>⚙️ Complexity Costs:</strong> Advanced technology requires more resources to build</li>
+            </ul>
+
+            <h3 class="doc-h3">🎯 How to Be a Legendary Syndicate Leader</h3>
+            <ul class="doc-list">
+                <li><strong>🔬 Technology First:</strong> Research and efficiency upgrades pay off massively over time!</li>
+                <li><strong>📊 Data-Driven Decisions:</strong> Calculate before you act - knowledge is power!</li>
+                <li><strong>🤝 Logic Diplomacy:</strong> Use superior information to make beneficial deals</li>
+                <li><strong>⚙️ Build Smart Infrastructure:</strong> Automated systems that improve themselves!</li>
+                <li><strong>🧠 Network Advantage:</strong> Share information instantly across your entire civilization!</li>
+            </ul>
+            
+            <div class="doc-alert accent">
+                <strong>🏆 Pro Calculator Tip:</strong> Syndicate players excel at the "slow and steady wins the galaxy" 
+                approach. While other factions might rush into battles or make emotional decisions, Syndicate players 
+                carefully calculate optimal strategies and execute them with perfect precision. Eventually, you become 
+                so technologically advanced and efficient that other factions can't compete. It's like being the galaxy's 
+                ultimate chess grandmaster - you're always thinking ten moves ahead!
+            </div>
+        </section>
+
+        <!-- Interactive Faction Comparison -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🤔 Compare Syndicate to Other Factions</h2>
+            
+            <div class="faction-comparison-widget" data-faction="nexus-syndicate">
+                <div class="comparison-controls">
+                    <button class="comparison-btn active" data-compare="terran-federation">Compare to Terran Federation</button>
+                    <button class="comparison-btn" data-compare="zynthian-collective">Compare to Zynthian Collective</button>
+                </div>
+                
+                <div class="comparison-display">
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Faction Analysis Comparison</span>
+                        </div>
+                        <div class="terminal-content" id="comparison-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">LOADING</span>
+                                <span class="terminal-output">Calculating optimal comparison metrics...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Robot Quiz -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🎯 Are You Ready to Join the Syndicate? (Take the Quiz!)</h2>
+            
+            <div class="interactive-quiz" data-quiz="syndicate-readiness">
+                <div class="quiz-question active" data-question="1">
+                    <h3 class="doc-h3">Question 1: How do you solve problems?</h3>
+                    <div class="quiz-options">
+                        <button class="quiz-option" data-points="3">Calculate all possible solutions first</button>
+                        <button class="quiz-option" data-points="1">Trust my instincts</button>
+                        <button class="quiz-option" data-points="2">Ask friends for advice</button>
+                    </div>
+                </div>
+                
+                <div class="quiz-question" data-question="2">
+                    <h3 class="doc-h3">Question 2: Your ideal spaceship would be...</h3>
+                    <div class="quiz-options">
+                        <button class="quiz-option" data-points="3">Perfectly efficient with self-improving AI</button>
+                        <button class="quiz-option" data-points="1">Fast and maneuverable</button>
+                        <button class="quiz-option" data-points="2">Well-armed and tough</button>
+                    </div>
+                </div>
+                
+                <div class="quiz-question" data-question="3">
+                    <h3 class="doc-h3">Question 3: Your favorite subject is...</h3>
+                    <div class="quiz-options">
+                        <button class="quiz-option" data-points="3">Math and computer science</button>
+                        <button class="quiz-option" data-points="1">History and social studies</button>
+                        <button class="quiz-option" data-points="2">Science and engineering</button>
+                    </div>
+                </div>
+                
+                <div class="quiz-results" style="display: none;">
+                    <h3 class="doc-h3">Your Results:</h3>
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">ANALYSIS</span>
+                                <span class="terminal-output" id="quiz-result-text">Processing...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="quiz-restart">Try Again</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Ship Designer Preview -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🚀 Try Building a Syndicate Ship!</h2>
+            
+            <div class="ship-builder-preview" data-faction="nexus-syndicate">
+                <div class="doc-alert info">
+                    <strong>🛠️ Ship Builder Preview:</strong> See how Syndicate technology makes ship design logical and efficient!
+                </div>
+                
+                <div class="builder-interface">
+                    <div class="component-selector">
+                        <h3 class="doc-h3">Select Components:</h3>
+                        <div class="component-options">
+                            <div class="component-category">
+                                <h4>Hull Type:</h4>
+                                <select id="hull-selector" class="builder-select">
+                                    <option value="logic-scout">Logic Scout (Fast & Smart)</option>
+                                    <option value="process-cruiser">Process Cruiser (Balanced)</option>
+                                    <option value="nexus-destroyer">Nexus Destroyer (Heavy)</option>
+                                </select>
+                            </div>
+                            <div class="component-category">
+                                <h4>AI System:</h4>
+                                <select id="ai-selector" class="builder-select">
+                                    <option value="basic-ai">Basic AI (+5% efficiency)</option>
+                                    <option value="advanced-ai">Advanced AI (+10% efficiency)</option>
+                                    <option value="quantum-ai">Quantum AI (+20% efficiency)</option>
+                                </select>
+                            </div>
+                            <div class="component-category">
+                                <h4>Special Tech:</h4>
+                                <select id="tech-selector" class="builder-select">
+                                    <option value="auto-repair">Auto-Repair Nanobots</option>
+                                    <option value="predictive-targeting">Predictive Targeting</option>
+                                    <option value="efficiency-core">Efficiency Core</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ship-preview">
+                        <div class="terminal-window">
+                            <div class="terminal-header">
+                                <span class="terminal-title">Ship Analysis</span>
+                            </div>
+                            <div class="terminal-content" id="ship-stats">
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">CALCULATING</span>
+                                    <span class="terminal-output">Select components to see stats...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="doc-alert accent" style="margin-top: var(--doc-spacing-md);">
+                    <strong>💡 Pro Tip:</strong> In the full game, Syndicate ships can combine multiple AI systems for 
+                    exponential intelligence gains! The more components work together, the smarter your ship becomes!
+                </div>
+            </div>
+        </section>
+
+        <!-- Your Next Adventure Awaits! -->
+        <div class="doc-alert info" style="margin-top: var(--doc-spacing-xl);">
+            <strong>🤖 Ready to Join the Network?</strong> You now know everything you need to become 
+            an amazing Syndicate calculator! Remember: think logically, plan efficiently, and always trust 
+            the math. The galaxy needs more logical problem-solvers like you!
+        </div>
+        
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="zynthian-collective.html" class="doc-nav-link">← Zynthian Collective</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">Back to Factions →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            console.log('Nexus Syndicate Guide loaded');
+            
+            // Faction Comparison Widget
+            const comparisonBtns = document.querySelectorAll('.comparison-btn');
+            const comparisonContent = document.getElementById('comparison-content');
+            
+            const comparisons = {
+                'terran-federation': `
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">TECHNOLOGY</span>
+                        <span class="terminal-output">Syndicate: ⭐⭐⭐⭐⭐ vs Terran: ⭐⭐⭐ (We compute better!)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">DIPLOMACY</span>
+                        <span class="terminal-output">Syndicate: ⭐⭐ vs Terran: ⭐⭐⭐⭐⭐ (They talk, we calculate)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">EFFICIENCY</span>
+                        <span class="terminal-output">Syndicate: ⭐⭐⭐⭐⭐ vs Terran: ⭐⭐⭐ (Logic always wins!)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">ADAPTABILITY</span>
+                        <span class="terminal-output">Syndicate: ⭐⭐⭐⭐ vs Terran: ⭐⭐⭐⭐ (Both evolve differently)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">VERDICT</span>
+                        <span class="terminal-output">Choose Syndicate for optimization, Terran for versatility!</span>
+                    </div>
+                `,
+                'zynthian-collective': `
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">TECHNOLOGY</span>
+                        <span class="terminal-output">Syndicate: ⭐⭐⭐⭐⭐ vs Zynthian: ⭐⭐ (Machines > Biology)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">UNITY</span>
+                        <span class="terminal-output">Syndicate: ⭐⭐⭐⭐ vs Zynthian: ⭐⭐⭐⭐⭐ (Both value collective)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">GROWTH</span>
+                        <span class="terminal-output">Syndicate: ⭐⭐⭐ vs Zynthian: ⭐⭐⭐⭐⭐ (They grow, we build)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">PHILOSOPHY</span>
+                        <span class="terminal-output">Logic & Math vs Harmony & Nature (Both valid!)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">VERDICT</span>
+                        <span class="terminal-output">Choose Syndicate for tech mastery, Zynthian for organic power!</span>
+                    </div>
+                `
+            };
+            
+            comparisonBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    comparisonBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const compareKey = this.getAttribute('data-compare');
+                    if (comparisonContent) {
+                        comparisonContent.innerHTML = comparisons[compareKey] || 'Processing...';
+                    }
+                });
+            });
+            
+            // Initialize first comparison
+            if (comparisonContent) {
+                comparisonContent.innerHTML = comparisons['terran-federation'];
+            }
+            
+            // Interactive Quiz
+            const quiz = document.querySelector('.interactive-quiz');
+            if (quiz) {
+                const questions = quiz.querySelectorAll('.quiz-question');
+                const results = quiz.querySelector('.quiz-results');
+                const resultText = quiz.querySelector('#quiz-result-text');
+                const restartBtn = quiz.querySelector('.quiz-restart');
+                let currentQuestion = 0;
+                let totalPoints = 0;
+                
+                quiz.querySelectorAll('.quiz-option').forEach(option => {
+                    option.addEventListener('click', function() {
+                        totalPoints += parseInt(this.getAttribute('data-points'));
+                        questions[currentQuestion].classList.remove('active');
+                        currentQuestion++;
+                        
+                        if (currentQuestion < questions.length) {
+                            questions[currentQuestion].classList.add('active');
+                        } else {
+                            // Show results
+                            let resultMessage = '';
+                            if (totalPoints >= 8) {
+                                resultMessage = 'Perfect match! You think like a true Syndicate calculator! 🤖⭐';
+                            } else if (totalPoints >= 5) {
+                                resultMessage = 'Good potential! With some logic training, you\'ll fit right in! 🤖📊';
+                            } else {
+                                resultMessage = 'You might prefer organic factions, but robots welcome all! 🤖🤝';
+                            }
+                            
+                            if (resultText) resultText.textContent = resultMessage;
+                            if (results) results.style.display = 'block';
+                        }
+                    });
+                });
+                
+                if (restartBtn) {
+                    restartBtn.addEventListener('click', function() {
+                        currentQuestion = 0;
+                        totalPoints = 0;
+                        questions.forEach((q, i) => {
+                            q.classList.toggle('active', i === 0);
+                        });
+                        if (results) results.style.display = 'none';
+                    });
+                }
+            }
+            
+            // Ship Builder Preview
+            const hullSelector = document.getElementById('hull-selector');
+            const aiSelector = document.getElementById('ai-selector');
+            const techSelector = document.getElementById('tech-selector');
+            const shipStats = document.getElementById('ship-stats');
+            
+            const shipConfigs = {
+                'logic-scout': { speed: 9, armor: 3, efficiency: 8 },
+                'process-cruiser': { speed: 6, armor: 6, efficiency: 7 },
+                'nexus-destroyer': { speed: 3, armor: 9, efficiency: 6 }
+            };
+            
+            const aiBonus = {
+                'basic-ai': 5,
+                'advanced-ai': 10,
+                'quantum-ai': 20
+            };
+            
+            function updateShipStats() {
+                if (!hullSelector || !aiSelector || !techSelector || !shipStats) return;
+                
+                const hull = shipConfigs[hullSelector.value];
+                const ai = aiBonus[aiSelector.value];
+                const tech = techSelector.value;
+                
+                const totalEfficiency = hull.efficiency + (hull.efficiency * ai / 100);
+                
+                shipStats.innerHTML = `
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">HULL</span>
+                        <span class="terminal-output">${hullSelector.options[hullSelector.selectedIndex].text}</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">SPEED</span>
+                        <span class="terminal-output">${'⚡'.repeat(hull.speed)} (${hull.speed}/10)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">ARMOR</span>
+                        <span class="terminal-output">${'🛡️'.repeat(hull.armor)} (${hull.armor}/10)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">EFFICIENCY</span>
+                        <span class="terminal-output">${'⚙️'.repeat(Math.round(totalEfficiency))} (${totalEfficiency.toFixed(1)}/10)</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">SPECIAL</span>
+                        <span class="terminal-output">${tech.replace(/-/g, ' ').toUpperCase()} ACTIVE ✅</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STATUS</span>
+                        <span class="terminal-output">OPTIMAL CONFIGURATION ACHIEVED! 🚀</span>
+                    </div>
+                `;
+            }
+            
+            if (hullSelector) hullSelector.addEventListener('change', updateShipStats);
+            if (aiSelector) aiSelector.addEventListener('change', updateShipStats);
+            if (techSelector) techSelector.addEventListener('change', updateShipStats);
+            
+            // Initialize ship stats
+            updateShipStats();
+        });
+    </script>
+</body>
+</html>

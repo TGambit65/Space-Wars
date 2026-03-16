@@ -1,54 +1,82 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useState, useEffect, useCallback } from 'react';
+import { Suspense, lazy, useState, useEffect, useCallback } from 'react';
 import { auth } from './services/api';
 import useSocket from './hooks/useSocket';
 import useNPCEvents from './hooks/useNPCEvents';
+import { GameSessionProvider } from './contexts/GameSessionContext';
+import { NotificationProvider } from './contexts/NotificationContext';
+import ToastContainer from './components/common/ToastContainer';
 import Layout from './components/common/Layout';
 import Login from './components/common/Login';
 import Dashboard from './components/common/Dashboard';
-import GalaxyMap from './components/navigation/GalaxyMap';
-import SystemView from './components/navigation/SystemView';
-import ShipPanel from './components/ship/ShipPanel';
-import ShipDesigner from './components/ship/ShipDesigner';
-import TradingPage from './components/trading/TradingPage';
-import CombatPage from './components/combat/CombatPage';
-import CombatHistory from './components/combat/CombatHistory';
-import RepairPage from './components/ship/RepairPage';
-import PlanetsPage from './components/planets/PlanetsPage';
-import ColoniesPage from './components/colonies/ColoniesPage';
-import CrewPage from './components/crew/CrewPage';
-import AdminPage from './components/admin/AdminPage';
-import PlanetOrbitView from './components/planet-orbit/PlanetOrbitView';
 import NPCChatPanel from './components/npc/NPCChatPanel';
 import NPCHailNotification from './components/npc/NPCHailNotification';
+import ChatPanel from './components/chat/ChatPanel';
+import { MessageSquare } from 'lucide-react';
+import { clearToken, getToken, setToken } from './services/session';
+
+const GalaxyMap = lazy(() => import('./components/navigation/GalaxyMap'));
+const SystemView = lazy(() => import('./components/navigation/SystemView'));
+const ShipPanel = lazy(() => import('./components/ship/ShipPanel'));
+const ShipDesigner = lazy(() => import('./components/ship/ShipDesigner'));
+const TradingPage = lazy(() => import('./components/trading/TradingPage'));
+const CombatPage = lazy(() => import('./components/combat/CombatPage'));
+const CombatHistory = lazy(() => import('./components/combat/CombatHistory'));
+const RepairPage = lazy(() => import('./components/ship/RepairPage'));
+const PlanetsPage = lazy(() => import('./components/planets/PlanetsPage'));
+const ColoniesPage = lazy(() => import('./components/colonies/ColoniesPage'));
+const ColonySurface = lazy(() => import('./components/colonies/ColonySurface'));
+const VoxelSurface = lazy(() => import('./components/colonies/VoxelSurface'));
+const ColonyLeaderboard = lazy(() => import('./components/colonies/ColonyLeaderboard'));
+const GroundCombatView = lazy(() => import('./components/colonies/GroundCombatView'));
+const CrewPage = lazy(() => import('./components/crew/CrewPage'));
+const AdminPage = lazy(() => import('./components/admin/AdminPage'));
+const PlanetOrbitView = lazy(() => import('./components/planet-orbit/PlanetOrbitView'));
+const ProgressionPage = lazy(() => import('./components/progression/ProgressionPage'));
+const CraftingPage = lazy(() => import('./components/crafting/CraftingPage'));
+const MissionsPage = lazy(() => import('./components/missions/MissionsPage'));
+const CorporationPage = lazy(() => import('./components/corporations/CorporationPage'));
+const AutomationPage = lazy(() => import('./components/automation/AutomationPage'));
+const MarketPage = lazy(() => import('./components/market/MarketPage'));
+const WikiPage = lazy(() => import('./components/wiki/WikiPage'));
+const FactionPage = lazy(() => import('./components/factions/FactionPage'));
+const MessagingPage = lazy(() => import('./components/messaging/MessagingPage'));
+const ShipCustomizer = lazy(() => import('./components/ship/ShipCustomizer'));
+const OutpostsPage = lazy(() => import('./components/outposts/OutpostsPage'));
+const EventsPage = lazy(() => import('./components/events/EventsPage'));
+
+function RouteLoadingFallback() {
+  return (
+    <div className="min-h-[16rem] flex items-center justify-center">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-neon-cyan"></div>
+    </div>
+  );
+}
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeChatNPC, setActiveChatNPC] = useState(null);
+  const [chatOpen, setChatOpen] = useState(false);
 
-  const { socket } = useSocket(user);
+  const { socket, connected: socketConnected } = useSocket(user);
   const { pendingHails, dismissHail } = useNPCEvents(socket);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      auth.getProfile()
-        .then(res => setUser(res.data.data))
-        .catch(() => localStorage.removeItem('token'))
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    auth.getProfile({ skipAuthRedirect: true })
+      .then(res => setUser(res.data.data))
+      .catch(() => clearToken())
+      .finally(() => setLoading(false));
   }, []);
 
   const handleLogin = (userData, token) => {
-    localStorage.setItem('token', token);
+    setToken(token);
     setUser(userData);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    auth.logout().catch(() => {});
+    clearToken();
     setUser(null);
     setActiveChatNPC(null);
   };
@@ -73,7 +101,7 @@ function App() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-cyan"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neon-cyan"></div>
       </div>
     );
   }
@@ -83,7 +111,10 @@ function App() {
   }
 
   return (
-    <Layout user={user} onLogout={handleLogout}>
+    <NotificationProvider>
+    <GameSessionProvider user={user} onUserUpdate={setUser}>
+    <Layout user={user} onLogout={handleLogout} socketConnected={socketConnected}>
+      <Suspense fallback={<RouteLoadingFallback />}>
       <Routes>
         <Route path="/" element={<Dashboard user={user} />} />
         <Route path="/map" element={<GalaxyMap user={user} />} />
@@ -91,16 +122,34 @@ function App() {
         <Route path="/ships" element={<ShipPanel user={user} />} />
         <Route path="/designer" element={<ShipDesigner user={user} />} />
         <Route path="/trading" element={<TradingPage user={user} />} />
-        <Route path="/combat" element={<CombatPage user={user} />} />
+        <Route path="/combat" element={<CombatPage user={user} socket={socket} />} />
         <Route path="/combat/history" element={<CombatHistory user={user} />} />
         <Route path="/repair" element={<RepairPage user={user} />} />
         <Route path="/planets" element={<PlanetsPage user={user} />} />
         <Route path="/colonies" element={<ColoniesPage user={user} />} />
+        <Route path="/colony/:colonyId/surface" element={<ColonySurface user={user} />} />
+        <Route path="/colony/:colonyId/surface/public" element={<ColonySurface user={user} readOnly />} />
+        <Route path="/colony/:colonyId/voxel" element={<VoxelSurface user={user} />} />
+        <Route path="/colony-leaderboard" element={<ColonyLeaderboard user={user} />} />
+        <Route path="/ground-combat/:instanceId" element={<GroundCombatView user={user} />} />
         <Route path="/crew" element={<CrewPage user={user} />} />
         <Route path="/planet/:planetId" element={<PlanetOrbitView user={user} />} />
+        <Route path="/progression" element={<ProgressionPage user={user} />} />
+        <Route path="/crafting" element={<CraftingPage user={user} />} />
+        <Route path="/missions" element={<MissionsPage user={user} />} />
+        <Route path="/corporation" element={<CorporationPage user={user} />} />
+        <Route path="/automation" element={<AutomationPage user={user} />} />
+        <Route path="/market" element={<MarketPage user={user} />} />
+        <Route path="/wiki" element={<WikiPage />} />
+        <Route path="/faction" element={<FactionPage user={user} />} />
+        <Route path="/messages" element={<MessagingPage user={user} />} />
+        <Route path="/customizer" element={<ShipCustomizer user={user} />} />
+        <Route path="/outposts" element={<OutpostsPage user={user} />} />
+        <Route path="/events" element={<EventsPage user={user} />} />
         {user.is_admin && <Route path="/admin" element={<AdminPage user={user} />} />}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
 
       {/* NPC Hail Notifications */}
       <NPCHailNotification
@@ -118,7 +167,33 @@ function App() {
           user={user}
         />
       )}
+
+      {/* Chat Toggle Button */}
+      <button
+        onClick={() => setChatOpen(!chatOpen)}
+        className="fixed bottom-4 right-4 z-30 p-3 rounded-full transition-all duration-200 hover:scale-110"
+        style={{
+          background: chatOpen ? 'rgba(0, 255, 255, 0.2)' : 'rgba(10, 10, 30, 0.8)',
+          border: '1px solid rgba(0, 255, 255, 0.3)',
+          boxShadow: chatOpen ? '0 0 15px rgba(0, 255, 255, 0.2)' : 'none',
+        }}
+        title="Toggle Chat"
+      >
+        <MessageSquare className={`w-5 h-5 ${chatOpen ? 'text-neon-cyan' : 'text-gray-400'}`} />
+      </button>
+
+      {/* Real-time Chat Panel */}
+      <ChatPanel
+        socket={socket}
+        user={user}
+        isOpen={chatOpen}
+        onClose={() => setChatOpen(false)}
+      />
+
+      <ToastContainer />
     </Layout>
+    </GameSessionProvider>
+    </NotificationProvider>
   );
 }
 

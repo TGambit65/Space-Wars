@@ -1,0 +1,451 @@
+/* Combat Responsive Design */
+
+/* Tablet Layout (768px and below) */
+@media (max-width: 768px) {
+  #combatUI {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas:
+      "left-panel"
+      "right-panel"
+      "center"
+      "actions";
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .combat-panel {
+    padding: 12px;
+  }
+
+  .ships-container {
+    max-height: 300px;
+  }
+
+  .ship-card {
+    padding: 10px;
+  }
+
+  .ship-stats {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .formation-selector {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 8px;
+  }
+
+  .formation-btn {
+    padding: 10px 6px;
+    min-height: 60px;
+    font-size: 10px;
+  }
+
+  .fleet-status {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ai-mode-buttons {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  #combatSpace {
+    min-height: 300px;
+  }
+
+  .combat-ship {
+    width: 35px;
+    height: 35px;
+    font-size: 9px;
+  }
+
+  .action-btn {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+}
+
+/* Mobile Layout (480px and below) */
+@media (max-width: 480px) {
+  #combatUI {
+    padding: 5px;
+    gap: 5px;
+  }
+
+  .combat-panel {
+    padding: 10px;
+  }
+
+  .combat-title {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .combat-subtitle {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  /* Collapsible Panels for Mobile */
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--combat-border-secondary);
+    margin-bottom: 10px;
+  }
+
+  .panel-toggle {
+    color: var(--combat-accent);
+    font-size: 16px;
+    font-weight: bold;
+    transition: transform 0.2s ease;
+  }
+
+  .panel-content.collapsed {
+    display: none;
+  }
+
+  .panel-header.collapsed .panel-toggle {
+    transform: rotate(180deg);
+  }
+
+  /* Ship Cards - Compact Mobile View */
+  .ship-card {
+    padding: 8px;
+    margin-bottom: 5px;
+  }
+
+  .ship-header {
+    margin-bottom: 6px;
+  }
+
+  .ship-name {
+    font-size: 12px;
+  }
+
+  .ship-class {
+    font-size: 10px;
+  }
+
+  .ship-stats {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
+
+  .stat-item {
+    font-size: 10px;
+  }
+
+  .stat-bar {
+    height: 10px;
+  }
+
+  /* Formation Controls - Mobile */
+  .formation-selector {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .formation-btn {
+    padding: 8px 4px;
+    min-height: 50px;
+    font-size: 9px;
+  }
+
+  .formation-icon {
+    font-size: 14px;
+  }
+
+  .formation-name {
+    font-size: 9px;
+  }
+
+  .formation-description {
+    font-size: 8px;
+  }
+
+  /* Combat Space - Mobile */
+  #combatSpace {
+    min-height: 250px;
+    margin: 5px 0;
+  }
+
+  .combat-ship {
+    width: 30px;
+    height: 30px;
+    font-size: 8px;
+  }
+
+  /* Touch-Friendly Action Buttons */
+  .combat-actions {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .action-btn {
+    padding: 12px 16px;
+    font-size: 11px;
+    min-height: 44px; /* iOS touch target recommendation */
+    flex: 1;
+    min-width: 80px;
+  }
+
+  /* Filter Buttons - Mobile */
+  .filter-buttons {
+    gap: 6px;
+  }
+
+  .filter-btn {
+    padding: 6px 8px;
+    font-size: 10px;
+    min-width: 50px;
+    min-height: 44px;
+  }
+
+  .filter-count {
+    font-size: 9px;
+  }
+
+  /* Fleet Controls - Mobile */
+  .fleet-status {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .status-item {
+    padding: 6px;
+  }
+
+  .status-value {
+    font-size: 14px;
+  }
+
+  .status-label {
+    font-size: 9px;
+  }
+
+  /* AI Controls - Mobile */
+  .ai-mode-buttons {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .ai-mode-btn {
+    padding: 10px 8px;
+    font-size: 10px;
+    min-height: 44px;
+  }
+
+  /* Formation Commands - Mobile */
+  .formation-commands {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .formation-command-btn {
+    padding: 10px 12px;
+    font-size: 10px;
+    min-height: 44px;
+  }
+
+  /* Combat Log - Mobile */
+  .combat-log {
+    max-height: 150px;
+    font-size: 10px;
+    padding: 8px;
+  }
+
+  /* Damage Numbers - Mobile */
+  .damage-number {
+    font-size: 14px;
+  }
+
+  .damage-number.critical {
+    font-size: 16px;
+  }
+
+  /* Sound Controls - Mobile */
+  .sound-controls {
+    padding: 8px;
+  }
+
+  .volume-control {
+    gap: 6px;
+  }
+
+  .volume-control label {
+    font-size: 11px;
+    min-width: 50px;
+  }
+
+  .mute-btn {
+    padding: 6px 10px;
+    font-size: 9px;
+    min-width: 50px;
+    min-height: 32px;
+  }
+
+  /* Turn Indicator - Mobile */
+  .turn-indicator {
+    top: 10px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  /* Combat Result - Mobile */
+  .combat-result {
+    padding: 16px 30px;
+    font-size: 20px;
+  }
+}
+
+/* Small Mobile Layout (320px and below) */
+@media (max-width: 320px) {
+  .formation-selector {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .fleet-status {
+    grid-template-columns: 1fr;
+  }
+
+  .action-btn {
+    padding: 10px 12px;
+    font-size: 10px;
+    min-width: 70px;
+  }
+
+  .ship-card {
+    padding: 6px;
+  }
+
+  .ship-name {
+    font-size: 11px;
+  }
+
+  .combat-ship {
+    width: 25px;
+    height: 25px;
+    font-size: 7px;
+  }
+
+  #combatSpace {
+    min-height: 200px;
+  }
+}
+
+/* Landscape Mobile Orientation */
+@media (max-height: 480px) and (orientation: landscape) {
+  #combatUI {
+    grid-template-columns: 250px 1fr 250px;
+    grid-template-rows: 1fr auto;
+    grid-template-areas:
+      "left-panel center right-panel"
+      "actions actions actions";
+  }
+
+  .ships-container {
+    max-height: 200px;
+  }
+
+  #combatSpace {
+    min-height: 200px;
+  }
+
+  .combat-panel {
+    padding: 8px;
+  }
+
+  .formation-selector {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .formation-btn {
+    min-height: 40px;
+    padding: 6px 4px;
+  }
+}
+
+/* Touch Interaction Improvements */
+@media (hover: none) and (pointer: coarse) {
+  .combat-btn:hover,
+  .action-btn:hover,
+  .filter-btn:hover,
+  .formation-btn:hover {
+    transform: none; /* Remove hover transforms on touch devices */
+  }
+
+  .ship-card:hover {
+    transform: none;
+  }
+
+  /* Add touch feedback instead */
+  .combat-btn:active,
+  .action-btn:active,
+  .filter-btn:active,
+  .formation-btn:active {
+    background: rgba(74, 158, 255, 0.3);
+    transform: scale(0.95);
+  }
+
+  .ship-card:active {
+    background: rgba(74, 158, 255, 0.2);
+    transform: scale(0.98);
+  }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  .combat-ship {
+    border-width: 1px; /* Thinner borders on high DPI */
+  }
+
+  .ship-card {
+    border-width: 1px;
+  }
+
+  .progress-bar {
+    border-width: 1px;
+  }
+
+  .action-btn {
+    border-width: 1px;
+  }
+}
+
+/* Dark Mode Adjustments */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --combat-bg-primary: rgba(5, 5, 15, 0.95);
+    --combat-bg-secondary: rgba(15, 15, 30, 0.9);
+    --combat-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Reduced Motion for Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .combat-ship.selected {
+    animation: none;
+    box-shadow: 0 0 20px var(--combat-warning);
+  }
+
+  .status-overlay.burning,
+  .status-overlay.stunned {
+    animation: none;
+    opacity: 0.8;
+  }
+
+  #combatSpace::before {
+    animation: none;
+  }
+}

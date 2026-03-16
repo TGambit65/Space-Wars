@@ -14,5 +14,10 @@ router.post('/flee/:shipId', combatController.flee);
 router.get('/history', combatController.getCombatHistory);
 router.get('/log/:combatLogId', combatController.getCombatLog);
 
+// Real-time combat
+router.post('/realtime/attack-npc/:shipId', combatController.initiateRealtimeCombatNPC);
+router.post('/realtime/attack-player/:shipId', combatController.initiateRealtimeCombatPVP);
+router.get('/realtime/state/:combatId', combatController.getRealtimeCombatState);
+
 module.exports = router;
 

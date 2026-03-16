@@ -1,0 +1,41 @@
+/* Store CSS for Space Wars 3000 */
+
+.store-item {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.store-item:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+}
+
+.store-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: rgba(138, 43, 226, 0.1);
+  color: var(--primary-color);
+}
+
+.store-item .btn {
+  transition: all 0.3s ease;
+}
+
+.store-item .btn:hover {
+  transform: scale(1.05);
+}
+
+.store-item h3 {
+  color: var(--primary-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .store-icon {
+    width: 60px;
+    height: 60px;
+  }
+}

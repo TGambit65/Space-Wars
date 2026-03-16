@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ship Design Calculator - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+    <script src="../../js/wiki-smart-navigation.js"></script>
+    <script src="../../js/wiki-interactive-features.js"></script>
+    <script src="../../js/wiki-ship-calculator.js"></script>
+</head>
+<body class="doc-container tools-page">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="../index.html" class="doc-nav-link">← Wiki Home</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">Interactive Tools</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="ship-calculator.html" class="doc-nav-link active">Ship Calculator</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="trade-planner.html" class="doc-nav-link">Trade Planner</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item">
+                <a href="index.html" class="doc-breadcrumb-link">Interactive Tools</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Ship Calculator</div>
+        </nav>
+
+        <h1 class="doc-h1 holo-text">🚀 Ship Design Calculator</h1>
+        
+        <div class="doc-alert info">
+            <strong>Build Your Dream Ship:</strong> This interactive calculator helps you design the perfect vessel 
+            for any mission. It's like having a spaceship architect in your browser! 🛠️
+        </div>
+
+        <p class="doc-lead">
+            Welcome to the most powerful ship design tool in the galaxy! This calculator does all the math so you 
+            can focus on the fun part - creating amazing ships. Whether you want a lightning-fast fighter, a cargo-hauling 
+            beast, or a balanced cruiser that can handle anything, this tool will help you build it perfectly! 
+            It's like having a team of spaceship engineers working for you! 🌟
+        </p>
+
+        <!-- Ship Calculator Interface -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🎯 Ship Builder Interface</h2>
+            
+            <div class="doc-grid doc-grid-2">
+                <!-- Hull Selection -->
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🏗️ Hull Selection</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <div id="hull-selection">
+                            <div class="doc-alert accent">
+                                <strong>Choose Your Foundation:</strong> The hull is your ship's skeleton. 
+                                Pick one that matches your mission!
+                            </div>
+                            
+                            <div class="hull-options">
+                                <div class="hull-option" data-hull="fighter">
+                                    <h4>Fighter Hull</h4>
+                                    <p>Fast and agile combat specialist</p>
+                                    <ul class="doc-list">
+                                        <li>Hull Points: 100</li>
+                                        <li>Speed: 8</li>
+                                        <li>Maneuverability: 9</li>
+                                        <li>Cost: 1,000 credits</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="hull-option" data-hull="cruiser">
+                                    <h4>Cruiser Hull</h4>
+                                    <p>Balanced multi-role vessel</p>
+                                    <ul class="doc-list">
+                                        <li>Hull Points: 200</li>
+                                        <li>Speed: 6</li>
+                                        <li>Maneuverability: 6</li>
+                                        <li>Cost: 2,500 credits</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="hull-option" data-hull="freighter">
+                                    <h4>Freighter Hull</h4>
+                                    <p>Massive cargo capacity</p>
+                                    <ul class="doc-list">
+                                        <li>Hull Points: 150</li>
+                                        <li>Speed: 4</li>
+                                        <li>Cargo: 200</li>
+                                        <li>Cost: 3,000 credits</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Component Installation -->
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">⚙️ Component Installation</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <div id="component-installation">
+                            <div class="component-category">
+                                <h4>🔧 Engines</h4>
+                                <div class="component-slots" id="engine-slots">
+                                    <p>Select a hull first to see available slots</p>
+                                </div>
+                            </div>
+                            
+                            <div class="component-category">
+                                <h4>🔫 Weapons</h4>
+                                <div class="component-slots" id="weapon-slots">
+                                    <p>Select a hull first to see available slots</p>
+                                </div>
+                            </div>
+                            
+                            <div class="component-category">
+                                <h4>🛡️ Shields</h4>
+                                <div class="component-slots" id="shield-slots">
+                                    <p>Select a hull first to see available slots</p>
+                                </div>
+                            </div>
+                            
+                            <div class="component-category">
+                                <h4>🔧 Utilities</h4>
+                                <div class="component-slots" id="utility-slots">
+                                    <p>Select a hull first to see available slots</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ship Statistics -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">📊 Ship Statistics</h2>
+            
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Ship Performance Analysis</span>
+                </div>
+                <div class="terminal-content" id="ship-stats">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">COST</span>
+                        <span class="terminal-output" id="stat-cost">0 credits</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">HULL</span>
+                        <span class="terminal-output" id="stat-hull">0 points</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">SPEED</span>
+                        <span class="terminal-output" id="stat-speed">0 units</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">MANEUVER</span>
+                        <span class="terminal-output" id="stat-maneuver">0 rating</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">FIREPOWER</span>
+                        <span class="terminal-output" id="stat-firepower">0 damage</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">SHIELDS</span>
+                        <span class="terminal-output" id="stat-shields">0 points</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">CARGO</span>
+                        <span class="terminal-output" id="stat-cargo">0 units</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Build Recommendations -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">💡 Build Recommendations</h2>
+            
+            <div class="doc-grid doc-grid-3">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">⚡ Speed Build</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Maximum speed and maneuverability</p>
+                        <ul class="doc-list">
+                            <li>Light Fighter Hull</li>
+                            <li>Racing Engines x2</li>
+                            <li>Light Weapons x2</li>
+                            <li>Minimal Shields</li>
+                        </ul>
+                        <div class="doc-alert accent">
+                            <strong>Best For:</strong> Hit-and-run tactics, scouting, courier missions
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🛡️ Tank Build</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Maximum survivability and firepower</p>
+                        <ul class="doc-list">
+                            <li>Heavy Cruiser Hull</li>
+                            <li>Standard Engines</li>
+                            <li>Heavy Weapons x4</li>
+                            <li>Maximum Shields</li>
+                        </ul>
+                        <div class="doc-alert accent">
+                            <strong>Best For:</strong> Frontline combat, fleet battles, base assault
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">💰 Trade Build</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Maximum cargo with basic defenses</p>
+                        <ul class="doc-list">
+                            <li>Freighter Hull</li>
+                            <li>Efficient Engines</li>
+                            <li>Light Weapons x2</li>
+                            <li>Basic Shields</li>
+                        </ul>
+                        <div class="doc-alert accent">
+                            <strong>Best For:</strong> Trading, supply runs, resource transport
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Related Tools -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🔗 Related Tools</h2>
+            
+            <div class="doc-alert info">
+                <strong>Complete Your Design:</strong> These tools work great together! Design your ship here, 
+                then test it in combat or plan profitable trade routes!
+            </div>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">⚔️ Test Your Ship</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Use the Combat Simulator to test your ship design against various enemies</p>
+                        <a href="combat-simulator.html" class="doc-button secondary">Combat Simulator →</a>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🗺️ Plan Your Routes</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>If you built a trader, use the Trade Planner to find profitable routes</p>
+                        <a href="trade-planner.html" class="doc-button secondary">Trade Planner →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">← Interactive Tools</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="trade-planner.html" class="doc-nav-link">Trade Planner →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            
+            // Initialize Ship Calculator
+            const shipCalc = new WikiShipCalculator();
+            
+            // Add event listeners for hull selection
+            document.querySelectorAll('.hull-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const hullType = this.dataset.hull;
+                    shipCalc.selectHull(hullType);
+                    updateDisplay();
+                });
+            });
+            
+            function updateDisplay() {
+                const stats = shipCalc.getStats();
+                document.getElementById('stat-cost').textContent = stats.totalCost + ' credits';
+                document.getElementById('stat-hull').textContent = stats.hullPoints + ' points';
+                document.getElementById('stat-speed').textContent = stats.speed + ' units';
+                document.getElementById('stat-maneuver').textContent = stats.maneuverability + ' rating';
+                document.getElementById('stat-firepower').textContent = stats.firepower + ' damage';
+                document.getElementById('stat-shields').textContent = stats.shieldStrength + ' points';
+                document.getElementById('stat-cargo').textContent = stats.cargoSpace + ' units';
+            }
+            
+            console.log('Ship Calculator loaded');
+        });
+    </script>
+</body>
+</html>

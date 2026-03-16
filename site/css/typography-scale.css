@@ -1,0 +1,269 @@
+/* ==========================================================================
+   Space Wars 3000 - Typography Scale Foundation
+   Documentation-specific typography hierarchy for optimal readability
+   ========================================================================== */
+
+/* Font imports and base typography setup */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Typography scale variables */
+:root {
+  /* Font families */
+  --doc-font-heading: 'Orbitron', 'Roboto', sans-serif;
+  --doc-font-body: 'Inter', 'Roboto', sans-serif;
+  --doc-font-mono: 'Courier New', 'Monaco', monospace;
+  
+  /* Font size scale - optimized for documentation */
+  --doc-font-xs: 0.75rem;    /* 12px */
+  --doc-font-sm: 0.875rem;   /* 14px */
+  --doc-font-base: 1rem;     /* 16px */
+  --doc-font-lg: 1.125rem;   /* 18px */
+  --doc-font-xl: 1.25rem;    /* 20px */
+  --doc-font-2xl: 1.5rem;    /* 24px */
+  --doc-font-3xl: 1.875rem;  /* 30px */
+  --doc-font-4xl: 2.25rem;   /* 36px */
+  --doc-font-5xl: 3rem;      /* 48px */
+  
+  /* Line height scale for readability */
+  --doc-leading-tight: 1.25;
+  --doc-leading-snug: 1.375;
+  --doc-leading-normal: 1.5;
+  --doc-leading-relaxed: 1.625;
+  --doc-leading-loose: 2;
+  
+  /* Font weights */
+  --doc-weight-light: 300;
+  --doc-weight-normal: 400;
+  --doc-weight-medium: 500;
+  --doc-weight-semibold: 600;
+  --doc-weight-bold: 700;
+  --doc-weight-black: 900;
+}
+
+/* H1-H6 heading scale optimized for reading */
+.doc-h1, h1.doc-heading {
+  font-family: var(--doc-font-heading);
+  font-size: var(--doc-font-5xl);
+  font-weight: var(--doc-weight-black);
+  line-height: var(--doc-leading-tight);
+  color: var(--doc-primary-color);
+  margin-bottom: var(--doc-spacing-xl);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.doc-h2, h2.doc-heading {
+  font-family: var(--doc-font-heading);
+  font-size: var(--doc-font-4xl);
+  font-weight: var(--doc-weight-bold);
+  line-height: var(--doc-leading-tight);
+  color: var(--doc-text-primary);
+  margin-bottom: var(--doc-spacing-lg);
+  margin-top: var(--doc-spacing-xxl);
+  border-bottom: 2px solid var(--doc-primary-color);
+  padding-bottom: var(--doc-spacing-sm);
+}
+
+.doc-h3, h3.doc-heading {
+  font-family: var(--doc-font-heading);
+  font-size: var(--doc-font-3xl);
+  font-weight: var(--doc-weight-semibold);
+  line-height: var(--doc-leading-snug);
+  color: var(--doc-text-primary);
+  margin-bottom: var(--doc-spacing-md);
+  margin-top: var(--doc-spacing-xl);
+}
+
+.doc-h4, h4.doc-heading {
+  font-family: var(--doc-font-heading);
+  font-size: var(--doc-font-2xl);
+  font-weight: var(--doc-weight-semibold);
+  line-height: var(--doc-leading-snug);
+  color: var(--doc-highlight-color);
+  margin-bottom: var(--doc-spacing-md);
+  margin-top: var(--doc-spacing-lg);
+}
+
+.doc-h5, h5.doc-heading {
+  font-family: var(--doc-font-heading);
+  font-size: var(--doc-font-xl);
+  font-weight: var(--doc-weight-medium);
+  line-height: var(--doc-leading-normal);
+  color: var(--doc-text-primary);
+  margin-bottom: var(--doc-spacing-sm);
+  margin-top: var(--doc-spacing-lg);
+}
+
+.doc-h6, h6.doc-heading {
+  font-family: var(--doc-font-heading);
+  font-size: var(--doc-font-lg);
+  font-weight: var(--doc-weight-medium);
+  line-height: var(--doc-leading-normal);
+  color: var(--doc-text-secondary);
+  margin-bottom: var(--doc-spacing-sm);
+  margin-top: var(--doc-spacing-md);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* Body text sizing and line height optimization */
+.doc-body, .doc-content p {
+  font-family: var(--doc-font-body);
+  font-size: var(--doc-font-base);
+  font-weight: var(--doc-weight-normal);
+  line-height: var(--doc-leading-relaxed);
+  color: var(--doc-text-primary);
+  margin-bottom: var(--doc-spacing-md);
+}
+
+.doc-body-large {
+  font-size: var(--doc-font-lg);
+  line-height: var(--doc-leading-relaxed);
+}
+
+.doc-body-small {
+  font-size: var(--doc-font-sm);
+  line-height: var(--doc-leading-normal);
+}
+
+.doc-lead {
+  font-size: var(--doc-font-xl);
+  font-weight: var(--doc-weight-light);
+  line-height: var(--doc-leading-relaxed);
+  color: var(--doc-text-secondary);
+  margin-bottom: var(--doc-spacing-lg);
+}
+
+/* Code text styling with syntax highlighting base */
+.doc-code, code {
+  font-family: var(--doc-font-mono);
+  font-size: 0.9em;
+  background-color: rgba(0, 255, 255, 0.1);
+  color: var(--doc-primary-color);
+  padding: 0.2em 0.4em;
+  border-radius: var(--doc-radius-sm);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.doc-code-block, pre {
+  font-family: var(--doc-font-mono);
+  font-size: var(--doc-font-sm);
+  background-color: #000;
+  color: #00ff00;
+  padding: var(--doc-spacing-md);
+  border-radius: var(--doc-radius-md);
+  border: 1px solid var(--doc-primary-color);
+  overflow-x: auto;
+  margin: var(--doc-spacing-lg) 0;
+  line-height: var(--doc-leading-normal);
+}
+
+.doc-code-block code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+
+/* Interactive text element foundations */
+.doc-link {
+  color: var(--doc-primary-color);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.doc-link:hover {
+  color: var(--doc-highlight-color);
+  border-bottom-color: var(--doc-highlight-color);
+  text-shadow: 0 0 5px currentColor;
+}
+
+.doc-emphasis {
+  font-weight: var(--doc-weight-semibold);
+  color: var(--doc-accent-color);
+}
+
+.doc-strong {
+  font-weight: var(--doc-weight-bold);
+  color: var(--doc-text-primary);
+}
+
+.doc-muted {
+  color: var(--doc-text-muted);
+  font-size: var(--doc-font-sm);
+}
+
+/* List styling */
+.doc-list, .doc-content ul, .doc-content ol {
+  margin: var(--doc-spacing-md) 0;
+  padding-left: var(--doc-spacing-xl);
+}
+
+.doc-list li {
+  margin-bottom: var(--doc-spacing-xs);
+  line-height: var(--doc-leading-relaxed);
+}
+
+.doc-list-unstyled {
+  list-style: none;
+  padding-left: 0;
+}
+
+/* Reading-optimized line heights and spacing */
+.doc-content {
+  max-width: 65ch; /* Optimal reading width */
+  margin: 0 auto;
+}
+
+.doc-content > * + * {
+  margin-top: var(--doc-spacing-md);
+}
+
+.doc-content > h1 + *,
+.doc-content > h2 + *,
+.doc-content > h3 + * {
+  margin-top: var(--doc-spacing-sm);
+}
+
+/* Responsive typography adjustments */
+@media (max-width: 768px) {
+  :root {
+    --doc-font-5xl: 2.25rem;  /* Reduce large headings on mobile */
+    --doc-font-4xl: 1.875rem;
+    --doc-font-3xl: 1.5rem;
+  }
+  
+  .doc-content {
+    max-width: none;
+  }
+  
+  .doc-h1, h1.doc-heading {
+    margin-bottom: var(--doc-spacing-lg);
+  }
+  
+  .doc-h2, h2.doc-heading {
+    margin-top: var(--doc-spacing-xl);
+  }
+}
+
+/* Print styles for documentation */
+@media print {
+  .doc-h1, .doc-h2, .doc-h3, .doc-h4, .doc-h5, .doc-h6 {
+    color: #000;
+    text-shadow: none;
+  }
+  
+  .doc-code, .doc-code-block {
+    background: #f5f5f5;
+    color: #000;
+    border: 1px solid #ccc;
+  }
+  
+  .doc-link {
+    color: #000;
+    text-decoration: underline;
+  }
+}

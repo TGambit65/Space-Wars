@@ -1,6 +1,7 @@
 const { Sector, SectorConnection, Commodity, Port, PortCommodity, Component, NPC, Planet, PlanetResource, Artifact, Crew, sequelize } = require('../models');
 const config = require('../config');
 const npcService = require('./npcService');
+const worldPolicyService = require('./worldPolicyService');
 
 // Simple seeded random number generator
 class SeededRandom {
@@ -92,10 +93,10 @@ const getStarClassForZone = (rng, sectorType) => {
  * Generate star positions in a spiral galaxy pattern.
  * Uses logarithmic spiral arms with central bulge.
  */
-const generateSpiralPositions = (numSystems, galaxyRadius, rng) => {
+const generateSpiralPositions = (numSystems, galaxyRadius, rng, configuredArms = null) => {
   const positions = [];
-  const minDistance = galaxyRadius * 0.02; // Minimum distance between stars
-  const numArms = rng.nextInt(2, 4);
+  const minDistance = galaxyRadius * 0.015; // Slightly tighter for larger galaxies
+  const numArms = configuredArms || config.universe.spiralArms || rng.nextInt(2, 4);
   const armSpread = 0.4; // How wide each arm is (radians)
   const armTwist = 2.5; // How tightly the arms wind
 
@@ -306,8 +307,8 @@ const generateHyperlanes = (positions, sectorIds, galaxyRadius, rng) => {
     }
   }
 
-  // Add 1-3 wormhole connections between distant systems
-  const wormholeCount = rng.nextInt(1, 3);
+  // Add wormhole connections between distant systems (scales with galaxy size)
+  const wormholeCount = rng.nextInt(1, Math.max(3, Math.floor(positions.length / 200)));
   const minWormholeDist = galaxyRadius * 0.6;
   let wormholesAdded = 0;
 
@@ -389,6 +390,9 @@ const generateUniverse = async ({ numSystems = null, seed = null, galaxyShape = 
       );
 
       const starConfig = config.starClasses[starClass];
+      const sectorPolicy = worldPolicyService.buildDefaultSectorPolicy({
+        type: sectorType
+      });
 
       const sector = await Sector.create({
         x_coord: parseFloat(x.toFixed(2)),
@@ -397,9 +401,13 @@ const generateUniverse = async ({ numSystems = null, seed = null, galaxyShape = 
         name: generateSectorName(rng, i),
         type: sectorType,
         star_class: starClass,
+        zone_class: sectorPolicy.zone_class,
+        security_class: sectorPolicy.security_class,
+        access_mode: sectorPolicy.access_mode,
         is_starting_sector: false, // Set after loop
         hazard_level: hazardLevel,
-        description: `A ${sectorType.toLowerCase()} system with a ${starConfig.name} star.`
+        description: `A ${sectorType.toLowerCase()} system with a ${starConfig.name} star.`,
+        rule_flags: sectorPolicy.rule_flags
       }, { transaction });
 
       sectors.push(sector);
@@ -411,13 +419,51 @@ const generateUniverse = async ({ numSystems = null, seed = null, galaxyShape = 
       await sectors[startingSectorIdx].update({ is_starting_sector: true }, { transaction });
     }
 
+    // Assign permanent space phenomena to sectors
+    const phenomenaTypes = Object.entries(config.spacePhenomena || {})
+      .filter(([, p]) => p.permanent);
+
+    for (const sector of sectors) {
+      // BlackHole systems don't get additional phenomena
+      if (sector.star_class === 'BlackHole') continue;
+
+      for (const [type, phenomenaDef] of phenomenaTypes) {
+        if (rng.next() < phenomenaDef.spawnChance) {
+          await sector.update({
+            phenomena: {
+              type,
+              intensity: 0.5 + rng.next() * 0.5,
+              expires_at: null
+            }
+          }, { transaction });
+          break; // Only one phenomenon per sector
+        }
+      }
+    }
+
     console.log(`Created ${sectors.length} sectors. Generating hyperlanes...`);
 
     // Generate hyperlane connections
-    const connections = generateHyperlanes(positions, sectorIds, galaxyRadius, rng);
+    const sectorsById = new Map(sectors.map((sector) => [sector.sector_id, sector]));
+    const connections = generateHyperlanes(positions, sectorIds, galaxyRadius, rng).map((connection) => {
+      const fromSector = sectorsById.get(connection.sector_a_id);
+      const toSector = sectorsById.get(connection.sector_b_id);
+      const connectionPolicy = worldPolicyService.buildDefaultConnectionPolicy(connection, fromSector, toSector);
+
+      return {
+        ...connection,
+        lane_class: connectionPolicy.lane_class,
+        access_mode: connectionPolicy.access_mode,
+        rule_flags: connectionPolicy.rule_flags
+      };
+    });
     await SectorConnection.bulkCreate(connections, { transaction });
 
     await transaction.commit();
+
+    // Invalidate the static map cache so the next /api/sectors/map request rebuilds it
+    try { require('../controllers/sectorController').clearMapCache(); } catch (_) {}
+
     console.log(`✓ Galaxy generated: ${sectors.length} systems, ${connections.length} hyperlanes`);
 
     return { sectors: sectors.length, connections: connections.length, galaxyRadius };

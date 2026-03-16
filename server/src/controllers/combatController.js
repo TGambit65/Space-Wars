@@ -1,4 +1,6 @@
 const combatService = require('../services/combatService');
+const realtimeCombatService = require('../services/realtimeCombatService');
+const combatPolicyService = require('../services/combatPolicyService');
 
 /**
  * Attack an NPC
@@ -89,10 +91,64 @@ const getCombatLog = async (req, res, next) => {
   }
 };
 
+/**
+ * Initiate real-time combat against an NPC
+ */
+const initiateRealtimeCombatNPC = async (req, res, next) => {
+  try {
+    const { shipId } = req.params;
+    const { npcId } = req.body;
+    if (!npcId) return res.status(400).json({ success: false, message: 'npcId is required' });
+    const combatId = await realtimeCombatService.initiateNPCCombat(shipId, npcId);
+    res.json({ success: true, data: { combat_id: combatId } });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Initiate real-time PvP combat against another player
+ */
+const initiateRealtimeCombatPVP = async (req, res, next) => {
+  try {
+    const { shipId } = req.params;
+    const { defenderShipId } = req.body;
+    if (!defenderShipId) return res.status(400).json({ success: false, message: 'defenderShipId is required' });
+
+    await combatPolicyService.authorizePvpInitiation({
+      attackerShipId: shipId,
+      defenderShipId,
+      attackerUserId: req.userId,
+      req
+    });
+
+    const combatId = await realtimeCombatService.initiatePlayerCombat(shipId, defenderShipId);
+    res.json({ success: true, data: { combat_id: combatId } });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Get current state of a real-time combat instance
+ */
+const getRealtimeCombatState = async (req, res, next) => {
+  try {
+    const { combatId } = req.params;
+    const state = realtimeCombatService.getCombatState(combatId);
+    if (!state) return res.status(404).json({ success: false, message: 'No active combat found' });
+    res.json({ success: true, data: state });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   attackNPC,
   flee,
   getCombatHistory,
-  getCombatLog
+  getCombatLog,
+  initiateRealtimeCombatNPC,
+  initiateRealtimeCombatPVP,
+  getRealtimeCombatState
 };
-

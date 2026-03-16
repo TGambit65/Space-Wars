@@ -1,6 +1,7 @@
 const config = require('../config');
 const { Sector, SectorConnection, Planet, Port, NPC, Crew, Ship, ShipCargo, ShipComponent, CombatLog, Transaction: TxModel } = require('../models');
 const universeGenerator = require('../services/universeGenerator');
+const actionAuditService = require('../services/actionAuditService');
 
 /**
  * POST /api/admin/universe/generate
@@ -89,7 +90,34 @@ const getUniverseConfig = async (req, res, next) => {
   }
 };
 
+/**
+ * GET /api/admin/action-audit
+ * Return recent action audit logs for moderation and cheat review.
+ */
+const getActionAuditLogs = async (req, res, next) => {
+  try {
+    const logs = await actionAuditService.listRecent({
+      userId: req.query.user_id || null,
+      actionType: req.query.action_type || null,
+      scopeType: req.query.scope_type || null,
+      scopeId: req.query.scope_id || null,
+      status: req.query.status || null,
+      limit: req.query.limit || 50
+    });
+
+    res.json({
+      success: true,
+      data: {
+        logs
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   generateUniverse,
-  getUniverseConfig
+  getUniverseConfig,
+  getActionAuditLogs
 };

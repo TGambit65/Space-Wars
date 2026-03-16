@@ -1,0 +1,287 @@
+/* ==========================================================================
+   Space Wars 3000 - Holographic Effects System
+   Sci-fi holographic visual effects for immersive documentation
+   ========================================================================== */
+
+/* Holographic panel borders with glow effects */
+.holo-panel {
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px solid var(--doc-primary-color);
+  border-radius: var(--doc-radius-md);
+  box-shadow: 
+    0 0 20px rgba(0, 255, 255, 0.3),
+    inset 0 0 20px rgba(0, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.holo-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(0, 255, 255, 0.1) 50%,
+    transparent 70%
+  );
+  animation: holo-sweep 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes holo-sweep {
+  0% { transform: translateX(-100%) translateY(-100%); }
+  50% { transform: translateX(100%) translateY(100%); }
+  100% { transform: translateX(-100%) translateY(-100%); }
+}
+
+/* Transparency and backdrop filter effects */
+.holo-container {
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--doc-radius-lg);
+  position: relative;
+}
+
+.holo-glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) brightness(110%);
+  -webkit-backdrop-filter: blur(20px) brightness(110%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--doc-radius-md);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Animated holographic scan lines */
+.holo-scanlines {
+  position: relative;
+  overflow: hidden;
+}
+
+.holo-scanlines::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    rgba(0, 255, 255, 0.1) 1px,
+    rgba(0, 255, 255, 0.1) 3px
+  );
+  animation: holo-scanlines-move 2s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes holo-scanlines-move {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(4px); }
+}
+
+/* Color shifting gradients for holo feel */
+.holo-gradient {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 255, 255, 0.2) 0%,
+    rgba(124, 77, 255, 0.2) 25%,
+    rgba(255, 102, 0, 0.2) 50%,
+    rgba(255, 64, 129, 0.2) 75%,
+    rgba(0, 255, 255, 0.2) 100%
+  );
+  background-size: 400% 400%;
+  animation: holo-gradient-shift 4s ease infinite;
+}
+
+@keyframes holo-gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Holographic border effects */
+.holo-border {
+  position: relative;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.holo-border::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(
+    45deg,
+    var(--doc-primary-color),
+    var(--doc-highlight-color),
+    var(--doc-accent-color),
+    var(--doc-warning-color),
+    var(--doc-primary-color)
+  );
+  background-size: 300% 300%;
+  border-radius: inherit;
+  z-index: -1;
+  animation: holo-border-rotate 3s ease infinite;
+}
+
+@keyframes holo-border-rotate {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Holographic text effects */
+.holo-text {
+  color: var(--doc-primary-color);
+  text-shadow: 
+    0 0 5px currentColor,
+    0 0 10px currentColor,
+    0 0 20px currentColor;
+  animation: holo-text-flicker 2s ease-in-out infinite alternate;
+}
+
+@keyframes holo-text-flicker {
+  0% { 
+    opacity: 1;
+    text-shadow: 
+      0 0 5px currentColor,
+      0 0 10px currentColor,
+      0 0 20px currentColor;
+  }
+  50% { 
+    opacity: 0.8;
+    text-shadow: 
+      0 0 2px currentColor,
+      0 0 5px currentColor,
+      0 0 8px currentColor;
+  }
+  100% { 
+    opacity: 1;
+    text-shadow: 
+      0 0 5px currentColor,
+      0 0 10px currentColor,
+      0 0 20px currentColor;
+  }
+}
+
+/* Holographic button effects */
+.holo-button {
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid var(--doc-primary-color);
+  color: var(--doc-primary-color);
+  padding: var(--doc-spacing-sm) var(--doc-spacing-md);
+  border-radius: var(--doc-radius-sm);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.holo-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.holo-button:hover {
+  background: rgba(0, 255, 255, 0.2);
+  box-shadow: 
+    0 0 20px rgba(0, 255, 255, 0.5),
+    inset 0 0 20px rgba(0, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.holo-button:hover::before {
+  left: 100%;
+}
+
+/* Holographic loading effects */
+.holo-loading {
+  position: relative;
+  color: var(--doc-primary-color);
+}
+
+.holo-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -30px;
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid var(--doc-primary-color);
+  border-radius: 50%;
+  animation: holo-spin 1s linear infinite;
+  transform: translateY(-50%);
+}
+
+@keyframes holo-spin {
+  0% { transform: translateY(-50%) rotate(0deg); }
+  100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* Performance optimizations */
+.holo-panel,
+.holo-container,
+.holo-glass {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .holo-panel::before,
+  .holo-scanlines::after,
+  .holo-gradient,
+  .holo-border::before,
+  .holo-text,
+  .holo-loading::after {
+    animation: none;
+  }
+  
+  .holo-button:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+  .holo-panel,
+  .holo-container,
+  .holo-glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(0, 0, 0, 0.9);
+    border-color: #ffffff;
+  }
+  
+  .holo-text {
+    text-shadow: none;
+    color: #ffffff;
+  }
+}

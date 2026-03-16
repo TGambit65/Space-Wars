@@ -232,13 +232,24 @@ const startResearch = async (userId, techName) => {
 
     await user.update({ credits: Number(user.credits) - techConfig.creditsCost }, { transaction });
 
+    // Apply faction technology bonus to research speed
+    let researchTimeMs = techConfig.researchTimeMs;
+    try {
+      const factionConfig = config.factions[user.faction];
+      if (factionConfig) {
+        const techBonus = factionConfig.bonuses.technology || 1.0;
+        const extraSpeedBonus = factionConfig.researchSpeedBonus || 0;
+        researchTimeMs = Math.floor(researchTimeMs / (techBonus + extraSpeedBonus));
+      }
+    } catch (e) { /* faction bonus failure should not block research */ }
+
     const now = new Date();
     const research = await TechResearch.create({
       user_id: userId,
       tech_name: techName,
       is_completed: false,
       started_at: now,
-      completes_at: new Date(now.getTime() + techConfig.researchTimeMs),
+      completes_at: new Date(now.getTime() + researchTimeMs),
       credits_spent: techConfig.creditsCost
     }, { transaction });
 

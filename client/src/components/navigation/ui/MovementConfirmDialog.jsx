@@ -45,6 +45,7 @@ const MovementConfirmDialog = ({ target, moving, error, onConfirm, onCancel }) =
         <div className="flex gap-3">
           <button
             onClick={onCancel}
+            data-dismiss
             className="btn btn-secondary flex-1"
             disabled={moving}
           >

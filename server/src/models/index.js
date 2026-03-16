@@ -36,6 +36,9 @@ const CorporationMember = require('./CorporationMember');
 const AutomatedTask = require('./AutomatedTask');
 // Phase C: Colony Buildings
 const ColonyBuilding = require('./ColonyBuilding');
+// Colony Surface
+const SurfaceAnomaly = require('./SurfaceAnomaly');
+const CustomBlock = require('./CustomBlock');
 // Faction & Warfare
 const FactionStanding = require('./FactionStanding');
 const FactionWar = require('./FactionWar');
@@ -47,6 +50,19 @@ const Message = require('./Message');
 const CosmeticUnlock = require('./CosmeticUnlock');
 // Fleet System
 const Fleet = require('./Fleet');
+// Ground Combat
+const GroundUnit = require('./GroundUnit');
+const GroundCombatUnit = require('./GroundCombatUnit');
+const GroundCombatInstance = require('./GroundCombatInstance');
+// Daily Quests
+const DailyQuest = require('./DailyQuest');
+// Voxel Blocks
+const VoxelBlock = require('./VoxelBlock');
+const PlayerProtectionState = require('./PlayerProtectionState');
+const ActionAuditLog = require('./ActionAuditLog');
+const SectorInstanceAssignment = require('./SectorInstanceAssignment');
+const TransferLedger = require('./TransferLedger');
+const ColonyRaidProtection = require('./ColonyRaidProtection');
 // Phase 7: Agreements, Events, Outposts, Templates
 const CorporationAgreement = require('./CorporationAgreement');
 const CommunityEvent = require('./CommunityEvent');
@@ -63,6 +79,13 @@ Ship.belongsTo(User, { foreignKey: 'owner_user_id', as: 'owner' });
 // Sector <-> Ship (One-to-Many)
 Sector.hasMany(Ship, { foreignKey: 'current_sector_id', as: 'ships' });
 Ship.belongsTo(Sector, { foreignKey: 'current_sector_id', as: 'currentSector' });
+
+// Sector ownership / access policy support
+User.hasMany(Sector, { foreignKey: 'owner_user_id', as: 'ownedSectors' });
+Sector.belongsTo(User, { foreignKey: 'owner_user_id', as: 'ownerUser' });
+
+Corporation.hasMany(Sector, { foreignKey: 'owner_corporation_id', as: 'ownedSectors' });
+Sector.belongsTo(Corporation, { foreignKey: 'owner_corporation_id', as: 'ownerCorporation' });
 
 // Sector <-> SectorConnection (Many-to-Many through SectorConnection)
 Sector.belongsToMany(Sector, {
@@ -260,6 +283,14 @@ AutomatedTask.belongsTo(Ship, { foreignKey: 'ship_id', as: 'ship' });
 Colony.hasMany(ColonyBuilding, { foreignKey: 'colony_id', as: 'buildings' });
 ColonyBuilding.belongsTo(Colony, { foreignKey: 'colony_id', as: 'colony' });
 
+// Colony Surface Anomalies
+Colony.hasMany(SurfaceAnomaly, { foreignKey: 'colony_id', as: 'anomalies' });
+SurfaceAnomaly.belongsTo(Colony, { foreignKey: 'colony_id', as: 'colony' });
+
+// Custom Blocks
+Colony.hasMany(CustomBlock, { foreignKey: 'colony_id', as: 'customBlocks' });
+CustomBlock.belongsTo(Colony, { foreignKey: 'colony_id', as: 'colony' });
+
 // ============== Faction & Warfare ==============
 User.hasMany(FactionStanding, { foreignKey: 'user_id', as: 'factionStandings' });
 FactionStanding.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
@@ -310,6 +341,57 @@ Ship.belongsTo(Fleet, { foreignKey: 'fleet_id', as: 'fleet' });
 User.hasMany(ShipDesignTemplate, { foreignKey: 'user_id', as: 'designTemplates' });
 ShipDesignTemplate.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
+// ============== Ground Combat ==============
+// GroundUnit — persistent roster
+User.hasMany(GroundUnit, { foreignKey: 'owner_user_id', as: 'groundUnits' });
+GroundUnit.belongsTo(User, { foreignKey: 'owner_user_id', as: 'owner' });
+Colony.hasMany(GroundUnit, { foreignKey: 'colony_id', as: 'garrison' });
+GroundUnit.belongsTo(Colony, { foreignKey: 'colony_id', as: 'colony' });
+Ship.hasMany(GroundUnit, { foreignKey: 'ship_id', as: 'groundUnits' });
+GroundUnit.belongsTo(Ship, { foreignKey: 'ship_id', as: 'ship' });
+
+// GroundCombatInstance
+Colony.hasMany(GroundCombatInstance, { foreignKey: 'colony_id', as: 'groundCombatInstances' });
+GroundCombatInstance.belongsTo(Colony, { foreignKey: 'colony_id', as: 'colony' });
+User.hasMany(GroundCombatInstance, { foreignKey: 'attacker_id', as: 'attackingCombats' });
+GroundCombatInstance.belongsTo(User, { foreignKey: 'attacker_id', as: 'attacker' });
+Ship.hasMany(GroundCombatInstance, { foreignKey: 'attacker_ship_id', as: 'groundCombatInstances' });
+GroundCombatInstance.belongsTo(Ship, { foreignKey: 'attacker_ship_id', as: 'attackerShip' });
+
+// GroundCombatUnit — per-instance snapshots
+GroundCombatInstance.hasMany(GroundCombatUnit, { foreignKey: 'combat_instance_id', as: 'combatUnits' });
+GroundCombatUnit.belongsTo(GroundCombatInstance, { foreignKey: 'combat_instance_id', as: 'combatInstance' });
+GroundUnit.hasMany(GroundCombatUnit, { foreignKey: 'source_unit_id', as: 'combatSnapshots' });
+GroundCombatUnit.belongsTo(GroundUnit, { foreignKey: 'source_unit_id', as: 'sourceUnit' });
+
+// ============== Daily Quests ==============
+User.hasMany(DailyQuest, { foreignKey: 'user_id', as: 'dailyQuests' });
+DailyQuest.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// ============== Voxel Blocks ==============
+Colony.hasMany(VoxelBlock, { foreignKey: 'colony_id', as: 'voxelBlocks' });
+VoxelBlock.belongsTo(Colony, { foreignKey: 'colony_id' });
+User.hasMany(VoxelBlock, { foreignKey: 'placed_by', as: 'placedVoxels' });
+VoxelBlock.belongsTo(User, { foreignKey: 'placed_by', as: 'placer' });
+
+// ============== Anti-Cheat / Anti-Grief ==============
+User.hasOne(PlayerProtectionState, { foreignKey: 'user_id', as: 'protectionState' });
+PlayerProtectionState.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+User.hasMany(ActionAuditLog, { foreignKey: 'user_id', as: 'actionAuditLogs' });
+ActionAuditLog.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+User.hasMany(SectorInstanceAssignment, { foreignKey: 'user_id', as: 'sectorInstanceAssignments' });
+SectorInstanceAssignment.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+Sector.hasMany(SectorInstanceAssignment, { foreignKey: 'sector_id', as: 'instanceAssignments' });
+SectorInstanceAssignment.belongsTo(Sector, { foreignKey: 'sector_id', as: 'sector' });
+User.hasMany(TransferLedger, { foreignKey: 'user_id', as: 'transferLedgerEntries' });
+TransferLedger.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+Commodity.hasMany(TransferLedger, { foreignKey: 'commodity_id', as: 'transferLedgerEntries' });
+TransferLedger.belongsTo(Commodity, { foreignKey: 'commodity_id', as: 'commodity' });
+Colony.hasOne(ColonyRaidProtection, { foreignKey: 'colony_id', as: 'raidProtection' });
+ColonyRaidProtection.belongsTo(Colony, { foreignKey: 'colony_id', as: 'colony' });
+User.hasMany(ColonyRaidProtection, { foreignKey: 'last_attacker_id', as: 'recentRaidTargets' });
+ColonyRaidProtection.belongsTo(User, { foreignKey: 'last_attacker_id', as: 'lastAttacker' });
+
 module.exports = {
   sequelize,
   User,
@@ -349,6 +431,9 @@ module.exports = {
   AutomatedTask,
   // Phase C
   ColonyBuilding,
+  // Colony Surface
+  SurfaceAnomaly,
+  CustomBlock,
   // Factions & Warfare
   FactionStanding,
   FactionWar,
@@ -360,11 +445,23 @@ module.exports = {
   CosmeticUnlock,
   // Fleet System
   Fleet,
+  // Ground Combat
+  GroundUnit,
+  GroundCombatUnit,
+  GroundCombatInstance,
   // Phase 7
   CorporationAgreement,
   CommunityEvent,
   EventContribution,
   Outpost,
-  ShipDesignTemplate
+  ShipDesignTemplate,
+  // Daily Quests
+  DailyQuest,
+  // Voxel Blocks
+  VoxelBlock,
+  PlayerProtectionState,
+  ActionAuditLog,
+  SectorInstanceAssignment,
+  TransferLedger,
+  ColonyRaidProtection
 };
-

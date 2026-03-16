@@ -11,6 +11,7 @@ const SectorMap = ({ user }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [moving, setMoving] = useState(false);
+    const [toast, setToast] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -25,7 +26,8 @@ const SectorMap = ({ user }) => {
                 const shipsRes = await ships.getAll();
                 const shipList = shipsRes.data.data?.ships || [];
                 if (shipList.length > 0) {
-                    setCurrentShip(shipList[0]);
+                    const activeId = shipsRes.data.data?.active_ship_id;
+                    setCurrentShip((activeId && shipList.find(s => s.ship_id === activeId)) || shipList[0]);
                 }
 
             } catch (err) {
@@ -79,7 +81,8 @@ const SectorMap = ({ user }) => {
 
         } catch (err) {
             console.error("Move failed", err);
-            alert(err.response?.data?.error || "Movement failed");
+            setToast({ message: err.response?.data?.error || "Movement failed", type: 'error' });
+            setTimeout(() => setToast(null), 5000);
         } finally {
             setMoving(false);
         }
@@ -104,6 +107,12 @@ const SectorMap = ({ user }) => {
 
     return (
         <div className="p-6 max-w-6xl mx-auto">
+            {toast && (
+                <div className={`flex items-center justify-between p-3 rounded-lg border mb-4 ${toast.type === 'error' ? 'bg-accent-red/10 border-accent-red/30 text-accent-red' : 'bg-accent-green/10 border-accent-green/30 text-accent-green'}`}>
+                    <span className="flex items-center gap-2"><AlertTriangle className="w-4 h-4" />{toast.message}</span>
+                    <button onClick={() => setToast(null)} className="text-xs underline ml-4">dismiss</button>
+                </div>
+            )}
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-white flex items-center gap-3">

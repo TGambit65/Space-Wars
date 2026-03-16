@@ -1,15 +1,22 @@
 import { useState, useEffect } from 'react';
-import { designer, ships } from '../../services/api';
-import { Wrench, Zap, Shield, Crosshair, Cpu, Trash2, PlusCircle, AlertTriangle } from 'lucide-react';
+import { designer, ships, templates } from '../../services/api';
+import { Wrench, Zap, Shield, Crosshair, Cpu, Trash2, PlusCircle, AlertTriangle, Save, FolderOpen, X, Download } from 'lucide-react';
+import { useNotifications } from '../../contexts/NotificationContext';
 
 const ShipDesigner = () => {
     const [ship, setShip] = useState(null);
     const [installed, setInstalled] = useState([]);
     const [available, setAvailable] = useState([]);
     const [stats, setStats] = useState(null);
+    const notify = useNotifications();
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    // Template state
+    const [savedTemplates, setSavedTemplates] = useState([]);
+    const [showTemplates, setShowTemplates] = useState(false);
+    const [templateName, setTemplateName] = useState('');
 
     useEffect(() => {
         fetchData();
@@ -23,7 +30,8 @@ const ShipDesigner = () => {
             if (!shipsRes.data.data?.ships || shipsRes.data.data.ships.length === 0) {
                 throw new Error("No active ship found.");
             }
-            const activeShip = shipsRes.data.data.ships[0];
+            const activeId = shipsRes.data.data.active_ship_id;
+            const activeShip = (activeId && shipsRes.data.data.ships.find(s => s.ship_id === activeId)) || shipsRes.data.data.ships[0];
             const shipId = activeShip.ship_id;
 
             // 2. Get Design & Components
@@ -72,7 +80,7 @@ const ShipDesigner = () => {
             await fetchData(); // Refresh all state
         } catch (err) {
             console.error("Install failed", err);
-            alert(err.response?.data?.error || "Installation failed. Check slots or power.");
+            notify.error(err.response?.data?.error || "Installation failed. Check slots or power.");
         } finally {
             setActionLoading(false);
         }
@@ -85,7 +93,75 @@ const ShipDesigner = () => {
             await fetchData(); // Refresh all state
         } catch (err) {
             console.error("Uninstall failed", err);
-            alert(err.response?.data?.error || "Uninstall failed.");
+            notify.error(err.response?.data?.error || "Uninstall failed.");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const fetchTemplates = async () => {
+        try {
+            const res = await templates.getAll();
+            setSavedTemplates(res.data.data?.templates || res.data.templates || []);
+        } catch { /* ignore */ }
+    };
+
+    const handleSaveTemplate = async () => {
+        if (!templateName.trim() || !ship) return;
+        try {
+            setActionLoading(true);
+            await templates.save({
+                name: templateName.trim(),
+                ship_type: ship.ship_type,
+                components: installed.map(c => ({ component_id: c.component_id, name: c.name, type: c.type })),
+            });
+            setTemplateName('');
+            notify.success('Template saved!');
+            await fetchTemplates();
+        } catch (err) {
+            notify.error(err.response?.data?.message || 'Failed to save template');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleDeleteTemplate = async (id) => {
+        try {
+            await templates.delete(id);
+            await fetchTemplates();
+        } catch { /* ignore */ }
+    };
+
+    const handleApplyTemplate = async (template) => {
+        if (!ship || !template.components?.length) return;
+        try {
+            setActionLoading(true);
+            // Uninstall all current components
+            for (const comp of installed) {
+                await designer.uninstall(ship.ship_id, comp.ship_component_id);
+            }
+            // Install template components by matching available components by name+type
+            let installedCount = 0;
+            for (const tComp of template.components) {
+                const match = available.find(a =>
+                    a.name === tComp.name || (a.id || a.component_id) === tComp.component_id
+                );
+                if (match) {
+                    try {
+                        await designer.install(ship.ship_id, match.id || match.component_id);
+                        installedCount++;
+                    } catch { /* skip if slot/power issues */ }
+                }
+            }
+            await fetchData();
+            if (installedCount === 0) {
+                notify.warning(`Template applied but no matching components found in catalog`);
+            } else {
+                notify.success(`Template applied: ${installedCount}/${template.components.length} components installed`);
+            }
+        } catch (err) {
+            notify.error(err.response?.data?.message || 'Failed to apply template');
+            await fetchData();
         } finally {
             setActionLoading(false);
         }
@@ -98,23 +174,79 @@ const ShipDesigner = () => {
 
     return (
         <div className="max-w-6xl mx-auto space-y-6">
+            {/* Notifications via global toast system */}
             <header className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-white flex items-center gap-3">
                         <Wrench className="w-8 h-8 text-accent-cyan" />
-                        Shipyard & Desiger
+                        Shipyard & Designer
                     </h1>
                     <p className="text-gray-400 mt-1">
                         Modifying: <span className="text-white font-mono">{ship.name}</span>
                     </p>
                 </div>
-                <div className="text-right">
-                    <div className="text-sm text-gray-400">Available Slots</div>
-                    <div className="text-2xl font-bold text-accent-cyan">
-                        {installed.length} / {ship.slots}
+                <div className="flex items-center gap-4">
+                    <button onClick={() => { setShowTemplates(!showTemplates); if (!showTemplates) fetchTemplates(); }}
+                        className="holo-button text-sm flex items-center gap-1.5">
+                        <FolderOpen className="w-4 h-4" /> Templates
+                    </button>
+                    <div className="text-right">
+                        <div className="text-sm text-gray-400">Available Slots</div>
+                        <div className="text-2xl font-bold text-accent-cyan">
+                            {installed.length} / {ship.slots}
+                        </div>
                     </div>
                 </div>
             </header>
+
+            {/* Templates Panel */}
+            {showTemplates && (
+                <div className="holo-panel p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-display text-white flex items-center gap-2">
+                            <FolderOpen className="w-4 h-4 text-neon-cyan" /> Design Templates
+                        </h3>
+                        <button onClick={() => setShowTemplates(false)} className="text-gray-500 hover:text-white">
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                    {/* Save current */}
+                    <div className="flex gap-2">
+                        <input className="input flex-1 text-sm" placeholder="Template name..." value={templateName}
+                            onChange={e => setTemplateName(e.target.value)} />
+                        <button onClick={handleSaveTemplate} disabled={actionLoading || !templateName.trim()}
+                            className="holo-button text-xs flex items-center gap-1 disabled:opacity-50">
+                            <Save className="w-3.5 h-3.5" /> Save Current
+                        </button>
+                    </div>
+                    {/* Saved list */}
+                    {savedTemplates.length === 0 ? (
+                        <p className="text-gray-500 text-xs text-center py-2">No saved templates</p>
+                    ) : (
+                        <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                            {savedTemplates.map(t => (
+                                <div key={t.template_id || t.id} className="flex items-center justify-between p-2 rounded-lg"
+                                    style={{ background: 'rgba(0,255,255,0.03)', border: '1px solid rgba(0,255,255,0.08)' }}>
+                                    <div>
+                                        <p className="text-sm text-white">{t.name}</p>
+                                        <p className="text-xs text-gray-500">{t.ship_type} — {(t.components || []).length} components</p>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <button onClick={() => handleApplyTemplate(t)} disabled={actionLoading}
+                                            className="text-neon-cyan hover:text-white p-1 disabled:opacity-50 transition-colors" title="Apply template">
+                                            <Download className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button onClick={() => handleDeleteTemplate(t.template_id || t.id)}
+                                            className="text-gray-600 hover:text-red-400 p-1 transition-colors" title="Delete template">
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -183,7 +315,7 @@ const ShipDesigner = () => {
                                     <button
                                         onClick={() => handleUninstall(item.ship_component_id)}
                                         disabled={actionLoading}
-                                        className="btn btn-danger p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                        className="btn btn-danger p-2 rounded-full opacity-60 hover:opacity-100 transition-opacity"
                                         title="Uninstall"
                                     >
                                         <Trash2 className="w-4 h-4" />

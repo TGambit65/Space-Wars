@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Colonies - Space Wars 3000 Wiki</title>
+  <link rel="stylesheet" href="/css/wiki-theme.css">
+  <link rel="icon" href="/images/icons/icon-192x192.png">
+</head>
+<body>
+  <div id="reading-progress"></div>
+  <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">&#9776;</button>
+  <div class="wiki-layout">
+    <aside class="wiki-sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="/" class="sidebar-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+        <span>SW3K Wiki</span>
+      </a>
+      <div class="sidebar-badge">Knowledge Database</div>
+    </div>
+    <div class="sidebar-search">
+      <div class="sidebar-search-wrap">
+        <input type="text" placeholder="Search articles..." id="wiki-search" />
+      </div>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav"><div class="sidebar-category">
+      <div class="sidebar-category-title">Getting Started</div><a href="/wiki/getting-started/" class="sidebar-link">Getting Started</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Core Systems</div><a href="/wiki/navigation/" class="sidebar-link">Navigation</a><a href="/wiki/ships/" class="sidebar-link">Ships</a><a href="/wiki/ship-designer/" class="sidebar-link">Ship Designer</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Economy</div><a href="/wiki/trading/" class="sidebar-link">Trading</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Combat</div><a href="/wiki/combat/" class="sidebar-link">Combat</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">World</div><a href="/wiki/planets/" class="sidebar-link">Planets</a><a href="/wiki/colonies/" class="sidebar-link active">Colonies</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Crew & Progression</div><a href="/wiki/crew/" class="sidebar-link">Crew</a><a href="/wiki/progression/" class="sidebar-link">Progression</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Advanced</div><a href="/wiki/crafting/" class="sidebar-link">Crafting</a><a href="/wiki/missions/" class="sidebar-link">Missions</a><a href="/wiki/corporations/" class="sidebar-link">Corporations</a><a href="/wiki/automation/" class="sidebar-link">Automation</a><a href="/wiki/artifacts/" class="sidebar-link">Artifacts</a></div><div class="sidebar-category">
+      <div class="sidebar-category-title">Guides</div><a href="/wiki/guide-new-player/" class="sidebar-link">New Player Guide</a><a href="/wiki/guide-trading/" class="sidebar-link">Trading Guide</a><a href="/wiki/guide-combat/" class="sidebar-link">Combat Guide</a><a href="/wiki/guide-colonization/" class="sidebar-link">Colonization Guide</a></div></nav>
+    <div class="sidebar-footer">
+      <a href="/">Home</a>
+      <a href="/play">Play Game</a>
+    </div>
+  </aside>
+    <main class="wiki-main">
+      <div class="wiki-content">
+        <nav class="wiki-breadcrumb">
+          <a href="/wiki/">Wiki</a>
+          <span class="sep">/</span>
+          <span>World</span>
+          <span class="sep">/</span>
+          <span class="current">Colonies</span>
+        </nav>
+        <header class="article-header">
+          <div class="article-category">World</div>
+          <h1 class="article-title">Colonies</h1>
+        </header>
+        
+        <article class="wiki-article">
+          <p>Colonies allow you to establish permanent settlements on planets, extract resources, and build infrastructure.</p>
+<h2 id="founding-a-colony">Founding a Colony</h2>
+<h3 id="requirements">Requirements</h3>
+<ol>
+<li><strong>A Colony Ship</strong> — Either a Colony Ship or Insta Colony Ship hull type</li>
+<li><strong>A habitable planet</strong> — Gas Giants (0% habitability) cannot be colonized</li>
+<li><strong>10,000 credits</strong> — Base colonization cost</li>
+<li><strong>Navigate to the planet&#39;s system</strong> — You must be in the same sector</li>
+</ol>
+<h3 id="colony-ship-types">Colony Ship Types</h3>
+<div class="table-wrap"><table><thead><tr><th>Ship</th><th>Cargo</th><th>Crew</th><th>Development</th><th>Consumed?</th></tr></thead><tbody><tr><td>Colony Ship</td><td>1,000</td><td>20</td><td>Up to 8 hours (scales with habitability)</td><td>Yes</td></tr><tr><td>Insta Colony Ship</td><td>500</td><td>15</td><td>Instant</td><td>Yes</td></tr></tbody></table></div>
+<blockquote><p><strong>Important</strong>: Your colony ship is <strong>consumed</strong> when founding a colony. You&#39;ll need another ship to continue playing.</p>
+</blockquote>
+<h3 id="development-timer">Development Timer</h3>
+<p>Standard Colony Ships trigger a development period before the colony becomes active. The timer scales inversely with planet habitability:</p>
+<ul>
+<li><strong>Terran (100%)</strong> — Shortest development time</li>
+<li><strong>Desert (50%)</strong> — Moderate development time</li>
+<li><strong>Barren (10%)</strong> — Very long development time</li>
+</ul>
+<p>Insta Colony Ships skip this timer entirely but carry less cargo and crew.</p>
+<h2 id="colony-management">Colony Management</h2>
+<h3 id="infrastructure-level">Infrastructure Level</h3>
+<p>Colonies have an infrastructure level from 1–10. Higher infrastructure unlocks:</p>
+<ul>
+<li>More advanced buildings</li>
+<li>Higher population capacity</li>
+<li>Access to wonders (at infrastructure 3+)</li>
+</ul>
+<h3 id="population-growth">Population Growth</h3>
+<p>Base population growth rate is <strong>5% per tick</strong>. Growth is influenced by:</p>
+<ul>
+<li>Planet habitability</li>
+<li>Available housing (Habitat Modules)</li>
+<li>Colony morale (Entertainment Complexes)</li>
+</ul>
+<h3 id="resource-extraction">Resource Extraction</h3>
+<p>Colonies automatically extract resources based on:</p>
+<ul>
+<li>Planet type and available resources</li>
+<li>Installed extraction buildings</li>
+<li>Infrastructure level</li>
+<li>Base resource generation multiplier (1.0×)</li>
+</ul>
+<h2 id="buildings">Buildings</h2>
+<p>Colonies can construct 21 building types across three categories. Buildings require workforce, some consume power, and many have planet type bonuses.</p>
+<h3 id="extraction-buildings">Extraction Buildings</h3>
+<p>These produce raw resources. Each has a 3-tier upgrade chain:</p>
+<p><strong>Mining Chain</strong>: Surface Mine → Deep Core Drill → Quantum Extractor</p>
+<div class="table-wrap"><table><thead><tr><th>Building</th><th>Tier</th><th>Cost</th><th>Workforce</th><th>Power</th><th>Output</th><th>Max</th></tr></thead><tbody><tr><td>Surface Mine</td><td>1</td><td>25,000</td><td>50</td><td>0</td><td>20 Ore</td><td>3</td></tr><tr><td>Deep Core Drill</td><td>2</td><td>60,000</td><td>80</td><td>50</td><td>50 Ore</td><td>3</td></tr><tr><td>Quantum Extractor</td><td>3</td><td>150,000</td><td>120</td><td>150</td><td>120 Ore</td><td>3</td></tr></tbody></table></div>
+<p>Planet bonuses: Volcanic 1.5×, Barren 1.3×, Desert 1.2×</p>
+<p><strong>Water Chain</strong>: Water Pump → Deep Well → Cryo Harvester</p>
+<div class="table-wrap"><table><thead><tr><th>Building</th><th>Tier</th><th>Cost</th><th>Workforce</th><th>Power</th><th>Output</th><th>Max</th></tr></thead><tbody><tr><td>Water Pump</td><td>1</td><td>20,000</td><td>30</td><td>0</td><td>25 Water</td><td>3</td></tr><tr><td>Deep Well</td><td>2</td><td>50,000</td><td>50</td><td>30</td><td>60 Water</td><td>3</td></tr><tr><td>Cryo Harvester</td><td>3</td><td>120,000</td><td>80</td><td>100</td><td>150 Water</td><td>3</td></tr></tbody></table></div>
+<p>Planet bonuses: Oceanic 2.0×, Terran 1.5×, Jungle 1.4×, Ice 1.3×</p>
+<p><strong>Power Chain</strong>: Solar Array → Geothermal Plant → Fusion Reactor</p>
+<div class="table-wrap"><table><thead><tr><th>Building</th><th>Tier</th><th>Cost</th><th>Workforce</th><th>Power Gen</th><th>Max</th></tr></thead><tbody><tr><td>Solar Array</td><td>1</td><td>15,000</td><td>20</td><td>100</td><td>5</td></tr><tr><td>Geothermal Plant</td><td>2</td><td>40,000</td><td>40</td><td>250</td><td>5</td></tr><tr><td>Fusion Reactor</td><td>3</td><td>100,000</td><td>60</td><td>500</td><td>5</td></tr></tbody></table></div>
+<p>Solar Array bonus: Desert 1.5×. Geothermal bonus: Volcanic 1.8×.</p>
+<h3 id="infrastructure-buildings">Infrastructure Buildings</h3>
+<div class="table-wrap"><table><thead><tr><th>Building</th><th>Tier</th><th>Cost</th><th>Workforce</th><th>Power</th><th>Effect</th><th>Max</th></tr></thead><tbody><tr><td>Habitat Module</td><td>1</td><td>30,000</td><td>20</td><td>20</td><td>+500 max population</td><td>5</td></tr><tr><td>Hydroponic Farm</td><td>1</td><td>20,000</td><td>40</td><td>30</td><td>5 Water → 30 Food</td><td>4</td></tr><tr><td>Entertainment Complex</td><td>1</td><td>25,000</td><td>30</td><td>25</td><td>+10% morale</td><td>2</td></tr><tr><td>Spaceport</td><td>2</td><td>45,000</td><td>50</td><td>40</td><td>+25% trade capacity</td><td>1</td></tr><tr><td>Defense Grid</td><td>2</td><td>40,000</td><td>30</td><td>60</td><td>+50 colony defense</td><td>3</td></tr><tr><td>Research Lab</td><td>2</td><td>50,000</td><td>60</td><td>50</td><td>+15% research speed</td><td>2</td></tr></tbody></table></div>
+<h3 id="manufacturing-buildings">Manufacturing Buildings</h3>
+<div class="table-wrap"><table><thead><tr><th>Building</th><th>Tier</th><th>Cost</th><th>Workforce</th><th>Power</th><th>Production</th><th>Max</th></tr></thead><tbody><tr><td>Refinery</td><td>2</td><td>60,000</td><td>70</td><td>80</td><td>10 Ore → 8 Refined Metals</td><td>2</td></tr><tr><td>Chemical Plant</td><td>2</td><td>55,000</td><td>60</td><td>70</td><td>8 Water + 5 Organics → 6 Chemicals</td><td>2</td></tr><tr><td>Component Factory</td><td>3</td><td>100,000</td><td>100</td><td>120</td><td>5 Refined Metals + 3 Electronics → 4 Ship Parts</td><td>1</td></tr></tbody></table></div>
+<h2 id="wonders">Wonders</h2>
+<p>Wonders are unique mega-structures that provide powerful bonuses. They require the <strong>Advanced Colonies</strong> tech and sufficient infrastructure.</p>
+<div class="table-wrap"><table><thead><tr><th>Wonder</th><th>Bonus</th><th>Phase Cost</th><th>Required Infrastructure</th></tr></thead><tbody><tr><td>Orbital Array</td><td>+25% scan range</td><td>10,000</td><td>3</td></tr><tr><td>Trade Nexus</td><td>+15% trade bonus</td><td>15,000</td><td>4</td></tr><tr><td>Defense Matrix</td><td>+20% sector defense</td><td>20,000</td><td>5</td></tr><tr><td>Shipyard</td><td>-20% ship cost</td><td>25,000</td><td>5</td></tr><tr><td>Research Station</td><td>+25% research speed</td><td>20,000</td><td>4</td></tr><tr><td>Genesis Device</td><td>+30% habitability</td><td>30,000</td><td>6</td></tr></tbody></table></div>
+<p>Wonders are built in phases (up to 5 per wonder). Each phase costs credits and provides incremental bonus increases.</p>
+
+        </article>
+        <nav class="article-nav">
+          <a href="/wiki/planets/" class="nav-prev"><span class="nav-label">Previous</span><span class="nav-title">Planets</span></a>
+          <a href="/wiki/crew/" class="nav-next"><span class="nav-label">Next</span><span class="nav-title">Crew</span></a>
+        </nav>
+      </div>
+    </main>
+  </div>
+  <script>
+    // Reading progress
+    window.addEventListener('scroll', function() {
+      var h = document.documentElement;
+      var pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+      document.getElementById('reading-progress').style.width = Math.min(pct, 100) + '%';
+    });
+    // Sidebar toggle (mobile)
+    document.getElementById('sidebar-toggle').addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('open');
+    });
+    // Search filter
+    document.getElementById('wiki-search').addEventListener('input', function(e) {
+      var q = e.target.value.toLowerCase();
+      document.querySelectorAll('.sidebar-link').forEach(function(link) {
+        link.style.display = link.textContent.toLowerCase().includes(q) || !q ? '' : 'none';
+      });
+      document.querySelectorAll('.sidebar-category').forEach(function(cat) {
+        var visible = cat.querySelectorAll('.sidebar-link[style=""],.sidebar-link:not([style])');
+        cat.style.display = visible.length || !q ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>

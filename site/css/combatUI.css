@@ -1,0 +1,1007 @@
+/**
+ * PvP Combat UI Styles
+ */
+
+/* Base Panel Styles */
+.pvp-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    border: 2px solid #4A90E2;
+    border-radius: 10px;
+    padding: 20px;
+    min-width: 400px;
+    max-width: 800px;
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    box-shadow: 0 0 30px rgba(74, 144, 226, 0.5);
+    z-index: 1000;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Queue Interface */
+#pvp-queue-panel h2 {
+    text-align: center;
+    color: #4A90E2;
+    margin-bottom: 20px;
+    font-size: 24px;
+    text-transform: uppercase;
+}
+
+.mode-selector h3 {
+    color: #FFD700;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.mode-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.mode-btn {
+    background: rgba(74, 144, 226, 0.2);
+    border: 1px solid #4A90E2;
+    border-radius: 5px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #fff;
+    text-align: center;
+}
+
+.mode-btn:hover {
+    background: rgba(74, 144, 226, 0.3);
+    transform: translateY(-2px);
+}
+
+.mode-btn.active {
+    background: rgba(74, 144, 226, 0.5);
+    border-color: #FFD700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.mode-icon {
+    display: block;
+    font-size: 30px;
+    margin-bottom: 5px;
+}
+
+.mode-name {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+.mode-desc {
+    display: block;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* Queue Status */
+.queue-status {
+    text-align: center;
+}
+
+.queue-info {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.queue-info > div {
+    margin: 10px 0;
+}
+
+.queue-info .label {
+    color: #888;
+    margin-right: 10px;
+}
+
+.queue-info .timer,
+.queue-info .estimate,
+.queue-info .count {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+.primary-btn {
+    background: linear-gradient(45deg, #4A90E2, #357ABD);
+    border: none;
+    border-radius: 5px;
+    padding: 15px 40px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    margin: 10px 0;
+}
+
+.primary-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(74, 144, 226, 0.5);
+}
+
+.primary-btn.in-queue {
+    background: linear-gradient(45deg, #E74C3C, #C0392B);
+}
+
+.queue-preferences {
+    margin-top: 15px;
+}
+
+.queue-preferences label {
+    display: block;
+    margin: 5px 0;
+    cursor: pointer;
+}
+
+.queue-preferences input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+/* Match Notification */
+.match-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.match-content {
+    background: rgba(0, 0, 0, 0.95);
+    border: 3px solid #FFD700;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 600px;
+    width: 90%;
+    animation: matchFound 0.5s ease;
+}
+
+@keyframes matchFound {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.match-content h2 {
+    text-align: center;
+    color: #FFD700;
+    font-size: 32px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.match-players {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.team {
+    flex: 1;
+    text-align: center;
+}
+
+.team h4 {
+    color: #4A90E2;
+    margin-bottom: 10px;
+}
+
+.team-2 h4 {
+    color: #E74C3C;
+}
+
+.player-list .player {
+    margin: 5px 0;
+    padding: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.player-name {
+    font-weight: bold;
+}
+
+.player-rating {
+    color: #FFD700;
+    margin-left: 10px;
+    font-size: 14px;
+}
+
+.vs {
+    font-size: 24px;
+    font-weight: bold;
+    color: #FFD700;
+    margin: 0 20px;
+}
+
+.match-timer {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 18px;
+}
+
+.countdown {
+    color: #E74C3C;
+    font-weight: bold;
+    font-size: 24px;
+    margin-left: 10px;
+}
+
+.match-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.accept-btn {
+    background: linear-gradient(45deg, #27AE60, #229954);
+    border: none;
+    border-radius: 5px;
+    padding: 10px 30px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.accept-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(39, 174, 96, 0.5);
+}
+
+.accept-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.decline-btn {
+    background: linear-gradient(45deg, #E74C3C, #C0392B);
+    border: none;
+    border-radius: 5px;
+    padding: 10px 30px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.decline-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(231, 76, 60, 0.5);
+}
+
+/* Ready Check */
+.ready-check-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    border: 2px solid #FFD700;
+    border-radius: 10px;
+    padding: 20px;
+    min-width: 300px;
+    color: #fff;
+    z-index: 1500;
+}
+
+.ready-check-panel h3 {
+    text-align: center;
+    color: #FFD700;
+    margin-bottom: 15px;
+}
+
+.ready-players {
+    margin: 15px 0;
+}
+
+.ready-player {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    margin: 5px 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.ready-player.ready {
+    background: rgba(39, 174, 96, 0.2);
+}
+
+.ready-icon {
+    font-size: 20px;
+    color: #888;
+}
+
+.ready-player.ready .ready-icon {
+    color: #27AE60;
+}
+
+.ready-status {
+    text-align: center;
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.ready-btn {
+    display: block;
+    width: 100%;
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    color: #000;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.ready-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.5);
+}
+
+.ready-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Combat Overlay */
+.combat-ui {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 500;
+}
+
+.combat-ui > * {
+    pointer-events: auto;
+}
+
+/* Top Bar */
+.combat-top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.9), transparent);
+    padding: 20px;
+}
+
+.team-score {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.team-name {
+    font-size: 16px;
+    opacity: 0.8;
+}
+
+.score {
+    font-size: 36px;
+    font-weight: bold;
+}
+
+.team-1-score .score {
+    color: #4A90E2;
+}
+
+.team-2-score .score {
+    color: #E74C3C;
+}
+
+.match-timer {
+    font-size: 24px;
+    font-weight: bold;
+    color: #FFD700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* Kill Feed */
+.kill-feed {
+    position: absolute;
+    top: 100px;
+    right: 20px;
+    width: 300px;
+}
+
+.kill-entry {
+    background: rgba(0, 0, 0, 0.7);
+    border-left: 3px solid #FFD700;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    font-size: 14px;
+    animation: slideIn 0.3s ease;
+    transition: opacity 0.5s ease;
+}
+
+.kill-entry.fade-out {
+    opacity: 0;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.killer {
+    font-weight: bold;
+}
+
+.killer.team1 {
+    color: #4A90E2;
+}
+
+.killer.team2 {
+    color: #E74C3C;
+}
+
+.weapon {
+    color: #FFD700;
+    margin: 0 5px;
+}
+
+.victim {
+    font-weight: bold;
+}
+
+.victim.team1 {
+    color: #4A90E2;
+}
+
+.victim.team2 {
+    color: #E74C3C;
+}
+
+/* Objectives Panel */
+.objectives-panel {
+    position: absolute;
+    top: 100px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #4A90E2;
+    border-radius: 5px;
+    padding: 15px;
+    min-width: 200px;
+}
+
+.objectives-panel h4 {
+    color: #FFD700;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.objective {
+    margin: 8px 0;
+    padding: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.objective.team1 {
+    border-left: 3px solid #4A90E2;
+}
+
+.objective.team2 {
+    border-left: 3px solid #E74C3C;
+}
+
+.objective.neutral {
+    border-left: 3px solid #888;
+}
+
+/* Player Status */
+.player-status-list {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.player-status {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #4A90E2;
+    border-radius: 5px;
+    padding: 10px;
+    min-width: 150px;
+}
+
+.player-status.team2 {
+    border-color: #E74C3C;
+}
+
+.player-status.dead {
+    opacity: 0.5;
+}
+
+.health-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+.health-fill {
+    height: 100%;
+    background: #27AE60;
+    transition: width 0.3s ease;
+}
+
+/* Combat Log */
+.combat-log {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 300px;
+    max-height: 200px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* Respawn Timer */
+.respawn-timer {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid #E74C3C;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    z-index: 1000;
+}
+
+.respawn-timer h3 {
+    color: #E74C3C;
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.respawn-countdown {
+    font-size: 18px;
+    color: #fff;
+}
+
+#respawn-countdown {
+    color: #FFD700;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+/* Post-Match Stats */
+.post-match-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.stats-content {
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid #4A90E2;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.match-result {
+    text-align: center;
+    font-size: 48px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.match-result.victory {
+    color: #27AE60;
+    text-shadow: 0 0 20px rgba(39, 174, 96, 0.8);
+}
+
+.match-result.defeat {
+    color: #E74C3C;
+    text-shadow: 0 0 20px rgba(231, 76, 60, 0.8);
+}
+
+/* Stats Tabs */
+.stats-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    background: rgba(74, 144, 226, 0.2);
+    border: 1px solid #4A90E2;
+    border-radius: 5px;
+    padding: 10px 20px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+    background: rgba(74, 144, 226, 0.3);
+}
+
+.tab-btn.active {
+    background: rgba(74, 144, 226, 0.5);
+    border-color: #FFD700;
+}
+
+.tab-content {
+    padding: 20px 0;
+}
+
+/* Team Comparison */
+.team-comparison {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.team-stats {
+    flex: 1;
+    text-align: center;
+}
+
+.team-stats h4 {
+    color: #4A90E2;
+    margin-bottom: 15px;
+    font-size: 20px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 20px;
+    margin: 5px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.vs-divider {
+    font-size: 32px;
+    font-weight: bold;
+    color: #FFD700;
+    margin: 0 30px;
+}
+
+/* Player Stats Grid */
+.player-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.player-stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(74, 144, 226, 0.5);
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.player-stat-card h5 {
+    color: #FFD700;
+    margin-bottom: 10px;
+}
+
+.stat-grid {
+    display: grid;
+    gap: 5px;
+}
+
+.stat {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+.stat .label {
+    color: #888;
+}
+
+.stat .value {
+    color: #fff;
+    font-weight: bold;
+}
+
+/* Rewards Section */
+.rewards-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.rewards-section h3 {
+    color: #FFD700;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.reward-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.reward-item {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid #FFD700;
+    border-radius: 5px;
+    padding: 10px;
+    text-align: center;
+}
+
+.reward-icon {
+    font-size: 24px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.reward-name {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 3px;
+}
+
+.reward-value {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+/* Stats Actions */
+.stats-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.secondary-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #4A90E2;
+    border-radius: 5px;
+    padding: 10px 20px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.secondary-btn:hover {
+    background: rgba(74, 144, 226, 0.3);
+}
+
+/* Spectator UI */
+.spectator-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.9);
+    border-bottom: 2px solid #4A90E2;
+    padding: 10px 20px;
+    z-index: 1000;
+}
+
+.spectator-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.spectator-icon {
+    font-size: 24px;
+}
+
+.small-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #4A90E2;
+    border-radius: 3px;
+    padding: 5px 15px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+}
+
+.small-btn:hover {
+    background: rgba(74, 144, 226, 0.3);
+}
+
+.spectator-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.camera-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.camera-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #4A90E2;
+    border-radius: 3px;
+    padding: 5px 10px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+}
+
+.camera-btn:hover {
+    background: rgba(74, 144, 226, 0.3);
+}
+
+.camera-btn.active {
+    background: rgba(74, 144, 226, 0.5);
+    border-color: #FFD700;
+}
+
+.player-selector select {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #4A90E2;
+    border-radius: 3px;
+    padding: 5px 10px;
+    color: #fff;
+    cursor: pointer;
+}
+
+.viewer-count {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #FFD700;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Scrollbar Styling */
+.combat-log::-webkit-scrollbar,
+.stats-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.combat-log::-webkit-scrollbar-track,
+.stats-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.combat-log::-webkit-scrollbar-thumb,
+.stats-content::-webkit-scrollbar-thumb {
+    background: #4A90E2;
+    border-radius: 4px;
+}
+
+.combat-log::-webkit-scrollbar-thumb:hover,
+.stats-content::-webkit-scrollbar-thumb:hover {
+    background: #357ABD;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .pvp-panel {
+        width: 95%;
+        max-width: none;
+        padding: 15px;
+    }
+    
+    .mode-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .match-players {
+        flex-direction: column;
+    }
+    
+    .team-comparison {
+        flex-direction: column;
+    }
+    
+    .vs-divider {
+        margin: 20px 0;
+    }
+    
+    .stats-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .stats-actions button {
+        width: 100%;
+    }
+}

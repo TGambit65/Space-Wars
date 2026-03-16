@@ -407,10 +407,11 @@ const processProductionTick = async (colonyId, hoursPassed, generatedResources, 
       inputScale.ratio = minRatio;
     }
 
-    // Calculate outputs
+    // Calculate outputs — include cached adjacency multiplier
+    const adjacencyMultiplier = building.cached_multiplier || 1.0;
     for (const [outputName, outputQty] of Object.entries(cfg.production.outputs || {})) {
       const baseOutput = outputQty * hoursPassed;
-      const scaledOutput = Math.floor(baseOutput * conditionFactor * planetBonus * infrastructureBonus * (inputScale.ratio || 1));
+      const scaledOutput = Math.floor(baseOutput * conditionFactor * planetBonus * infrastructureBonus * adjacencyMultiplier * (inputScale.ratio || 1));
       if (scaledOutput > 0) {
         outputs[outputName] = scaledOutput;
         // Add to resource pool so downstream buildings can use them

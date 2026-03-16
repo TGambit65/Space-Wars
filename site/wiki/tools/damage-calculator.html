@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damage Calculator - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+    <script src="../../js/wiki-smart-navigation.js"></script>
+    <script src="../../js/wiki-interactive-features.js"></script>
+</head>
+<body class="doc-container tools-page">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="../index.html" class="doc-nav-link">← Wiki Home</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">Interactive Tools</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="combat-simulator.html" class="doc-nav-link">Combat Simulator</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="damage-calculator.html" class="doc-nav-link active">Damage Calculator</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item">
+                <a href="index.html" class="doc-breadcrumb-link">Interactive Tools</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Damage Calculator</div>
+        </nav>
+
+        <h1 class="doc-h1 holo-text">💥 Damage Calculator</h1>
+        
+        <div class="doc-alert info">
+            <strong>Precision Destruction:</strong> Calculate exact damage outputs for any weapon against any target! 
+            It's like having a ballistics computer in your head! 🎯
+        </div>
+
+        <p class="doc-lead">
+            Welcome to the most mathematically precise tool in your arsenal! This calculator doesn't just guess 
+            at damage numbers - it computes them with scientific precision. Whether you're trying to optimize 
+            your weapon loadout, planning an attack, or figuring out why your enemy exploded so spectacularly, 
+            this tool gives you the exact numbers you need. Professor "By The Numbers" Einstein uses this calculator 
+            to win every argument about weapon effectiveness because math doesn't lie! 🔢💥
+        </p>
+
+        <!-- Damage Calculator Interface -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🎯 Damage Calculation</h2>
+            
+            <div class="doc-grid doc-grid-2">
+                <!-- Weapon Configuration -->
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🔫 Weapon Configuration</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <div class="weapon-config">
+                            <div class="input-group">
+                                <label>Weapon Type:</label>
+                                <select id="weapon-type">
+                                    <option value="">Select weapon...</option>
+                                    <option value="light-laser">Light Laser</option>
+                                    <option value="medium-laser">Medium Laser</option>
+                                    <option value="heavy-laser">Heavy Laser</option>
+                                    <option value="plasma-gun">Plasma Gun</option>
+                                    <option value="ion-cannon">Ion Cannon</option>
+                                    <option value="missile">Missile Launcher</option>
+                                    <option value="torpedo">Torpedo</option>
+                                    <option value="railgun">Railgun</option>
+                                </select>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Base Damage:</label>
+                                <input type="number" id="base-damage" value="25" min="1" max="500">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Accuracy (%):</label>
+                                <input type="number" id="accuracy" value="80" min="0" max="100">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Critical Hit Rate (%):</label>
+                                <input type="number" id="crit-rate" value="10" min="0" max="100">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Critical Hit Multiplier:</label>
+                                <input type="number" id="crit-multiplier" value="2" min="1" max="10" step="0.1">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Range to Target:</label>
+                                <select id="range">
+                                    <option value="short">Short Range (1.2x damage)</option>
+                                    <option value="medium" selected>Medium Range (1.0x damage)</option>
+                                    <option value="long">Long Range (0.8x damage)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Target Configuration -->
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🛡️ Target Configuration</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <div class="target-config">
+                            <div class="input-group">
+                                <label>Target Type:</label>
+                                <select id="target-type">
+                                    <option value="">Select target...</option>
+                                    <option value="fighter">Fighter (Light)</option>
+                                    <option value="cruiser">Cruiser (Medium)</option>
+                                    <option value="battleship">Battleship (Heavy)</option>
+                                    <option value="station">Space Station</option>
+                                </select>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Armor Rating:</label>
+                                <input type="number" id="armor-rating" value="10" min="0" max="100">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Shield Strength:</label>
+                                <input type="number" id="shield-strength" value="50" min="0" max="500">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Armor Type:</label>
+                                <select id="armor-type">
+                                    <option value="light">Light Armor</option>
+                                    <option value="medium" selected>Medium Armor</option>
+                                    <option value="heavy">Heavy Armor</option>
+                                    <option value="reactive">Reactive Armor</option>
+                                </select>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Shield Type:</label>
+                                <select id="shield-type">
+                                    <option value="energy">Energy Shield</option>
+                                    <option value="particle" selected>Particle Shield</option>
+                                    <option value="deflector">Deflector Shield</option>
+                                </select>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Target Size:</label>
+                                <select id="target-size">
+                                    <option value="small">Small (0.8x hit chance)</option>
+                                    <option value="medium" selected>Medium (1.0x hit chance)</option>
+                                    <option value="large">Large (1.2x hit chance)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="calculator-controls">
+                <button class="doc-button primary" onclick="calculateDamage()">Calculate Damage</button>
+                <button class="doc-button secondary" onclick="calculateDPS()">Calculate DPS</button>
+                <button class="doc-button" onclick="clearCalculation()">Clear</button>
+            </div>
+        </section>
+
+        <!-- Damage Results -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">📊 Damage Analysis</h2>
+            
+            <div class="doc-grid doc-grid-2">
+                <!-- Damage Breakdown -->
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">💥 Damage Breakdown</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <div class="terminal-window">
+                            <div class="terminal-header">
+                                <span class="terminal-title">Damage Calculation Results</span>
+                            </div>
+                            <div class="terminal-content" id="damage-breakdown">
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">STATUS</span>
+                                    <span class="terminal-output">Ready to calculate damage</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">BASE_DAMAGE</span>
+                                    <span class="terminal-output">-- points</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">RANGE_MODIFIER</span>
+                                    <span class="terminal-output">--x</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">SHIELD_DAMAGE</span>
+                                    <span class="terminal-output">-- points</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">ARMOR_DAMAGE</span>
+                                    <span class="terminal-output">-- points</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">FINAL_DAMAGE</span>
+                                    <span class="terminal-output">-- points</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">CRIT_DAMAGE</span>
+                                    <span class="terminal-output">-- points</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hit Statistics -->
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🎯 Hit Statistics</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <div class="hit-stats">
+                            <div class="stat-row">
+                                <div class="stat-label">Hit Chance:</div>
+                                <div class="stat-value" id="hit-chance">--%</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">Average Damage:</div>
+                                <div class="stat-value" id="avg-damage">-- points</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">Max Damage:</div>
+                                <div class="stat-value" id="max-damage">-- points</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">DPS (with misses):</div>
+                                <div class="stat-value" id="effective-dps">-- points/sec</div>
+                            </div>
+                        </div>
+                        
+                        <div class="damage-chart">
+                            <div class="chart-bar">
+                                <div class="chart-label">Normal Hit</div>
+                                <div class="chart-bar-fill" id="normal-bar"></div>
+                                <div class="chart-value" id="normal-value">0</div>
+                            </div>
+                            <div class="chart-bar">
+                                <div class="chart-label">Critical Hit</div>
+                                <div class="chart-bar-fill critical" id="crit-bar"></div>
+                                <div class="chart-value" id="crit-value">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Weapon Effectiveness Matrix -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🔍 Weapon Effectiveness Matrix</h2>
+            
+            <div class="doc-alert accent">
+                <strong>Quick Reference:</strong> This matrix shows how different weapons perform against different 
+                armor types. Green is good, red is bad, yellow is okay!
+            </div>
+
+            <div class="effectiveness-matrix">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Weapon Type</th>
+                            <th>Light Armor</th>
+                            <th>Medium Armor</th>
+                            <th>Heavy Armor</th>
+                            <th>Reactive Armor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Light Laser</td>
+                            <td class="effectiveness-high">95%</td>
+                            <td class="effectiveness-medium">80%</td>
+                            <td class="effectiveness-low">60%</td>
+                            <td class="effectiveness-medium">75%</td>
+                        </tr>
+                        <tr>
+                            <td>Medium Laser</td>
+                            <td class="effectiveness-high">100%</td>
+                            <td class="effectiveness-high">90%</td>
+                            <td class="effectiveness-medium">75%</td>
+                            <td class="effectiveness-medium">80%</td>
+                        </tr>
+                        <tr>
+                            <td>Heavy Laser</td>
+                            <td class="effectiveness-high">100%</td>
+                            <td class="effectiveness-high">95%</td>
+                            <td class="effectiveness-high">85%</td>
+                            <td class="effectiveness-medium">70%</td>
+                        </tr>
+                        <tr>
+                            <td>Plasma Gun</td>
+                            <td class="effectiveness-high">110%</td>
+                            <td class="effectiveness-high">100%</td>
+                            <td class="effectiveness-high">90%</td>
+                            <td class="effectiveness-high">95%</td>
+                        </tr>
+                        <tr>
+                            <td>Ion Cannon</td>
+                            <td class="effectiveness-medium">70%</td>
+                            <td class="effectiveness-medium">75%</td>
+                            <td class="effectiveness-medium">80%</td>
+                            <td class="effectiveness-low">50%</td>
+                        </tr>
+                        <tr>
+                            <td>Missile</td>
+                            <td class="effectiveness-high">120%</td>
+                            <td class="effectiveness-high">110%</td>
+                            <td class="effectiveness-high">100%</td>
+                            <td class="effectiveness-low">40%</td>
+                        </tr>
+                        <tr>
+                            <td>Torpedo</td>
+                            <td class="effectiveness-high">130%</td>
+                            <td class="effectiveness-high">125%</td>
+                            <td class="effectiveness-high">120%</td>
+                            <td class="effectiveness-medium">60%</td>
+                        </tr>
+                        <tr>
+                            <td>Railgun</td>
+                            <td class="effectiveness-high">100%</td>
+                            <td class="effectiveness-high">100%</td>
+                            <td class="effectiveness-high">100%</td>
+                            <td class="effectiveness-high">100%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Related Tools -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🔗 Related Tools</h2>
+            
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">⚔️ Test in Combat</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>See how your calculated damage performs in actual combat scenarios</p>
+                        <a href="combat-simulator.html" class="doc-button secondary">Combat Simulator →</a>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🚀 Optimize Your Build</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Use damage calculations to design the perfect weapon loadout</p>
+                        <a href="ship-calculator.html" class="doc-button secondary">Ship Calculator →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="combat-simulator.html" class="doc-nav-link">← Combat Simulator</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">Back to Interactive Tools</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            
+            // Weapon data
+            const weaponData = {
+                'light-laser': { damage: 15, accuracy: 85, crit: 5, fireRate: 2.0 },
+                'medium-laser': { damage: 25, accuracy: 80, crit: 8, fireRate: 1.5 },
+                'heavy-laser': { damage: 40, accuracy: 75, crit: 12, fireRate: 1.0 },
+                'plasma-gun': { damage: 35, accuracy: 70, crit: 15, fireRate: 1.2 },
+                'ion-cannon': { damage: 30, accuracy: 85, crit: 5, fireRate: 1.8 },
+                'missile': { damage: 50, accuracy: 90, crit: 20, fireRate: 0.8 },
+                'torpedo': { damage: 80, accuracy: 95, crit: 25, fireRate: 0.5 },
+                'railgun': { damage: 60, accuracy: 95, crit: 10, fireRate: 0.6 }
+            };
+            
+            // Target data
+            const targetData = {
+                'fighter': { armor: 5, shields: 25, type: 'light' },
+                'cruiser': { armor: 15, shields: 75, type: 'medium' },
+                'battleship': { armor: 30, shields: 150, type: 'heavy' },
+                'station': { armor: 50, shields: 200, type: 'heavy' }
+            };
+            
+            // Auto-populate weapon stats
+            document.getElementById('weapon-type').addEventListener('change', function() {
+                const weapon = weaponData[this.value];
+                if (weapon) {
+                    document.getElementById('base-damage').value = weapon.damage;
+                    document.getElementById('accuracy').value = weapon.accuracy;
+                    document.getElementById('crit-rate').value = weapon.crit;
+                }
+            });
+            
+            // Auto-populate target stats
+            document.getElementById('target-type').addEventListener('change', function() {
+                const target = targetData[this.value];
+                if (target) {
+                    document.getElementById('armor-rating').value = target.armor;
+                    document.getElementById('shield-strength').value = target.shields;
+                    document.getElementById('armor-type').value = target.type;
+                }
+            });
+            
+            // Damage calculation functions
+            window.calculateDamage = function() {
+                const baseDamage = parseInt(document.getElementById('base-damage').value);
+                const accuracy = parseInt(document.getElementById('accuracy').value);
+                const critRate = parseInt(document.getElementById('crit-rate').value);
+                const critMultiplier = parseFloat(document.getElementById('crit-multiplier').value);
+                const range = document.getElementById('range').value;
+                const armor = parseInt(document.getElementById('armor-rating').value);
+                const shields = parseInt(document.getElementById('shield-strength').value);
+                const targetSize = document.getElementById('target-size').value;
+                
+                // Range modifiers
+                const rangeModifiers = { short: 1.2, medium: 1.0, long: 0.8 };
+                const rangeMultiplier = rangeModifiers[range];
+                
+                // Target size modifiers
+                const sizeModifiers = { small: 0.8, medium: 1.0, large: 1.2 };
+                const sizeMultiplier = sizeModifiers[targetSize];
+                
+                // Calculate modified damage
+                const modifiedDamage = baseDamage * rangeMultiplier;
+                
+                // Calculate damage after shields and armor
+                const shieldDamage = Math.max(0, modifiedDamage - shields * 0.1);
+                const armorDamage = Math.max(1, shieldDamage - armor);
+                
+                // Calculate hit chance
+                const hitChance = (accuracy / 100) * sizeMultiplier;
+                
+                // Calculate critical damage
+                const critDamage = armorDamage * critMultiplier;
+                
+                // Calculate average damage
+                const avgDamage = (armorDamage * (1 - critRate/100)) + (critDamage * (critRate/100));
+                const effectiveAvgDamage = avgDamage * hitChance;
+                
+                // Display results
+                displayDamageResults({
+                    baseDamage: baseDamage,
+                    rangeMultiplier: rangeMultiplier,
+                    shieldDamage: shieldDamage,
+                    armorDamage: armorDamage,
+                    finalDamage: armorDamage,
+                    critDamage: critDamage,
+                    hitChance: (hitChance * 100).toFixed(1),
+                    avgDamage: avgDamage.toFixed(1),
+                    maxDamage: critDamage.toFixed(1),
+                    effectiveAvgDamage: effectiveAvgDamage.toFixed(1)
+                });
+            };
+            
+            window.calculateDPS = function() {
+                calculateDamage();
+                
+                const weaponType = document.getElementById('weapon-type').value;
+                const weapon = weaponData[weaponType];
+                
+                if (weapon) {
+                    const avgDamage = parseFloat(document.getElementById('avg-damage').textContent);
+                    const dps = (avgDamage * weapon.fireRate).toFixed(1);
+                    document.getElementById('effective-dps').textContent = dps + ' points/sec';
+                }
+            };
+            
+            window.clearCalculation = function() {
+                // Reset all form fields
+                document.getElementById('weapon-type').value = '';
+                document.getElementById('target-type').value = '';
+                document.getElementById('base-damage').value = 25;
+                document.getElementById('accuracy').value = 80;
+                document.getElementById('crit-rate').value = 10;
+                document.getElementById('crit-multiplier').value = 2;
+                document.getElementById('range').value = 'medium';
+                document.getElementById('armor-rating').value = 10;
+                document.getElementById('shield-strength').value = 50;
+                document.getElementById('armor-type').value = 'medium';
+                document.getElementById('shield-type').value = 'particle';
+                document.getElementById('target-size').value = 'medium';
+                
+                // Clear results
+                document.getElementById('damage-breakdown').innerHTML = `
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STATUS</span>
+                        <span class="terminal-output">Ready to calculate damage</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">BASE_DAMAGE</span>
+                        <span class="terminal-output">-- points</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">RANGE_MODIFIER</span>
+                        <span class="terminal-output">--x</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">SHIELD_DAMAGE</span>
+                        <span class="terminal-output">-- points</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">ARMOR_DAMAGE</span>
+                        <span class="terminal-output">-- points</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">FINAL_DAMAGE</span>
+                        <span class="terminal-output">-- points</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">CRIT_DAMAGE</span>
+                        <span class="terminal-output">-- points</span>
+                    </div>
+                `;
+                
+                document.getElementById('hit-chance').textContent = '--%';
+                document.getElementById('avg-damage').textContent = '-- points';
+                document.getElementById('max-damage').textContent = '-- points';
+                document.getElementById('effective-dps').textContent = '-- points/sec';
+            };
+            
+            function displayDamageResults(results) {
+                const breakdown = document.getElementById('damage-breakdown');
+                breakdown.innerHTML = `
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STATUS</span>
+                        <span class="terminal-output">Damage calculation complete</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">BASE_DAMAGE</span>
+                        <span class="terminal-output">${results.baseDamage} points</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">RANGE_MODIFIER</span>
+                        <span class="terminal-output">${results.rangeMultiplier}x</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">SHIELD_DAMAGE</span>
+                        <span class="terminal-output">${results.shieldDamage.toFixed(1)} points</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">ARMOR_DAMAGE</span>
+                        <span class="terminal-output">${results.armorDamage.toFixed(1)} points</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">FINAL_DAMAGE</span>
+                        <span class="terminal-output">${results.finalDamage.toFixed(1)} points</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">CRIT_DAMAGE</span>
+                        <span class="terminal-output">${results.critDamage.toFixed(1)} points</span>
+                    </div>
+                `;
+                
+                document.getElementById('hit-chance').textContent = results.hitChance + '%';
+                document.getElementById('avg-damage').textContent = results.avgDamage + ' points';
+                document.getElementById('max-damage').textContent = results.maxDamage + ' points';
+                document.getElementById('effective-dps').textContent = results.effectiveAvgDamage + ' points/sec';
+                
+                // Update damage bars
+                const maxDamageValue = parseFloat(results.maxDamage);
+                const normalDamageValue = parseFloat(results.avgDamage);
+                
+                document.getElementById('normal-bar').style.width = (normalDamageValue / maxDamageValue * 100) + '%';
+                document.getElementById('crit-bar').style.width = '100%';
+                document.getElementById('normal-value').textContent = normalDamageValue.toFixed(1);
+                document.getElementById('crit-value').textContent = maxDamageValue.toFixed(1);
+            }
+            
+            console.log('Damage Calculator loaded');
+        });
+    </script>
+    
+    <style>
+        .calculator-controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .calculator-controls button {
+            margin: 0 10px;
+        }
+        
+        .weapon-config, .target-config {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .input-group select,
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #333;
+            background: #1a1a1a;
+            color: #ffffff;
+            border-radius: 4px;
+        }
+        
+        .hit-stats {
+            margin-bottom: 20px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 5px;
+            background: rgba(0, 255, 0, 0.1);
+            border-radius: 4px;
+        }
+        
+        .stat-label {
+            font-weight: bold;
+        }
+        
+        .stat-value {
+            color: #00ffff;
+        }
+        
+        .damage-chart {
+            margin-top: 20px;
+        }
+        
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .chart-label {
+            width: 100px;
+            font-size: 12px;
+        }
+        
+        .chart-bar-fill {
+            height: 20px;
+            background: linear-gradient(90deg, #ff6600, #ff0000);
+            margin: 0 10px;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .chart-bar-fill.critical {
+            background: linear-gradient(90deg, #ffff00, #ff0000);
+        }
+        
+        .chart-value {
+            font-size: 12px;
+            color: #00ffff;
+        }
+        
+        .effectiveness-matrix {
+            margin: 20px 0;
+        }
+        
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .matrix-table th,
+        .matrix-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+        
+        .matrix-table th {
+            background: rgba(0, 100, 0, 0.3);
+            font-weight: bold;
+        }
+        
+        .matrix-table td:first-child {
+            background: rgba(0, 0, 100, 0.3);
+            font-weight: bold;
+        }
+        
+        .effectiveness-high {
+            background: rgba(0, 255, 0, 0.3);
+            color: #00ff00;
+        }
+        
+        .effectiveness-medium {
+            background: rgba(255, 255, 0, 0.3);
+            color: #ffff00;
+        }
+        
+        .effectiveness-low {
+            background: rgba(255, 0, 0, 0.3);
+            color: #ff6666;
+        }
+    </style>
+</body>
+</html>

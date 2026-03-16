@@ -1,0 +1,905 @@
+/**
+ * Faction War UI Styles
+ */
+
+/* War Overview Panel */
+.faction-war-overview {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 1500;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.war-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background: linear-gradient(135deg, #8B0000, #B22222);
+    border-bottom: 2px solid #FFD700;
+}
+
+.war-header h1 {
+    color: #FFD700;
+    margin: 0;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.war-status {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.status-indicator {
+    color: #fff;
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.status-indicator.active {
+    background: rgba(231, 76, 60, 0.3);
+    border: 1px solid #E74C3C;
+}
+
+.status-indicator.peaceful {
+    background: rgba(39, 174, 96, 0.3);
+    border: 1px solid #27AE60;
+}
+
+.close-wars {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
+.close-wars:hover {
+    color: #E74C3C;
+}
+
+/* Faction Selection */
+.faction-selection {
+    padding: 20px 30px;
+    background: rgba(0, 0, 0, 0.7);
+    border-bottom: 1px solid #333;
+}
+
+.faction-selection h3 {
+    color: #FFD700;
+    margin: 0 0 15px 0;
+    font-size: 18px;
+}
+
+.faction-display {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.faction-icon {
+    font-size: 40px;
+    width: 60px;
+    text-align: center;
+}
+
+.faction-info {
+    flex: 1;
+}
+
+.faction-info h4 {
+    color: #4A90E2;
+    margin: 0 0 5px 0;
+    font-size: 20px;
+}
+
+.faction-info p {
+    color: #ccc;
+    margin: 0;
+    font-size: 14px;
+}
+
+.faction-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.faction-stats .stat {
+    display: flex;
+    gap: 10px;
+}
+
+.faction-stats .label {
+    color: #888;
+    font-size: 14px;
+}
+
+.faction-stats .value {
+    color: #fff;
+    font-weight: 500;
+}
+
+/* Active Wars Section */
+.active-wars-section {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.active-wars-section h3 {
+    color: #FFD700;
+    margin: 0 0 20px 0;
+    font-size: 20px;
+}
+
+.wars-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.war-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #333;
+    border-radius: 15px;
+    padding: 25px;
+    transition: all 0.3s ease;
+}
+
+.war-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #E74C3C;
+}
+
+.war-factions {
+    margin-bottom: 20px;
+}
+
+.faction-vs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.faction-vs .faction {
+    padding: 8px 16px;
+    border-radius: 5px;
+    color: #fff;
+}
+
+.faction-vs .faction.terran_federation {
+    background: #4A90E2;
+}
+
+.faction-vs .faction.zythian_empire {
+    background: #9B59B6;
+}
+
+.faction-vs .faction.nexus_collective {
+    background: #E74C3C;
+}
+
+.faction-vs .faction.independent_colonies {
+    background: #27AE60;
+}
+
+.faction-vs .faction.pirate_confederacy {
+    background: #F39C12;
+}
+
+.faction-vs .vs {
+    color: #FFD700;
+    font-size: 24px;
+}
+
+.war-info {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 20px;
+    color: #ccc;
+    font-size: 14px;
+}
+
+.war-objectives {
+    margin-bottom: 20px;
+}
+
+.war-objectives h5 {
+    color: #FFD700;
+    margin: 0 0 10px 0;
+    font-size: 16px;
+}
+
+.objective {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #333;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 8px;
+}
+
+.objective-name {
+    color: #fff;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.objective-progress {
+    display: flex;
+    gap: 20px;
+}
+
+.faction-progress {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.faction-progress .faction-name {
+    color: #888;
+}
+
+.faction-progress .progress-value {
+    color: #4A90E2;
+    font-weight: bold;
+}
+
+.war-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+}
+
+.join-war-btn,
+.view-campaigns-btn {
+    background: linear-gradient(135deg, #E74C3C, #C0392B);
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.join-war-btn:hover,
+.view-campaigns-btn:hover {
+    background: linear-gradient(135deg, #C0392B, #A93226);
+}
+
+.view-campaigns-btn {
+    background: linear-gradient(135deg, #4A90E2, #357ABD);
+}
+
+.view-campaigns-btn:hover {
+    background: linear-gradient(135deg, #357ABD, #2E6DA4);
+}
+
+.cannot-join {
+    color: #666;
+    font-style: italic;
+    padding: 10px 20px;
+}
+
+.no-wars {
+    text-align: center;
+    color: #888;
+    padding: 40px;
+    font-size: 16px;
+}
+
+/* War Participation */
+.war-participation {
+    padding: 20px 30px;
+    background: rgba(0, 0, 0, 0.5);
+    border-top: 1px solid #333;
+}
+
+.war-participation h3 {
+    color: #FFD700;
+    margin: 0 0 20px 0;
+    font-size: 18px;
+}
+
+.participation-stats {
+    display: flex;
+    gap: 20px;
+    justify-content: space-around;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    flex: 1;
+}
+
+.stat-value {
+    color: #E74C3C;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.stat-label {
+    color: #888;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Territory Map Panel */
+.territory-map-panel {
+    position: fixed;
+    top: 50px;
+    left: 50px;
+    right: 50px;
+    bottom: 50px;
+    background: rgba(0, 0, 0, 0.95);
+    border: 2px solid #4A90E2;
+    border-radius: 15px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.map-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border-bottom: 1px solid #333;
+}
+
+.map-header h2 {
+    color: #FFD700;
+    margin: 0;
+    font-size: 22px;
+}
+
+.map-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.map-btn,
+.close-map {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #333;
+    border-radius: 5px;
+    color: #fff;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.map-btn:hover,
+.close-map:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #4A90E2;
+}
+
+.close-map {
+    font-size: 18px;
+    padding: 5px 10px;
+}
+
+.close-map:hover {
+    border-color: #E74C3C;
+    color: #E74C3C;
+}
+
+/* Map Legend */
+.map-legend {
+    display: flex;
+    gap: 20px;
+    padding: 15px 30px;
+    background: rgba(0, 0, 0, 0.7);
+    border-bottom: 1px solid #333;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ccc;
+    font-size: 14px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    border: 1px solid #333;
+}
+
+.legend-color.terran {
+    background: #4A90E2;
+}
+
+.legend-color.zythian {
+    background: #9B59B6;
+}
+
+.legend-color.nexus {
+    background: #E74C3C;
+}
+
+.legend-color.independent {
+    background: #27AE60;
+}
+
+.legend-color.pirate {
+    background: #F39C12;
+}
+
+.legend-color.contested {
+    background: #FF6B6B;
+    border-color: #FF0000;
+}
+
+/* Map Container */
+.map-container {
+    flex: 1;
+    position: relative;
+    background: #111;
+    overflow: hidden;
+}
+
+#territory-canvas {
+    width: 100%;
+    height: 100%;
+    cursor: move;
+}
+
+.sector-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid #FFD700;
+    border-radius: 8px;
+    padding: 10px;
+    color: #fff;
+    font-size: 12px;
+    z-index: 3000;
+    pointer-events: none;
+}
+
+.sector-tooltip h4 {
+    color: #FFD700;
+    margin: 0 0 5px 0;
+    font-size: 14px;
+}
+
+.sector-tooltip p {
+    margin: 3px 0;
+    color: #ccc;
+}
+
+/* Battle Queue Panel */
+.battle-queue-panel {
+    position: fixed;
+    top: 10%;
+    right: 20px;
+    width: 400px;
+    max-height: 80vh;
+    background: rgba(0, 0, 0, 0.95);
+    border: 2px solid #E74C3C;
+    border-radius: 15px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.queue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #8B0000, #B22222);
+    border-bottom: 1px solid #333;
+}
+
+.queue-header h2 {
+    color: #FFD700;
+    margin: 0;
+    font-size: 20px;
+}
+
+.refresh-battles,
+.close-queue {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.refresh-battles:hover,
+.close-queue:hover {
+    color: #FFD700;
+}
+
+/* Battle Filters */
+.battle-filters {
+    display: flex;
+    gap: 10px;
+    padding: 15px 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border-bottom: 1px solid #333;
+}
+
+.battle-filters select {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #333;
+    border-radius: 5px;
+    color: #fff;
+    padding: 8px 12px;
+    flex: 1;
+}
+
+/* Battles List */
+.battles-list {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.battle-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 15px;
+    transition: all 0.3s ease;
+}
+
+.battle-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #E74C3C;
+}
+
+.battle-item.recruiting {
+    border-color: #27AE60;
+}
+
+.battle-item.active {
+    border-color: #F39C12;
+    animation: pulse-orange 2s infinite;
+}
+
+@keyframes pulse-orange {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.4); }
+    50% { box-shadow: 0 0 20px 5px rgba(243, 156, 18, 0.2); }
+}
+
+.battle-item.completed {
+    opacity: 0.7;
+    border-color: #666;
+}
+
+.battle-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.battle-header h4 {
+    color: #FFD700;
+    margin: 0;
+    font-size: 16px;
+}
+
+.battle-status {
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.battle-status.recruiting {
+    background: #27AE60;
+    color: #fff;
+}
+
+.battle-status.active {
+    background: #F39C12;
+    color: #fff;
+}
+
+.battle-status.completed {
+    background: #666;
+    color: #fff;
+}
+
+.battle-info {
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.battle-type {
+    color: #4A90E2;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.battle-participants {
+    color: #ccc;
+}
+
+.faction-participants {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.faction-participants.terran_federation {
+    background: rgba(74, 144, 226, 0.3);
+}
+
+.faction-participants.zythian_empire {
+    background: rgba(155, 89, 182, 0.3);
+}
+
+.faction-participants.nexus_collective {
+    background: rgba(231, 76, 60, 0.3);
+}
+
+.faction-participants.independent_colonies {
+    background: rgba(39, 174, 96, 0.3);
+}
+
+.faction-participants.pirate_confederacy {
+    background: rgba(243, 156, 18, 0.3);
+}
+
+.battle-timing {
+    color: #FFD700;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+
+.battle-objectives {
+    margin-bottom: 10px;
+}
+
+.battle-objectives h5 {
+    color: #ccc;
+    margin: 0 0 5px 0;
+    font-size: 12px;
+}
+
+.battle-objectives ul {
+    margin: 0;
+    padding-left: 15px;
+    color: #888;
+    font-size: 11px;
+}
+
+.battle-rewards {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    font-size: 12px;
+}
+
+.battle-rewards .reward {
+    color: #FFD700;
+}
+
+.battle-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.join-battle-btn,
+.spectate-battle-btn {
+    background: linear-gradient(135deg, #27AE60, #229954);
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.join-battle-btn:hover {
+    background: linear-gradient(135deg, #229954, #1E8449);
+}
+
+.spectate-battle-btn {
+    background: linear-gradient(135deg, #4A90E2, #357ABD);
+}
+
+.spectate-battle-btn:hover {
+    background: linear-gradient(135deg, #357ABD, #2E6DA4);
+}
+
+.no-battles {
+    text-align: center;
+    color: #888;
+    padding: 40px 20px;
+}
+
+/* War History Panel */
+.war-history-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    border: 2px solid #9B59B6;
+    border-radius: 15px;
+    width: 80%;
+    max-width: 900px;
+    max-height: 80vh;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background: linear-gradient(135deg, #7B2C85, #9B59B6);
+    border-bottom: 1px solid #333;
+}
+
+.history-header h2 {
+    color: #FFD700;
+    margin: 0;
+    font-size: 22px;
+}
+
+.close-history {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
+.close-history:hover {
+    color: #E74C3C;
+}
+
+.history-timeline {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .territory-map-panel {
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+    }
+    
+    .battle-queue-panel {
+        position: relative;
+        width: 100%;
+        max-height: none;
+        margin: 20px 0;
+    }
+    
+    .participation-stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .war-header {
+        padding: 15px 20px;
+    }
+    
+    .war-header h1 {
+        font-size: 22px;
+    }
+    
+    .faction-display {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .faction-vs {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .war-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .war-actions {
+        flex-direction: column;
+    }
+    
+    .map-legend {
+        justify-content: center;
+    }
+    
+    .battle-filters {
+        flex-direction: column;
+    }
+    
+    .battle-rewards {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .battle-actions {
+        flex-direction: column;
+    }
+}
+
+/* Scrollbar Styling */
+.active-wars-section::-webkit-scrollbar,
+.battles-list::-webkit-scrollbar,
+.history-timeline::-webkit-scrollbar {
+    width: 8px;
+}
+
+.active-wars-section::-webkit-scrollbar-track,
+.battles-list::-webkit-scrollbar-track,
+.history-timeline::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.active-wars-section::-webkit-scrollbar-thumb,
+.battles-list::-webkit-scrollbar-thumb,
+.history-timeline::-webkit-scrollbar-thumb {
+    background: #E74C3C;
+    border-radius: 4px;
+}
+
+.active-wars-section::-webkit-scrollbar-thumb:hover,
+.battles-list::-webkit-scrollbar-thumb:hover,
+.history-timeline::-webkit-scrollbar-thumb:hover {
+    background: #C0392B;
+}
+
+/* Hidden state */
+.hidden {
+    display: none !important;
+}

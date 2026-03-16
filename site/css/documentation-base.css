@@ -1,0 +1,155 @@
+/* ==========================================================================
+   Space Wars 3000 - Documentation Base CSS
+   Foundation styling for documentation and help systems
+   ========================================================================== */
+
+/* CSS Reset and Base Variables */
+:root {
+  /* Existing design system color integration */
+  --doc-primary-color: #00ffff;
+  --doc-secondary-color: #1a237e;
+  --doc-accent-color: #ff6600;
+  --doc-highlight-color: #7c4dff;
+  --doc-warning-color: #ff4081;
+  
+  /* Documentation-specific background colors */
+  --doc-bg-primary: #0a0a0a;
+  --doc-bg-secondary: #1a1a1a;
+  --doc-bg-surface: #2a2a2a;
+  --doc-bg-card: #1e1e1e;
+  
+  /* Text colors for optimal readability */
+  --doc-text-primary: #ffffff;
+  --doc-text-secondary: #b0b0b0;
+  --doc-text-muted: #808080;
+  --doc-text-accent: #00ffff;
+  
+  /* Spacing system */
+  --doc-spacing-xs: 0.25rem;
+  --doc-spacing-sm: 0.5rem;
+  --doc-spacing-md: 1rem;
+  --doc-spacing-lg: 1.5rem;
+  --doc-spacing-xl: 2rem;
+  --doc-spacing-xxl: 3rem;
+  
+  /* Border radius for consistency */
+  --doc-radius-sm: 4px;
+  --doc-radius-md: 8px;
+  --doc-radius-lg: 12px;
+  
+  /* Responsive breakpoints */
+  --doc-bp-sm: 576px;
+  --doc-bp-md: 768px;
+  --doc-bp-lg: 992px;
+  --doc-bp-xl: 1200px;
+}
+
+/* Base reset for documentation elements */
+.doc-container *,
+.doc-container *::before,
+.doc-container *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Core layout grid system */
+.doc-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--doc-spacing-md);
+  background-color: var(--doc-bg-primary);
+  color: var(--doc-text-primary);
+  font-family: 'Inter', 'Roboto', sans-serif;
+  line-height: 1.6;
+}
+
+.doc-grid {
+  display: grid;
+  gap: var(--doc-spacing-lg);
+  grid-template-columns: 1fr;
+}
+
+.doc-grid-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.doc-grid-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.doc-grid-sidebar {
+  grid-template-columns: 250px 1fr;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 768px) {
+  .doc-grid-2,
+  .doc-grid-3,
+  .doc-grid-sidebar {
+    grid-template-columns: 1fr;
+  }
+  
+  .doc-container {
+    padding: var(--doc-spacing-sm);
+  }
+}
+
+/* Color scheme integration utilities */
+.doc-color-primary { color: var(--doc-primary-color); }
+.doc-color-secondary { color: var(--doc-secondary-color); }
+.doc-color-accent { color: var(--doc-accent-color); }
+.doc-color-highlight { color: var(--doc-highlight-color); }
+.doc-color-warning { color: var(--doc-warning-color); }
+
+.doc-bg-primary { background-color: var(--doc-bg-primary); }
+.doc-bg-secondary { background-color: var(--doc-bg-secondary); }
+.doc-bg-surface { background-color: var(--doc-bg-surface); }
+.doc-bg-card { background-color: var(--doc-bg-card); }
+
+/* Base responsive utilities */
+.doc-hide-mobile {
+  display: block;
+}
+
+.doc-show-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .doc-hide-mobile {
+    display: none;
+  }
+  
+  .doc-show-mobile {
+    display: block;
+  }
+}
+
+/* Accessibility and performance optimizations */
+.doc-container {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .doc-container {
+    scroll-behavior: auto;
+  }
+  
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --doc-text-primary: #ffffff;
+    --doc-text-secondary: #ffffff;
+    --doc-bg-primary: #000000;
+    --doc-bg-secondary: #000000;
+  }
+}

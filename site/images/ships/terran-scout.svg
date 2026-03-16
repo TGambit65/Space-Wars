@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="terranBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1565C0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1E88E5;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="terranMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E0E0E0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#BDBDBD;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#9E9E9E;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Eagle Scout - Small, sleek reconnaissance vessel -->
+  <!-- Main hull -->
+  <path d="M100 40 L120 90 L115 150 L100 170 L85 150 L80 90 Z" 
+        fill="url(#terranMetal)" stroke="#424242" stroke-width="2"/>
+  
+  <!-- Cockpit -->
+  <ellipse cx="100" cy="70" rx="15" ry="25" fill="url(#terranBlue)" opacity="0.8"/>
+  
+  <!-- Engine pods -->
+  <rect x="65" y="120" width="15" height="40" rx="5" fill="#424242"/>
+  <rect x="120" y="120" width="15" height="40" rx="5" fill="#424242"/>
+  
+  <!-- Engine glow -->
+  <circle cx="72.5" cy="160" r="7" fill="#FF6F00" opacity="0.8"/>
+  <circle cx="127.5" cy="160" r="7" fill="#FF6F00" opacity="0.8"/>
+  
+  <!-- Sensor array -->
+  <circle cx="100" cy="50" r="8" fill="url(#terranBlue)" stroke="#1565C0" stroke-width="1"/>
+  <line x1="100" y1="42" x2="100" y2="30" stroke="#1565C0" stroke-width="2"/>
+  
+  <!-- Wing details -->
+  <path d="M80 90 L60 100 L65 120 L80 110 Z" fill="#757575" opacity="0.7"/>
+  <path d="M120 90 L140 100 L135 120 L120 110 Z" fill="#757575" opacity="0.7"/>
+  
+  <!-- Federation emblem -->
+  <circle cx="100" cy="100" r="10" fill="white" opacity="0.9"/>
+  <text x="100" y="105" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#1565C0">TF</text>
+</svg>

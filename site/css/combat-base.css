@@ -1,0 +1,220 @@
+/* Combat Interface Base Styles for Space Wars 3000 */
+
+/* CSS Custom Properties */
+:root {
+  --combat-bg-primary: rgba(10, 10, 26, 0.9);
+  --combat-bg-secondary: rgba(20, 20, 40, 0.8);
+  --combat-border-primary: #2a2a4a;
+  --combat-border-secondary: #666;
+  --combat-accent: #4a9eff;
+  --combat-text-primary: #ffffff;
+  --combat-text-secondary: #cccccc;
+  --combat-success: #00ff00;
+  --combat-warning: #ffaa00;
+  --combat-danger: #ff4444;
+  --combat-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  --combat-transition: all 0.2s ease;
+  --combat-border-radius: 8px;
+  --combat-border-radius-small: 6px;
+}
+
+/* Main Layout */
+#combatUI {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 300px 1fr 300px;
+  grid-template-areas:
+    "left-panel center right-panel"
+    "left-panel center right-panel"
+    "actions actions actions";
+  height: 100vh;
+  background: #0a0a1a;
+  gap: 10px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* Panel Base Styles */
+.combat-panel {
+  background: var(--combat-bg-primary);
+  border: 1px solid var(--combat-border-primary);
+  border-radius: var(--combat-border-radius);
+  padding: 15px;
+  box-shadow: var(--combat-shadow);
+  overflow-y: auto;
+}
+
+/* Left Panel */
+.left-panel {
+  grid-area: left-panel;
+}
+
+/* Center Panel */
+.center-panel {
+  grid-area: center;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Right Panel */
+.right-panel {
+  grid-area: right-panel;
+}
+
+/* Actions Panel */
+.actions-panel {
+  grid-area: actions;
+  height: auto;
+  max-height: 120px;
+}
+
+/* Typography */
+.combat-title {
+  color: var(--combat-accent);
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.combat-subtitle {
+  color: var(--combat-accent);
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.combat-text {
+  color: var(--combat-text-primary);
+  margin: 5px 0;
+}
+
+.combat-text-secondary {
+  color: var(--combat-text-secondary);
+  font-size: 12px;
+}
+
+/* Button Base Styles */
+.combat-btn {
+  background: var(--combat-bg-secondary);
+  border: 2px solid var(--combat-border-secondary);
+  border-radius: var(--combat-border-radius-small);
+  color: var(--combat-text-primary);
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  transition: var(--combat-transition);
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.combat-btn:hover {
+  background: rgba(40, 40, 80, 0.9);
+  transform: translateY(-1px);
+}
+
+.combat-btn:active {
+  transform: translateY(0);
+}
+
+.combat-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.combat-btn.primary {
+  background: var(--combat-accent);
+  border-color: var(--combat-accent);
+  color: #ffffff;
+}
+
+.combat-btn.success {
+  background: var(--combat-success);
+  border-color: var(--combat-success);
+  color: #000000;
+}
+
+.combat-btn.warning {
+  background: var(--combat-warning);
+  border-color: var(--combat-warning);
+  color: #000000;
+}
+
+.combat-btn.danger {
+  background: var(--combat-danger);
+  border-color: var(--combat-danger);
+  color: #ffffff;
+}
+
+/* Progress Bar Base */
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--combat-border-secondary);
+  border-radius: var(--combat-border-radius-small);
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Sound Controls */
+.sound-controls {
+  background: var(--combat-bg-primary);
+  border: 1px solid var(--combat-border-primary);
+  border-radius: var(--combat-border-radius);
+  padding: 10px;
+  margin-bottom: 10px;
+  box-shadow: var(--combat-shadow);
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 5px 0;
+}
+
+.volume-control label {
+  color: var(--combat-text-primary);
+  font-size: 12px;
+  min-width: 60px;
+}
+
+.volume-control input[type="range"] {
+  flex: 1;
+  height: 4px;
+  background: var(--combat-border-secondary);
+  outline: none;
+  border-radius: 2px;
+}
+
+.volume-control input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--combat-accent);
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.mute-btn {
+  padding: 4px 8px;
+  font-size: 10px;
+  min-width: 40px;
+}

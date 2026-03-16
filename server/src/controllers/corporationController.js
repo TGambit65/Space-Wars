@@ -87,7 +87,9 @@ const contribute = async (req, res, next) => {
     if (!amount || typeof amount !== 'number' || !Number.isFinite(amount) || !Number.isInteger(amount) || amount <= 0) {
       return res.status(400).json({ success: false, message: 'amount must be a positive integer' });
     }
-    const result = await corporationService.contributeToTreasury(req.user.user_id, amount);
+    const result = await corporationService.contributeToTreasury(req.user.user_id, amount, {
+      idempotencyKey: req.headers['idempotency-key'] || null
+    });
     res.json({ success: true, data: result });
   } catch (error) {
     next(error);
@@ -100,7 +102,9 @@ const withdraw = async (req, res, next) => {
     if (!amount || typeof amount !== 'number' || !Number.isFinite(amount) || !Number.isInteger(amount) || amount <= 0) {
       return res.status(400).json({ success: false, message: 'amount must be a positive integer' });
     }
-    const result = await corporationService.withdrawFromTreasury(req.user.user_id, amount);
+    const result = await corporationService.withdrawFromTreasury(req.user.user_id, amount, {
+      idempotencyKey: req.headers['idempotency-key'] || null
+    });
     res.json({ success: true, data: result });
   } catch (error) {
     next(error);

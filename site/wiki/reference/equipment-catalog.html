@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment & Components Catalog - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+    <script src="../../js/wiki-smart-navigation.js"></script>
+    <script src="../../js/wiki-interactive-features.js"></script>
+    
+    <style>
+        /* Component catalog specific styles */
+        .component-filter {
+            display: flex;
+            gap: var(--doc-spacing-md);
+            margin-bottom: var(--doc-spacing-lg);
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: var(--doc-spacing-sm) var(--doc-spacing-md);
+            background: var(--color-surface);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: var(--font-family-mono);
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--color-primary);
+            color: var(--color-background);
+            box-shadow: 0 0 10px var(--color-primary);
+        }
+        
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: var(--doc-spacing-md);
+        }
+        
+        .stats-table th, .stats-table td {
+            padding: var(--doc-spacing-sm);
+            border: 1px solid var(--color-primary-dim);
+            text-align: left;
+        }
+        
+        .stats-table th {
+            background: var(--color-surface);
+            color: var(--color-primary);
+            font-weight: bold;
+        }
+        
+        .tier-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        
+        .tier-1 { background: #4CAF50; color: white; }
+        .tier-2 { background: #2196F3; color: white; }
+        .tier-3 { background: #9C27B0; color: white; }
+        .tier-4 { background: #FF9800; color: white; }
+        .tier-5 { background: #F44336; color: white; }
+        
+        .component-search {
+            width: 100%;
+            padding: var(--doc-spacing-md);
+            background: var(--color-surface);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text);
+            font-family: var(--font-family-mono);
+            margin-bottom: var(--doc-spacing-lg);
+        }
+    </style>
+</head>
+<body class="doc-container reference-page">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="../index.html" class="doc-nav-link">← Wiki Home</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="equipment-catalog.html" class="doc-nav-link active">Equipment Catalog</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="advanced-technologies.html" class="doc-nav-link">Advanced Technologies</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Equipment & Components Catalog</div>
+        </nav>
+        
+        <h1 class="doc-h1 holo-text">🛠️ Equipment & Components Catalog</h1>
+        
+        <div class="doc-alert info">
+            <strong>🔧 Complete Component Database:</strong> Everything you need to know about ship parts, 
+            from basic engines to legendary weapons! It's like a cosmic hardware store catalog! 🛍️
+        </div>
+
+        <p class="doc-lead">
+            Welcome to the ultimate equipment guide! Think of this as your personal shopping list for building 
+            the most awesome spaceship in the galaxy. Whether you want engines that go zoom, weapons that go 
+            boom, or shields that go... um... shield, we've got all the stats, tips, and secrets you need! 
+            Every component has been tested by real space captains (some of them even survived)! 🚀⚡
+        </p>
+
+        <!-- Search and Filter -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🔍 Find Your Perfect Components</h2>
+            
+            <input type="text" class="component-search" id="component-search" placeholder="Search for components... (e.g., 'plasma', 'engine', 'shield')">
+            
+            <div class="component-filter">
+                <button class="filter-btn active" data-filter="all">All Components</button>
+                <button class="filter-btn" data-filter="weapons">⚔️ Weapons</button>
+                <button class="filter-btn" data-filter="engines">🚀 Engines</button>
+                <button class="filter-btn" data-filter="shields">🛡️ Shields</button>
+                <button class="filter-btn" data-filter="armor">🧱 Armor</button>
+                <button class="filter-btn" data-filter="sensors">📡 Sensors</button>
+                <button class="filter-btn" data-filter="special">✨ Special</button>
+            </div>
+        </section>
+
+        <!-- Weapons Section -->
+        <section class="holo-panel component-section" data-category="weapons">
+            <h2 class="doc-h2">⚔️ Weapons Systems</h2>
+            
+            <div class="doc-alert warning">
+                <strong>🎯 Pro Tip:</strong> Different weapons work better against different targets! 
+                Energy weapons melt shields, kinetic weapons punch through armor, and missiles... well, they explode things!
+            </div>
+
+            <h3 class="doc-h3">⚡ Energy Weapons</h3>
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Weapon Name</th>
+                        <th>Tier</th>
+                        <th>Damage</th>
+                        <th>Range</th>
+                        <th>Fire Rate</th>
+                        <th>Energy Cost</th>
+                        <th>Special</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Basic Laser</strong></td>
+                        <td><span class="tier-badge tier-1">Tier 1</span></td>
+                        <td>10-15</td>
+                        <td>Short</td>
+                        <td>Fast</td>
+                        <td>Low</td>
+                        <td>Beginner friendly!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pulse Phaser</strong></td>
+                        <td><span class="tier-badge tier-2">Tier 2</span></td>
+                        <td>20-30</td>
+                        <td>Medium</td>
+                        <td>Medium</td>
+                        <td>Medium</td>
+                        <td>Shield piercing +10%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Plasma Cannon</strong></td>
+                        <td><span class="tier-badge tier-3">Tier 3</span></td>
+                        <td>35-50</td>
+                        <td>Medium</td>
+                        <td>Slow</td>
+                        <td>High</td>
+                        <td>Burn damage over time</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ion Disruptor</strong></td>
+                        <td><span class="tier-badge tier-4">Tier 4</span></td>
+                        <td>45-65</td>
+                        <td>Long</td>
+                        <td>Medium</td>
+                        <td>Very High</td>
+                        <td>Disables systems temporarily</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Quantum Beam</strong></td>
+                        <td><span class="tier-badge tier-5">Tier 5</span></td>
+                        <td>80-120</td>
+                        <td>Very Long</td>
+                        <td>Slow</td>
+                        <td>Extreme</td>
+                        <td>Ignores 50% of all defenses!</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="doc-h3">💥 Kinetic Weapons</h3>
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Weapon Name</th>
+                        <th>Tier</th>
+                        <th>Damage</th>
+                        <th>Range</th>
+                        <th>Fire Rate</th>
+                        <th>Ammo Type</th>
+                        <th>Special</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Machine Gun</strong></td>
+                        <td><span class="tier-badge tier-1">Tier 1</span></td>
+                        <td>5-8</td>
+                        <td>Short</td>
+                        <td>Very Fast</td>
+                        <td>Standard</td>
+                        <td>Spray and pray!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rail Gun</strong></td>
+                        <td><span class="tier-badge tier-3">Tier 3</span></td>
+                        <td>40-60</td>
+                        <td>Long</td>
+                        <td>Slow</td>
+                        <td>Tungsten</td>
+                        <td>Armor penetration +25%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Gauss Cannon</strong></td>
+                        <td><span class="tier-badge tier-5">Tier 5</span></td>
+                        <td>100-150</td>
+                        <td>Very Long</td>
+                        <td>Very Slow</td>
+                        <td>Depleted Uranium</td>
+                        <td>One-shot smaller ships!</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="doc-h3">🚀 Missile Systems</h3>
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Weapon Name</th>
+                        <th>Tier</th>
+                        <th>Damage</th>
+                        <th>Range</th>
+                        <th>Speed</th>
+                        <th>Tracking</th>
+                        <th>Special</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Dumbfire Rocket</strong></td>
+                        <td><span class="tier-badge tier-1">Tier 1</span></td>
+                        <td>25-35</td>
+                        <td>Medium</td>
+                        <td>Fast</td>
+                        <td>None</td>
+                        <td>Cheap and cheerful!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Homing Missile</strong></td>
+                        <td><span class="tier-badge tier-2">Tier 2</span></td>
+                        <td>35-50</td>
+                        <td>Long</td>
+                        <td>Medium</td>
+                        <td>Good</td>
+                        <td>Follows targets!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Swarm Missiles</strong></td>
+                        <td><span class="tier-badge tier-3">Tier 3</span></td>
+                        <td>15-20 x6</td>
+                        <td>Medium</td>
+                        <td>Fast</td>
+                        <td>Excellent</td>
+                        <td>Launches 6 mini-missiles!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Torpedo</strong></td>
+                        <td><span class="tier-badge tier-4">Tier 4</span></td>
+                        <td>80-120</td>
+                        <td>Long</td>
+                        <td>Slow</td>
+                        <td>Good</td>
+                        <td>Massive explosion radius</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Antimatter Warhead</strong></td>
+                        <td><span class="tier-badge tier-5">Tier 5</span></td>
+                        <td>200-300</td>
+                        <td>Very Long</td>
+                        <td>Slow</td>
+                        <td>Perfect</td>
+                        <td>WARNING: Handle with care!</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Engines Section -->
+        <section class="holo-panel component-section" data-category="engines">
+            <h2 class="doc-h2">🚀 Engine Systems</h2>
+            
+            <div class="doc-alert info">
+                <strong>🏎️ Speed Fact:</strong> The fastest engine in the game can make you go from 0 to light speed 
+                in 3.7 seconds! Just remember: speed is useless if you crash into an asteroid!
+            </div>
+
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Engine Name</th>
+                        <th>Tier</th>
+                        <th>Speed Bonus</th>
+                        <th>Maneuverability</th>
+                        <th>Fuel Efficiency</th>
+                        <th>Jump Range</th>
+                        <th>Special</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Basic Thruster</strong></td>
+                        <td><span class="tier-badge tier-1">Tier 1</span></td>
+                        <td>+10%</td>
+                        <td>Low</td>
+                        <td>Standard</td>
+                        <td>1 Sector</td>
+                        <td>Reliable starter engine</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ion Drive</strong></td>
+                        <td><span class="tier-badge tier-2">Tier 2</span></td>
+                        <td>+20%</td>
+                        <td>Medium</td>
+                        <td>Good</td>
+                        <td>2 Sectors</td>
+                        <td>Silent running mode</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Plasma Engine</strong></td>
+                        <td><span class="tier-badge tier-3">Tier 3</span></td>
+                        <td>+35%</td>
+                        <td>High</td>
+                        <td>Standard</td>
+                        <td>2 Sectors</td>
+                        <td>Afterburner boost!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fusion Drive</strong></td>
+                        <td><span class="tier-badge tier-4">Tier 4</span></td>
+                        <td>+50%</td>
+                        <td>High</td>
+                        <td>Excellent</td>
+                        <td>3 Sectors</td>
+                        <td>Eco-friendly power!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Quantum Engine</strong></td>
+                        <td><span class="tier-badge tier-5">Tier 5</span></td>
+                        <td>+75%</td>
+                        <td>Very High</td>
+                        <td>Good</td>
+                        <td>4 Sectors</td>
+                        <td>Phase through obstacles!</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Shields Section -->
+        <section class="holo-panel component-section" data-category="shields">
+            <h2 class="doc-h2">🛡️ Shield Generators</h2>
+            
+            <div class="doc-alert accent">
+                <strong>🌟 Shield Wisdom:</strong> "The best offense is not getting blown up!" - Captain Sarah Thompson, 
+                who survived 47 pirate attacks thanks to good shields!
+            </div>
+
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Shield Name</th>
+                        <th>Tier</th>
+                        <th>Shield HP</th>
+                        <th>Recharge Rate</th>
+                        <th>Energy Drain</th>
+                        <th>Coverage</th>
+                        <th>Special</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Basic Deflector</strong></td>
+                        <td><span class="tier-badge tier-1">Tier 1</span></td>
+                        <td>100</td>
+                        <td>5/sec</td>
+                        <td>Low</td>
+                        <td>Front only</td>
+                        <td>Better than nothing!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Energy Shield</strong></td>
+                        <td><span class="tier-badge tier-2">Tier 2</span></td>
+                        <td>200</td>
+                        <td>8/sec</td>
+                        <td>Medium</td>
+                        <td>180°</td>
+                        <td>Standard protection</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bubble Shield</strong></td>
+                        <td><span class="tier-badge tier-3">Tier 3</span></td>
+                        <td>350</td>
+                        <td>12/sec</td>
+                        <td>High</td>
+                        <td>360°</td>
+                        <td>Full coverage!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Adaptive Shield</strong></td>
+                        <td><span class="tier-badge tier-4">Tier 4</span></td>
+                        <td>500</td>
+                        <td>15/sec</td>
+                        <td>High</td>
+                        <td>360°</td>
+                        <td>Learns from damage!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Quantum Barrier</strong></td>
+                        <td><span class="tier-badge tier-5">Tier 5</span></td>
+                        <td>800</td>
+                        <td>25/sec</td>
+                        <td>Very High</td>
+                        <td>360°</td>
+                        <td>50% chance to phase attacks!</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Special Equipment -->
+        <section class="holo-panel component-section" data-category="special">
+            <h2 class="doc-h2">✨ Special Equipment</h2>
+            
+            <div class="doc-alert warning">
+                <strong>🎪 Fun Equipment:</strong> These aren't just upgrades - they're game-changers! 
+                Some of these gadgets are so cool, they're practically cheating (but totally legal)!
+            </div>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🌟 Cloaking Device</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Effect:</strong> Become invisible for 30 seconds</li>
+                            <li><strong>Cooldown:</strong> 5 minutes</li>
+                            <li><strong>Energy Cost:</strong> 50% of max</li>
+                            <li><strong>Best For:</strong> Sneaky escapes and ambushes</li>
+                            <li><strong>Fun Fact:</strong> Pirates hate this one weird trick!</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">⚡ Emergency Teleporter</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Effect:</strong> Instantly jump 1 sector away</li>
+                            <li><strong>Uses:</strong> Single use per mission</li>
+                            <li><strong>Activation:</strong> When hull < 20%</li>
+                            <li><strong>Best For:</strong> Not dying!</li>
+                            <li><strong>Warning:</strong> Random destination!</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🔧 Repair Drones</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Effect:</strong> Auto-repair 5 HP/second</li>
+                            <li><strong>Duration:</strong> Continuous</li>
+                            <li><strong>Capacity:</strong> 3 drones max</li>
+                            <li><strong>Best For:</strong> Long missions</li>
+                            <li><strong>Bonus:</strong> They're cute little robots!</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">📡 Advanced Scanner</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Effect:</strong> Reveals hidden objects</li>
+                            <li><strong>Range:</strong> Entire sector</li>
+                            <li><strong>Bonus:</strong> +50% loot discovery</li>
+                            <li><strong>Best For:</strong> Treasure hunters</li>
+                            <li><strong>Secret:</strong> Can find secret jump points!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upgrade Paths -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">📈 Upgrade Paths & Synergies</h2>
+            
+            <div class="doc-alert info">
+                <strong>🧩 Combo Master:</strong> Some components work better together! It's like making the 
+                ultimate sandwich - the right combination of ingredients makes all the difference!
+            </div>
+
+            <h3 class="doc-h3">🎯 Best Beginner Combinations</h3>
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Starter Build Calculator</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">TRADER_BUILD</span>
+                        <span class="terminal-output">Ion Drive + Basic Deflector + Cargo Scanner = 💰</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">FIGHTER_BUILD</span>
+                        <span class="terminal-output">Pulse Phaser + Plasma Engine + Energy Shield = ⚔️</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">EXPLORER_BUILD</span>
+                        <span class="terminal-output">Ion Drive + Advanced Scanner + Repair Drones = 🔍</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">BALANCED_BUILD</span>
+                        <span class="terminal-output">Rail Gun + Ion Drive + Bubble Shield = 🛡️</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">💎 Legendary Synergies</h3>
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">The Glass Cannon</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p><strong>Components:</strong> Quantum Beam + Quantum Engine + NO shields</p>
+                        <p><strong>Strategy:</strong> Hit hard, hit fast, don't get hit!</p>
+                        <p><strong>Risk:</strong> One mistake = space dust</p>
+                        <p><strong>Reward:</strong> Enemies explode before they can blink!</p>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">The Immortal Turtle</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p><strong>Components:</strong> Quantum Barrier + Adaptive Shield + Repair Drones</p>
+                        <p><strong>Strategy:</strong> Outlast everyone!</p>
+                        <p><strong>Risk:</strong> Battles take forever</p>
+                        <p><strong>Reward:</strong> Practically indestructible!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cost-Benefit Analysis -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">💰 Cost-Benefit Analysis</h2>
+            
+            <div class="doc-alert accent">
+                <strong>🏪 Shopping Advice:</strong> "Buy nice or buy twice!" - Every space mechanic ever. 
+                Sometimes saving up for better equipment is smarter than buying cheap stuff!
+            </div>
+
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Equipment Investment Calculator</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">BEST_VALUE_WEAPON</span>
+                        <span class="terminal-output">Pulse Phaser - Only 2,000 credits for reliable damage!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">BEST_VALUE_ENGINE</span>
+                        <span class="terminal-output">Ion Drive - Great fuel efficiency pays for itself!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">BEST_VALUE_SHIELD</span>
+                        <span class="terminal-output">Bubble Shield - 360° protection worth every credit!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">BIGGEST_WASTE</span>
+                        <span class="terminal-output">Tier 1 anything after level 10 - Just don't!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">HIDDEN_GEM</span>
+                        <span class="terminal-output">Repair Drones - Saves fortune on repair bills! 🔧</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cross-References -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🔗 Related Guides</h2>
+            
+            <div class="doc-grid doc-grid-3">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🚀 Ship Building</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Learn how to combine these components into amazing ships!</p>
+                        <a href="../ship-design/index.html" class="doc-button secondary">Ship Design Guide</a>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">⚔️ Combat Tactics</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Use your equipment effectively in battle!</p>
+                        <a href="../combat/index.html" class="doc-button secondary">Combat Guide</a>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">💰 Trading Routes</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Where to buy equipment for the best prices!</p>
+                        <a href="../trading/index.html" class="doc-button secondary">Trading Guide</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="../index.html" class="doc-nav-link">← Wiki Home</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="advanced-technologies.html" class="doc-nav-link">Advanced Technologies →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            
+            // Component Filter System
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const componentSections = document.querySelectorAll('.component-section');
+            const searchInput = document.getElementById('component-search');
+            
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const filter = this.getAttribute('data-filter');
+                    
+                    componentSections.forEach(section => {
+                        if (filter === 'all' || section.getAttribute('data-category') === filter) {
+                            section.style.display = 'block';
+                        } else {
+                            section.style.display = 'none';
+                        }
+                    });
+                });
+            });
+            
+            // Search functionality
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const allRows = document.querySelectorAll('.stats-table tbody tr');
+                    const allCards = document.querySelectorAll('.component-section .doc-card');
+                    
+                    allRows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                    
+                    allCards.forEach(card => {
+                        const text = card.textContent.toLowerCase();
+                        card.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                    
+                    // Show all sections when searching
+                    if (searchTerm.length > 0) {
+                        componentSections.forEach(section => {
+                            section.style.display = 'block';
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

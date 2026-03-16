@@ -24,7 +24,9 @@ const buyCommodity = async (req, res, next) => {
     const { ship_id, port_id, commodity_id, quantity } = req.body;
 
     const result = await tradeService.buyCommodity(
-      userId, ship_id, port_id, commodity_id, quantity
+      userId, ship_id, port_id, commodity_id, quantity, {
+        idempotencyKey: req.headers['idempotency-key'] || null
+      }
     );
 
     res.json({
@@ -45,7 +47,9 @@ const sellCommodity = async (req, res, next) => {
     const { ship_id, port_id, commodity_id, quantity } = req.body;
 
     const result = await tradeService.sellCommodity(
-      userId, ship_id, port_id, commodity_id, quantity
+      userId, ship_id, port_id, commodity_id, quantity, {
+        idempotencyKey: req.headers['idempotency-key'] || null
+      }
     );
 
     res.json({
@@ -272,4 +276,3 @@ module.exports = {
   getMarketData,
   getMarketSummary
 };
-

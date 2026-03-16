@@ -37,6 +37,35 @@ const ColonyBuilding = sequelize.define('ColonyBuilding', {
   last_production: {
     type: DataTypes.DATE,
     allowNull: true
+  },
+  grid_x: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: null,
+    comment: 'X position on colony surface grid (null = unplaced)'
+  },
+  grid_y: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: null,
+    comment: 'Y position on colony surface grid (null = unplaced)'
+  },
+  cached_multiplier: {
+    type: DataTypes.FLOAT,
+    defaultValue: 1.0,
+    comment: 'Pre-calculated adjacency bonus multiplier for production'
+  },
+  placed_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
+    comment: 'Timestamp of placement for undo window validation'
+  },
+  last_relocated: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
+    comment: 'Last relocation timestamp for cooldown enforcement'
   }
 }, {
   tableName: 'colony_buildings',

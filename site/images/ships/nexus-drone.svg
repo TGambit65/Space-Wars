@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="nexusOrange1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF5722;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E64A19;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="nexusMetal1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ECEFF1;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#CFD8DC;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#90A4AE;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="aiCore1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FF8A65;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#FF5722;stop-opacity:0.2" />
+    </radialGradient>
+    <radialGradient id="quantumField" cx="50%" cy="50%" r="40%">
+      <stop offset="0%" style="stop-color:#FFC107;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF5722;stop-opacity:0.3" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Sentinel Drone - Fully autonomous AI reconnaissance unit -->
+  <!-- AI processing field -->
+  <ellipse cx="100" cy="100" rx="85" ry="80" fill="url(#aiCore1)"/>
+  
+  <!-- Main hull - sleek technological design -->
+  <path d="M100 30 Q120 45 125 70 Q130 100 125 130 Q120 155 100 170 Q80 155 75 130 Q70 100 75 70 Q80 45 100 30 Z" 
+        fill="url(#nexusMetal1)" stroke="#37474F" stroke-width="2"/>
+  
+  <!-- AI processing core -->
+  <circle cx="100" cy="100" r="20" fill="url(#quantumField)"/>
+  <circle cx="100" cy="100" r="15" fill="#FF5722" opacity="0.8"/>
+  <circle cx="100" cy="100" r="10" fill="#FFC107"/>
+  
+  <!-- Sensor arrays -->
+  <circle cx="85" cy="80" r="6" fill="#37474F"/>
+  <circle cx="115" cy="80" r="6" fill="#37474F"/>
+  <circle cx="85" cy="120" r="6" fill="#37474F"/>
+  <circle cx="115" cy="120" r="6" fill="#37474F"/>
+  
+  <!-- Sensor details -->
+  <circle cx="85" cy="80" r="3" fill="#FF5722"/>
+  <circle cx="115" cy="80" r="3" fill="#FF5722"/>
+  <circle cx="85" cy="120" r="3" fill="#FF5722"/>
+  <circle cx="115" cy="120" r="3" fill="#FF5722"/>
+  
+  <!-- Advanced engine systems -->
+  <ellipse cx="85" cy="155" rx="8" ry="12" fill="#37474F"/>
+  <ellipse cx="115" cy="155" rx="8" ry="12" fill="#37474F"/>
+  
+  <!-- Engine glow -->
+  <ellipse cx="85" cy="165" rx="6" ry="10" fill="#FF6F00" opacity="0.9"/>
+  <ellipse cx="115" cy="165" rx="6" ry="10" fill="#FF6F00" opacity="0.9"/>
+  
+  <!-- Adaptive cloaking emitters -->
+  <rect x="70" y="60" width="4" height="8" rx="2" fill="#FF5722" opacity="0.7"/>
+  <rect x="126" y="60" width="4" height="8" rx="2" fill="#FF5722" opacity="0.7"/>
+  <rect x="70" y="132" width="4" height="8" rx="2" fill="#FF5722" opacity="0.7"/>
+  <rect x="126" y="132" width="4" height="8" rx="2" fill="#FF5722" opacity="0.7"/>
+  
+  <!-- Network synchronization arrays -->
+  <path d="M100 35 Q90 25 85 20" stroke="#FFC107" stroke-width="2" fill="none"/>
+  <circle cx="85" cy="20" r="2" fill="#FFC107"/>
+  
+  <path d="M100 35 Q100 25 100 15" stroke="#FFC107" stroke-width="3" fill="none"/>
+  <circle cx="100" cy="15" r="3" fill="#FFC107"/>
+  
+  <path d="M100 35 Q110 25 115 20" stroke="#FFC107" stroke-width="2" fill="none"/>
+  <circle cx="115" cy="20" r="2" fill="#FFC107"/>
+  
+  <!-- AI-guided weapon ports -->
+  <circle cx="75" cy="100" r="4" fill="#37474F"/>
+  <circle cx="125" cy="100" r="4" fill="#37474F"/>
+  <circle cx="75" cy="100" r="2" fill="#FF5722"/>
+  <circle cx="125" cy="100" r="2" fill="#FF5722"/>
+  
+  <!-- Quantum processing nodes -->
+  <circle cx="95" cy="85" r="2" fill="#FFC107" opacity="0.8"/>
+  <circle cx="105" cy="85" r="2" fill="#FFC107" opacity="0.8"/>
+  <circle cx="95" cy="115" r="2" fill="#FFC107" opacity="0.8"/>
+  <circle cx="105" cy="115" r="2" fill="#FFC107" opacity="0.8"/>
+  
+  <!-- Data link connections -->
+  <path d="M95 85 Q100 90 105 85" stroke="#FFC107" stroke-width="1" fill="none" opacity="0.6"/>
+  <path d="M95 115 Q100 110 105 115" stroke="#FFC107" stroke-width="1" fill="none" opacity="0.6"/>
+  <path d="M95 85 Q90 100 95 115" stroke="#FFC107" stroke-width="1" fill="none" opacity="0.6"/>
+  <path d="M105 85 Q110 100 105 115" stroke="#FFC107" stroke-width="1" fill="none" opacity="0.6"/>
+  
+  <!-- Armor plating -->
+  <rect x="88" y="50" width="24" height="6" rx="3" fill="#90A4AE" opacity="0.8"/>
+  <rect x="88" y="144" width="24" height="6" rx="3" fill="#90A4AE" opacity="0.8"/>
+  
+  <!-- Shield generators -->
+  <circle cx="65" cy="85" r="3" fill="#42A5F5" opacity="0.7"/>
+  <circle cx="135" cy="85" r="3" fill="#42A5F5" opacity="0.7"/>
+  <circle cx="65" cy="115" r="3" fill="#42A5F5" opacity="0.7"/>
+  <circle cx="135" cy="115" r="3" fill="#42A5F5" opacity="0.7"/>
+  
+  <!-- Nexus collective symbol -->
+  <circle cx="100" cy="100" r="5" fill="white" opacity="0.95"/>
+  <text x="100" y="104" text-anchor="middle" font-family="Arial" font-size="8" font-weight="bold" fill="#FF5722">N</text>
+  
+  <!-- Tactical analysis indicators -->
+  <circle cx="100" cy="70" r="1" fill="#FFC107" opacity="0.8"/>
+  <circle cx="100" cy="130" r="1" fill="#FFC107" opacity="0.8"/>
+  <circle cx="75" cy="100" r="1" fill="#FFC107" opacity="0.8"/>
+  <circle cx="125" cy="100" r="1" fill="#FFC107" opacity="0.8"/>
+</svg>

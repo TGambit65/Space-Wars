@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="zythianPurple3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A148C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8E24AA;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="ancientShell" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E1BEE7;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#CE93D8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#9C27B0;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="cosmicPower" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#AB47BC;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4A148C;stop-opacity:0.3" />
+    </radialGradient>
+    <radialGradient id="psionicCore" cx="50%" cy="50%" r="30%">
+      <stop offset="0%" style="stop-color:#E1BEE7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8E24AA;stop-opacity:0.5" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Elder Leviathan - Ancient bio-titan with cosmic power -->
+  <!-- Cosmic power field -->
+  <ellipse cx="100" cy="100" rx="98" ry="95" fill="url(#cosmicPower)"/>
+  
+  <!-- Ancient hull structure - massive organic titan -->
+  <path d="M100 5 L150 25 L165 60 L170 100 L165 140 L150 175 L100 195 L50 175 L35 140 L30 100 L35 60 L50 25 Z" 
+        fill="url(#ancientShell)" stroke="#4A148C" stroke-width="4"/>
+  
+  <!-- Ancient armor segments (millennia of evolution) -->
+  <ellipse cx="80" cy="40" rx="20" ry="12" fill="#7B1FA2" opacity="0.8"/>
+  <ellipse cx="120" cy="40" rx="20" ry="12" fill="#7B1FA2" opacity="0.8"/>
+  <ellipse cx="70" cy="70" rx="25" ry="15" fill="#7B1FA2" opacity="0.8"/>
+  <ellipse cx="130" cy="70" rx="25" ry="15" fill="#7B1FA2" opacity="0.8"/>
+  <ellipse cx="60" cy="100" rx="20" ry="25" fill="#7B1FA2" opacity="0.8"/>
+  <ellipse cx="140" cy="100" rx="20" ry="25" fill="#7B1FA2" opacity="0.8"/>
+  <ellipse cx="70" cy="130" rx="25" ry="15" fill="#7B1FA2" opacity="0.8"/>
+  <ellipse cx="130" cy="130" rx="25" ry="15" fill="#7B1FA2" opacity="0.8"/>
+  <ellipse cx="80" cy="160" rx="20" ry="12" fill="#7B1FA2" opacity="0.8"/>
+  <ellipse cx="120" cy="160" rx="20" ry="12" fill="#7B1FA2" opacity="0.8"/>
+  
+  <!-- Central psionic core -->
+  <circle cx="100" cy="100" r="35" fill="url(#psionicCore)"/>
+  <circle cx="100" cy="100" r="25" fill="#9C27B0" opacity="0.8"/>
+  <circle cx="100" cy="100" r="15" fill="#4A148C"/>
+  
+  <!-- Millennial memory banks -->
+  <circle cx="85" cy="85" r="8" fill="#E1BEE7" opacity="0.9"/>
+  <circle cx="115" cy="85" r="8" fill="#E1BEE7" opacity="0.9"/>
+  <circle cx="85" cy="115" r="8" fill="#E1BEE7" opacity="0.9"/>
+  <circle cx="115" cy="115" r="8" fill="#E1BEE7" opacity="0.9"/>
+  
+  <!-- Ancient weapon batteries (8 total) -->
+  <circle cx="45" cy="50" r="10" fill="#4A148C"/>
+  <circle cx="155" cy="50" r="10" fill="#4A148C"/>
+  <circle cx="30" cy="80" r="12" fill="#4A148C"/>
+  <circle cx="170" cy="80" r="12" fill="#4A148C"/>
+  <circle cx="30" cy="120" r="12" fill="#4A148C"/>
+  <circle cx="170" cy="120" r="12" fill="#4A148C"/>
+  <circle cx="45" cy="150" r="10" fill="#4A148C"/>
+  <circle cx="155" cy="150" r="10" fill="#4A148C"/>
+  
+  <!-- Weapon discharge ports -->
+  <circle cx="45" cy="50" r="6" fill="#8E24AA"/>
+  <circle cx="155" cy="50" r="6" fill="#8E24AA"/>
+  <circle cx="30" cy="80" r="8" fill="#8E24AA"/>
+  <circle cx="170" cy="80" r="8" fill="#8E24AA"/>
+  <circle cx="30" cy="120" r="8" fill="#8E24AA"/>
+  <circle cx="170" cy="120" r="8" fill="#8E24AA"/>
+  <circle cx="45" cy="150" r="6" fill="#8E24AA"/>
+  <circle cx="155" cy="150" r="6" fill="#8E24AA"/>
+  
+  <!-- Bio-propulsion arrays (massive organic engines) -->
+  <ellipse cx="65" cy="175" rx="15" ry="25" fill="#7B1FA2"/>
+  <ellipse cx="100" cy="180" rx="18" ry="30" fill="#7B1FA2"/>
+  <ellipse cx="135" cy="175" rx="15" ry="25" fill="#7B1FA2"/>
+  
+  <!-- Ancient thrust emanations -->
+  <ellipse cx="65" cy="190" rx="12" ry="20" fill="#AB47BC" opacity="0.8"/>
+  <ellipse cx="100" cy="195" rx="15" ry="25" fill="#AB47BC" opacity="0.8"/>
+  <ellipse cx="135" cy="190" rx="12" ry="20" fill="#AB47BC" opacity="0.8"/>
+  
+  <!-- Cosmic awareness sensors -->
+  <ellipse cx="75" cy="20" rx="8" ry="12" fill="#E1BEE7"/>
+  <ellipse cx="100" cy="15" rx="10" ry="15" fill="#E1BEE7"/>
+  <ellipse cx="125" cy="20" rx="8" ry="12" fill="#E1BEE7"/>
+  
+  <!-- Psionic storm generators -->
+  <path d="M100 65 Q85 50 70 45" stroke="#E1BEE7" stroke-width="3" fill="none"/>
+  <path d="M100 65 Q115 50 130 45" stroke="#E1BEE7" stroke-width="3" fill="none"/>
+  <path d="M100 135 Q85 150 70 155" stroke="#E1BEE7" stroke-width="3" fill="none"/>
+  <path d="M100 135 Q115 150 130 155" stroke="#E1BEE7" stroke-width="3" fill="none"/>
+  
+  <!-- Ancient neural pathways -->
+  <path d="M70 100 Q100 70 130 100 Q100 130 70 100" stroke="#E1BEE7" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M100 70 Q130 100 100 130 Q70 100 100 70" stroke="#E1BEE7" stroke-width="2" fill="none" opacity="0.7"/>
+  
+  <!-- Evolutionary adaptation chambers -->
+  <rect x="50" y="85" width="12" height="30" rx="6" fill="#9C27B0" opacity="0.7"/>
+  <rect x="138" y="85" width="12" height="30" rx="6" fill="#9C27B0" opacity="0.7"/>
+  
+  <!-- Eternal life force regenerators -->
+  <circle cx="100" cy="50" r="6" fill="#AB47BC"/>
+  <circle cx="100" cy="150" r="6" fill="#AB47BC"/>
+  <circle cx="50" cy="100" r="6" fill="#AB47BC"/>
+  <circle cx="150" cy="100" r="6" fill="#AB47BC"/>
+  
+  <!-- Ancient wisdom emanations -->
+  <circle cx="100" cy="30" r="3" fill="#E1BEE7" opacity="0.8"/>
+  <circle cx="70" cy="60" r="2" fill="#E1BEE7" opacity="0.6"/>
+  <circle cx="130" cy="60" r="2" fill="#E1BEE7" opacity="0.6"/>
+  <circle cx="70" cy="140" r="2" fill="#E1BEE7" opacity="0.6"/>
+  <circle cx="130" cy="140" r="2" fill="#E1BEE7" opacity="0.6"/>
+  <circle cx="100" cy="170" r="3" fill="#E1BEE7" opacity="0.8"/>
+  
+  <!-- Elder symbol - ancient consciousness -->
+  <circle cx="100" cy="100" r="12" fill="white" opacity="0.95"/>
+  <text x="100" y="107" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold" fill="#4A148C">∞</text>
+  
+  <!-- Cosmic tendrils (ancient reach) -->
+  <path d="M40 40 Q20 30 10 15" stroke="#8E24AA" stroke-width="4" fill="none" opacity="0.6"/>
+  <path d="M160 40 Q180 30 190 15" stroke="#8E24AA" stroke-width="4" fill="none" opacity="0.6"/>
+  <path d="M40 160 Q20 170 10 185" stroke="#8E24AA" stroke-width="4" fill="none" opacity="0.6"/>
+  <path d="M160 160 Q180 170 190 185" stroke="#8E24AA" stroke-width="4" fill="none" opacity="0.6"/>
+  
+  <!-- Millennial memory nodes -->
+  <circle cx="15" cy="15" r="4" fill="#AB47BC" opacity="0.8"/>
+  <circle cx="185" cy="15" r="4" fill="#AB47BC" opacity="0.8"/>
+  <circle cx="15" cy="185" r="4" fill="#AB47BC" opacity="0.8"/>
+  <circle cx="185" cy="185" r="4" fill="#AB47BC" opacity="0.8"/>
+</svg>

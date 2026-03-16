@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Wars 3000 - Game Design Plan</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a1e;--card:#111133;--border:#1a1a4e;--accent:#00ffff;--orange:#ff6600;--text:#e0e0e0;--muted:#666;--red:#f44;--green:#4c4;--purple:#a78bfa;--yellow:#ffc107}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+
+/* Layout */
+.app{display:flex;min-height:100vh}
+.sidebar{width:280px;background:#080818;border-right:1px solid var(--border);position:fixed;height:100vh;overflow-y:auto;z-index:10}
+.main{margin-left:280px;flex:1;padding:2rem 3rem;max-width:1100px}
+
+/* Sidebar */
+.sidebar-header{padding:1.5rem;border-bottom:1px solid var(--border)}
+.sidebar-header h1{font-size:1.2rem;color:var(--accent);letter-spacing:2px}
+.sidebar-header p{font-size:.7rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:3px}
+.nav-section{padding:.75rem 0}
+.nav-section-title{padding:.5rem 1.5rem;font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-weight:700}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 1.5rem;font-size:.85rem;color:#999;cursor:pointer;transition:all .15s;border-left:2px solid transparent}
+.nav-item:hover{background:rgba(0,255,255,.04);color:#ccc}
+.nav-item.active{color:var(--accent);background:rgba(0,255,255,.06);border-left-color:var(--accent)}
+.nav-item .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dot-exists{background:var(--green)}
+.dot-new{background:var(--orange)}
+.dot-planned{background:var(--yellow)}
+.nav-item .count{margin-left:auto;font-size:.7rem;background:rgba(255,255,255,.06);padding:1px 6px;border-radius:8px;color:var(--muted)}
+
+/* Cards */
+.section{margin-bottom:3rem;scroll-margin-top:2rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.section-header h2{font-size:1.4rem;color:#fff}
+.badge{font-size:.6rem;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.badge-exists{background:rgba(76,175,80,.15);color:var(--green);border:1px solid rgba(76,175,80,.3)}
+.badge-new{background:rgba(255,102,0,.15);color:var(--orange);border:1px solid rgba(255,102,0,.3)}
+.badge-planned{background:rgba(255,193,7,.15);color:var(--yellow);border:1px solid rgba(255,193,7,.3)}
+
+.feature{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.25rem;margin-bottom:1rem;transition:border-color .2s}
+.feature:hover{border-color:rgba(0,255,255,.2)}
+.feature-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.feature-title{font-size:1rem;color:#fff;font-weight:600}
+.feature-desc{font-size:.85rem;color:#aaa;margin-top:.5rem;line-height:1.7}
+.feature-meta{display:flex;gap:8px;margin-top:.75rem;flex-wrap:wrap}
+.tag{font-size:.7rem;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.04);color:var(--muted);border:1px solid rgba(255,255,255,.06)}
+.tag-pve{color:#4caf50;border-color:rgba(76,175,80,.2);background:rgba(76,175,80,.06)}
+.tag-pvp{color:#f44336;border-color:rgba(244,67,54,.2);background:rgba(244,67,54,.06)}
+.tag-store{color:var(--orange);border-color:rgba(255,102,0,.2);background:rgba(255,102,0,.06)}
+.tag-backend{color:var(--purple);border-color:rgba(167,139,250,.2);background:rgba(167,139,250,.06)}
+.tag-frontend{color:var(--accent);border-color:rgba(0,255,255,.2);background:rgba(0,255,255,.06)}
+
+/* Comments */
+.comments-toggle{font-size:.8rem;color:var(--accent);cursor:pointer;margin-top:.75rem;display:inline-flex;align-items:center;gap:4px;opacity:.7}
+.comments-toggle:hover{opacity:1}
+.comments-area{margin-top:.75rem;display:none}
+.comments-area.open{display:block}
+.comment{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.05);border-radius:6px;padding:.75rem;margin-bottom:.5rem}
+.comment-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.comment-author{font-size:.75rem;color:var(--accent);font-weight:600}
+.comment-time{font-size:.65rem;color:var(--muted)}
+.comment-text{font-size:.82rem;color:#bbb;white-space:pre-wrap}
+.comment-delete{font-size:.65rem;color:var(--red);cursor:pointer;opacity:.5;margin-left:8px}
+.comment-delete:hover{opacity:1}
+.comment-form{display:flex;gap:8px;margin-top:.5rem}
+.comment-form input[type=text]{flex:1;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:4px;padding:6px 10px;color:var(--text);font-size:.82rem;outline:none}
+.comment-form input[type=text]:focus{border-color:var(--accent)}
+.comment-form button{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.3);color:var(--accent);padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.8rem;white-space:nowrap}
+.comment-form button:hover{background:rgba(0,255,255,.2)}
+
+/* Author Name Modal */
+.author-bar{padding:.75rem 1.5rem;border-top:1px solid var(--border);margin-top:auto}
+.author-bar label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px}
+.author-bar input{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:4px;padding:5px 8px;color:var(--text);font-size:.8rem;outline:none}
+.author-bar input:focus{border-color:var(--accent)}
+
+/* Stats bar */
+.stats{display:flex;gap:1.5rem;padding:1rem 1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.stat{text-align:center}
+.stat-val{font-size:1.2rem;font-weight:700;color:#fff}
+.stat-label{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;margin:.75rem 0;font-size:.85rem}
+th{text-align:left;color:var(--accent);font-size:.7rem;text-transform:uppercase;letter-spacing:1px;padding:8px;border-bottom:1px solid var(--border)}
+td{padding:8px;border-bottom:1px solid rgba(255,255,255,.03);color:#bbb}
+
+/* Search */
+.search{padding:.75rem 1.5rem}
+.search input{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-size:.85rem;outline:none}
+.search input:focus{border-color:var(--accent)}
+.search input::placeholder{color:#444}
+
+/* Workflow */
+.workflow{display:flex;gap:4px;align-items:center;margin-top:.5rem;flex-wrap:wrap}
+.wf-step{font-size:.7rem;padding:3px 8px;border-radius:3px;background:rgba(0,255,255,.06);border:1px solid rgba(0,255,255,.15);color:var(--accent)}
+.wf-arrow{color:var(--muted);font-size:.7rem}
+
+/* Responsive */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main{margin-left:0;padding:1rem}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h1>SPACE WARS 3000</h1>
+    <p>Game Design Plan</p>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div class="search"><input type="text" id="search" placeholder="Search features..."></div>
+  <nav id="nav"></nav>
+  <div class="author-bar">
+    <label>Your Name (for comments)</label>
+    <input type="text" id="authorName" placeholder="e.g. Todd, Claude, Droid..." />
+  </div>
+</aside>
+<main class="main" id="content"></main>
+</div>
+
+<script>
+const PLAN = [
+  // ============ UNIVERSE & WORLD ============
+  {
+    id: 'universe', title: 'Universe & World Design', status: 'planned',
+    features: [
+      { id: 'sector-zones', title: 'Zone-Based Galaxy Layout', status: 'new',
+        desc: 'Split the galaxy into distinct zones: Core Hubs (200 sectors, protected PvE), Inner Ring (600, mid-game PvE), Outer Ring (500, endgame PvE), Frontier (400, open PvP), Deep Space (100, elite PvP), Adventure Sectors (60, team content), Wormhole Nodes (40, transit). Total shared: ~1,950 sectors.',
+        tags: ['backend', 'pve', 'pvp'],
+        workflow: ['Define zone boundaries', 'Update universe generator', 'Zone flags on Sector model', 'Update map UI with zone colors', 'PvP flag enforcement'] },
+      { id: 'home-sectors', title: 'Player Home Sectors (Homesteads)', status: 'new',
+        desc: 'Each player gets a procedurally generated home sector at galaxy rim on registration. Contains: 1 habitable planet (guaranteed colonizable), 1 small NPC port (basic supplies/repairs), 2-3 jump points to nearby public hub sectors, asteroid/resource nodes. Only owner + alliance members can enter. Generated from user_id seed, loaded on-demand. Expandable via store-purchased sector templates that add additional home sectors.',
+        tags: ['backend', 'frontend', 'store'],
+        workflow: ['Homestead generator service', 'Access control middleware', 'Jump point connections to hubs', 'On-demand loading system', 'Store template purchase flow'] },
+      { id: 'sector-scaling', title: 'Universe Scaling Config', status: 'planned',
+        desc: 'Target: 1,000 concurrent / 7,000-8,000 registered. ~2,000 shared sectors + on-demand home sectors. Oversell ratio 7:1. Config: INITIAL_SECTORS=2000, zone distribution via percentages.',
+        tags: ['backend'] },
+      { id: 'difficulty-scaling', title: 'Zone Difficulty Scaling', status: 'new',
+        desc: 'NPC levels and hazard levels scale with distance from Core. Core: L1-3, hazard 1-2. Inner: L3-6, hazard 2-4. Outer: L5-8, hazard 4-7. Frontier: L7-10, hazard 6-9. Deep Space: L9-10+, hazard 8-10.',
+        tags: ['backend'] },
+    ]
+  },
+
+  // ============ TRAVEL & NAVIGATION ============
+  {
+    id: 'travel', title: 'Travel & Navigation', status: 'planned',
+    features: [
+      { id: 'wormholes-static', title: 'Static Wormhole Pairs', status: 'new',
+        desc: '15-20 fixed wormhole connections between distant zones. Visible on galaxy map as purple pulsing lines. Usable by anyone with enough fuel. Major ones connect: Home -> Core, Core -> Outer Ring, Outer -> Frontier. Fuel cost = 3x normal jump.',
+        tags: ['backend', 'frontend'],
+        workflow: ['Wormhole model', 'Generate pairs in universe gen', 'Map rendering (purple lines)', 'Travel validation', 'Fuel cost multiplier'] },
+      { id: 'wormholes-unstable', title: 'Unstable Wormholes (Dynamic)', status: 'new',
+        desc: '5-10 temporary wormholes active at any time. Spawn randomly, last 1-4 hours. Creates emergent "a wormhole to deep space just opened!" events. Announced via global chat/notification.',
+        tags: ['backend', 'frontend'],
+        workflow: ['Spawn timer service', 'Expiration cleanup', 'Global notification', 'Map rendering (animated)'] },
+      { id: 'jump-drives', title: 'Jump Drive Component', status: 'new',
+        desc: 'High-tier ship component allowing 3-5 sector jumps at once with long cooldown. Tier 4-5, expensive. Gives endgame ships individual long-range mobility without relying on wormholes.',
+        tags: ['backend'],
+        workflow: ['New component type', 'Jump range calculation', 'Cooldown timer', 'Fuel cost (high)'] },
+      { id: 'deep-space-gates', title: 'Player-Built Deep Space Gates', status: 'new',
+        desc: 'Corporation-built structures in Outer Ring/Frontier. Extremely expensive to construct. Creates a permanent wormhole-like connection between two sectors. Can be destroyed in PvP. Gives endgame corps infrastructure goals.',
+        tags: ['backend', 'pvp'],
+        workflow: ['Gate model', 'Construction requirements', 'Pair linking', 'PvP destruction mechanics', 'Corp ownership'] },
+      { id: 'protected-lanes', title: 'Protected Space Lanes', status: 'new',
+        desc: 'Specific hyperlane connections flagged as protected. PvP disabled on these lanes. No hostile NPC spawns. Visual: thicker blue/white lines on map with shield icons. Connect: Home jump points -> Core hubs, Core hubs to each other, Core -> Inner Ring entries. Longer route but safe.',
+        tags: ['backend', 'frontend', 'pvp'],
+        workflow: ['Protected flag on SectorConnection', 'PvP check middleware', 'NPC spawn exclusion', 'Map visual distinction'] },
+      { id: 'route-planner', title: 'Route Planner (BFS Pathfinder)', status: 'exists',
+        desc: 'Already implemented. Click distant sector -> shows shortest path with animated cyan overlay and hop count. Uses BFS on adjacency map.',
+        tags: ['frontend'] },
+    ]
+  },
+
+  // ============ PVP SYSTEM ============
+  {
+    id: 'pvp', title: 'PvP System', status: 'planned',
+    features: [
+      { id: 'pvp-zones', title: 'PvP Zone Enforcement', status: 'new',
+        desc: 'Frontier (400 sectors) and Deep Space (100 sectors) are open PvP. PvP toggling only matters in Inner/Outer Ring. Core/Home are always safe. Entering PvP zone shows warning. Ships destroyed in PvP drop partial cargo.',
+        tags: ['backend', 'pvp'],
+        workflow: ['Zone-based PvP rules', 'Entry warning system', 'Loot drop on PvP kill', 'Bounty system integration'] },
+      { id: 'pvp-rewards', title: 'PvP Zone Reward Multipliers', status: 'new',
+        desc: '2x credits, 2x XP in PvP zones. Exclusive rare crafting materials and ship components only drop in PvP space. Risk-reward balance.',
+        tags: ['backend', 'pvp'] },
+      { id: 'pvp-choke', title: 'Choke Point Design', status: 'new',
+        desc: 'Narrow hyperlane bottlenecks between safe space and PvP space. Natural PvP hotspots for gate camping and blockade running. 3-4 entry corridors into Frontier.',
+        tags: ['backend', 'pvp'] },
+      { id: 'pvp-harbors', title: 'Neutral Safe Harbors in PvP Space', status: 'new',
+        desc: 'A few neutral stations deep in PvP space where you can dock but NOT be attacked. Forward operating bases. Limited services (repair, refuel, no trading).',
+        tags: ['backend', 'pvp'] },
+      { id: 'offline-protection', title: 'Offline Ship Protection', status: 'new',
+        desc: 'Ships in public sectors become "docked" (invulnerable) 15-30 min after logout. Home sector is always safe. Prevents offline griefing while allowing consequences for parking in PvP space.',
+        tags: ['backend'] },
+    ]
+  },
+
+  // ============ NPC CLANS & RAIDS ============
+  {
+    id: 'npc-clans', title: 'NPC Clans & Dynamic Raids', status: 'new',
+    features: [
+      { id: 'clan-spawning', title: 'NPC Clan Territory Spawning', status: 'new',
+        desc: 'Every 4-8 hours, an NPC clan invasion spawns. 3 adjacent sectors claimed. Clan types: Pirates, Zythian Hive, Rogue Automatons, Void Reavers (deep space only). Visual: red-tinted sectors with skull icon on map.',
+        tags: ['backend', 'frontend'],
+        workflow: ['Clan spawn timer', 'Territory claim system', 'NPC wave generator', 'Map visual overlay', 'Clan type variety'] },
+      { id: 'clan-raids', title: 'Player-Level-Scaled Raids', status: 'new',
+        desc: 'After 2-4 hours occupying, clan sends raids to adjacent player sectors. Raids target colonies, outposts, undefended ships. CRITICAL: raid difficulty scales to owning player level. L3 player gets L3-4 raiders. L9 gets L9-10. Raids every 30-60 min until stronghold cleared.',
+        tags: ['backend', 'pve'],
+        workflow: ['Raid targeting logic', 'Level scaling algorithm', 'Damage to colonies/outposts', 'Notification system', 'Cooldown timers'] },
+      { id: 'clan-clearing', title: 'Clan Stronghold Clearing', status: 'new',
+        desc: 'Players enter 3 clan sectors, defeat escalating NPC waves. Center sector has boss NPC (buffed stats, unique loot). Solo-able by strong players or team. Awards: XP, credits, unique drops, achievement. If nobody clears within 12-24h, clan despawns naturally but raid damage remains.',
+        tags: ['backend', 'pve'],
+        workflow: ['Wave encounter system', 'Boss NPC generation', 'Unique loot table', 'Clear/despawn timer', 'Achievement trigger'] },
+    ]
+  },
+
+  // ============ ADVENTURE / TEAM CONTENT ============
+  {
+    id: 'adventure', title: 'Adventure & Team Content', status: 'new',
+    features: [
+      { id: 'adventure-sectors', title: 'Adventure Sector System', status: 'new',
+        desc: '60 sectors reserved for group content. Gated entry: requires 3-5 players in a fleet, minimum ship tier, or a "sector key" item. Instanced or limited (1-2 groups at a time). Reset periodically.',
+        tags: ['backend', 'pve'] },
+      { id: 'derelict-explore', title: 'Derelict Capital Ship Exploration', status: 'new',
+        desc: 'Room-by-room clearing of abandoned capital ships. NPC encounters, environmental hazards, loot at the end. Team coordination required.',
+        tags: ['backend', 'pve'] },
+      { id: 'alien-hive', title: 'Alien Hive Sectors', status: 'new',
+        desc: 'Waves of NPC enemies with escalating difficulty. Survival-style encounter. Higher waves = better loot. Team healer/tank/DPS roles matter.',
+        tags: ['backend', 'pve'] },
+      { id: 'nebula-challenge', title: 'Nebula Navigation Challenges', status: 'new',
+        desc: 'Environmental hazard sectors. Navigate through damaging nebula, use scanner skills, find safe routes. Rewards exploration-focused players.',
+        tags: ['backend', 'pve'] },
+      { id: 'raid-bosses', title: 'Raid Bosses', status: 'new',
+        desc: 'Single powerful NPC requiring coordinated fleet tactics. Multiple phases, special mechanics. Weekly reset. Top-tier loot.',
+        tags: ['backend', 'pve'] },
+      { id: 'timed-rush', title: 'Timed Resource Rushes', status: 'new',
+        desc: 'Sector floods with rare materials for 15 minutes. Fight NPCs and other players. Mixed PvPvE content. Announced server-wide.',
+        tags: ['backend', 'pve', 'pvp'] },
+    ]
+  },
+
+  // ============ STORE & MONETIZATION ============
+  {
+    id: 'store', title: 'Store & Monetization', status: 'new',
+    features: [
+      { id: 'store-philosophy', title: 'Store Design Philosophy', status: 'new',
+        desc: 'CORE RULE: Everything purchasable in the store MUST be grindable in-game. Store is convenience + cosmetics, not power. Integrity first. Categories: Cosmetics (skins, trails, decals), Convenience (XP boosters, inventory expansion), Homestead Templates (expand home sectors), Premium Currency (earned slowly in-game, bought faster with real money).',
+        tags: ['store'] },
+      { id: 'store-cosmetics', title: 'Cosmetic Store Items', status: 'new',
+        desc: 'Ship skins, engine trails, decals, nameplate styles, faction-themed cosmetic packs, station decorations, crew outfit customization. All visual-only. Earnable via achievements or grind.',
+        tags: ['store', 'frontend'],
+        workflow: ['Store UI page', 'Purchase flow', 'Unlock system', 'Grind alternative paths'] },
+      { id: 'store-homestead', title: 'Homestead Expansion Templates', status: 'new',
+        desc: 'Purchasable sector templates that add additional home sectors. Templates: Mining Colony (rich asteroid field), Agricultural Haven (high-yield farming planet), Fortress Sector (pre-built defenses), Trade Hub (NPC marketplace). Each template procedurally generates but with guaranteed features.',
+        tags: ['store', 'backend'],
+        workflow: ['Template definitions', 'Sector generation from template', 'Purchase/unlock flow', 'Home sector linking'] },
+      { id: 'store-convenience', title: 'Convenience Items', status: 'new',
+        desc: 'XP boosters (2x for 24h, grindable from daily quests), Inventory expansion (+50 cargo, permanent), Fast travel tokens (skip to any owned sector, craftable), Auto-repair kits (instant repair, craftable). All have in-game earn paths.',
+        tags: ['store'] },
+      { id: 'premium-currency', title: 'Premium Currency (Star Gems)', status: 'new',
+        desc: 'Dual currency: Credits (in-game, earned freely) and Star Gems (premium, earned slowly via achievements/daily login, bought with real money). Star Gems buy cosmetics and convenience items. NEVER buy power.',
+        tags: ['store', 'backend'],
+        workflow: ['Gem model on User', 'Daily login gem rewards', 'Achievement gem rewards', 'Store purchase with gems', 'Real money purchase integration'] },
+    ]
+  },
+
+  // ============ EXISTING: ECONOMY & TRADING ============
+  {
+    id: 'economy', title: 'Economy & Trading', status: 'exists',
+    features: [
+      { id: 'dynamic-pricing', title: 'Dynamic Supply/Demand Pricing', status: 'exists',
+        desc: '30+ commodities across 8 port types. Prices fluctuate based on supply/demand. Economy ticks every 10 minutes. Price history tracked for 7 days. Min/max price multipliers (0.5x-2.0x).',
+        tags: ['backend'] },
+      { id: 'port-types', title: '8 Port Types', status: 'exists',
+        desc: 'Trading Hub, Mining Outpost, Agricultural Station, Tech Center, Space Station, Fuel Depot, Medical Station, Black Market. Each with unique commodity production/consumption profiles.',
+        tags: ['backend'] },
+      { id: 'trading-ui', title: 'Trading Interface + Profit Indicators', status: 'exists',
+        desc: 'Buy/sell at ports, profit indicators showing avg cost basis, Best Trades panel (top 5 opportunities). Trading history tracked.',
+        tags: ['frontend'] },
+      { id: 'economy-scaling', title: 'Dynamic Economy Scaling', status: 'new',
+        desc: 'Port commodity quantities and restock rates should scale with active player count in region. 200 players in Core = faster restocking. 10 players in Outer = sparse, expensive. Rewards explorers.',
+        tags: ['backend'] },
+    ]
+  },
+
+  // ============ EXISTING: COMBAT ============
+  {
+    id: 'combat', title: 'Combat System', status: 'exists',
+    features: [
+      { id: 'turn-combat', title: 'Turn-Based Space Combat', status: 'exists',
+        desc: 'Shields, armor, critical hits (10% chance, 2x dmg), flee mechanics. Max 50 rounds. Component degradation per combat round (2%). Loot drops (70% chance). XP per damage/kill.',
+        tags: ['backend'] },
+      { id: 'realtime-combat', title: 'Real-Time Combat System', status: 'exists',
+        desc: 'Alternative real-time combat with attack-NPC endpoint. Speed control (1x/2x/4x/Skip). Detailed loot breakdown.',
+        tags: ['backend', 'frontend'] },
+      { id: 'ground-combat', title: 'Ground Combat', status: 'exists',
+        desc: '5 unit types (militia, marines, heavy armor, mech, spec ops). Grid-based with terrain effects, cover bonuses. Orbital bombardment. NPC raids on colonies.',
+        tags: ['backend'] },
+      { id: 'npc-types', title: '5 NPC Types', status: 'exists',
+        desc: 'Pirate, Pirate Lord (boss), Trader, System Patrol, Bounty Hunter. Each with distinct hostility, behavior, ship types, loot multipliers. AI behavior trees with personality traits.',
+        tags: ['backend'] },
+    ]
+  },
+
+  // ============ EXISTING: SHIPS ============
+  {
+    id: 'ships', title: 'Ships & Equipment', status: 'exists',
+    features: [
+      { id: 'ship-types', title: '13 Ship Types', status: 'exists',
+        desc: 'Scout, Fighter, Corvette, Destroyer, Battlecruiser, Carrier, Interceptor, Freighter, Merchant Cruiser, Colony Ship, Insta Colony Ship, Mining Barge, Explorer. Each with unique hull/shields/fuel/cargo and component slots.',
+        tags: ['backend'] },
+      { id: 'components', title: '6 Component Types, 38 Components', status: 'exists',
+        desc: 'Weapons (9), Shields (7), Engines (6), Scanners (5), Cargo Pods (5), Armor (5). Tiers 1-5. Component degradation and repair system. Condition affects effectiveness.',
+        tags: ['backend'] },
+      { id: 'ship-designer', title: 'Ship Designer', status: 'exists',
+        desc: 'Install/uninstall components based on ship slot configuration. Stat recalculation. Design template save/load system.',
+        tags: ['backend', 'frontend'] },
+      { id: 'ship-customizer', title: 'Ship Cosmetic Customizer', status: 'exists',
+        desc: 'Hull colors (25), accent colors (15), engine trails (8), decals (10), skins (8), nameplate styles (6). Live preview. Unlock milestones at levels 5/10/15/20.',
+        tags: ['frontend'] },
+      { id: 'fleets', title: 'Fleet System', status: 'exists',
+        desc: 'Group ships into fleets. Max 5 fleets, 10 ships each. Shift+drag selection on galaxy map. Fleet movement.',
+        tags: ['backend', 'frontend'] },
+    ]
+  },
+
+  // ============ EXISTING: COLONIES ============
+  {
+    id: 'colonies', title: 'Colonies & Planets', status: 'exists',
+    features: [
+      { id: 'colonization', title: 'Planet Colonization', status: 'exists',
+        desc: '10 planet types (Terran, Desert, Ice, Volcanic, Gas Giant, Oceanic, Barren, Jungle, Toxic, Crystalline). Colony Ship required. Population growth, resource generation, infrastructure upgrades (max level 10).',
+        tags: ['backend'] },
+      { id: 'colony-buildings', title: '21 Colony Building Types', status: 'exists',
+        desc: 'Extraction (9, tier 1-3), Infrastructure (6), Manufacturing (3), Defense (3). Production chains with inputs/outputs. Planet type bonuses. Power system (solar -> geothermal -> fusion). Adjacency bonuses.',
+        tags: ['backend'] },
+      { id: 'colony-surface', title: 'Colony Surface Grid', status: 'exists',
+        desc: 'Grid-based surface management (24x24 to 48x48). 13 terrain types. Building placement with footprints. Resource deposits. Weather effects. Daily quests. Custom decorative blocks (12 types). Surface anomalies.',
+        tags: ['backend', 'frontend'] },
+      { id: 'wonders', title: '6 Wonder Types', status: 'exists',
+        desc: 'Orbital Array, Trade Nexus, Defense Matrix, Shipyard, Research Station, Genesis Device. Multi-phase construction. Infrastructure requirements.',
+        tags: ['backend'] },
+      { id: 'colony-no-limit', title: 'No Hard Colony Limits', status: 'new',
+        desc: 'DESIGN DECISION: No artificial colony cap. Instead, soft pressure: maintenance scaling (colony 5 costs 3x colony 1, colony 10 costs 8x), crew requirements, defense burden (undefended = raid target). Wealthy endgame players CAN run 15+ colonies if they earn it.',
+        tags: ['backend'] },
+    ]
+  },
+
+  // ============ EXISTING: CREW ============
+  {
+    id: 'crew', title: 'Crew & Species', status: 'exists',
+    features: [
+      { id: 'crew-species', title: '13 Crew Species', status: 'exists',
+        desc: '8 organic (Human, Vexian, Krynn, Zorath, Sylphi, Grox, Nexari, Threll, Crystallid, Void Walker) + 3 robot (Worker Bot, Combat Droid, Science Unit). Unique stat bonuses per species. 4 roles: Pilot, Engineer, Gunner, Scientist.',
+        tags: ['backend'] },
+      { id: 'crew-salary', title: 'Crew Salary System', status: 'exists',
+        desc: 'Species-based salary. 24h tick interval. Salary debt tracking. Hiring fee = baseSalary * 5.',
+        tags: ['backend'] },
+    ]
+  },
+
+  // ============ EXISTING: PROGRESSION ============
+  {
+    id: 'progression', title: 'Progression & Research', status: 'exists',
+    features: [
+      { id: 'levels', title: 'Player Levels (1-20)', status: 'exists',
+        desc: 'XP table from 100 to 1M. Skill points per level. 8 skills (Combat Mastery, Shield Expertise, Trade Acumen, Navigation, Engineering, Leadership, Mining Proficiency, Scanner Mastery). Max skill level 10.',
+        tags: ['backend'] },
+      { id: 'tech-tree', title: 'Tech Research Tree', status: 'exists',
+        desc: '7 techs: Advanced Weapons, Advanced Shields, Capital Class Ships, Deep Scanning, Basic Crafting, Basic Automation, Advanced Colonies. Prerequisites, credit costs, research timers.',
+        tags: ['backend'] },
+      { id: 'crafting', title: 'Crafting System', status: 'exists',
+        desc: '6 blueprints. Component and commodity crafting. Required levels and tech. Ingredient system with time-based jobs.',
+        tags: ['backend', 'frontend'] },
+      { id: 'missions', title: 'Mission System', status: 'exists',
+        desc: '5 mission types (delivery, bounty, scan, trade_volume, patrol). Max 5 active. 3 per port. 24h expiration. 30min refresh.',
+        tags: ['backend'] },
+      { id: 'achievements-client', title: 'Client Achievement System', status: 'exists',
+        desc: '12 localStorage achievements tracking trades, combats, sectors explored, colonies, fleets, credits, levels. Trophy panel on Dashboard.',
+        tags: ['frontend'] },
+    ]
+  },
+
+  // ============ EXISTING: SOCIAL ============
+  {
+    id: 'social', title: 'Social & Organizations', status: 'exists',
+    features: [
+      { id: 'corporations', title: 'Corporation System', status: 'exists',
+        desc: 'Creation cost 50K credits. Max 20 members. Name/tag requirements. Agreements system between corps.',
+        tags: ['backend'] },
+      { id: 'messaging', title: 'Player Messaging', status: 'exists',
+        desc: 'In-game mail with reply button. Unread count in sidebar.',
+        tags: ['backend', 'frontend'] },
+      { id: 'factions', title: '3 Factions', status: 'exists',
+        desc: 'Terran Alliance (trade/diplomacy), Zythian Swarm (combat), Automaton Collective (tech). Standing system, faction wars, leaderboards.',
+        tags: ['backend'] },
+      { id: 'community-events', title: 'Community Events', status: 'exists',
+        desc: 'Server-wide events with contribution system.',
+        tags: ['backend'] },
+      { id: 'alliance-territory', title: 'Alliance Territory Claims', status: 'new',
+        desc: 'Alliances can claim 5-10 public sectors by building control structures. Claimed sectors get alliance-only bonuses (reduced port taxes, faster repairs). Other players can still enter. PvP zones: claims can be contested.',
+        tags: ['backend', 'pvp'] },
+    ]
+  },
+
+  // ============ EXISTING: INFRASTRUCTURE ============
+  {
+    id: 'infrastructure', title: 'Infrastructure & Automation', status: 'exists',
+    features: [
+      { id: 'outposts', title: '4 Outpost Types', status: 'exists',
+        desc: 'Trade Relay, Scanner Post, Defense Platform, Fuel Cache. Player-built structures in sectors. Level 1-3 or 1-5.',
+        tags: ['backend'] },
+      { id: 'automation', title: 'Task Automation', status: 'exists',
+        desc: 'Max 3 active automated tasks per user. 1-minute execution interval. 1.5x fuel multiplier for automated travel.',
+        tags: ['backend'] },
+      { id: 'artifacts', title: '10 Artifact Types', status: 'exists',
+        desc: 'Equippable artifacts with functional bonuses: fuel reduction, energy, scan detail, shields, crew bonuses, speed, research time, damage, flee chance, fuel efficiency.',
+        tags: ['backend'] },
+    ]
+  },
+
+  // ============ EXISTING: UI/UX ============
+  {
+    id: 'ux', title: 'UI/UX & Client Features', status: 'exists',
+    features: [
+      { id: 'keyboard', title: 'Keyboard Shortcuts', status: 'exists',
+        desc: '8 navigation shortcuts (D/S/M/V/T/C/P/I), Esc closes dialogs, ? shows help overlay.',
+        tags: ['frontend'] },
+      { id: 'mobile', title: 'Mobile Responsive Layout', status: 'exists',
+        desc: 'Collapsible sidebar with hamburger menu. Closes on navigation.',
+        tags: ['frontend'] },
+      { id: 'accessibility', title: 'Basic Accessibility', status: 'exists',
+        desc: 'ARIA labels on nav/main/modals. aria-current on active nav items.',
+        tags: ['frontend'] },
+      { id: 'faction-theme', title: 'Faction-Colored UI Theming', status: 'exists',
+        desc: 'Sidebar accent, XP bar, nav states adapt to faction color (blue/red/purple).',
+        tags: ['frontend'] },
+      { id: 'galaxy-map', title: 'Galaxy Map Canvas', status: 'exists',
+        desc: 'Quadtree-optimized rendering, 1200+ nodes, Delaunay triangulation, hyperlane rendering, ship badges, fleet selection, route overlay.',
+        tags: ['frontend'] },
+      { id: 'wiki', title: 'In-Game Wiki', status: 'exists',
+        desc: '19 articles, markdown rendering, search, categories, cross-linking.',
+        tags: ['frontend'] },
+      { id: 'notifications', title: 'Toast Notification System', status: 'exists',
+        desc: 'Global NotificationContext with success/info/warning/error types. Auto-dismiss.',
+        tags: ['frontend'] },
+      { id: 'socket', title: 'WebSocket Connection', status: 'exists',
+        desc: 'Real-time connection indicator (green/red dot). Socket service for live updates.',
+        tags: ['frontend', 'backend'] },
+    ]
+  },
+
+  // ============ SCALING & OPERATIONS ============
+  {
+    id: 'ops', title: 'Scaling & Operations', status: 'planned',
+    features: [
+      { id: 'player-spawn', title: 'Distributed Player Spawning', status: 'new',
+        desc: 'Spread starting sectors across 30-50 Core sectors, distributed by faction. Prevents Day 1 congestion. New players start in home sector, first jump to assigned Core hub.',
+        tags: ['backend'] },
+      { id: 'sector-instance', title: 'Sector Instance Limits', status: 'new',
+        desc: 'Cap players-per-sector at 30-50 for shared galaxy to prevent combat processing overload. Queue entry if cap hit. Home sectors: 1 instance per owner.',
+        tags: ['backend'] },
+      { id: 'econ-sinks', title: 'Economic Credit Sinks', status: 'new',
+        desc: 'Wormhole usage fees, Deep Space Gate construction, PvP ship insurance, adventure sector entry costs, wonder construction, homestead expansion. Prevent inflation with more players.',
+        tags: ['backend'] },
+      { id: 'discovery-fog', title: 'Discovery & Fog of War', status: 'exists',
+        desc: 'PlayerDiscovery model tracks visited sectors. Sector fog reveals adjacent on visit. Scanner upgrades reveal 2-3 hops. Star chart purchases from NPCs for distant regions.',
+        tags: ['backend'] },
+    ]
+  },
+];
+
+// ===== COMMENT SYSTEM =====
+const COMMENTS_KEY = 'sw3k_plan_comments';
+const AUTHOR_KEY = 'sw3k_plan_author';
+
+function getComments() {
+  try { return JSON.parse(localStorage.getItem(COMMENTS_KEY) || '{}'); } catch { return {}; }
+}
+function saveComments(c) { localStorage.setItem(COMMENTS_KEY, JSON.stringify(c)); }
+function getAuthor() { return localStorage.getItem(AUTHOR_KEY) || ''; }
+function saveAuthor(a) { localStorage.setItem(AUTHOR_KEY, a); }
+
+function addComment(featureId, text) {
+  const author = getAuthor() || 'Anonymous';
+  const comments = getComments();
+  if (!comments[featureId]) comments[featureId] = [];
+  comments[featureId].push({ author, text, time: Date.now() });
+  saveComments(comments);
+  return comments;
+}
+function deleteComment(featureId, idx) {
+  const comments = getComments();
+  if (comments[featureId]) { comments[featureId].splice(idx, 1); saveComments(comments); }
+  return comments;
+}
+function getFeatureComments(featureId) {
+  return (getComments()[featureId] || []);
+}
+function getTotalComments() {
+  const c = getComments();
+  return Object.values(c).reduce((sum, arr) => sum + arr.length, 0);
+}
+
+// ===== RENDER =====
+function statusBadge(s) {
+  if (s === 'exists') return '<span class="badge badge-exists">Implemented</span>';
+  if (s === 'new') return '<span class="badge badge-new">New Concept</span>';
+  return '<span class="badge badge-planned">Planned</span>';
+}
+function statusDot(s) {
+  if (s === 'exists') return '<span class="dot dot-exists"></span>';
+  if (s === 'new') return '<span class="dot dot-new"></span>';
+  return '<span class="dot dot-planned"></span>';
+}
+function tagHTML(t) {
+  const cls = t === 'pve' ? 'tag-pve' : t === 'pvp' ? 'tag-pvp' : t === 'store' ? 'tag-store' : t === 'backend' ? 'tag-backend' : t === 'frontend' ? 'tag-frontend' : '';
+  return `<span class="tag ${cls}">${t}</span>`;
+}
+function timeAgo(ts) {
+  const d = Date.now() - ts;
+  if (d < 60000) return 'just now';
+  if (d < 3600000) return Math.floor(d/60000) + 'm ago';
+  if (d < 86400000) return Math.floor(d/3600000) + 'h ago';
+  return Math.floor(d/86400000) + 'd ago';
+}
+
+function renderComments(featureId) {
+  const comments = getFeatureComments(featureId);
+  const count = comments.length;
+  let html = `<div class="comments-toggle" onclick="toggleComments('${featureId}')">&#x1f4ac; ${count} comment${count !== 1 ? 's' : ''} &mdash; click to ${count ? 'view' : 'add'}</div>`;
+  html += `<div class="comments-area" id="comments-${featureId}">`;
+  for (let i = 0; i < comments.length; i++) {
+    const c = comments[i];
+    html += `<div class="comment"><div class="comment-header"><span class="comment-author">${esc(c.author)}</span><span><span class="comment-time">${timeAgo(c.time)}</span><span class="comment-delete" onclick="delComment('${featureId}',${i})">delete</span></span></div><div class="comment-text">${esc(c.text)}</div></div>`;
+  }
+  html += `<div class="comment-form"><input type="text" id="input-${featureId}" placeholder="Add a comment..." onkeydown="if(event.key==='Enter')postComment('${featureId}')"/><button onclick="postComment('${featureId}')">Post</button></div>`;
+  html += '</div>';
+  return html;
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function renderAll(filter) {
+  const q = (filter || '').toLowerCase();
+  let navHTML = '';
+  let contentHTML = '';
+  let totalFeatures = 0, existsCount = 0, newCount = 0, plannedCount = 0;
+
+  for (const section of PLAN) {
+    const features = section.features.filter(f => !q || f.title.toLowerCase().includes(q) || f.desc.toLowerCase().includes(q) || f.id.includes(q));
+    if (features.length === 0 && q) continue;
+
+    const commentCounts = features.reduce((s, f) => s + getFeatureComments(f.id).length, 0);
+    navHTML += `<div class="nav-section"><div class="nav-section-title">${section.title}</div>`;
+    for (const f of features) {
+      const cc = getFeatureComments(f.id).length;
+      navHTML += `<div class="nav-item" onclick="scrollTo('${f.id}')">${statusDot(f.status)} ${f.title}${cc ? `<span class="count">${cc}</span>` : ''}</div>`;
+      totalFeatures++;
+      if (f.status === 'exists') existsCount++;
+      else if (f.status === 'new') newCount++;
+      else plannedCount++;
+    }
+    navHTML += '</div>';
+
+    contentHTML += `<div class="section" id="section-${section.id}"><div class="section-header"><h2>${section.title}</h2>${statusBadge(section.status)}</div>`;
+    for (const f of features) {
+      contentHTML += `<div class="feature" id="${f.id}"><div class="feature-header"><div><div class="feature-title">${f.title} ${statusBadge(f.status)}</div><div class="feature-desc">${f.desc}</div>`;
+      if (f.tags) contentHTML += `<div class="feature-meta">${f.tags.map(tagHTML).join('')}</div>`;
+      if (f.workflow) contentHTML += `<div class="workflow">${f.workflow.map((s,i) => `${i?'<span class="wf-arrow">&#x2192;</span>':''}<span class="wf-step">${s}</span>`).join('')}</div>`;
+      contentHTML += renderComments(f.id);
+      contentHTML += '</div></div></div>';
+    }
+    contentHTML += '</div>';
+  }
+
+  document.getElementById('nav').innerHTML = navHTML;
+  document.getElementById('content').innerHTML = contentHTML;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="stat-val">${totalFeatures}</div><div class="stat-label">Features</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--green)">${existsCount}</div><div class="stat-label">Built</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--orange)">${newCount}</div><div class="stat-label">New</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--yellow)">${plannedCount}</div><div class="stat-label">Planned</div></div>
+    <div class="stat"><div class="stat-val">${getTotalComments()}</div><div class="stat-label">Comments</div></div>
+  `;
+
+  // Restore author
+  document.getElementById('authorName').value = getAuthor();
+}
+
+// ===== INTERACTIONS =====
+function scrollTo(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Highlight
+  el.style.borderColor = 'rgba(0,255,255,0.5)';
+  setTimeout(() => el.style.borderColor = '', 1500);
+}
+
+function toggleComments(fid) {
+  const el = document.getElementById('comments-' + fid);
+  if (el) { el.classList.toggle('open'); if (el.classList.contains('open')) { const inp = document.getElementById('input-' + fid); if (inp) inp.focus(); } }
+}
+
+function postComment(fid) {
+  const inp = document.getElementById('input-' + fid);
+  if (!inp || !inp.value.trim()) return;
+  addComment(fid, inp.value.trim());
+  renderAll(document.getElementById('search').value);
+  // Re-open the comments area
+  const el = document.getElementById('comments-' + fid);
+  if (el) el.classList.add('open');
+}
+
+function delComment(fid, idx) {
+  deleteComment(fid, idx);
+  renderAll(document.getElementById('search').value);
+  const el = document.getElementById('comments-' + fid);
+  if (el) el.classList.add('open');
+}
+
+// Author name save
+document.getElementById('authorName').addEventListener('input', (e) => saveAuthor(e.target.value));
+
+// Search
+document.getElementById('search').addEventListener('input', (e) => renderAll(e.target.value));
+
+// Initial render
+renderAll();
+</script>
+</body>
+</html>

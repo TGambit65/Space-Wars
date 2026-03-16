@@ -1,4 +1,4 @@
-import { Globe, Anchor, Crosshair, Skull, HelpCircle } from 'lucide-react';
+import { Globe, Anchor, Crosshair, Skull, HelpCircle, Rocket, Navigation } from 'lucide-react';
 
 const PLANET_DOT_COLORS = {
   'Terran': '#4A90D9',
@@ -13,18 +13,39 @@ const PLANET_DOT_COLORS = {
   'Crystalline': '#E6E6FA'
 };
 
-const SystemEntityBar = ({ systemDetail, selectedEntityId, onEntitySelect }) => {
+const SystemEntityBar = ({ systemDetail, selectedEntityId, onEntitySelect, currentShip, neighbors, onShipSelect }) => {
   if (!systemDetail) return null;
 
   const planets = systemDetail.planets || [];
   const ports = systemDetail.ports || [];
   const npcs = systemDetail.npcs || [];
+  const jumpPoints = neighbors || [];
 
-  if (planets.length === 0 && ports.length === 0 && npcs.length === 0) return null;
+  if (!currentShip && planets.length === 0 && ports.length === 0 && npcs.length === 0 && jumpPoints.length === 0) return null;
 
   return (
     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 max-w-[calc(100vw-320px)] bg-space-900/90 border border-space-700 rounded-lg backdrop-blur-sm px-3 py-2 pointer-events-auto">
       <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-space-600">
+        {/* Player Ship */}
+        {currentShip && (
+          <>
+            <button
+              onClick={() => onShipSelect?.()}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs shrink-0 transition-all ${
+                selectedEntityId === 'ship'
+                  ? 'bg-space-600 text-white border border-space-500'
+                  : 'text-accent-cyan hover:bg-space-700 hover:text-white'
+              }`}
+            >
+              <Rocket className="w-3 h-3 text-accent-cyan shrink-0" />
+              <span className="truncate max-w-[100px]">{currentShip.name}</span>
+            </button>
+            {(planets.length > 0 || ports.length > 0 || npcs.length > 0 || jumpPoints.length > 0) && (
+              <div className="w-px h-5 bg-space-600 shrink-0" />
+            )}
+          </>
+        )}
+
         {/* Planets */}
         {planets.length > 0 && (
           <>
@@ -59,7 +80,41 @@ const SystemEntityBar = ({ systemDetail, selectedEntityId, onEntitySelect }) => 
         )}
 
         {/* Separator */}
-        {planets.length > 0 && (ports.length > 0 || npcs.length > 0) && (
+        {planets.length > 0 && (jumpPoints.length > 0 || ports.length > 0 || npcs.length > 0) && (
+          <div className="w-px h-5 bg-space-600 shrink-0" />
+        )}
+
+        {/* Jump Points — high priority, shown before ports/contacts */}
+        {jumpPoints.length > 0 && (
+          <>
+            <span className="text-[10px] text-gray-500 uppercase shrink-0 font-bold tracking-widest">Jump</span>
+            {jumpPoints.map(neighbor => (
+              <button
+                key={neighbor.sector_id}
+                onClick={() => onEntitySelect('jumpPoint', neighbor)}
+                className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs shrink-0 transition-all ${
+                  neighbor.sector_id === selectedEntityId
+                    ? 'bg-space-600 text-white border border-space-500'
+                    : 'text-gray-300 hover:bg-space-700 hover:text-white'
+                }`}
+              >
+                <Navigation className={`w-3 h-3 shrink-0 ${
+                  (neighbor.lane_class || neighbor.connection_type) === 'wormhole'
+                    ? 'text-purple-400'
+                    : (neighbor.lane_class || neighbor.connection_type) === 'portal'
+                      ? 'text-orange-400'
+                      : (neighbor.lane_class || neighbor.connection_type) === 'protected'
+                        ? 'text-blue-300'
+                        : 'text-cyan-400'
+                }`} />
+                <span className="truncate max-w-[100px]">{neighbor.name || `Sector ${neighbor.sector_id}`}</span>
+              </button>
+            ))}
+          </>
+        )}
+
+        {/* Separator */}
+        {(planets.length > 0 || jumpPoints.length > 0) && ports.length > 0 && (
           <div className="w-px h-5 bg-space-600 shrink-0" />
         )}
 
@@ -85,7 +140,7 @@ const SystemEntityBar = ({ systemDetail, selectedEntityId, onEntitySelect }) => 
         )}
 
         {/* Separator */}
-        {(planets.length > 0 || ports.length > 0) && npcs.length > 0 && (
+        {(planets.length > 0 || jumpPoints.length > 0 || ports.length > 0) && npcs.length > 0 && (
           <div className="w-px h-5 bg-space-600 shrink-0" />
         )}
 
@@ -93,24 +148,29 @@ const SystemEntityBar = ({ systemDetail, selectedEntityId, onEntitySelect }) => 
         {npcs.length > 0 && (
           <>
             <span className="text-[10px] text-gray-500 uppercase shrink-0 font-bold tracking-widest">Contacts</span>
-            {npcs.map(npc => (
-              <button
-                key={npc.npc_id}
-                onClick={() => onEntitySelect('npc', npc)}
-                className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs shrink-0 transition-all ${
-                  npc.npc_id === selectedEntityId
-                    ? 'bg-space-600 text-white border border-space-500'
-                    : 'text-gray-300 hover:bg-space-700 hover:text-white'
-                }`}
-              >
-                {npc.npc_type === 'PIRATE' || npc.npc_type === 'PIRATE_LORD' ? (
-                  <Skull className="w-3 h-3 text-red-400 shrink-0" />
-                ) : (
-                  <Crosshair className="w-3 h-3 text-yellow-400 shrink-0" />
-                )}
-                <span className="truncate max-w-[100px]">{npc.name}</span>
-              </button>
-            ))}
+            {npcs.map(npc => {
+              const isHostile = npc.npc_type === 'PIRATE' || npc.npc_type === 'PIRATE_LORD' || npc.npc_type === 'BOUNTY_HUNTER';
+              const isFriendly = npc.npc_type === 'TRADER';
+              const npcColor = isHostile ? 'text-red-400' : isFriendly ? 'text-green-400' : 'text-yellow-400';
+              return (
+                <button
+                  key={npc.npc_id}
+                  onClick={() => onEntitySelect('npc', npc)}
+                  className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs shrink-0 transition-all ${
+                    npc.npc_id === selectedEntityId
+                      ? 'bg-space-600 text-white border border-space-500'
+                      : 'text-gray-300 hover:bg-space-700 hover:text-white'
+                  }`}
+                >
+                  {isHostile ? (
+                    <Skull className={`w-3 h-3 ${npcColor} shrink-0`} />
+                  ) : (
+                    <Crosshair className={`w-3 h-3 ${npcColor} shrink-0`} />
+                  )}
+                  <span className="truncate max-w-[100px]">{npc.name}</span>
+                </button>
+              );
+            })}
           </>
         )}
       </div>

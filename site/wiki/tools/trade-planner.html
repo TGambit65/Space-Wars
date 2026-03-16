@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trade Route Planner - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+    <script src="../../js/wiki-smart-navigation.js"></script>
+    <script src="../../js/wiki-interactive-features.js"></script>
+    <script src="../../js/wiki-trade-planner.js"></script>
+</head>
+<body class="doc-container tools-page">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="../index.html" class="doc-nav-link">← Wiki Home</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="index.html" class="doc-nav-link">Interactive Tools</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="ship-calculator.html" class="doc-nav-link">Ship Calculator</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="trade-planner.html" class="doc-nav-link active">Trade Planner</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item">
+                <a href="index.html" class="doc-breadcrumb-link">Interactive Tools</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Trade Planner</div>
+        </nav>
+
+        <h1 class="doc-h1 holo-text">💰 Trade Route Planner</h1>
+        
+        <div class="doc-alert info">
+            <strong>Your Personal Trading Assistant:</strong> This planner helps you find the most profitable 
+            trade routes while avoiding dangerous sectors. It's like having a space merchant's GPS! 🗺️
+        </div>
+
+        <p class="doc-lead">
+            Welcome to the smartest trading tool in the galaxy! This planner takes all the guesswork out of 
+            interstellar commerce. Instead of flying around randomly hoping to find good deals, you can plan 
+            your routes like a professional space trader! It calculates profits, fuel costs, travel times, 
+            and even warns you about dangerous sectors. Captain "Always Profitable" Rodriguez uses this tool 
+            for every single trade run and hasn't lost money in three years! 💎
+        </p>
+
+        <!-- Trade Route Interface -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🎯 Route Planning Interface</h2>
+            
+            <div class="doc-grid doc-grid-2">
+                <!-- Route Selection -->
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🚀 Route Selection</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <div id="route-selection">
+                            <div class="route-inputs">
+                                <div class="input-group">
+                                    <label>Starting Location:</label>
+                                    <select id="start-location">
+                                        <option value="">Select starting sector...</option>
+                                        <option value="alpha-1">Alpha Station</option>
+                                        <option value="beta-2">Beta Outpost</option>
+                                        <option value="gamma-3">Gamma Colony</option>
+                                        <option value="delta-4">Delta Industrial</option>
+                                        <option value="epsilon-5">Epsilon Trading Hub</option>
+                                        <option value="zeta-6">Zeta Research</option>
+                                        <option value="eta-7">Eta Frontier</option>
+                                        <option value="theta-8">Theta Refinery</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="input-group">
+                                    <label>Destination:</label>
+                                    <select id="end-location">
+                                        <option value="">Select destination...</option>
+                                        <option value="alpha-1">Alpha Station</option>
+                                        <option value="beta-2">Beta Outpost</option>
+                                        <option value="gamma-3">Gamma Colony</option>
+                                        <option value="delta-4">Delta Industrial</option>
+                                        <option value="epsilon-5">Epsilon Trading Hub</option>
+                                        <option value="zeta-6">Zeta Research</option>
+                                        <option value="eta-7">Eta Frontier</option>
+                                        <option value="theta-8">Theta Refinery</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="input-group">
+                                    <label>Commodity:</label>
+                                    <select id="commodity-select">
+                                        <option value="">Select commodity...</option>
+                                        <option value="food">Food Supplies</option>
+                                        <option value="ore">Raw Ore</option>
+                                        <option value="machinery">Machinery</option>
+                                        <option value="technology">Technology</option>
+                                        <option value="luxury">Luxury Goods</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="input-group">
+                                    <label>Cargo Capacity:</label>
+                                    <input type="number" id="cargo-capacity" value="50" min="1" max="500">
+                                </div>
+                                
+                                <div class="input-group">
+                                    <label>Available Funds:</label>
+                                    <input type="number" id="available-funds" value="10000" min="100" max="1000000">
+                                </div>
+                            </div>
+                            
+                            <div class="route-actions">
+                                <button class="doc-button primary" onclick="calculateRoute()">Calculate Route</button>
+                                <button class="doc-button secondary" onclick="findBestRoute()">Find Best Route</button>
+                                <button class="doc-button" onclick="clearRoute()">Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Route Results -->
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">📊 Route Analysis</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <div id="route-results">
+                            <div class="terminal-window">
+                                <div class="terminal-header">
+                                    <span class="terminal-title">Trade Route Analysis</span>
+                                </div>
+                                <div class="terminal-content" id="route-analysis">
+                                    <div class="terminal-line">
+                                        <span class="terminal-prompt">STATUS</span>
+                                        <span class="terminal-output">Ready to calculate route</span>
+                                    </div>
+                                    <div class="terminal-line">
+                                        <span class="terminal-prompt">DISTANCE</span>
+                                        <span class="terminal-output">-- units</span>
+                                    </div>
+                                    <div class="terminal-line">
+                                        <span class="terminal-prompt">FUEL_COST</span>
+                                        <span class="terminal-output">-- credits</span>
+                                    </div>
+                                    <div class="terminal-line">
+                                        <span class="terminal-prompt">BUY_PRICE</span>
+                                        <span class="terminal-output">-- credits/unit</span>
+                                    </div>
+                                    <div class="terminal-line">
+                                        <span class="terminal-prompt">SELL_PRICE</span>
+                                        <span class="terminal-output">-- credits/unit</span>
+                                    </div>
+                                    <div class="terminal-line">
+                                        <span class="terminal-prompt">PROFIT</span>
+                                        <span class="terminal-output">-- credits</span>
+                                    </div>
+                                    <div class="terminal-line">
+                                        <span class="terminal-prompt">RISK_LEVEL</span>
+                                        <span class="terminal-output">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Galaxy Map -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🗺️ Interactive Galaxy Map</h2>
+            
+            <div class="doc-alert accent">
+                <strong>Visual Route Planning:</strong> Click on sectors to select them, or use the dropdowns above. 
+                The map shows sector types, populations, and trade relationships!
+            </div>
+
+            <div class="galaxy-map" id="galaxy-map">
+                <div class="map-container">
+                    <div class="sector-grid">
+                        <div class="sector" data-sector="alpha-1" style="grid-column: 2; grid-row: 2;">
+                            <div class="sector-marker station"></div>
+                            <span class="sector-name">Alpha Station</span>
+                        </div>
+                        <div class="sector" data-sector="beta-2" style="grid-column: 5; grid-row: 1;">
+                            <div class="sector-marker mining"></div>
+                            <span class="sector-name">Beta Outpost</span>
+                        </div>
+                        <div class="sector" data-sector="gamma-3" style="grid-column: 8; grid-row: 3;">
+                            <div class="sector-marker agricultural"></div>
+                            <span class="sector-name">Gamma Colony</span>
+                        </div>
+                        <div class="sector" data-sector="delta-4" style="grid-column: 3; grid-row: 6;">
+                            <div class="sector-marker industrial"></div>
+                            <span class="sector-name">Delta Industrial</span>
+                        </div>
+                        <div class="sector" data-sector="epsilon-5" style="grid-column: 7; grid-row: 7;">
+                            <div class="sector-marker commercial"></div>
+                            <span class="sector-name">Epsilon Hub</span>
+                        </div>
+                        <div class="sector" data-sector="zeta-6" style="grid-column: 1; grid-row: 8;">
+                            <div class="sector-marker research"></div>
+                            <span class="sector-name">Zeta Research</span>
+                        </div>
+                        <div class="sector" data-sector="eta-7" style="grid-column: 9; grid-row: 5;">
+                            <div class="sector-marker frontier"></div>
+                            <span class="sector-name">Eta Frontier</span>
+                        </div>
+                        <div class="sector" data-sector="theta-8" style="grid-column: 6; grid-row: 9;">
+                            <div class="sector-marker refinery"></div>
+                            <span class="sector-name">Theta Refinery</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Top Trade Routes -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🏆 Top Trade Routes</h2>
+            
+            <div class="doc-grid doc-grid-3">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">💎 Most Profitable</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <div class="trade-route-summary">
+                            <div class="route-path">Gamma Colony → Delta Industrial</div>
+                            <div class="route-commodity">Food Supplies</div>
+                            <div class="route-profit">+2,400 credits</div>
+                            <div class="route-risk risk-low">Low Risk</div>
+                        </div>
+                        <button class="doc-button secondary" onclick="loadRoute('gamma-3', 'delta-4', 'food')">Load Route</button>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">⚡ Fastest</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <div class="trade-route-summary">
+                            <div class="route-path">Alpha Station → Beta Outpost</div>
+                            <div class="route-commodity">Machinery</div>
+                            <div class="route-profit">+1,200 credits</div>
+                            <div class="route-risk risk-low">Low Risk</div>
+                        </div>
+                        <button class="doc-button secondary" onclick="loadRoute('alpha-1', 'beta-2', 'machinery')">Load Route</button>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🛡️ Safest</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <div class="trade-route-summary">
+                            <div class="route-path">Epsilon Hub → Zeta Research</div>
+                            <div class="route-commodity">Technology</div>
+                            <div class="route-profit">+1,800 credits</div>
+                            <div class="route-risk risk-low">Very Low Risk</div>
+                        </div>
+                        <button class="doc-button secondary" onclick="loadRoute('epsilon-5', 'zeta-6', 'technology')">Load Route</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Related Tools -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🔗 Related Tools</h2>
+            
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🚀 Design Trading Ship</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Build the perfect trading vessel with maximum cargo capacity</p>
+                        <a href="ship-calculator.html" class="doc-button secondary">Ship Calculator →</a>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">⚔️ Test Defenses</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Make sure your trader can survive pirate attacks</p>
+                        <a href="combat-simulator.html" class="doc-button secondary">Combat Simulator →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="ship-calculator.html" class="doc-nav-link">← Ship Calculator</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="combat-simulator.html" class="doc-nav-link">Combat Simulator →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            
+            // Initialize Trade Planner
+            const tradePlanner = new WikiTradePlanner();
+            
+            // Add event listeners for route calculation
+            window.calculateRoute = function() {
+                const start = document.getElementById('start-location').value;
+                const end = document.getElementById('end-location').value;
+                const commodity = document.getElementById('commodity-select').value;
+                const cargo = parseInt(document.getElementById('cargo-capacity').value);
+                const funds = parseInt(document.getElementById('available-funds').value);
+                
+                if (!start || !end || !commodity) {
+                    alert('Please select start, end, and commodity');
+                    return;
+                }
+                
+                const route = tradePlanner.calculateRoute(start, end, commodity, cargo, funds);
+                displayRouteResults(route);
+            };
+            
+            window.findBestRoute = function() {
+                const cargo = parseInt(document.getElementById('cargo-capacity').value);
+                const funds = parseInt(document.getElementById('available-funds').value);
+                
+                const bestRoute = tradePlanner.findBestRoute(cargo, funds);
+                displayRouteResults(bestRoute);
+                
+                // Auto-fill the form
+                document.getElementById('start-location').value = bestRoute.start;
+                document.getElementById('end-location').value = bestRoute.end;
+                document.getElementById('commodity-select').value = bestRoute.commodity;
+            };
+            
+            window.clearRoute = function() {
+                document.getElementById('start-location').value = '';
+                document.getElementById('end-location').value = '';
+                document.getElementById('commodity-select').value = '';
+                document.getElementById('cargo-capacity').value = 50;
+                document.getElementById('available-funds').value = 10000;
+                
+                // Clear results
+                const analysis = document.getElementById('route-analysis');
+                analysis.innerHTML = `
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STATUS</span>
+                        <span class="terminal-output">Ready to calculate route</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">DISTANCE</span>
+                        <span class="terminal-output">-- units</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">FUEL_COST</span>
+                        <span class="terminal-output">-- credits</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">BUY_PRICE</span>
+                        <span class="terminal-output">-- credits/unit</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">SELL_PRICE</span>
+                        <span class="terminal-output">-- credits/unit</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">PROFIT</span>
+                        <span class="terminal-output">-- credits</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">RISK_LEVEL</span>
+                        <span class="terminal-output">--</span>
+                    </div>
+                `;
+            };
+            
+            window.loadRoute = function(start, end, commodity) {
+                document.getElementById('start-location').value = start;
+                document.getElementById('end-location').value = end;
+                document.getElementById('commodity-select').value = commodity;
+                calculateRoute();
+            };
+            
+            function displayRouteResults(route) {
+                const analysis = document.getElementById('route-analysis');
+                analysis.innerHTML = `
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">STATUS</span>
+                        <span class="terminal-output">Route calculated successfully</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">DISTANCE</span>
+                        <span class="terminal-output">${route.distance} units</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">FUEL_COST</span>
+                        <span class="terminal-output">${route.fuelCost} credits</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">BUY_PRICE</span>
+                        <span class="terminal-output">${route.buyPrice} credits/unit</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">SELL_PRICE</span>
+                        <span class="terminal-output">${route.sellPrice} credits/unit</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">PROFIT</span>
+                        <span class="terminal-output">${route.profit > 0 ? '+' : ''}${route.profit} credits</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">RISK_LEVEL</span>
+                        <span class="terminal-output">${route.riskLevel}</span>
+                    </div>
+                `;
+            }
+            
+            console.log('Trade Planner loaded');
+        });
+    </script>
+    
+    <style>
+        .galaxy-map {
+            background: linear-gradient(135deg, #001122 0%, #000033 100%);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .sector-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 10px;
+            height: 400px;
+            position: relative;
+        }
+        
+        .sector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .sector:hover {
+            transform: scale(1.1);
+        }
+        
+        .sector-marker {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-bottom: 5px;
+        }
+        
+        .sector-marker.station { background: #00ff00; }
+        .sector-marker.mining { background: #ff6600; }
+        .sector-marker.agricultural { background: #66ff66; }
+        .sector-marker.industrial { background: #ff0000; }
+        .sector-marker.commercial { background: #0066ff; }
+        .sector-marker.research { background: #9900ff; }
+        .sector-marker.frontier { background: #ffff00; }
+        .sector-marker.refinery { background: #ff00ff; }
+        
+        .sector-name {
+            font-size: 10px;
+            text-align: center;
+            color: #ffffff;
+        }
+        
+        .trade-route-summary {
+            margin-bottom: 15px;
+        }
+        
+        .route-path {
+            font-weight: bold;
+            color: #00ff00;
+            margin-bottom: 5px;
+        }
+        
+        .route-commodity {
+            color: #ffff00;
+            margin-bottom: 5px;
+        }
+        
+        .route-profit {
+            color: #00ffff;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .route-risk {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .risk-low { background: #006600; color: white; }
+        .risk-medium { background: #666600; color: white; }
+        .risk-high { background: #660000; color: white; }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .input-group select,
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #333;
+            background: #1a1a1a;
+            color: #ffffff;
+            border-radius: 4px;
+        }
+        
+        .route-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</body>
+</html>

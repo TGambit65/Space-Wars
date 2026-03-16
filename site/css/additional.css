@@ -1,0 +1,126 @@
+/* Additional styles for better responsiveness and cross-browser compatibility */
+
+/* Row and column utilities for layout */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -15px;
+}
+
+.row.reverse {
+  flex-direction: row-reverse;
+}
+
+.col-40, .col-60 {
+  padding: 15px;
+}
+
+.col-40 {
+  flex: 0 0 40%;
+  max-width: 40%;
+}
+
+.col-60 {
+  flex: 0 0 60%;
+  max-width: 60%;
+}
+
+/* Spacing utilities */
+.mt-20 {
+  margin-top: 20px;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}
+
+/* Text utilities */
+.text-center {
+  text-align: center;
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+/* Background utilities */
+.alt-bg {
+  background-color: var(--surface-color);
+}
+
+/* Additional section styles */
+.section {
+  padding: 100px 0;
+}
+
+.cta {
+  background: linear-gradient(45deg, var(--primary-dark), var(--primary-color));
+  text-align: center;
+}
+
+.cta h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.cta p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+  }
+  
+  .row.reverse {
+    flex-direction: column;
+  }
+  
+  .col-40, .col-60 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  
+  .section {
+    padding: 60px 0;
+  }
+  
+  .cta-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* Animation for content */
+.gameplay-item, .faction-content {
+  transition: all 0.3s ease-in-out;
+}
+
+.gameplay-item:not(.active), .faction-content:not(.active) {
+  display: none;
+}
+
+.gameplay-item.active, .faction-content.active {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Create placeholder images effect */
+.img-placeholder {
+  background: linear-gradient(45deg, rgba(124, 77, 255, 0.1), rgba(124, 77, 255, 0.2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: var(--secondary-color);
+  font-size: 3rem;
+  min-height: 200px;
+}

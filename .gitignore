@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+client/dist/
+
+# Database
+server/data/*.sqlite
+
+# Test output
+server/test-output*.txt
+server/test-results/
+client/test-results/
+
+# Playwright
+.playwright-cli/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*

@@ -1,0 +1,15 @@
+/* Combat Interface Styles for Space Wars 3000 - Modular Design */
+
+/* Import base styles and variables */
+@import url('./combat-base.css');
+
+/* Import component-specific styles */
+@import url('./combat-ships.css');
+@import url('./combat-formations.css');
+@import url('./combat-effects.css');
+
+/* Import responsive design */
+@import url('./combat-responsive.css');
+
+/* Legacy compatibility - will be removed in future version */
+/* This ensures existing functionality continues to work while components are being migrated */

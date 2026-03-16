@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Technologies Guide - Space Wars 3000 Wiki</title>
+    
+    <!-- Load documentation CSS foundation -->
+    <link rel="stylesheet" href="../../css/documentation-base.css">
+    <link rel="stylesheet" href="../../css/terminal-components.css">
+    <link rel="stylesheet" href="../../css/holographic-effects.css">
+    <link rel="stylesheet" href="../../css/typography-scale.css">
+    <link rel="stylesheet" href="../../css/interactive-typography.css">
+    <link rel="stylesheet" href="../../css/ui-components-base.css">
+    <link rel="stylesheet" href="../../css/visual-feedback.css">
+    
+    <link rel="icon" href="../../images/icons/icon-192x192.png">
+    <script src="../../js/wiki-smart-navigation.js"></script>
+    <script src="../../js/wiki-interactive-features.js"></script>
+    
+    <style>
+        /* Technology tree styles */
+        .tech-tree {
+            margin: var(--doc-spacing-lg) 0;
+            padding: var(--doc-spacing-lg);
+            background: var(--color-surface);
+            border: 2px solid var(--color-primary);
+            position: relative;
+        }
+        
+        .tech-branch {
+            margin-bottom: var(--doc-spacing-xl);
+        }
+        
+        .tech-node {
+            display: inline-block;
+            padding: var(--doc-spacing-sm) var(--doc-spacing-md);
+            background: var(--color-background);
+            border: 2px solid var(--color-accent);
+            margin: var(--doc-spacing-sm);
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .tech-node:hover {
+            box-shadow: 0 0 20px var(--color-accent);
+            transform: translateY(-2px);
+        }
+        
+        .tech-node.unlocked {
+            border-color: var(--color-success);
+            box-shadow: 0 0 10px var(--color-success);
+        }
+        
+        .tech-node.locked {
+            opacity: 0.6;
+            border-style: dashed;
+        }
+        
+        .tech-connection {
+            position: absolute;
+            height: 2px;
+            background: var(--color-primary);
+            z-index: -1;
+        }
+        
+        .research-cost {
+            display: inline-block;
+            padding: 2px 8px;
+            background: var(--color-warning);
+            color: var(--color-background);
+            font-size: 0.85em;
+            margin-left: var(--doc-spacing-sm);
+        }
+        
+        .tech-calculator {
+            background: var(--color-surface);
+            padding: var(--doc-spacing-lg);
+            border: 2px solid var(--color-primary);
+            margin: var(--doc-spacing-lg) 0;
+        }
+        
+        .calculator-input {
+            width: 100%;
+            padding: var(--doc-spacing-sm);
+            background: var(--color-background);
+            border: 1px solid var(--color-primary);
+            color: var(--color-text);
+            font-family: var(--font-family-mono);
+            margin: var(--doc-spacing-sm) 0;
+        }
+    </style>
+</head>
+<body class="doc-container reference-page">
+    <!-- Navigation Header -->
+    <header class="holo-panel">
+        <nav class="doc-nav">
+            <div class="doc-nav-item">
+                <a href="../index.html" class="doc-nav-link">← Wiki Home</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="equipment-catalog.html" class="doc-nav-link">Equipment Catalog</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="advanced-technologies.html" class="doc-nav-link active">Advanced Technologies</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="doc-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="doc-breadcrumb">
+            <div class="doc-breadcrumb-item">
+                <a href="../index.html" class="doc-breadcrumb-link">Wiki Home</a>
+            </div>
+            <div class="doc-breadcrumb-item active">Advanced Technologies Guide</div>
+        </nav>
+        
+        <h1 class="doc-h1 holo-text">🔬 Advanced Technologies Guide</h1>
+        
+        <div class="doc-alert info">
+            <strong>🚀 Future Tech Awaits:</strong> Welcome to the cutting edge of space technology! 
+            These aren't just upgrades - they're game-changers that will make you feel like you're 
+            living in the year 3000 (which you technically are)! 🌟
+        </div>
+
+        <p class="doc-lead">
+            Ready to transform your basic space jalopy into a technological marvel? This guide reveals 
+            the secrets of advanced technology research, from quantum physics to artificial intelligence! 
+            Learn which technologies to prioritize, how to unlock the coolest gadgets, and why some 
+            captains spend more time in the research lab than in space (hint: the coffee is better)! ☕🔬
+        </p>
+
+        <!-- Technology Overview -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🌟 Understanding Technology Research</h2>
+            
+            <div class="doc-alert warning">
+                <strong>🎓 Research Tip:</strong> Technology isn't just about having the shiniest toys - 
+                it's about having the RIGHT toys at the RIGHT time! Smart research planning is the 
+                difference between victory and becoming space debris!
+            </div>
+
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">📚 How Research Works</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Research Points:</strong> Earned from missions and discoveries</li>
+                            <li><strong>Tech Trees:</strong> Branching paths of related technologies</li>
+                            <li><strong>Prerequisites:</strong> Some tech requires other tech first</li>
+                            <li><strong>Research Time:</strong> Advanced tech takes longer to unlock</li>
+                            <li><strong>Faction Bonuses:</strong> Each faction researches differently!</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🎯 Research Strategies</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <ul class="doc-list">
+                            <li><strong>Specialization:</strong> Master one branch completely</li>
+                            <li><strong>Balanced:</strong> Spread research across all fields</li>
+                            <li><strong>Rush Strategy:</strong> Beeline to powerful tech</li>
+                            <li><strong>Economic Focus:</strong> Tech that pays for itself</li>
+                            <li><strong>Combat Priority:</strong> Survival first, comfort later</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Visual Technology Tree -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🌳 The Technology Tree</h2>
+            
+            <div class="doc-alert info">
+                <strong>🗺️ Navigation Tip:</strong> Think of the tech tree like a cosmic skill tree in your 
+                favorite RPG - except instead of fire spells, you're unlocking quantum engines! 🎮
+            </div>
+
+            <div class="tech-tree">
+                <h3 class="doc-h3">⚡ Energy Technology Branch</h3>
+                <div class="tech-branch">
+                    <div class="tech-node unlocked">
+                        Basic Power Systems
+                        <span class="research-cost">FREE</span>
+                    </div>
+                    →
+                    <div class="tech-node unlocked">
+                        Improved Reactors
+                        <span class="research-cost">100 RP</span>
+                    </div>
+                    →
+                    <div class="tech-node">
+                        Fusion Technology
+                        <span class="research-cost">500 RP</span>
+                    </div>
+                    →
+                    <div class="tech-node locked">
+                        Zero-Point Energy
+                        <span class="research-cost">2000 RP</span>
+                    </div>
+                </div>
+
+                <h3 class="doc-h3">🚀 Propulsion Technology Branch</h3>
+                <div class="tech-branch">
+                    <div class="tech-node unlocked">
+                        Chemical Thrusters
+                        <span class="research-cost">FREE</span>
+                    </div>
+                    →
+                    <div class="tech-node">
+                        Ion Drives
+                        <span class="research-cost">200 RP</span>
+                    </div>
+                    →
+                    <div class="tech-node locked">
+                        Plasma Engines
+                        <span class="research-cost">800 RP</span>
+                    </div>
+                    →
+                    <div class="tech-node locked">
+                        Quantum Drives
+                        <span class="research-cost">3000 RP</span>
+                    </div>
+                </div>
+
+                <h3 class="doc-h3">⚔️ Weapons Technology Branch</h3>
+                <div class="tech-branch">
+                    <div class="tech-node unlocked">
+                        Projectile Weapons
+                        <span class="research-cost">FREE</span>
+                    </div>
+                    →
+                    <div class="tech-node">
+                        Energy Weapons
+                        <span class="research-cost">300 RP</span>
+                    </div>
+                    →
+                    <div class="tech-node locked">
+                        Plasma Weapons
+                        <span class="research-cost">1000 RP</span>
+                    </div>
+                    →
+                    <div class="tech-node locked">
+                        Antimatter Weapons
+                        <span class="research-cost">5000 RP</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Jump Drive Technology Deep Dive -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">⚡ Jump Drive Technology Explained</h2>
+            
+            <div class="doc-alert accent">
+                <strong>🌌 Space-Time Fun Fact:</strong> Jump drives don't actually move you through space - 
+                they fold space around you! It's like folding a piece of paper to make two points touch. 
+                Except the paper is the universe, and you're a spaceship. Mind = blown! 🤯
+            </div>
+
+            <h3 class="doc-h3">📊 Jump Drive Evolution</h3>
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Technology Level</th>
+                        <th>Jump Range</th>
+                        <th>Fuel Efficiency</th>
+                        <th>Cooldown</th>
+                        <th>Special Features</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Basic Jump Drive</strong></td>
+                        <td>1 Sector</td>
+                        <td>Standard (100%)</td>
+                        <td>60 seconds</td>
+                        <td>Gets you there... eventually</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Improved Jump Drive</strong></td>
+                        <td>2 Sectors</td>
+                        <td>Good (80%)</td>
+                        <td>45 seconds</td>
+                        <td>Smoother jumps, less nausea!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Advanced Jump Drive</strong></td>
+                        <td>3 Sectors</td>
+                        <td>Excellent (60%)</td>
+                        <td>30 seconds</td>
+                        <td>Can jump while moving!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Quantum Jump Drive</strong></td>
+                        <td>5 Sectors</td>
+                        <td>Amazing (40%)</td>
+                        <td>15 seconds</td>
+                        <td>Phase through obstacles!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Experimental Warp Drive</strong></td>
+                        <td>Unlimited*</td>
+                        <td>Variable</td>
+                        <td>Instant</td>
+                        <td>*May cause temporal anomalies</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="doc-alert warning">
+                <strong>⚠️ Safety Warning:</strong> The Experimental Warp Drive has a 0.01% chance of sending 
+                you to an alternate dimension where everything is made of cheese. Use at your own risk!
+            </div>
+        </section>
+
+        <!-- Research Strategies and Priorities -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🎯 Research Strategies by Play Style</h2>
+            
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">💰 The Trader's Path</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <h4>Priority Technologies:</h4>
+                        <ol class="doc-list">
+                            <li><strong>Cargo Expansion:</strong> More space = more profit!</li>
+                            <li><strong>Fuel Efficiency:</strong> Save credits on every jump</li>
+                            <li><strong>Market Predictors:</strong> Know prices before you arrive</li>
+                            <li><strong>Stealth Systems:</strong> Avoid those pesky pirates</li>
+                            <li><strong>Fast Engines:</strong> Time is money!</li>
+                        </ol>
+                        <div class="doc-alert info">
+                            <strong>💡 Pro Tip:</strong> Research "Automated Trading AI" early - 
+                            it literally makes money while you sleep!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">⚔️ The Warrior's Path</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <h4>Priority Technologies:</h4>
+                        <ol class="doc-list">
+                            <li><strong>Weapon Damage:</strong> Dead enemies can't shoot back</li>
+                            <li><strong>Shield Technology:</strong> Living is important</li>
+                            <li><strong>Targeting Systems:</strong> Hit what you aim at</li>
+                            <li><strong>Combat Maneuvers:</strong> Dodge like a pro</li>
+                            <li><strong>Weapon Variety:</strong> Right tool for every job</li>
+                        </ol>
+                        <div class="doc-alert warning">
+                            <strong>⚔️ Combat Wisdom:</strong> "Advanced Targeting Computer" + "Quantum Weapons" = 
+                            Nobody stands a chance!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🔍 The Explorer's Path</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <h4>Priority Technologies:</h4>
+                        <ol class="doc-list">
+                            <li><strong>Scanning Range:</strong> Find stuff from farther away</li>
+                            <li><strong>Jump Range:</strong> Go where others can't</li>
+                            <li><strong>Anomaly Detection:</strong> Discover the weird stuff</li>
+                            <li><strong>Data Analysis:</strong> Understand what you find</li>
+                            <li><strong>Survival Systems:</strong> Come back alive!</li>
+                        </ol>
+                        <div class="doc-alert accent">
+                            <strong>🗺️ Explorer Secret:</strong> "Quantum Scanners" can find hidden 
+                            jump points that lead to secret sectors!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🤖 The Tech Lord's Path</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <h4>Priority Technologies:</h4>
+                        <ol class="doc-list">
+                            <li><strong>Research Boost:</strong> Research faster to research more!</li>
+                            <li><strong>AI Systems:</strong> Let robots do the work</li>
+                            <li><strong>Efficiency Tech:</strong> Everything works better</li>
+                            <li><strong>Experimental Tech:</strong> The weird, wild stuff</li>
+                            <li><strong>Tech Trading:</strong> Sell knowledge for profit</li>
+                        </ol>
+                        <div class="doc-alert info">
+                            <strong>🧠 Big Brain Move:</strong> Rush "Research Lab Mk III" - 
+                            it gives +50% research speed forever!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Special Technology Unlocks -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🌟 Special Technology Unlocks</h2>
+            
+            <div class="doc-alert warning">
+                <strong>🎁 Secret Tech Alert:</strong> Some technologies can only be unlocked through 
+                special missions, faction loyalty, or by finding ancient artifacts. Keep exploring!
+            </div>
+
+            <h3 class="doc-h3">🏆 Legendary Technologies</h3>
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-title">Classified Technology Database</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">CHRONO_DRIVE</span>
+                        <span class="terminal-output">Time manipulation engine - Slow enemies to 10% speed!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">SINGULARITY_GEN</span>
+                        <span class="terminal-output">Creates mini black holes - Ultimate area denial!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">PHOENIX_PROTOCOL</span>
+                        <span class="terminal-output">Auto-resurrect once per battle - Cheat death!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">REALITY_ANCHOR</span>
+                        <span class="terminal-output">Immune to all space-time effects - Stay grounded!</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">OMEGA_CANNON</span>
+                        <span class="terminal-output">[REDACTED] - Trust us, you want this!</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="doc-h3">🔓 How to Unlock Special Tech</h3>
+            <div class="doc-grid doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">📜 Ancient Artifacts</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Find these in:</p>
+                        <ul class="doc-list">
+                            <li>Derelict alien ships</li>
+                            <li>Hidden planet ruins</li>
+                            <li>Anomaly investigations</li>
+                            <li>Black market dealers</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h4 class="doc-card-title">🏛️ Faction Loyalty</h4>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Exclusive tech from:</p>
+                        <ul class="doc-list">
+                            <li>Terran: Diplomatic systems</li>
+                            <li>Zynthian: Bio-technology</li>
+                            <li>Nexus: AI enhancements</li>
+                            <li>Pirates: Illegal mods!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Research Calculator -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🧮 Research Time Calculator</h2>
+            
+            <div class="tech-calculator">
+                <h3 class="doc-h3">Calculate Your Research Path</h3>
+                
+                <label for="current-rp">Current Research Points:</label>
+                <input type="number" id="current-rp" class="calculator-input" placeholder="Enter your current RP">
+                
+                <label for="rp-per-day">RP Generated Per Day:</label>
+                <input type="number" id="rp-per-day" class="calculator-input" placeholder="Your daily RP income">
+                
+                <label for="target-tech">Target Technology Cost:</label>
+                <input type="number" id="target-tech" class="calculator-input" placeholder="Cost of desired tech">
+                
+                <button class="doc-button primary" onclick="calculateResearchTime()">Calculate Time</button>
+                
+                <div id="calc-result" style="margin-top: var(--doc-spacing-md); display: none;">
+                    <div class="terminal-window">
+                        <div class="terminal-content">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">RESULT</span>
+                                <span class="terminal-output" id="result-text">Calculating...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech Tips and Tricks -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">💡 Pro Technology Tips</h2>
+            
+            <div class="doc-alert info">
+                <strong>🎓 Wisdom from Veterans:</strong> These tips come from players who've researched 
+                EVERYTHING and lived to tell the tale!
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🚀 Early Game Tech Tips</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <ul class="doc-list">
+                        <li><strong>Rush Fuel Efficiency:</strong> Saves money on EVERY trip</li>
+                        <li><strong>Get Basic Shields ASAP:</strong> Dead captains research nothing</li>
+                        <li><strong>Cargo Scanner is OP:</strong> See loot before you risk your ship</li>
+                        <li><strong>Don't Neglect Engines:</strong> Running away is a valid strategy!</li>
+                        <li><strong>Research Station First:</strong> Passive RP generation is king</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>⚡ Mid Game Power Spikes</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <ul class="doc-list">
+                        <li><strong>Jump Drive Mk III:</strong> Changes everything about exploration</li>
+                        <li><strong>Auto-Repair Systems:</strong> Never pay for repairs again</li>
+                        <li><strong>Advanced AI:</strong> Your ship becomes your co-pilot</li>
+                        <li><strong>Weapon Specialization:</strong> Master one weapon type completely</li>
+                        <li><strong>Economic Analyzer:</strong> Turns trading into easy mode</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="doc-expandable" data-component="accordion">
+                <div class="doc-expandable-header">
+                    <span>🌟 End Game Tech Goals</span>
+                </div>
+                <div class="doc-expandable-content">
+                    <ul class="doc-list">
+                        <li><strong>Quantum Everything:</strong> The best tier of all equipment</li>
+                        <li><strong>Experimental Weapons:</strong> For when overkill isn't enough</li>
+                        <li><strong>Reality Manipulation:</strong> Bend physics to your will</li>
+                        <li><strong>Infinite Energy:</strong> Never worry about power again</li>
+                        <li><strong>The Omega Protocol:</strong> ...we can't talk about this one</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cross-References -->
+        <section class="holo-panel">
+            <h2 class="doc-h2">🔗 Related Guides</h2>
+            
+            <div class="doc-grid doc-grid-3">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🛠️ Equipment Guide</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>See what technology unlocks which equipment!</p>
+                        <a href="equipment-catalog.html" class="doc-button secondary">Equipment Catalog</a>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🚀 Ship Design</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Build ships using your advanced technology!</p>
+                        <a href="../ship-design/index.html" class="doc-button secondary">Ship Design Guide</a>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <h3 class="doc-card-title">🏛️ Faction Tech</h3>
+                    </div>
+                    <div class="doc-card-body">
+                        <p>Learn about faction-specific technologies!</p>
+                        <a href="../factions/index.html" class="doc-button secondary">Faction Guide</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Footer -->
+        <nav class="doc-nav" style="margin-top: var(--doc-spacing-xxl);">
+            <div class="doc-nav-item">
+                <a href="equipment-catalog.html" class="doc-nav-link">← Equipment Catalog</a>
+            </div>
+            <div class="doc-nav-item">
+                <a href="../index.html" class="doc-nav-link">Wiki Home →</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Load Documentation JavaScript -->
+    <script src="../../js/documentation-core.js"></script>
+    <script src="../../js/accordion-component.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            DocumentationComponentFactory.autoInit();
+            
+            // Tech node interactions
+            const techNodes = document.querySelectorAll('.tech-node');
+            techNodes.forEach(node => {
+                node.addEventListener('click', function() {
+                    if (!this.classList.contains('locked')) {
+                        alert('Technology details would appear here in the full game!');
+                    } else {
+                        alert('This technology is locked! Complete prerequisites first.');
+                    }
+                });
+            });
+        });
+        
+        // Research Calculator
+        function calculateResearchTime() {
+            const currentRP = parseInt(document.getElementById('current-rp').value) || 0;
+            const rpPerDay = parseInt(document.getElementById('rp-per-day').value) || 0;
+            const targetCost = parseInt(document.getElementById('target-tech').value) || 0;
+            
+            if (rpPerDay === 0) {
+                document.getElementById('result-text').textContent = 'ERROR: You need to generate RP to research!';
+            } else {
+                const rpNeeded = Math.max(0, targetCost - currentRP);
+                const daysNeeded = Math.ceil(rpNeeded / rpPerDay);
+                
+                let resultText = '';
+                if (rpNeeded === 0) {
+                    resultText = 'You can research this RIGHT NOW! Go for it! 🎉';
+                } else if (daysNeeded === 1) {
+                    resultText = `Just 1 more day! You'll have it tomorrow! 🌟`;
+                } else if (daysNeeded <= 7) {
+                    resultText = `Only ${daysNeeded} days to go! Less than a week! 📅`;
+                } else if (daysNeeded <= 30) {
+                    resultText = `${daysNeeded} days (about ${Math.round(daysNeeded/7)} weeks). Stay patient! 🕐`;
+                } else {
+                    resultText = `${daysNeeded} days (about ${Math.round(daysNeeded/30)} months). Consider boosting RP generation! 🚀`;
+                }
+                
+                document.getElementById('result-text').textContent = resultText;
+            }
+            
+            document.getElementById('calc-result').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

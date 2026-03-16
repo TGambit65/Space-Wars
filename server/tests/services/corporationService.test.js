@@ -1,6 +1,6 @@
 const { cleanDatabase, createTestUser, createTestCorporation } = require('../helpers');
 const corporationService = require('../../src/services/corporationService');
-const { Corporation, CorporationMember, User } = require('../../src/models');
+const { Corporation, CorporationMember, User, TransferLedger } = require('../../src/models');
 
 describe('Corporation Service', () => {
   let user;
@@ -193,6 +193,50 @@ describe('Corporation Service', () => {
       await corporationService.contributeToTreasury(user.user_id, 5000);
       const result = await corporationService.withdrawFromTreasury(user.user_id, 2000);
       expect(result.treasury).toBe(3000);
+    });
+
+    it('should replay an idempotent treasury withdrawal without double spending', async () => {
+      await corporationService.contributeToTreasury(user.user_id, 6000);
+
+      const first = await corporationService.withdrawFromTreasury(user.user_id, 2000, {
+        idempotencyKey: 'corp-withdraw-1'
+      });
+      const second = await corporationService.withdrawFromTreasury(user.user_id, 2000, {
+        idempotencyKey: 'corp-withdraw-1'
+      });
+
+      expect(second).toEqual(first);
+
+      await corp.reload();
+      expect(Number(corp.treasury)).toBe(4000);
+
+      const ledgers = await TransferLedger.findAll({
+        where: { idempotency_key: 'corp-withdraw-1' }
+      });
+      expect(ledgers).toHaveLength(1);
+    });
+
+    it('should replay an idempotent treasury contribution without double charging', async () => {
+      const startingCredits = Number(user.credits);
+
+      const first = await corporationService.contributeToTreasury(user.user_id, 1500, {
+        idempotencyKey: 'corp-contribute-1'
+      });
+      const second = await corporationService.contributeToTreasury(user.user_id, 1500, {
+        idempotencyKey: 'corp-contribute-1'
+      });
+
+      expect(second).toEqual(first);
+
+      await corp.reload();
+      await user.reload();
+      expect(Number(corp.treasury)).toBe(1500);
+      expect(Number(user.credits)).toBe(startingCredits - 50000 - 1500);
+
+      const ledgers = await TransferLedger.findAll({
+        where: { idempotency_key: 'corp-contribute-1' }
+      });
+      expect(ledgers).toHaveLength(1);
     });
 
     it('should fail withdraw for non-leader', async () => {

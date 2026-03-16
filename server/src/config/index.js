@@ -104,7 +104,24 @@ module.exports = {
     // Production should use 12+ rounds, dev can use 10 for faster testing
     bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS) || (isProduction ? 12 : 10),
     rateLimitWindowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-    rateLimitMaxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || (isProduction ? 100 : 1000)
+    rateLimitMaxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || (isProduction ? 600 : 1000)
+  },
+
+  antiCheat: {
+    pvpToggleCooldownMs: parseInt(process.env.PVP_TOGGLE_COOLDOWN_MS, 10) || 10 * 60 * 1000,
+    hostilityDurationMs: parseInt(process.env.HOSTILITY_DURATION_MS, 10) || 5 * 60 * 1000,
+    newbieProtectionMs: parseInt(process.env.NEWBIE_PROTECTION_MS, 10) || 2 * 60 * 60 * 1000,
+    travelProtectionDefaultMs: parseInt(process.env.TRAVEL_PROTECTION_DEFAULT_MS, 10) || 15 * 1000,
+    combatCommandWindowMs: parseInt(process.env.COMBAT_COMMAND_WINDOW_MS, 10) || 1000,
+    combatCommandsPerWindow: parseInt(process.env.COMBAT_COMMANDS_PER_WINDOW, 10) || 20,
+    sectorInstanceAssignmentTtlMs: parseInt(process.env.SECTOR_INSTANCE_ASSIGNMENT_TTL_MS, 10) || 10 * 60 * 1000,
+    suspiciousCreditThreshold: parseInt(process.env.SUSPICIOUS_CREDIT_THRESHOLD, 10) || 25000,
+    suspiciousCommodityThreshold: parseInt(process.env.SUSPICIOUS_COMMODITY_THRESHOLD, 10) || 250,
+    playerRaidCooldownMs: parseInt(process.env.PLAYER_RAID_COOLDOWN_MS, 10) || 30 * 60 * 1000,
+    repeatedRaidWindowMs: parseInt(process.env.REPEATED_RAID_WINDOW_MS, 10) || 2 * 60 * 60 * 1000,
+    maxRepeatedRaidAttacksPerWindow: parseInt(process.env.MAX_REPEATED_RAID_ATTACKS_PER_WINDOW, 10) || 2,
+    raidOfflineThresholdMs: parseInt(process.env.RAID_OFFLINE_THRESHOLD_MS, 10) || 24 * 60 * 60 * 1000,
+    raidOfflineProtectionMs: parseInt(process.env.RAID_OFFLINE_PROTECTION_MS, 10) || 6 * 60 * 60 * 1000
   },
 
   // Ship types configuration (for future extensibility in Phase 2+)
@@ -1159,6 +1176,217 @@ module.exports = {
       spawnChance: 0.02,
       permanent: true
     }
+  },
+
+  // ============== Colony Surface ==============
+  colonySurface: {
+    gridSizes: {
+      small: { width: 24, height: 24 },   // planet size 1-3
+      medium: { width: 32, height: 32 },  // planet size 4-6
+      large: { width: 40, height: 40 },   // planet size 7-9
+      huge: { width: 48, height: 48 }     // planet size 10
+    },
+    terrainTypes: {
+      plains:        { color: '#4a7c59', buildable: true,  passable: true },
+      rocky:         { color: '#7c6e5a', buildable: true,  passable: true,  extractionBonus: 1.15 },
+      water:         { color: '#3a6b8c', buildable: false, passable: false },
+      lava:          { color: '#c44d2e', buildable: false, passable: false, adjacencyHazard: true },
+      ice:           { color: '#a8c8d8', buildable: true,  passable: true },
+      sand:          { color: '#c4a94d', buildable: true,  passable: true },
+      highland:      { color: '#5a5a5a', buildable: false, passable: true,  defenseBonus: 1.3, speedPenalty: 0.5 },
+      crystal:       { color: '#8a4d9e', buildable: true,  passable: true,  researchBonus: 1.2 },
+      swamp:         { color: '#4a5c3a', buildable: true,  passable: true,  speedPenalty: 0.5 },
+      volcanic_vent: { color: '#e06030', buildable: false, passable: false, powerBonus: true },
+      landing_zone:  { color: '#2a4a6a', buildable: false, passable: true },
+      metal_grating: { color: '#7a8a8a', buildable: true,  passable: true },
+      open_sky:      { color: '#1a3050', buildable: false, passable: false }
+    },
+    terrainProfiles: {
+      terrestrial:   { plains: 0.5, rocky: 0.2, water: 0.15, highland: 0.1, landing_zone: 0.05 },
+      oceanic:       { water: 0.55, plains: 0.15, sand: 0.15, swamp: 0.1, landing_zone: 0.05 },
+      desert:        { sand: 0.5, rocky: 0.25, plains: 0.1, highland: 0.1, landing_zone: 0.05 },
+      volcanic:      { lava: 0.25, rocky: 0.3, volcanic_vent: 0.15, plains: 0.15, highland: 0.1, landing_zone: 0.05 },
+      arctic:        { ice: 0.45, plains: 0.2, highland: 0.2, water: 0.1, landing_zone: 0.05 },
+      jungle:        { swamp: 0.3, plains: 0.35, water: 0.15, crystal: 0.05, highland: 0.1, landing_zone: 0.05 },
+      barren:        { rocky: 0.45, sand: 0.3, highland: 0.1, crystal: 0.05, landing_zone: 0.1 },
+      gas_giant:     { metal_grating: 0.5, plains: 0.2, open_sky: 0.15, highland: 0.1, landing_zone: 0.05 },
+      crystal_world: { crystal: 0.45, rocky: 0.2, plains: 0.2, highland: 0.1, landing_zone: 0.05 },
+      tomb_world:    { rocky: 0.3, sand: 0.25, plains: 0.2, swamp: 0.1, highland: 0.1, landing_zone: 0.05 }
+    },
+    // Planet type name → terrain profile mapping
+    planetTypeToProfile: {
+      Terran: 'terrestrial',
+      Desert: 'desert',
+      Ice: 'arctic',
+      Volcanic: 'volcanic',
+      'Gas Giant': 'gas_giant',
+      Oceanic: 'oceanic',
+      Barren: 'barren',
+      Jungle: 'jungle',
+      Toxic: 'tomb_world',
+      Crystalline: 'crystal_world'
+    },
+    // Footprints keyed by actual building type IDs from config.buildings
+    buildingFootprints: {
+      SURFACE_MINE: { w: 2, h: 1 },
+      DEEP_CORE_DRILL: { w: 2, h: 2 },
+      QUANTUM_EXTRACTOR: { w: 2, h: 2 },
+      WATER_PUMP: { w: 2, h: 1 },
+      DEEP_WELL: { w: 2, h: 2 },
+      CRYO_HARVESTER: { w: 2, h: 2 },
+      SOLAR_ARRAY: { w: 2, h: 2 },
+      GEOTHERMAL_PLANT: { w: 2, h: 2 },
+      FUSION_REACTOR: { w: 2, h: 2 },
+      HABITAT_MODULE: { w: 2, h: 2 },
+      HYDROPONIC_FARM: { w: 2, h: 1 },
+      RESEARCH_LAB: { w: 2, h: 2 },
+      SPACEPORT: { w: 3, h: 3 },
+      DEFENSE_GRID: { w: 1, h: 1 },
+      ENTERTAINMENT_COMPLEX: { w: 2, h: 2 },
+      REFINERY: { w: 2, h: 2 },
+      COMPONENT_FACTORY: { w: 3, h: 2 },
+      CHEMICAL_PLANT: { w: 3, h: 2 },
+      ORBITAL_DEFENSE: { w: 2, h: 2 },
+      SHIELD_GENERATOR: { w: 2, h: 2 },
+      GARRISON_BARRACKS: { w: 2, h: 2 }
+    },
+    // Adjacency bonuses: building_type → { neighbor_type_or_terrain: multiplier }
+    // Only affects OUTPUT production; does NOT scale input consumption
+    // Same-rule bonuses don't stack; different-rule bonuses multiply
+    adjacencyBonuses: {
+      SURFACE_MINE: { REFINERY: 1.2 },
+      DEEP_CORE_DRILL: { REFINERY: 1.2 },
+      QUANTUM_EXTRACTOR: { REFINERY: 1.2 },
+      REFINERY: { COMPONENT_FACTORY: 1.15, SURFACE_MINE: 1.1 },
+      COMPONENT_FACTORY: { REFINERY: 1.15, CHEMICAL_PLANT: 1.1 },
+      RESEARCH_LAB: { crystal: 1.15 },
+      SOLAR_ARRAY: { volcanic_vent: 1.3 },
+      GEOTHERMAL_PLANT: { volcanic_vent: 1.3 },
+      HYDROPONIC_FARM: { water: 1.2 }
+    },
+    anomalyTypes: {
+      meteorite_debris: { reward: 'materials', minAmount: 50, maxAmount: 200 },
+      smuggler_cache: { reward: 'credits', minAmount: 100, maxAmount: 500 },
+      alien_flora: { reward: 'experience', minAmount: 20, maxAmount: 80 },
+      mineral_vein: { reward: 'materials', minAmount: 100, maxAmount: 400 },
+      escape_pod: { reward: 'rare_component', minAmount: 1, maxAmount: 1 }
+    },
+    anomaliesPerDay: { min: 1, max: 3 },
+    anomalyLifetimeHours: 48,
+    maxActiveAnomalies: 5,
+    resourceDeposits: {
+      types: {
+        rich_ore: { bonus: 1.10, terrain: ['rocky', 'highland'], color: '#ff8844' },
+        crystal_vein: { bonus: 1.10, terrain: ['crystal'], color: '#cc66ff' },
+        fertile_soil: { bonus: 1.10, terrain: ['plains', 'swamp'], color: '#66cc44' },
+        thermal_vent: { bonus: 1.10, terrain: ['volcanic_vent', 'lava'], color: '#ff4422' }
+      },
+      depositsPerGrid: { min: 1, max: 3 },
+      clusterSize: { min: 2, max: 5 }
+    },
+    repairCostPerQuarter: 0.10,  // 10% of build cost per 0.25 condition restored
+    relocationCost: 0.25,         // 25% of build cost
+    relocationCooldownMs: 600000, // 10 minutes
+    depositRelocationCost: 0.10,  // 10% for deposit-matching relocations
+    undoWindowMs: 10000,           // 10-second undo window
+    weatherEffects: {
+      Terran:    { type: 'rain',      intensity: 0.3, color: '#8888cc' },
+      Oceanic:   { type: 'rain',      intensity: 0.6, color: '#6688aa' },
+      Desert:    { type: 'sandstorm', intensity: 0.4, color: '#c4a44d' },
+      Volcanic:  { type: 'ash',       intensity: 0.5, color: '#444444' },
+      Arctic:    { type: 'snow',      intensity: 0.5, color: '#ffffff' },
+      Ice:       { type: 'snow',      intensity: 0.7, color: '#ddeeff' },
+      Jungle:    { type: 'rain',      intensity: 0.5, color: '#66aa88' },
+      Barren:    { type: 'dust',      intensity: 0.2, color: '#aa9977' },
+      'Gas Giant': { type: 'lightning', intensity: 0.3, color: '#aaccff' },
+      'Crystal World': { type: 'sparkle', intensity: 0.4, color: '#cc88ff' },
+      'Tomb World': { type: 'mist', intensity: 0.5, color: '#556655' }
+    },
+    dailyQuests: {
+      questsPerDay: 3,
+      types: {
+        build_structures: { description: 'Place {n} buildings on the surface', minN: 1, maxN: 3, xpReward: 50, creditReward: 500 },
+        train_units: { description: 'Train {n} ground units', minN: 2, maxN: 5, xpReward: 40, creditReward: 400 },
+        claim_anomalies: { description: 'Claim {n} surface anomalies', minN: 1, maxN: 2, xpReward: 30, creditReward: 300 },
+        survive_raid: { description: 'Defend against an NPC raid', minN: 1, maxN: 1, xpReward: 100, creditReward: 1000 },
+        place_blocks: { description: 'Place {n} custom blocks', minN: 5, maxN: 15, xpReward: 20, creditReward: 200 },
+        repair_buildings: { description: 'Repair {n} damaged buildings', minN: 1, maxN: 3, xpReward: 25, creditReward: 250 }
+      }
+    }
+  },
+
+  // ============== Custom Blocks (Phase 2) ==============
+  customBlocks: {
+    maxBlocksBase: 50,  // blocks per infrastructure level
+    maxBlocksCap: 500,  // hard cap at level 10
+    blockTypes: {
+      wall:            { cost: 10,  hp: 100, blocks_movement: true,  blocks_los: true  },
+      reinforced_wall: { cost: 50,  hp: 500, blocks_movement: true,  blocks_los: true  },
+      floor:           { cost: 5,   hp: 50,  blocks_movement: false, blocks_los: false },
+      window:          { cost: 15,  hp: 30,  blocks_movement: true,  blocks_los: false },
+      door:            { cost: 20,  hp: 80,  blocks_movement: false, blocks_los: false },
+      lamp:            { cost: 10,  hp: 20,  blocks_movement: false, blocks_los: false, light_radius: 3 },
+      antenna:         { cost: 30,  hp: 40,  blocks_movement: false, blocks_los: false, sensor_range: 5 },
+      turret_mount:    { cost: 100, hp: 200, blocks_movement: true,  blocks_los: true,  enables_turret: true },
+      barricade:       { cost: 25,  hp: 150, blocks_movement: true,  blocks_los: false, half_cover: true },
+      storage_crate:   { cost: 15,  hp: 60,  blocks_movement: true,  blocks_los: false },
+      road:            { cost: 8,   hp: 40,  blocks_movement: false, blocks_los: false, speed_bonus: 1.3 },
+      path:            { cost: 3,   hp: 20,  blocks_movement: false, blocks_los: false, speed_bonus: 1.15 }
+    },
+    refundRatio: 0.5,         // 50% credit refund on removal
+    bulkLimit: 50,            // max blocks per bulk request
+    floorCoexistsBuildings: true  // floor blocks can coexist under building footprints
+  },
+
+  // ============== Voxel Blocks ==============
+  voxels: {
+    maxBlocksBase: 200,     // per infrastructure level
+    maxBlocksCap: 2000,     // hard cap
+    bulkLimit: 50,
+    chunkSize: 16,
+    worldHeight: 128,
+    seaLevel: 40
+  },
+
+  // ============== Ground Combat (Phase 3) ==============
+  groundCombat: {
+    unitTypes: {
+      militia:      { cost: 100,  hp: 50,  attack: 8,  defense: 5,  speed: 2, range: 1, upkeep: 5,   trainTime: 60 },
+      marines:      { cost: 300,  hp: 100, attack: 15, defense: 12, speed: 3, range: 1, upkeep: 15,  trainTime: 180 },
+      heavy_armor:  { cost: 800,  hp: 300, attack: 25, defense: 25, speed: 1, range: 2, upkeep: 40,  trainTime: 600 },
+      mech:         { cost: 2000, hp: 500, attack: 40, defense: 20, speed: 2, range: 3, upkeep: 100, trainTime: 1200 },
+      spec_ops:     { cost: 1500, hp: 80,  attack: 30, defense: 8,  speed: 4, range: 2, upkeep: 60,  trainTime: 900 }
+    },
+    maxUnitsPerColony: 50,
+    defenderPolicies: ['hold_the_line', 'aggressive', 'fallback_to_center', 'guerrilla'],
+    maxTurns: 30,
+    turnTimerMs: 60000,       // 60 seconds per turn
+    globalTimerMs: 900000,    // 15 minutes max per combat
+    combatRules: {
+      coverBonus: 0.3,        // 30% damage reduction behind walls/barricades/buildings
+      terrainEffects: {
+        highland:     { defense: 1.3, speed: 0.5 },
+        swamp:        { defense: 1.0, speed: 0.5 },
+        plains:       { defense: 1.0, speed: 1.0 },
+        rocky:        { defense: 1.1, speed: 1.0 },
+        ice:          { defense: 1.0, speed: 0.8 },
+        sand:         { defense: 1.0, speed: 0.9 },
+        crystal:      { defense: 1.0, speed: 1.0 },
+        metal_grating:{ defense: 1.0, speed: 1.0 },
+        landing_zone: { defense: 1.0, speed: 1.0 }
+      },
+      minDamage: 1
+    },
+    invasionFlow: {
+      requireShipInOrbit: true,
+      orbitalBombardmentDamage: { minCondition: 0.1, maxCondition: 0.3, unitHpPercent: 0.15 },
+      landingEdgeTiles: true  // attackers deploy on landing_zone edge tiles
+    },
+    npcRaid: {
+      minRaidStrength: 3,     // min NPC units
+      maxRaidStrength: 8,     // max NPC units
+      unitTypes: ['militia', 'marines'],  // NPC raid unit pool
+      raidCooldownMs: 3600000 // 1 hour between raids
+    }
   }
 };
-

@@ -1,7 +1,7 @@
 /**
  * Test helper functions and fixtures
  */
-const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, PriceHistory, PlayerSkill, TechResearch, Wonder, Blueprint, CraftingJob, Mission, PlayerMission, Corporation, CorporationMember, AutomatedTask, ColonyBuilding, FactionStanding, FactionWar, CombatInstance, Message, CosmeticUnlock, CorporationAgreement, CommunityEvent, EventContribution, Outpost, ShipDesignTemplate, Fleet, sequelize } = require('../src/models');
+const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, PriceHistory, PlayerSkill, TechResearch, Wonder, Blueprint, CraftingJob, Mission, PlayerMission, Corporation, CorporationMember, AutomatedTask, ColonyBuilding, SurfaceAnomaly, CustomBlock, GroundUnit, GroundCombatUnit, GroundCombatInstance, FactionStanding, FactionWar, CombatInstance, Message, CosmeticUnlock, CorporationAgreement, CommunityEvent, EventContribution, Outpost, ShipDesignTemplate, Fleet, DailyQuest, VoxelBlock, PlayerProtectionState, ActionAuditLog, SectorInstanceAssignment, TransferLedger, ColonyRaidProtection, sequelize } = require('../src/models');
 const authService = require('../src/services/authService');
 const gameSettingsService = require('../src/services/gameSettingsService');
 const bcrypt = require('bcryptjs');
@@ -60,12 +60,13 @@ const createTestShip = async (userId, sectorId, overrides = {}) => {
 /**
  * Create a connection between two sectors
  */
-const createSectorConnection = async (sectorAId, sectorBId) => {
+const createSectorConnection = async (sectorAId, sectorBId, overrides = {}) => {
   return SectorConnection.create({
     sector_a_id: sectorAId,
     sector_b_id: sectorBId,
     connection_type: 'standard',
-    is_bidirectional: true
+    is_bidirectional: true,
+    ...overrides
   });
 };
 
@@ -237,6 +238,8 @@ const cleanDatabase = async () => {
   // New models (Phases 1-7) first — they reference User/Corp/Sector
   await EventContribution.destroy({ where: {} });
   await CommunityEvent.destroy({ where: {} });
+  await ActionAuditLog.destroy({ where: {} });
+  await TransferLedger.destroy({ where: {} });
   await ShipDesignTemplate.destroy({ where: {} });
   await CosmeticUnlock.destroy({ where: {} });
   await CorporationAgreement.destroy({ where: {} });
@@ -252,6 +255,14 @@ const cleanDatabase = async () => {
   await Mission.destroy({ where: {} });
   await CraftingJob.destroy({ where: {} });
   await Blueprint.destroy({ where: {} });
+  await ColonyRaidProtection.destroy({ where: {} });
+  await DailyQuest.destroy({ where: {} });
+  await GroundCombatUnit.destroy({ where: {} });
+  await GroundCombatInstance.destroy({ where: {} });
+  await GroundUnit.destroy({ where: {} });
+  await VoxelBlock.destroy({ where: {} });
+  await CustomBlock.destroy({ where: {} });
+  await SurfaceAnomaly.destroy({ where: {} });
   await ColonyBuilding.destroy({ where: {} });
   await Wonder.destroy({ where: {} });
   await TechResearch.destroy({ where: {} });
@@ -281,6 +292,8 @@ const cleanDatabase = async () => {
   await Fleet.destroy({ where: {} });
   // Core models - Corporation before User due to FK
   await Ship.destroy({ where: {} });
+  await SectorInstanceAssignment.destroy({ where: {} });
+  await PlayerProtectionState.destroy({ where: {} });
   await SectorConnection.destroy({ where: {} });
   await Sector.destroy({ where: {} });
   await Commodity.destroy({ where: {} });
@@ -426,6 +439,28 @@ const createTestFleet = async (userId, shipIds = [], overrides = {}) => {
   return fleet;
 };
 
+// ============== Ground Combat Helpers ==============
+
+/**
+ * Create a test ground unit at a colony
+ */
+const createTestGroundUnit = async (colonyId, userId, overrides = {}) => {
+  const config = require('../src/config');
+  const unitType = overrides.unit_type || 'militia';
+  const unitConfig = config.groundCombat.unitTypes[unitType];
+  const defaults = {
+    owner_user_id: userId,
+    unit_type: unitType,
+    hp_max: unitConfig.hp,
+    hp_remaining: unitConfig.hp,
+    colony_id: colonyId,
+    is_active: true,
+    training_until: null
+  };
+  const { unit_type, ...restOverrides } = overrides;
+  return GroundUnit.create({ ...defaults, ...restOverrides });
+};
+
 module.exports = {
   createTestUser, createTestSector, createTestShip, createSectorConnection,
   createTestCommodity, createTestPort, addCommodityToPort, addCargoToShip,
@@ -440,6 +475,7 @@ module.exports = {
   createTestBlueprint, createTestMission, createTestCorporation,
   // Fleet helpers
   createTestFleet,
+  // Ground combat helpers
+  createTestGroundUnit,
   cleanDatabase, generateTestToken
 };
-

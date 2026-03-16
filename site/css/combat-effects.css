@@ -1,0 +1,450 @@
+/* Combat Effects and Animations */
+
+/* Combat Space */
+#combatSpace {
+  background: radial-gradient(circle at center, #0a0a1a 0%, #000005 100%);
+  border: 2px solid var(--combat-border-primary);
+  border-radius: var(--combat-border-radius);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Stars background effect */
+#combatSpace::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+    radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(2px 2px at 160px 30px, #fff, transparent);
+  background-repeat: repeat;
+  background-size: 200px 100px;
+  animation: stars-drift 20s linear infinite;
+  opacity: 0.3;
+}
+
+@keyframes stars-drift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-200px); }
+}
+
+/* Ship visual elements */
+.combat-ship {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(45deg, #4a9eff, #74c0fc);
+  border: 2px solid #ffffff;
+  border-radius: 50% 0 50% 0;
+  transition: all 0.5s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 10px rgba(74, 158, 255, 0.5);
+}
+
+.combat-ship.enemy {
+  background: linear-gradient(45deg, #ff4444, #ff6b6b);
+  box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+}
+
+.combat-ship.selected {
+  border-color: var(--combat-warning);
+  box-shadow: 0 0 20px var(--combat-warning);
+  animation: ship-pulse 1s infinite;
+}
+
+@keyframes ship-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.combat-ship.destroyed {
+  background: #666;
+  box-shadow: none;
+  opacity: 0.3;
+  animation: ship-explosion 0.5s ease-out;
+}
+
+@keyframes ship-explosion {
+  0% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+  100% { transform: scale(0.5) rotate(360deg); opacity: 0.3; }
+}
+
+/* Combat Actions and Effects */
+.combat-actions {
+  background: var(--combat-bg-primary);
+  border: 1px solid var(--combat-border-primary);
+  border-radius: var(--combat-border-radius);
+  padding: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.action-btn {
+  background: var(--combat-bg-secondary);
+  border: 2px solid var(--combat-border-secondary);
+  border-radius: var(--combat-border-radius-small);
+  color: var(--combat-text-primary);
+  cursor: pointer;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: bold;
+  transition: var(--combat-transition);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn:hover {
+  border-color: var(--combat-accent);
+  background: rgba(74, 158, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 158, 255, 0.3);
+}
+
+.action-btn:active {
+  transform: translateY(0);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.action-btn.attack {
+  border-color: var(--combat-danger);
+  color: var(--combat-danger);
+}
+
+.action-btn.attack:hover {
+  background: rgba(255, 68, 68, 0.2);
+  border-color: var(--combat-danger);
+  box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
+}
+
+.action-btn.defend {
+  border-color: var(--combat-accent);
+  color: var(--combat-accent);
+}
+
+.action-btn.special {
+  border-color: var(--combat-warning);
+  color: var(--combat-warning);
+}
+
+.action-btn.special:hover {
+  background: rgba(255, 170, 0, 0.2);
+  border-color: var(--combat-warning);
+  box-shadow: 0 4px 12px rgba(255, 170, 0, 0.3);
+}
+
+/* Weapon Effect Animations */
+.weapon-effect {
+  position: absolute;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.laser-beam {
+  width: 2px;
+  background: linear-gradient(90deg, transparent, #ff4444, #ff6b6b, transparent);
+  animation: laser-fire 0.3s ease-out;
+  transform-origin: left center;
+}
+
+@keyframes laser-fire {
+  0% { opacity: 0; transform: scaleX(0); }
+  50% { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+
+.missile-trail {
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, #ffaa00, transparent);
+  border-radius: 50%;
+  animation: missile-fly 1s ease-in-out;
+}
+
+@keyframes missile-fly {
+  0% { transform: scale(0); opacity: 1; }
+  50% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.5); opacity: 0; }
+}
+
+.explosion-effect {
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, #ff4444, #ffaa00, transparent);
+  border-radius: 50%;
+  animation: explosion 0.6s ease-out;
+}
+
+@keyframes explosion {
+  0% { transform: scale(0); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+.shield-hit {
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, transparent, rgba(74, 158, 255, 0.5), transparent);
+  border-radius: 50%;
+  animation: shield-flash 0.4s ease-out;
+}
+
+@keyframes shield-flash {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.2); opacity: 0; }
+}
+
+/* Damage Numbers */
+.damage-number {
+  position: absolute;
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--combat-danger);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  animation: damage-float 1.5s ease-out;
+  pointer-events: none;
+  z-index: 200;
+}
+
+.damage-number.critical {
+  color: var(--combat-warning);
+  font-size: 20px;
+  text-shadow: 2px 2px 6px rgba(255, 170, 0, 0.8);
+}
+
+.damage-number.miss {
+  color: var(--combat-text-secondary);
+  font-size: 14px;
+}
+
+@keyframes damage-float {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  50% { transform: translateY(-20px) scale(1.1); opacity: 1; }
+  100% { transform: translateY(-40px) scale(0.9); opacity: 0; }
+}
+
+/* Combat Status Effects */
+.status-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.status-overlay.stunned {
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 170, 0, 0.3) 2px,
+    rgba(255, 170, 0, 0.3) 4px
+  );
+  animation: stun-effect 0.5s infinite;
+}
+
+@keyframes stun-effect {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.status-overlay.burning {
+  background: radial-gradient(circle, rgba(255, 68, 68, 0.3), transparent);
+  animation: burn-effect 1s infinite;
+}
+
+@keyframes burn-effect {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+/* Combat Log Effects */
+.combat-log {
+  max-height: 200px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid var(--combat-border-secondary);
+  border-radius: var(--combat-border-radius-small);
+  padding: 10px;
+  margin: 10px 0;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.log-entry {
+  margin: 2px 0;
+  padding: 2px 4px;
+  border-radius: 2px;
+  animation: log-entry-appear 0.3s ease-out;
+}
+
+@keyframes log-entry-appear {
+  0% { opacity: 0; transform: translateX(-10px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.log-entry.damage {
+  color: var(--combat-danger);
+  background: rgba(255, 68, 68, 0.1);
+}
+
+.log-entry.miss {
+  color: var(--combat-text-secondary);
+}
+
+.log-entry.critical {
+  color: var(--combat-warning);
+  background: rgba(255, 170, 0, 0.1);
+  font-weight: bold;
+}
+
+.log-entry.system {
+  color: var(--combat-accent);
+  background: rgba(74, 158, 255, 0.1);
+}
+
+/* Turn Indicator */
+.turn-indicator {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--combat-bg-primary);
+  border: 2px solid var(--combat-accent);
+  border-radius: var(--combat-border-radius);
+  padding: 8px 16px;
+  color: var(--combat-accent);
+  font-weight: bold;
+  z-index: 300;
+  animation: turn-flash 0.5s ease-out;
+}
+
+@keyframes turn-flash {
+  0% { transform: translateX(-50%) scale(0.8); opacity: 0; }
+  50% { transform: translateX(-50%) scale(1.1); opacity: 1; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+/* Victory/Defeat Effects */
+.combat-result {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px 40px;
+  border-radius: var(--combat-border-radius);
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  z-index: 400;
+  animation: result-appear 1s ease-out;
+}
+
+.combat-result.victory {
+  background: linear-gradient(135deg, rgba(0, 255, 0, 0.9), rgba(0, 200, 0, 0.9));
+  color: #ffffff;
+  box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+}
+
+.combat-result.defeat {
+  background: linear-gradient(135deg, rgba(255, 0, 0, 0.9), rgba(200, 0, 0, 0.9));
+  color: #ffffff;
+  box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+}
+
+@keyframes result-appear {
+  0% { 
+    transform: translate(-50%, -50%) scale(0) rotate(180deg); 
+    opacity: 0; 
+  }
+  50% { 
+    transform: translate(-50%, -50%) scale(1.2) rotate(0deg); 
+    opacity: 1; 
+  }
+  100% { 
+    transform: translate(-50%, -50%) scale(1) rotate(0deg); 
+    opacity: 1; 
+  }
+}
+
+/* Loading and Transition Effects */
+.combat-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 500;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(74, 158, 255, 0.3);
+  border-top: 4px solid var(--combat-accent);
+  border-radius: 50%;
+  animation: loading-spin 1s linear infinite;
+}
+
+@keyframes loading-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Screen Flash Effects */
+.screen-flash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1000;
+  animation: screen-flash-effect 0.2s ease-out;
+}
+
+.screen-flash.damage {
+  background: rgba(255, 0, 0, 0.3);
+}
+
+.screen-flash.heal {
+  background: rgba(0, 255, 0, 0.3);
+}
+
+@keyframes screen-flash-effect {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}

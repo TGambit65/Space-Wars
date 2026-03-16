@@ -13,10 +13,18 @@ const generateToken = (user) => {
   );
 };
 
-const registerUser = async (username, email, password) => {
+const registerUser = async (username, email, password, faction = 'terran_alliance') => {
   const transaction = await sequelize.transaction();
 
   try {
+    // Validate faction
+    const factionConfig = config.factions[faction];
+    if (!factionConfig) {
+      const error = new Error('Invalid faction');
+      error.statusCode = 400;
+      throw error;
+    }
+
     // Check if user exists
     const existingUser = await User.findOne({
       where: {
@@ -32,13 +40,15 @@ const registerUser = async (username, email, password) => {
       throw error;
     }
 
-    console.log(`[AUTH] Creating user ${username}...`);
+    console.log(`[AUTH] Creating user ${username} (faction: ${faction})...`);
 
-    // Create user
+    // Create user with faction-specific starting credits
     const user = await User.create({
       username,
       email,
-      hashed_password: password
+      hashed_password: password,
+      faction,
+      credits: factionConfig.startingCredits
     }, { transaction });
 
     console.log(`[AUTH] User created: ${user.user_id}. Finding starting sector...`);
@@ -57,13 +67,14 @@ const registerUser = async (username, email, password) => {
 
     console.log(`[AUTH] Starting sector found: ${startingSector.sector_id}. Creating ship...`);
 
-    // Create default ship for user (sanitize ship name)
+    // Create default ship for user based on faction starting ship
     const sanitizedUsername = username.replace(/[<>&"']/g, '');
+    const startingShipType = factionConfig.startingShip || 'Scout';
     const ship = await Ship.create({
       owner_user_id: user.user_id,
       current_sector_id: startingSector.sector_id,
-      ship_type: 'Scout',
-      name: `${sanitizedUsername}'s Scout`
+      ship_type: startingShipType,
+      name: `${sanitizedUsername}'s ${startingShipType}`
     }, { transaction });
 
     // Create starter colony ship for new player
@@ -92,6 +103,13 @@ const registerUser = async (username, email, password) => {
     // Discover starting sector and neighbors (fog of war)
     await discoverSectorAndNeighbors(user.user_id, startingSector.sector_id, transaction);
     console.log(`[AUTH] Starting sector discovered with neighbors`);
+
+    // Initialize faction standings
+    try {
+      const factionService = require('./factionService');
+      await factionService.initializeStandings(user.user_id, faction, transaction);
+      console.log(`[AUTH] Faction standings initialized`);
+    } catch (e) { /* Faction init failure should not block registration */ }
 
     // Generate token
     const token = generateToken(user);
