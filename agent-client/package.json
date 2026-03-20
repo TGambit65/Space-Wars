@@ -1,0 +1,19 @@
+{
+  "name": "space-wars-agent-client",
+  "version": "1.0.0",
+  "description": "Standalone CLI trading agent for Space Wars 3000 agent API",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "start:once": "node src/index.js --once",
+    "check": "node --check src/index.js && node --check src/api.js && node --check src/agent.js && node --check src/state.js && node --check src/logger.js && node --check src/util.js && node --check src/strategy/navigator.js && node --check src/strategy/trader.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "axios": "^1.8.4",
+    "dotenv": "^16.4.7"
+  }
+}

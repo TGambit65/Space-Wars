@@ -228,18 +228,33 @@ const getMarketSummary = async (req, res, next) => {
     });
 
     const summary = commodities.map(c => {
-      const prices = c.portCommodities.map(pc => {
-        const buyPrice = pricingService.calculateBuyPrice(
+      const portPrices = c.portCommodities.map(pc => {
+        const buyPrice = pc.can_sell ? pricingService.calculateBuyPrice(
           c.base_price, pc.quantity, pc.max_quantity, c.volatility, pc.buy_price_modifier
-        );
-        const sellPrice = pricingService.calculateSellPrice(
+        ) : null;
+        const sellPrice = pc.can_buy ? pricingService.calculateSellPrice(
           c.base_price, pc.quantity, pc.max_quantity, c.volatility, pc.sell_price_modifier
-        );
-        return { buyPrice, sellPrice };
+        ) : null;
+        return {
+          port_id: pc.port.port_id,
+          port_name: pc.port.name,
+          sector_id: pc.port.sector_id,
+          buyPrice,
+          sellPrice,
+          can_buy: pc.can_buy,
+          can_sell: pc.can_sell,
+          quantity: pc.quantity,
+          max_quantity: pc.max_quantity,
+        };
       });
 
-      const buyPrices = prices.map(p => p.buyPrice).filter(p => p);
-      const sellPrices = prices.map(p => p.sellPrice).filter(p => p);
+      const buyPrices = portPrices.filter(p => p.buyPrice).map(p => p.buyPrice);
+      const sellPrices = portPrices.filter(p => p.sellPrice).map(p => p.sellPrice);
+
+      // Find best buy port (highest buy_price = best place for player to sell)
+      const bestBuyPort = portPrices.filter(p => p.buyPrice).sort((a, b) => b.buyPrice - a.buyPrice)[0] || null;
+      // Find best sell port (lowest sell_price = cheapest place for player to buy)
+      const bestSellPort = portPrices.filter(p => p.sellPrice).sort((a, b) => a.sellPrice - b.sellPrice)[0] || null;
 
       return {
         commodity_id: c.commodity_id,
@@ -251,7 +266,9 @@ const getMarketSummary = async (req, res, next) => {
         avg_buy_price: buyPrices.length ? Math.round(buyPrices.reduce((a,b) => a+b, 0) / buyPrices.length) : null,
         avg_sell_price: sellPrices.length ? Math.round(sellPrices.reduce((a,b) => a+b, 0) / sellPrices.length) : null,
         min_buy_price: buyPrices.length ? Math.min(...buyPrices) : null,
-        max_buy_price: buyPrices.length ? Math.max(...buyPrices) : null
+        max_buy_price: buyPrices.length ? Math.max(...buyPrices) : null,
+        best_buy: bestBuyPort ? { port_id: bestBuyPort.port_id, port_name: bestBuyPort.port_name, sector_id: bestBuyPort.sector_id, price: bestBuyPort.buyPrice } : null,
+        best_sell: bestSellPort ? { port_id: bestSellPort.port_id, port_name: bestSellPort.port_name, sector_id: bestSellPort.sector_id, price: bestSellPort.sellPrice } : null,
       };
     });
 

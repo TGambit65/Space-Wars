@@ -110,7 +110,8 @@ const getPortsBySector = async (sectorId) => {
     description: port.description,
     tax_rate: port.tax_rate,
     allows_illegal: port.allows_illegal,
-    commodity_count: port.portCommodities.length
+    commodity_count: port.portCommodities.length,
+    commodities: port.portCommodities.map(pc => pricingService.getPriceInfo(pc, port)),
   }));
 };
 

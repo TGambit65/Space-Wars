@@ -132,6 +132,12 @@ async function agentSelf(req, res) {
         daily_credit_limit: req.agent.daily_credit_limit,
         daily_credits_spent: req.agent.daily_credits_spent,
         rate_limit_per_minute: req.agent.rate_limit_per_minute,
+        total_actions: req.agent.total_actions,
+        total_credits_earned: req.agent.total_credits_earned,
+        total_credits_spent: req.agent.total_credits_spent,
+        last_action_at: req.agent.last_action_at,
+        last_action_type: req.agent.last_action_type,
+        error_message: req.agent.error_message,
       },
     });
   } catch (error) {
