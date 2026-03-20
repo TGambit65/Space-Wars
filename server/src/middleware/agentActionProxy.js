@@ -21,7 +21,7 @@ function agentAction(actionFamily, actionType, opts = {}) {
 
     const agent = req.agent;
     const creditsDelta = opts.getCreditsDelta ? opts.getCreditsDelta(req) : 0;
-    const targetEntity = opts.getTarget ? opts.getTarget(req) : (req.params.id || req.body.sector_id || null);
+    const targetEntity = opts.getTarget ? opts.getTarget(req) : (req.params.id || (req.body && req.body.sector_id) || null);
 
     try {
       const result = await agentService.executeAction(agent.agent_id, {
