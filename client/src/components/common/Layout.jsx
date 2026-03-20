@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Home, Globe, Building2, Users, LogOut, Wallet, Rocket, Map, ShoppingCart, Wrench, Hammer, Settings, Crosshair, TrendingUp, Boxes, Target, UsersRound, Bot, BarChart3, Swords, BookOpen, Shield, Mail, Flag, Landmark, Calendar, Palette, ChevronDown, ChevronRight, Keyboard, Menu, X } from 'lucide-react';
+import { Home, Globe, Building2, Users, LogOut, Wallet, Rocket, Map, ShoppingCart, Wrench, Hammer, Settings, Crosshair, TrendingUp, Boxes, Target, UsersRound, Bot, BarChart3, Swords, BookOpen, Shield, Mail, Flag, Landmark, Calendar, Palette, ChevronDown, ChevronRight, Keyboard, Menu, X, Eye, Leaf } from 'lucide-react';
 import StatusBar from './StatusBar';
 import useKeyboardShortcuts, { SHORTCUTS } from '../../hooks/useKeyboardShortcuts';
 import { useGameSession } from '../../contexts/GameSessionContext';
@@ -9,6 +9,8 @@ const FACTION_META = {
   terran_alliance: { name: 'Terran Alliance', color: '#3498db', icon: Shield },
   zythian_swarm: { name: 'Zythian Swarm', color: '#e74c3c', icon: Swords },
   automaton_collective: { name: 'Automaton Collective', color: '#9b59b6', icon: TrendingUp },
+  synthesis_accord: { name: 'Synthesis Accord', color: '#d4a017', icon: Eye },
+  sylvari_dominion: { name: 'Sylvari Dominion', color: '#2ecc71', icon: Leaf },
 };
 
 const coreNavItems = [
@@ -37,6 +39,7 @@ const advancedNavItems = [
   { path: '/events', icon: Calendar, label: 'Events' },
   { path: '/corporation', icon: UsersRound, label: 'Corporation' },
   { path: '/automation', icon: Bot, label: 'Automation' },
+  { path: '/agent', icon: Bot, label: 'AI Agent' },
   { path: '/wiki', icon: BookOpen, label: 'Wiki' },
 ];
 
@@ -83,7 +86,6 @@ function Layout({ user, onLogout, children, socketConnected }) {
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
 
   const factionMeta = user?.faction ? FACTION_META[user.faction] : null;
-  const factionAccent = factionMeta?.color || '#00ffff';
 
   return (
     <div className="min-h-screen flex">
@@ -106,22 +108,21 @@ function Layout({ user, onLogout, children, socketConnected }) {
         style={{
           background: 'rgba(10, 10, 30, 0.95)',
           backdropFilter: 'blur(12px)',
-          borderColor: `${factionAccent}20`,
-          '--faction-accent': factionAccent,
+          borderColor: 'var(--sw3-primary-alpha)'
         }}
       >
         {/* Logo */}
-        <div className="p-4" style={{ borderBottom: `1px solid ${factionAccent}20` }}>
+        <div className="p-4" style={{ borderBottom: '1px solid var(--sw3-primary-alpha)' }}>
           <div className="flex items-center gap-3">
             <div className="relative">
-              <Rocket className="w-8 h-8" style={{ color: factionAccent }} />
+              <Rocket className="w-8 h-8" style={{ color: 'var(--sw3-primary)' }} />
               <div className="absolute inset-0 blur-sm opacity-40">
-                <Rocket className="w-8 h-8" style={{ color: factionAccent }} />
+                <Rocket className="w-8 h-8" style={{ color: 'var(--sw3-primary)' }} />
               </div>
             </div>
             <div className="flex-1">
               <h1 className="text-lg font-bold text-white font-display tracking-wide">Space Wars</h1>
-              <p className="text-xs font-display tracking-widest" style={{ color: `${factionAccent}99` }}>3000</p>
+              <p className="text-xs font-display tracking-widest" style={{ color: 'var(--sw3-primary)' }}>3000</p>
             </div>
             <button onClick={() => setSidebarOpen(false)} className="p-1 text-gray-500 hover:text-white md:hidden" aria-label="Close menu">
               <X className="w-5 h-5" />
@@ -131,9 +132,9 @@ function Layout({ user, onLogout, children, socketConnected }) {
 
         {/* Level & XP */}
         {progressionData && (
-          <div className="px-4 py-3" style={{ borderBottom: `1px solid ${factionAccent}14` }}>
+          <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--sw3-primary-alpha)' }}>
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-display" style={{ color: factionAccent }}>Lv. {progressionData.player_level || 1}</span>
+              <span className="text-xs font-display" style={{ color: 'var(--sw3-primary)' }}>Lv. {progressionData.player_level || 1}</span>
               <span className="text-[10px] text-gray-500">
                 {(progressionData.total_xp || 0).toLocaleString()} / {(progressionData.xp_to_next_level || 1000).toLocaleString()} XP
               </span>
@@ -143,8 +144,8 @@ function Layout({ user, onLogout, children, socketConnected }) {
                 className="h-full rounded-full transition-all duration-500"
                 style={{
                   width: `${Math.min(((progressionData.total_xp || 0) / (progressionData.xp_to_next_level || 1000)) * 100, 100)}%`,
-                  background: factionAccent,
-                  boxShadow: `0 0 6px ${factionAccent}66`,
+                  background: 'var(--sw3-primary)',
+                  boxShadow: '0 0 6px var(--sw3-primary-glow)',
                 }}
               />
             </div>
@@ -156,7 +157,7 @@ function Layout({ user, onLogout, children, socketConnected }) {
           <ul className="space-y-1">
             {coreNavItems.map(({ path, icon: Icon, label }) => (
               <NavItem key={path} path={path} icon={Icon} label={label} isActive={location.pathname === path}
-                hasUnread={label === 'Messages' && unreadCount > 0} unreadCount={unreadCount} accent={factionAccent} />
+                hasUnread={label === 'Messages' && unreadCount > 0} unreadCount={unreadCount} />
             ))}
           </ul>
 
@@ -173,7 +174,7 @@ function Layout({ user, onLogout, children, socketConnected }) {
               {advancedExpanded && (
                 <ul className="space-y-1 mt-1">
                   {advancedNavItems.map(({ path, icon: Icon, label }) => (
-                    <NavItem key={path} path={path} icon={Icon} label={label} isActive={location.pathname === path} accent={factionAccent} />
+                    <NavItem key={path} path={path} icon={Icon} label={label} isActive={location.pathname === path} />
                   ))}
                 </ul>
               )}
@@ -185,7 +186,7 @@ function Layout({ user, onLogout, children, socketConnected }) {
               </div>
               <ul className="space-y-1">
                 {advancedNavItems.map(({ path, icon: Icon, label }) => (
-                  <NavItem key={path} path={path} icon={Icon} label={label} isActive={location.pathname === path} accent={factionAccent} />
+                  <NavItem key={path} path={path} icon={Icon} label={label} isActive={location.pathname === path} />
                 ))}
               </ul>
             </>
@@ -215,10 +216,10 @@ function Layout({ user, onLogout, children, socketConnected }) {
         </nav>
 
         {/* Back to Site + User Info */}
-        <div className="p-4" style={{ borderTop: '1px solid rgba(0, 255, 255, 0.12)' }}>
+        <div className="p-4" style={{ borderTop: '1px solid var(--sw3-primary-alpha)' }}>
           <a
             href="/"
-            className="flex items-center gap-2 px-3 py-2 mb-3 rounded-lg text-sm text-gray-400 hover:text-neon-cyan/80 hover:bg-white/[0.03] transition-all duration-200"
+            className="flex items-center gap-2 px-3 py-2 mb-3 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/[0.03] transition-all duration-200"
             style={{ borderLeft: '2px solid transparent' }}
           >
             <Globe className="w-4 h-4" />
@@ -235,8 +236,8 @@ function Layout({ user, onLogout, children, socketConnected }) {
             const FIcon = factionMeta.icon;
             return (
               <div className="flex items-center gap-2 mb-2 px-1">
-                <FIcon className="w-3.5 h-3.5" style={{ color: factionMeta.color }} />
-                <span className="text-xs font-display" style={{ color: factionMeta.color }}>{factionMeta.name}</span>
+                <FIcon className="w-3.5 h-3.5" style={{ color: 'var(--sw3-primary)' }} />
+                <span className="text-xs font-display" style={{ color: 'var(--sw3-primary)' }}>{factionMeta.name}</span>
               </div>
             );
           })()}
@@ -308,28 +309,29 @@ function Layout({ user, onLogout, children, socketConnected }) {
   );
 }
 
-function NavItem({ path, icon: Icon, label, isActive, hasUnread, unreadCount, accent = '#00ffff' }) {
+function NavItem({ path, icon: Icon, label, isActive, hasUnread, unreadCount }) {
   return (
     <li>
       <Link
         to={path}
         aria-label={label}
         aria-current={isActive ? 'page' : undefined}
-        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm ${isActive
+        className={`flex items-center gap-3 px-3 py-2 transition-all duration-200 text-sm ${isActive
           ? ''
           : 'text-gray-400 hover:bg-white/[0.03]'
           }`}
-        style={isActive ? {
-          color: accent,
-          background: `${accent}14`,
-          borderLeft: `2px solid ${accent}`,
-          boxShadow: `inset 0 0 15px ${accent}0d`,
-        } : { borderLeft: '2px solid transparent' }}
+        style={{
+          borderRadius: 'var(--sw3-border-radius)',
+          color: isActive ? 'var(--sw3-primary)' : undefined,
+          background: isActive ? 'var(--sw3-primary-alpha)' : undefined,
+          borderLeft: isActive ? '2px solid var(--sw3-primary)' : '2px solid transparent',
+          boxShadow: isActive ? 'inset 0 0 15px var(--sw3-primary-alpha)' : 'none',
+        }}
       >
         <Icon className="w-4 h-4" />
         <span className={`flex-1 ${isActive ? 'font-semibold' : ''}`}>{label}</span>
         {hasUnread && (
-          <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full" style={{ background: `${accent}33`, color: accent, border: `1px solid ${accent}4d` }}>
+          <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full" style={{ background: 'var(--sw3-primary-alpha)', color: 'var(--sw3-primary)', border: '1px solid var(--sw3-primary)' }}>
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}

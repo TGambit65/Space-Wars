@@ -58,6 +58,9 @@ const GroundCombatInstance = require('./GroundCombatInstance');
 const DailyQuest = require('./DailyQuest');
 // Voxel Blocks
 const VoxelBlock = require('./VoxelBlock');
+// AI Agent System
+const AgentAccount = require('./AgentAccount');
+const AgentActionLog = require('./AgentActionLog');
 const PlayerProtectionState = require('./PlayerProtectionState');
 const ActionAuditLog = require('./ActionAuditLog');
 const SectorInstanceAssignment = require('./SectorInstanceAssignment');
@@ -374,6 +377,16 @@ VoxelBlock.belongsTo(Colony, { foreignKey: 'colony_id' });
 User.hasMany(VoxelBlock, { foreignKey: 'placed_by', as: 'placedVoxels' });
 VoxelBlock.belongsTo(User, { foreignKey: 'placed_by', as: 'placer' });
 
+// ============== AI Agent System ==============
+User.hasOne(AgentAccount, { foreignKey: 'owner_id', as: 'agentAccount' });
+AgentAccount.belongsTo(User, { foreignKey: 'owner_id', as: 'owner' });
+AgentAccount.belongsTo(Ship, { foreignKey: 'ship_id', as: 'ship' });
+Ship.hasOne(AgentAccount, { foreignKey: 'ship_id', as: 'agentAccount' });
+AgentAccount.hasMany(AgentActionLog, { foreignKey: 'agent_id', as: 'actionLogs' });
+AgentActionLog.belongsTo(AgentAccount, { foreignKey: 'agent_id', as: 'agent' });
+User.hasMany(AgentActionLog, { foreignKey: 'owner_id', as: 'agentActionLogs' });
+AgentActionLog.belongsTo(User, { foreignKey: 'owner_id', as: 'owner' });
+
 // ============== Anti-Cheat / Anti-Grief ==============
 User.hasOne(PlayerProtectionState, { foreignKey: 'user_id', as: 'protectionState' });
 PlayerProtectionState.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
@@ -463,5 +476,8 @@ module.exports = {
   ActionAuditLog,
   SectorInstanceAssignment,
   TransferLedger,
-  ColonyRaidProtection
+  ColonyRaidProtection,
+  // AI Agent System
+  AgentAccount,
+  AgentActionLog
 };

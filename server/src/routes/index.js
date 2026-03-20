@@ -39,6 +39,9 @@ const cosmeticRoutes = require('./cosmeticRoutes');
 const groundCombatRoutes = require('./groundCombatRoutes');
 // Fleet System
 const fleetRoutes = require('./fleet');
+// AI Agent System
+const agentRoutes = require('./agentRoutes');
+const agentGameRoutes = require('./agentGameRoutes');
 // Admin
 const adminRoutes = require('./adminRoutes');
 const { sequelize } = require('../config/database');
@@ -119,6 +122,9 @@ router.use('/cosmetics', cosmeticRoutes);
 router.use('/ground-combat', groundCombatRoutes);
 // Fleet System
 router.use('/fleets', fleetRoutes);
+// AI Agent System
+router.use('/agents', agentRoutes);
+router.use('/agent-api', agentGameRoutes);
 // Admin
 router.use('/admin', adminRoutes);
 

@@ -1,34 +1,113 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 /**
- * React hook for voice recording via MediaRecorder and audio playback via AudioContext.
+ * React hook for voice recording via MediaRecorder and browser-native audio playback.
  * Used by VoiceButton and NPCChatPanel for voice chat with NPCs.
  *
  * @returns {{ isRecording, isPlaying, isVoiceSupported, startRecording, stopRecording, playAudio, stopPlayback }}
  */
+const FORMAT_TO_MIME = {
+  mp3: 'audio/mpeg',
+  mpeg: 'audio/mpeg',
+  wav: 'audio/wav',
+  wave: 'audio/wav',
+  ogg: 'audio/ogg',
+  webm: 'audio/webm',
+  flac: 'audio/flac',
+};
+
+const isBufferJson = (value) =>
+  value
+  && typeof value === 'object'
+  && value.type === 'Buffer'
+  && Array.isArray(value.data);
+
+const inferMimeType = (format, fallback = 'audio/mpeg') =>
+  FORMAT_TO_MIME[String(format || '').toLowerCase()] || fallback;
+
+const decodeBase64 = (base64) => {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+};
+
+const normalizeAudioInput = (audioData) => {
+  if (!audioData) {
+    return null;
+  }
+
+  if (audioData instanceof Blob) {
+    return new Blob([audioData], { type: audioData.type || 'audio/mpeg' });
+  }
+
+  if (audioData instanceof ArrayBuffer) {
+    return new Blob([audioData], { type: 'audio/mpeg' });
+  }
+
+  if (audioData instanceof Uint8Array) {
+    return new Blob([audioData], { type: 'audio/mpeg' });
+  }
+
+  if (typeof audioData === 'string') {
+    if (audioData.startsWith('data:audio/')) {
+      const [header, base64 = ''] = audioData.split(',', 2);
+      const mimeType = header.slice(5, header.indexOf(';')) || 'audio/mpeg';
+      return new Blob([decodeBase64(base64)], { type: mimeType });
+    }
+
+    return new Blob([decodeBase64(audioData)], { type: 'audio/mpeg' });
+  }
+
+  if (typeof audioData !== 'object') {
+    return null;
+  }
+
+  if (typeof audioData.audio_base64 === 'string') {
+    const mimeType = audioData.mime_type || audioData.audio_mime_type || inferMimeType(audioData.format);
+    return new Blob([decodeBase64(audioData.audio_base64)], { type: mimeType });
+  }
+
+  const rawBuffer = audioData.audioBuffer || audioData.buffer || audioData;
+  const mimeType = audioData.mime_type || audioData.audio_mime_type || inferMimeType(audioData.format);
+
+  if (rawBuffer instanceof Blob) {
+    return new Blob([rawBuffer], { type: rawBuffer.type || mimeType });
+  }
+
+  if (rawBuffer instanceof ArrayBuffer) {
+    return new Blob([rawBuffer], { type: mimeType });
+  }
+
+  if (rawBuffer instanceof Uint8Array) {
+    return new Blob([rawBuffer], { type: mimeType });
+  }
+
+  if (Array.isArray(rawBuffer)) {
+    return new Blob([new Uint8Array(rawBuffer)], { type: mimeType });
+  }
+
+  if (isBufferJson(rawBuffer)) {
+    return new Blob([new Uint8Array(rawBuffer.data)], { type: mimeType });
+  }
+
+  return null;
+};
+
 const useVoiceChat = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const recorderRef = useRef(null);
   const chunksRef = useRef([]);
-  const audioCtxRef = useRef(null);
-  const sourceRef = useRef(null);
   const resolveRef = useRef(null);
+  const audioRef = useRef(null);
+  const objectUrlRef = useRef(null);
 
   const isVoiceSupported = typeof navigator !== 'undefined'
     && !!navigator.mediaDevices?.getUserMedia
     && typeof MediaRecorder !== 'undefined';
-
-  const getAudioContext = useCallback(() => {
-    if (!audioCtxRef.current) {
-      audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    // Resume if suspended (browser autoplay policy)
-    if (audioCtxRef.current.state === 'suspended') {
-      audioCtxRef.current.resume();
-    }
-    return audioCtxRef.current;
-  }, []);
 
   const startRecording = useCallback(async () => {
     if (!isVoiceSupported) return;
@@ -39,8 +118,12 @@ const useVoiceChat = () => {
       // Prefer webm/opus, fall back to whatever the browser supports
       const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
         ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')
+          ? 'audio/ogg;codecs=opus'
         : MediaRecorder.isTypeSupported('audio/webm')
           ? 'audio/webm'
+          : MediaRecorder.isTypeSupported('audio/ogg')
+            ? 'audio/ogg'
           : undefined;
 
       const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
@@ -89,58 +172,58 @@ const useVoiceChat = () => {
     });
   }, []);
 
+  const cleanupPlayback = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.onended = null;
+      audioRef.current.onerror = null;
+      audioRef.current.pause();
+      audioRef.current.src = '';
+      audioRef.current = null;
+    }
+
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+
+    setIsPlaying(false);
+  }, []);
+
+  useEffect(() => () => {
+    cleanupPlayback();
+  }, [cleanupPlayback]);
+
   const playAudio = useCallback(async (audioData) => {
     try {
-      const ctx = getAudioContext();
-      let arrayBuffer;
-
-      if (audioData instanceof ArrayBuffer) {
-        arrayBuffer = audioData;
-      } else if (audioData instanceof Blob) {
-        arrayBuffer = await audioData.arrayBuffer();
-      } else if (typeof audioData === 'string') {
-        // Base64 encoded audio
-        const binary = atob(audioData);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) {
-          bytes[i] = binary.charCodeAt(i);
-        }
-        arrayBuffer = bytes.buffer;
-      } else {
+      const audioBlob = normalizeAudioInput(audioData);
+      if (!audioBlob || audioBlob.size === 0) {
         return;
       }
 
-      const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-      const source = ctx.createBufferSource();
-      source.buffer = audioBuffer;
-      source.connect(ctx.destination);
+      cleanupPlayback();
 
-      source.onended = () => {
-        setIsPlaying(false);
-        sourceRef.current = null;
+      const objectUrl = URL.createObjectURL(audioBlob);
+      objectUrlRef.current = objectUrl;
+
+      const audio = new Audio(objectUrl);
+      audioRef.current = audio;
+      audio.onended = cleanupPlayback;
+      audio.onerror = (event) => {
+        console.error('[VoiceChat] Audio playback failed:', event);
+        cleanupPlayback();
       };
 
-      // Stop any currently playing audio
-      if (sourceRef.current) {
-        sourceRef.current.stop();
-      }
-
-      sourceRef.current = source;
       setIsPlaying(true);
-      source.start(0);
+      await audio.play();
     } catch (err) {
       console.error('[VoiceChat] Audio playback failed:', err);
-      setIsPlaying(false);
+      cleanupPlayback();
     }
-  }, [getAudioContext]);
+  }, [cleanupPlayback]);
 
   const stopPlayback = useCallback(() => {
-    if (sourceRef.current) {
-      sourceRef.current.stop();
-      sourceRef.current = null;
-      setIsPlaying(false);
-    }
-  }, []);
+    cleanupPlayback();
+  }, [cleanupPlayback]);
 
   return {
     isRecording,

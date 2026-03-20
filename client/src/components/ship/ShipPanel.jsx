@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ships, trade, planets, auth, fleets as fleetsApi, designer } from '../../services/api';
 import CargoHold from './CargoHold';
 import ArtifactEquipment from './ArtifactEquipment';
-import { Rocket, Shield, Activity, Fuel, Box, Anchor, Zap, Gem, ChevronDown, ChevronRight, Skull, Swords, Users, Trash2, Edit3, MapPin, X, Wrench, Palette, AlertTriangle as AlertWarn, Hammer } from 'lucide-react';
+import { Rocket, Shield, Activity, Fuel, Box, Anchor, Zap, Gem, ChevronDown, ChevronRight, Skull, Swords, Users, Trash2, Edit3, MapPin, X, Wrench, Palette, AlertTriangle as AlertWarn, Hammer, Eye } from 'lucide-react';
 import { getShipIcon } from '../../utils/shipIcons';
 import { useNotifications } from '../../contexts/NotificationContext';
 
@@ -538,6 +538,18 @@ const ShipPanel = ({ user }) => {
                             className="btn btn-secondary flex justify-center items-center gap-2"
                         >
                             <Activity className="w-4 h-4" /> Scan
+                        </button>
+                        <button
+                            onClick={() => navigate(`/ship/${ship.ship_id}/interior`)}
+                            className="btn btn-secondary flex justify-center items-center gap-2"
+                        >
+                            <Eye className="w-4 h-4" /> Board Interior
+                        </button>
+                        <button
+                            onClick={() => navigate(`/ship/${ship.ship_id}/derelict`)}
+                            className="btn btn-secondary flex justify-center items-center gap-2"
+                        >
+                            <AlertWarn className="w-4 h-4" /> Board Derelict
                         </button>
                     </div>
 

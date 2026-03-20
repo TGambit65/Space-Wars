@@ -150,6 +150,13 @@ const backfillConnectionPolicies = async () => {
   }
 };
 
+const ensureNewTables = async () => {
+  const { AgentAccount, AgentActionLog } = require('../models');
+  // Create tables if they don't exist (no-op if already present)
+  await AgentAccount.sync();
+  await AgentActionLog.sync();
+};
+
 const ensureSprintWorldSchema = async () => {
   const sectorSchemaChanged = await patchSectorSchema();
   const connectionSchemaChanged = await patchConnectionSchema();
@@ -161,6 +168,8 @@ const ensureSprintWorldSchema = async () => {
   if (connectionSchemaChanged || sectorSchemaChanged) {
     await backfillConnectionPolicies();
   }
+
+  await ensureNewTables();
 };
 
 module.exports = {

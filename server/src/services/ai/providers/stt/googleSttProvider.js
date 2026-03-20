@@ -12,6 +12,7 @@ class GoogleSttProvider extends BaseSttProvider {
   async transcribe(audioBuffer, format = 'webm') {
     const encodingMap = {
       webm: 'WEBM_OPUS',
+      ogg: 'OGG_OPUS',
       mp3: 'MP3',
       wav: 'LINEAR16'
     };

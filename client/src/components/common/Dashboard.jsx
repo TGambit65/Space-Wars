@@ -1,17 +1,23 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ships, colonies, crew as crewApi, sectors, fleets as fleetsApi, combat, trade } from '../../services/api';
-import { Rocket, Globe, Building2, Users, ArrowRight, Wallet, AlertTriangle, Map, Swords, BarChart3, Shield, TrendingUp, CheckCircle, Circle, X, BookOpen } from 'lucide-react';
+import { Rocket, Globe, Building2, Users, ArrowRight, Wallet, AlertTriangle, Map, Swords, BarChart3, Shield, TrendingUp, Eye, Leaf, CheckCircle, Circle, X, BookOpen } from 'lucide-react';
 import AchievementsPanel, { checkAchievements } from './Achievements';
+import TerranDashboard from './TerranDashboard';
+import ZythianDashboard from './ZythianDashboard';
+import AutomatonDashboard from './AutomatonDashboard';
 
 const FACTION_META = {
   terran_alliance: { name: 'Terran Alliance', color: '#3498db', icon: Shield },
   zythian_swarm: { name: 'Zythian Swarm', color: '#e74c3c', icon: Swords },
   automaton_collective: { name: 'Automaton Collective', color: '#9b59b6', icon: TrendingUp },
+  synthesis_accord: { name: 'Synthesis Accord', color: '#d4a017', icon: Eye },
+  sylvari_dominion: { name: 'Sylvari Dominion', color: '#2ecc71', icon: Leaf },
 };
 
 function Dashboard({ user }) {
   const [data, setData] = useState({ ships: [], colonies: [], crew: [] });
+  const [combatLogs, setCombatLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,7 +57,9 @@ function Dashboard({ user }) {
         ]);
         const discoveredSectors = mapRes?.data?.data?.discovered_systems || 0;
         const fleetCount = (mapRes && fleetsRes?.data?.data?.fleets || fleetsRes?.data?.data || []).length || 0;
-        const combatWins = (combatRes?.data?.combat_logs || []).filter(l => l.winner === 'attacker').length;
+        const logs = combatRes?.data?.combat_logs || [];
+        setCombatLogs(logs);
+        const combatWins = logs.filter(l => l.winner === 'attacker').length;
         const tradeCount = (tradeRes?.data?.data?.transactions || tradeRes?.data?.data || []).length || 0;
         checkAchievements({
           level: user?.player_level || user?.level || 1,
@@ -74,6 +82,18 @@ function Dashboard({ user }) {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neon-cyan"></div>
       </div>
     );
+  }
+
+  if (user?.faction === 'terran_alliance') {
+    return <TerranDashboard user={user} data={data} combatLogs={combatLogs} />;
+  }
+
+  if (user?.faction === 'zythian_swarm') {
+    return <ZythianDashboard user={user} data={data} combatLogs={combatLogs} />;
+  }
+
+  if (user?.faction === 'automaton_collective') {
+    return <AutomatonDashboard user={user} data={data} combatLogs={combatLogs} />;
   }
 
   return (

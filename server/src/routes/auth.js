@@ -32,7 +32,7 @@ const registerValidation = [
     .withMessage('Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)'),
   body('faction')
     .optional()
-    .isIn(['terran_alliance', 'zythian_swarm', 'automaton_collective'])
+    .isIn(['terran_alliance', 'zythian_swarm', 'automaton_collective', 'synthesis_accord', 'sylvari_dominion'])
     .withMessage('Invalid faction')
 ];
 

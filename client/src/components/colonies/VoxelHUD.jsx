@@ -41,16 +41,43 @@ function getBlockColor(name) {
   return BLOCK_COLORS[name] || '#666666';
 }
 
-function VoxelHUD({ playerPos, targetBlock, hotbar, selectedSlot, flyMode }) {
+const PREVIEW_MARKER_STYLES = {
+  cyan: 'border-cyan-300/50 bg-cyan-500/10 text-cyan-100',
+  amber: 'border-amber-300/50 bg-amber-500/10 text-amber-100',
+  violet: 'border-violet-300/50 bg-violet-500/10 text-violet-100',
+};
+
+function VoxelHUD({
+  playerPos,
+  targetBlock,
+  hotbar = [],
+  selectedSlot = 0,
+  flyMode,
+  profile,
+  previewMode = false,
+  previewMarkers = [],
+  inputState = {},
+  showHotbar = true,
+  colonyId = null,
+}) {
+  const runtimeHints = profile?.runtimeHints || [];
+  const previewHints = profile?.previewHints || [];
+  const previewTitle = profile?.previewTitle || 'Traversal preview';
+  const previewPrompt = profile?.previewPrompt || 'Click scene or press A/Start';
+  const previewLabel = profile?.previewLabel || 'Traversal Preview';
+  const allowFly = inputState.allowFly ?? profile?.controls?.allowFly ?? false;
+
   return (
     <div className="absolute inset-0 pointer-events-none">
       {/* Crosshair */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <div className="w-6 h-6 relative">
-          <div className="absolute top-1/2 left-0 w-full h-px bg-white/70" />
-          <div className="absolute left-1/2 top-0 h-full w-px bg-white/70" />
+      {!previewMode && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="w-6 h-6 relative">
+            <div className="absolute top-1/2 left-0 w-full h-px bg-white/70" />
+            <div className="absolute left-1/2 top-0 h-full w-px bg-white/70" />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Coordinates */}
       {playerPos && (
@@ -60,14 +87,23 @@ function VoxelHUD({ playerPos, targetBlock, hotbar, selectedSlot, flyMode }) {
       )}
 
       {/* Fly mode indicator */}
-      {flyMode && (
+      {allowFly && flyMode && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 text-xs text-accent-cyan bg-black/40 px-2 py-1 rounded">
           FLY MODE (F to toggle)
         </div>
       )}
 
-      {/* Back button */}
-      <div className="absolute top-4 right-4 pointer-events-auto">
+      {/* Navigation buttons */}
+      <div className="absolute top-4 right-4 pointer-events-auto flex gap-2">
+        {colonyId && (
+          <button
+            onClick={() => { window.location.href = `/colony/${colonyId}/surface`; }}
+            className="px-3 py-1.5 text-sm bg-space-800/90 border border-blue-500/40 rounded text-blue-400 hover:text-blue-300 hover:border-blue-400/60 transition-colors"
+            title="Return to 2D colony map"
+          >
+            &#9635; 2D Map
+          </button>
+        )}
         <button
           onClick={() => window.history.back()}
           className="px-3 py-1.5 text-sm bg-space-800/90 border border-space-600 rounded text-gray-300 hover:text-white hover:border-accent-cyan transition-colors"
@@ -78,16 +114,48 @@ function VoxelHUD({ playerPos, targetBlock, hotbar, selectedSlot, flyMode }) {
 
       {/* Controls hint */}
       <div className="absolute top-14 right-4 font-mono text-[10px] text-white/40 bg-black/30 px-2 py-1 rounded leading-relaxed">
-        <div>WASD - Move</div>
-        <div>Mouse - Look</div>
-        <div>LClick - Break</div>
-        <div>RClick - Place</div>
-        <div>1-9 - Select block</div>
-        <div>Tab - Inventory</div>
-        <div>F - Fly mode</div>
-        <div>Space - Jump/Up</div>
-        <div>Shift - Sprint/Down</div>
+        {previewMode ? (
+          <>
+            <div>{previewTitle}</div>
+            <div>{previewPrompt}</div>
+            {previewHints.map((hint) => (
+              <div key={hint}>{hint}</div>
+            ))}
+          </>
+        ) : (
+          <>
+            {runtimeHints.map((hint) => (
+              <div key={hint}>{hint}</div>
+            ))}
+          </>
+        )}
       </div>
+
+      {previewMode && (
+        <div className="absolute left-1/2 top-10 -translate-x-1/2 rounded-full border border-cyan-400/30 bg-slate-950/60 px-4 py-2 text-[11px] uppercase tracking-[0.28em] text-cyan-200/80 backdrop-blur-sm">
+          {previewLabel}
+        </div>
+      )}
+
+      {previewMode && previewMarkers.map((marker) => (
+        <div
+          key={marker.key}
+          className="absolute"
+          style={{ left: marker.x, top: marker.y }}
+        >
+          <div className="relative -translate-x-1/2 -translate-y-full">
+            <div className={`mx-auto h-8 w-px ${marker.offscreen ? 'bg-white/55' : 'bg-white/30'}`} />
+            {marker.offscreen && (
+              <div className="mx-auto mb-1 h-0 w-0 border-l-[6px] border-r-[6px] border-b-[9px] border-l-transparent border-r-transparent border-b-white/70" />
+            )}
+            <div
+              className={`rounded-full border px-3 py-1 text-[10px] font-medium uppercase tracking-[0.22em] backdrop-blur-sm ${marker.offscreen ? 'shadow-[0_0_18px_rgba(255,255,255,0.16)]' : ''} ${PREVIEW_MARKER_STYLES[marker.color] || PREVIEW_MARKER_STYLES.cyan}`}
+            >
+              {marker.label}
+            </div>
+          </div>
+        </div>
+      ))}
 
       {/* Target block info */}
       {targetBlock?.hit && (
@@ -99,8 +167,15 @@ function VoxelHUD({ playerPos, targetBlock, hotbar, selectedSlot, flyMode }) {
         </div>
       )}
 
+      {inputState.gamepadActive && (
+        <div className="absolute bottom-20 right-4 rounded-full border border-cyan-400/30 bg-slate-950/60 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-cyan-200/80 backdrop-blur-sm">
+          Gamepad Ready
+        </div>
+      )}
+
       {/* Hotbar */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1">
+      {showHotbar && hotbar.length > 0 && (
+      <div className={`absolute left-1/2 -translate-x-1/2 flex gap-1 ${previewMode ? 'bottom-3' : 'bottom-4'}`}>
         {hotbar.map((blockId, i) => {
           const block = getBlock(blockId);
           const isSelected = i === selectedSlot;
@@ -127,6 +202,7 @@ function VoxelHUD({ playerPos, targetBlock, hotbar, selectedSlot, flyMode }) {
           );
         })}
       </div>
+      )}
     </div>
   );
 }

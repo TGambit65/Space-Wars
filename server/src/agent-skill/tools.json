@@ -1,0 +1,155 @@
+[
+  {
+    "name": "navigate",
+    "description": "Move your ship to an adjacent sector. Check adjacent-sectors first to find valid destinations.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "target_sector_id": {
+          "type": "string",
+          "description": "UUID of the sector to navigate to (must be adjacent)"
+        }
+      },
+      "required": ["target_sector_id"]
+    },
+    "endpoint": "POST /agent-api/navigate",
+    "permission": "navigate"
+  },
+  {
+    "name": "get_adjacent_sectors",
+    "description": "Get sectors connected to your current location. Use this to plan navigation routes.",
+    "parameters": { "type": "object", "properties": {} },
+    "endpoint": "GET /agent-api/adjacent-sectors",
+    "permission": "navigate"
+  },
+  {
+    "name": "get_ship_status",
+    "description": "Get your ship's current state: hull, shields, fuel, cargo capacity, sector location.",
+    "parameters": { "type": "object", "properties": {} },
+    "endpoint": "GET /agent-api/ship",
+    "permission": "scan"
+  },
+  {
+    "name": "get_cargo",
+    "description": "Get your current cargo manifest with quantities and estimated values.",
+    "parameters": { "type": "object", "properties": {} },
+    "endpoint": "GET /agent-api/ship/cargo",
+    "permission": "scan"
+  },
+  {
+    "name": "get_market",
+    "description": "Get market summary with commodity prices across all ports. Use this to find profitable trade routes.",
+    "parameters": { "type": "object", "properties": {} },
+    "endpoint": "GET /agent-api/trade/market",
+    "permission": "scan"
+  },
+  {
+    "name": "get_port",
+    "description": "Get ports in your current sector with their commodity listings and prices.",
+    "parameters": { "type": "object", "properties": {} },
+    "endpoint": "GET /agent-api/port",
+    "permission": "scan"
+  },
+  {
+    "name": "get_map",
+    "description": "Get the full galaxy map with sector coordinates and connections.",
+    "parameters": { "type": "object", "properties": {} },
+    "endpoint": "GET /agent-api/map",
+    "permission": "scan"
+  },
+  {
+    "name": "buy_commodity",
+    "description": "Buy a commodity at the current port. Check port info first to get port_id and commodity_id.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "ship_id": {
+          "type": "string",
+          "description": "UUID of your assigned ship"
+        },
+        "port_id": {
+          "type": "string",
+          "description": "UUID of the port to buy from (get from port info)"
+        },
+        "commodity_id": {
+          "type": "string",
+          "description": "UUID of the commodity to buy"
+        },
+        "quantity": {
+          "type": "integer",
+          "description": "Number of units to buy"
+        }
+      },
+      "required": ["ship_id", "port_id", "commodity_id", "quantity"]
+    },
+    "endpoint": "POST /agent-api/trade/buy",
+    "permission": "trade"
+  },
+  {
+    "name": "sell_commodity",
+    "description": "Sell a commodity at the current port. Check port info first to get port_id.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "ship_id": {
+          "type": "string",
+          "description": "UUID of your assigned ship"
+        },
+        "port_id": {
+          "type": "string",
+          "description": "UUID of the port to sell at (get from port info)"
+        },
+        "commodity_id": {
+          "type": "string",
+          "description": "UUID of the commodity to sell"
+        },
+        "quantity": {
+          "type": "integer",
+          "description": "Number of units to sell"
+        }
+      },
+      "required": ["ship_id", "port_id", "commodity_id", "quantity"]
+    },
+    "endpoint": "POST /agent-api/trade/sell",
+    "permission": "trade"
+  },
+  {
+    "name": "refuel",
+    "description": "Refuel your ship at the current port. Get the port_id from port info first.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "port_id": {
+          "type": "string",
+          "description": "UUID of the port to refuel at"
+        }
+      },
+      "required": ["port_id"]
+    },
+    "endpoint": "POST /agent-api/trade/refuel",
+    "permission": "trade"
+  },
+  {
+    "name": "activate_ship",
+    "description": "Switch which ship you control. Only works with ships owned by your owner.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "ship_id": {
+          "type": "string",
+          "description": "UUID of the ship to activate"
+        }
+      },
+      "required": ["ship_id"]
+    },
+    "endpoint": "POST /agent-api/activate-ship",
+    "permission": "navigate"
+  },
+  {
+    "name": "get_agent_status",
+    "description": "Get your agent configuration: remaining budget, rate limits, permissions, directive from owner.",
+    "parameters": { "type": "object", "properties": {} },
+    "endpoint": "GET /agents/me",
+    "permission": null
+  }
+]

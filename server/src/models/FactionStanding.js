@@ -16,7 +16,7 @@ const FactionStanding = sequelize.define('FactionStanding', {
     type: DataTypes.STRING(30),
     allowNull: false,
     validate: {
-      isIn: [['terran_alliance', 'zythian_swarm', 'automaton_collective']]
+      isIn: [['terran_alliance', 'zythian_swarm', 'automaton_collective', 'synthesis_accord', 'sylvari_dominion']]
     }
   },
   reputation: {

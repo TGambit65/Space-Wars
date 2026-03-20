@@ -127,6 +127,7 @@ export class ChunkManager {
         { type: 'module' }
       );
       worker.onmessage = (e) => this._onTerrainResult(i, e.data);
+      worker.onerror = (err) => console.error(`[ChunkManager] Terrain worker ${i} ERROR:`, err.message, err);
       this.terrainWorkers.push(worker);
       this.terrainWorkersBusy.push(false);
     }
@@ -137,15 +138,22 @@ export class ChunkManager {
         { type: 'module' }
       );
       worker.onmessage = (e) => this._onMeshResult(i, e.data);
+      worker.onerror = (err) => console.error(`[ChunkManager] Mesh worker ${i} ERROR:`, err.message, err);
       this.meshWorkers.push(worker);
       this.meshWorkersBusy.push(false);
     }
+    console.log(`[ChunkManager] Workers initialized: ${TERRAIN_WORKER_COUNT} terrain, ${MESH_WORKER_COUNT} mesh`);
   }
 
   /**
    * Called when a terrain worker finishes generating a chunk.
    */
   _onTerrainResult(workerIndex, data) {
+    if (this._terrainResultCount === undefined) this._terrainResultCount = 0;
+    this._terrainResultCount++;
+    if (this._terrainResultCount <= 3) {
+      console.log(`[ChunkManager] _onTerrainResult called #${this._terrainResultCount}`, data?.cx, data?.cz, 'sections?', !!data?.sections, 'error?', data?.error);
+    }
     this.terrainWorkersBusy[workerIndex] = false;
 
     const cx = data.cx ?? data.chunkX;
@@ -156,6 +164,7 @@ export class ChunkManager {
     const entry = this.chunks.get(key);
     if (!entry) return; // chunk was unloaded while generating
     if (error || !sections) {
+      console.error(`[ChunkManager] Terrain error for (${cx}, ${cz}):`, error);
       entry.state = STATE_PENDING;
       this.terrainQueue.push({ cx, cz });
       return;
@@ -163,10 +172,15 @@ export class ChunkManager {
 
     // Reconstruct chunk from transferred section data
     const chunk = new Chunk(cx, cz);
+    let nonEmptySections = 0;
     for (let sy = 0; sy < sections.length; sy++) {
       if (sections[sy]) {
         chunk.sections[sy] = new Uint8Array(sections[sy]);
+        nonEmptySections++;
       }
+    }
+    if (nonEmptySections === 0) {
+      console.warn(`[ChunkManager] Chunk (${cx}, ${cz}) has ALL empty sections — terrain generation produced no blocks`);
     }
 
     // Apply server deltas (block overrides from the backend)
@@ -174,6 +188,12 @@ export class ChunkManager {
 
     entry.chunk = chunk;
     entry.state = STATE_MESHING;
+
+    if (this._terrainLogCount === undefined) this._terrainLogCount = 0;
+    if (this._terrainLogCount < 3) {
+      console.log(`[ChunkManager] Terrain DONE (${cx}, ${cz}) — ${nonEmptySections} non-empty sections, queuing mesh`);
+      this._terrainLogCount++;
+    }
 
     // Enqueue for meshing
     this.meshQueue.push({ cx, cz });
@@ -221,6 +241,7 @@ export class ChunkManager {
     const entry = this.chunks.get(key);
     if (!entry) return;
     if (error) {
+      console.error(`[ChunkManager] Mesh ERROR for (${cx}, ${cz}):`, error);
       entry.state = STATE_MESHING;
       this.meshQueue.push({ cx, cz });
       return;
@@ -235,6 +256,7 @@ export class ChunkManager {
 
     // Skip empty chunks
     if (!positions || positions.length === 0) {
+      console.warn(`[ChunkManager] Mesh for (${cx}, ${cz}) is EMPTY — no visible faces`);
       entry.state = STATE_READY;
       return;
     }
@@ -254,6 +276,12 @@ export class ChunkManager {
     this.scene.add(mesh);
     entry.mesh = mesh;
     entry.state = STATE_READY;
+    if (this._meshLogCount === undefined) this._meshLogCount = 0;
+    if (this._meshLogCount < 5) {
+      const vertCount = positions.byteLength / 12; // 3 floats * 4 bytes
+      console.log(`[ChunkManager] Mesh ADDED (${cx}, ${cz}) — ${vertCount} vertices, pos=(${cx * CHUNK_SIZE}, 0, ${cz * CHUNK_SIZE})`);
+      this._meshLogCount++;
+    }
   }
 
   /**

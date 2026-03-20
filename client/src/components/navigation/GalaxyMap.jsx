@@ -205,7 +205,7 @@ const GalaxyMap = ({ user }) => {
   }
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black">
+    <div className="relative w-full h-screen overflow-hidden bg-black map-grid-pattern map-scanline">
       {/* Canvas */}
       <GalaxyMapCanvas
         mapData={mapData}

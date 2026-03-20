@@ -1,3 +1,4 @@
+import fs from 'node:fs/promises';
 import { test, expect } from '@playwright/test';
 import { registerFreshCommander } from './helpers/auth';
 
@@ -59,6 +60,7 @@ async function registerAndCreateColony(page) {
 
   const queue = [{ sectorId: startingSectorId, depth: 0 }];
   const visited = new Set([startingSectorId]);
+  const parents = new Map();
   let colonizablePlanet = null;
   let targetSectorId = startingSectorId;
 
@@ -91,6 +93,7 @@ async function registerAndCreateColony(page) {
       const adjacentSectorId = adjacent.sector?.sector_id;
       if (!adjacentSectorId || visited.has(adjacentSectorId)) continue;
       visited.add(adjacentSectorId);
+      parents.set(adjacentSectorId, sectorId);
       queue.push({ sectorId: adjacentSectorId, depth: depth + 1 });
     }
   }
@@ -98,17 +101,26 @@ async function registerAndCreateColony(page) {
   expect(colonizablePlanet).toBeTruthy();
 
   if (targetSectorId !== startingSectorId) {
-    await fetchJsonWithRetries(
-      page,
-      `/api/ships/${colonyShip.ship_id}/move`,
-      {
-        method: 'POST',
-        body: {
-          target_sector_id: targetSectorId,
+    const path = [];
+    let cursor = targetSectorId;
+    while (cursor && cursor !== startingSectorId) {
+      path.unshift(cursor);
+      cursor = parents.get(cursor);
+    }
+
+    for (const sectorId of path) {
+      await fetchJsonWithRetries(
+        page,
+        `/api/ships/${colonyShip.ship_id}/move`,
+        {
+          method: 'POST',
+          body: {
+            target_sector_id: sectorId,
+          },
         },
-      },
-      (result) => result.ok
-    );
+        (result) => result.ok
+      );
+    }
   }
 
   await fetchJsonWithRetries(
@@ -181,16 +193,24 @@ test.describe('Voxel Surface', () => {
       error: null,
     });
     await expect(page.getByRole('button', { name: /Back/i })).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('text=WASD - Move')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('text=Mouse - Look')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=COLONY SURFACE PREVIEW')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Click scene or press A/Start - Deploy team')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Gamepad: Left stick move, Right stick look, Y fly, A rise/jump')).toBeVisible({ timeout: 10000 });
     const voxelState = await page.evaluate(() => JSON.parse(window.render_game_to_text()));
     expect(voxelState.player.y).toBeGreaterThan(35);
     expect(voxelState.groundY).toBeGreaterThanOrEqual(35);
+    expect(voxelState.previewMode).toBeTruthy();
+    expect(voxelState.input.gamepadActive).toBeFalsy();
 
     await page.waitForTimeout(2500);
     const stabilizedState = await page.evaluate(() => JSON.parse(window.render_game_to_text()));
     expect(stabilizedState.player.y).toBeGreaterThan(stabilizedState.groundY);
     expect(stabilizedState.groundY).toBeGreaterThanOrEqual(35);
+    await fs.mkdir('test-results/screenshots', { recursive: true });
+    await fs.writeFile(
+      'test-results/screenshots/voxel-surface-state.json',
+      `${JSON.stringify(stabilizedState, null, 2)}\n`
+    );
     await page.screenshot({
       path: 'test-results/screenshots/voxel-surface-overview.png',
       fullPage: true

@@ -39,25 +39,25 @@ export function hashString(str) {
 export const SEA_LEVEL = 40;
 export const LANDING_SITE_LAYOUT = {
   spawnLocal: { x: 2.5, z: 8.5 },
-  focusLocal: { x: 15.2, yOffset: 4.2, z: 8.5 },
+  focusLocal: { x: 12.5, yOffset: 6.5, z: 8.5 },
   padCenterLocal: { x: 8.5, z: 8.5 },
 };
 
 /** Height range [min, max] per biome. */
 const BIOME_HEIGHT = {
-  plains:        [38, 48],
-  rocky:         [35, 55],
-  water:         [30, 38],
-  highland:      [50, 70],
-  sand:          [38, 44],
-  lava:          [25, 35],
-  ice:           [40, 52],
-  crystal:       [40, 60],
-  swamp:         [36, 42],
-  volcanic_vent: [25, 50],
+  plains:        [30, 65],
+  rocky:         [25, 80],
+  water:         [20, 35],
+  highland:      [55, 100],
+  sand:          [30, 50],
+  lava:          [15, 35],
+  ice:           [35, 70],
+  crystal:       [35, 85],
+  swamp:         [28, 42],
+  volcanic_vent: [20, 65],
   landing_zone:  [40, 40], // perfectly flat
   metal_grating: [40, 40], // perfectly flat
-  open_sky:      [30, 38],
+  open_sky:      [25, 35],
 };
 
 /** Surface block per biome. */
@@ -166,11 +166,12 @@ export function generateChunk(chunkX, chunkZ, seed, planetType, biomeGrid, spawn
       const wx = chunkX * CHUNK_SIZE + lx;
       const wz = chunkZ * CHUNK_SIZE + lz;
 
-      // Three-octave noise
-      const oct1 = noise2D(wx * 0.02, wz * 0.02) * 0.6;
-      const oct2 = noise2D(wx * 0.06, wz * 0.06) * 0.3;
-      const oct3 = noise2D(wx * 0.15, wz * 0.15) * 0.1;
-      const n = (oct1 + oct2 + oct3 + 1) / 2; // normalize to 0..1
+      // Four-octave noise for more dramatic terrain
+      const oct1 = noise2D(wx * 0.008, wz * 0.008) * 0.45;  // continental shapes
+      const oct2 = noise2D(wx * 0.025, wz * 0.025) * 0.30;  // hills
+      const oct3 = noise2D(wx * 0.06,  wz * 0.06)  * 0.15;  // roughness
+      const oct4 = noise2D(wx * 0.14,  wz * 0.14)  * 0.10;  // fine detail
+      const n = (oct1 + oct2 + oct3 + oct4 + 1) / 2; // normalize to 0..1
 
       const height = Math.floor(hMin + n * (hMax - hMin));
       const clampedHeight = Math.max(1, Math.min(height, CHUNK_HEIGHT - 1));
@@ -523,9 +524,124 @@ function placeLandingSite(chunk, heightmap) {
   chunk.setBlock(15, padY + 6, 6, lampId);
   chunk.setBlock(15, padY + 6, 10, lampId);
 
+  // Roofline guide lights and a gantry beam to make the structure readable from preview.
+  for (const lz of [4, 6, 8, 10, 12]) {
+    chunk.setBlock(15, padY + 8, lz, lampId);
+  }
+  for (let lx = 12; lx <= 15; lx += 1) {
+    chunk.setBlock(lx, padY + 6, 8, buildingCoreId);
+  }
+
+  // Tall beacon towers so the preview has unmistakable silhouettes.
+  for (const [lx, lz] of [
+    [11, 4],
+    [15, 4],
+    [11, 12],
+    [15, 12],
+  ]) {
+    for (let y = padY + 1; y <= padY + 11; y += 1) {
+      const blockId = y >= padY + 8 ? buildingCoreId : buildingWallId;
+      chunk.setBlock(lx, y, lz, blockId);
+    }
+    chunk.setBlock(lx, padY + 12, lz, lampId);
+  }
+
+  // Elevated bright gantry across the landing strip for a clearer center read.
+  for (let lx = 8; lx <= 15; lx += 1) {
+    chunk.setBlock(lx, padY + 9, 8, buildingCoreId);
+  }
+  chunk.setBlock(10, padY + 10, 8, lampId);
+  chunk.setBlock(13, padY + 10, 8, lampId);
+
+  // Roof beacon bars for the main hangar.
+  for (let lz = 5; lz <= 11; lz += 2) {
+    chunk.setBlock(14, padY + 9, lz, buildingCoreId);
+  }
+
+  // Primary spaceport beacon: intentionally exaggerated so the preview has a clear landmark.
+  for (let y = padY + 1; y <= padY + 18; y += 1) {
+    const shaftBlock = y >= padY + 12 ? buildingCoreId : buildingWallId;
+    chunk.setBlock(15, y, 8, shaftBlock);
+    if (y <= padY + 10) {
+      chunk.setBlock(14, y, 8, buildingWallId);
+    }
+  }
+  chunk.setBlock(15, padY + 19, 8, lampId);
+  chunk.setBlock(15, padY + 17, 7, terminalId);
+  chunk.setBlock(15, padY + 17, 9, terminalId);
+
+  // Thickened hangar shoulders so the actual silhouette reads without relying only on holograms.
+  for (let y = padY + 1; y <= padY + 9; y += 1) {
+    chunk.setBlock(14, y, 5, buildingWallId);
+    chunk.setBlock(14, y, 11, buildingWallId);
+    if (y <= padY + 7) {
+      chunk.setBlock(13, y, 5, buildingWallId);
+      chunk.setBlock(13, y, 11, buildingWallId);
+    }
+  }
+  for (let lz = 5; lz <= 11; lz += 1) {
+    chunk.setBlock(14, padY + 10, lz, buildingRoofId);
+  }
+
+  // Command hub annex and elevated bridge to give the colony real mass in the preview.
+  for (let lx = 9; lx <= 13; lx += 1) {
+    for (let lz = 11; lz <= 14; lz += 1) {
+      const edge = lx === 9 || lx === 13 || lz === 11 || lz === 14;
+      for (let y = padY + 1; y <= padY + 5; y += 1) {
+        if (edge) {
+          const windowBand = y === padY + 3 && lz !== 11;
+          chunk.setBlock(lx, y, lz, windowBand ? windowId : buildingWallId);
+        } else {
+          chunk.setBlock(lx, y, lz, 0);
+        }
+      }
+      chunk.setBlock(lx, padY + 6, lz, buildingRoofId);
+    }
+  }
+  for (let lx = 10; lx <= 12; lx += 1) {
+    chunk.setBlock(lx, padY + 6, 11, lampId);
+  }
+  for (let lx = 10; lx <= 13; lx += 1) {
+    chunk.setBlock(lx, padY + 6, 10, buildingCoreId);
+  }
+
+  // Raised landing approach gantries near the overlook so the left side of the shot has stronger depth.
+  for (const [lx, lz] of [
+    [3, 6],
+    [3, 10],
+    [5, 6],
+    [5, 10],
+  ]) {
+    for (let y = padY + 1; y <= padY + 4; y += 1) {
+      chunk.setBlock(lx, y, lz, buildingWallId);
+    }
+    chunk.setBlock(lx, padY + 5, lz, lampId);
+  }
+  for (let lz = 6; lz <= 10; lz += 4) {
+    for (let lx = 3; lx <= 5; lx += 1) {
+      chunk.setBlock(lx, padY + 4, lz, buildingCoreId);
+    }
+  }
+
   // Walkway stripe from west approach into the pad center.
   for (let lx = 2; lx <= 8; lx += 1) {
     chunk.setBlock(lx, padY, 8, landingPadId);
+  }
+
+  // Stronger centerline and threshold lights so the pad reads from the preview shot.
+  for (const [lx, lz] of [
+    [6, 6],
+    [6, 10],
+    [8, 6],
+    [8, 10],
+    [10, 6],
+    [10, 10],
+  ]) {
+    chunk.setBlock(lx, padY + 1, lz, lampId);
+  }
+
+  for (let lz = 6; lz <= 10; lz += 1) {
+    chunk.setBlock(9, padY + 1, lz, buildingCoreId);
   }
 
   // Perimeter guide lights at the player approach edge.
@@ -533,4 +649,9 @@ function placeLandingSite(chunk, heightmap) {
   chunk.setBlock(3, padY + 1, 10, lampId);
   chunk.setBlock(2, padY + 3, 6, lampId);
   chunk.setBlock(2, padY + 3, 10, lampId);
+
+  // South apron marker bar to break up the otherwise-flat foreground slab.
+  for (let lx = 6; lx <= 15; lx += 1) {
+    chunk.setBlock(lx, padY + 1, 13, (lx % 2 === 0) ? lampId : terminalId);
+  }
 }

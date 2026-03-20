@@ -61,11 +61,13 @@ const WATER_FRAGMENT = /* glsl */ `
 export class WaterRenderer {
   /**
    * @param {THREE.Scene} scene
+   * @param {{ waterColor?: THREE.Color, alpha?: number }} options
    */
-  constructor(scene) {
+  constructor(scene, options = {}) {
     this.scene = scene;
 
-    const waterColor = new THREE.Color(0x1a6090);
+    const waterColor = options.waterColor || new THREE.Color(0x1a6090);
+    const alpha = options.alpha ?? 0.35;
 
     const geometry = new THREE.PlaneGeometry(PLANE_SIZE, PLANE_SIZE, 64, 64);
     geometry.rotateX(-Math.PI / 2); // Lay flat on the XZ plane
@@ -74,7 +76,7 @@ export class WaterRenderer {
       uniforms: {
         uTime: { value: 0 },
         uWaterColor: { value: new THREE.Vector3(waterColor.r, waterColor.g, waterColor.b) },
-        uAlpha: { value: 0.35 },
+        uAlpha: { value: alpha },
       },
       vertexShader: WATER_VERTEX,
       fragmentShader: WATER_FRAGMENT,

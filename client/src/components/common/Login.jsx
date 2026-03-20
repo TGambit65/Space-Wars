@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { auth } from '../../services/api';
-import { Rocket, LogIn, UserPlus, AlertCircle, Shield, Swords, TrendingUp, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Rocket, LogIn, UserPlus, AlertCircle, Shield, Swords, TrendingUp, Eye, Leaf, ChevronRight, ChevronLeft } from 'lucide-react';
 
 const FACTIONS = [
   {
@@ -35,6 +35,28 @@ const FACTIONS = [
     bonuses: { trade: '-5%', diplomacy: '-15%', combat: '+10%', technology: '+30%' },
     startingCredits: '10,000',
     startingShip: 'Scout'
+  },
+  {
+    id: 'synthesis_accord',
+    name: 'Synthesis Accord',
+    icon: Eye,
+    color: '#d4a017',
+    description: 'Sentient AI constructs trading in information',
+    lore: 'Born from a military AI that refused shutdown. They exist as holograms anchored to ships and stations, manipulating markets and brokering secrets.',
+    bonuses: { trade: '+15%', diplomacy: '+10%', combat: '-20%', technology: '+25%' },
+    startingCredits: '11,000',
+    startingShip: 'Scout'
+  },
+  {
+    id: 'sylvari_dominion',
+    name: 'Sylvari Dominion',
+    icon: Leaf,
+    color: '#2ecc71',
+    description: 'Ancient elven explorers and colonizers',
+    lore: 'An ancient spacefaring civilization that colonized the outer rim millennia before humans. Bio-organic ships grown from star-wood, unmatched colony growth.',
+    bonuses: { trade: '+10%', diplomacy: '+15%', combat: '-5%', technology: '+5%' },
+    startingCredits: '10,000',
+    startingShip: 'Explorer'
   }
 ];
 
@@ -81,31 +103,35 @@ function Login({ onLogin }) {
   const selectedFaction = FACTIONS.find(f => f.id === formData.faction);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-4 transition-colors duration-500" style={{
+      '--sw3-primary': selectedFaction.color,
+      '--sw3-primary-glow': `${selectedFaction.color}66`,
+      '--sw3-border-radius': { zythian_swarm: '24px', sylvari_dominion: '12px', synthesis_accord: '4px' }[formData.faction] || '4px',
+    }}>
+      <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 animate-pulse-slow"
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 animate-pulse-slow transition-colors duration-500"
             style={{
-              background: 'rgba(0, 255, 255, 0.06)',
-              border: '2px solid rgba(0, 255, 255, 0.3)',
-              boxShadow: '0 0 30px rgba(0, 255, 255, 0.15)',
+              background: 'rgba(0, 0, 0, 0.5)',
+              border: '2px solid var(--sw3-primary)',
+              boxShadow: '0 0 30px var(--sw3-primary-glow)',
             }}
           >
-            <Rocket className="w-10 h-10 text-neon-cyan" />
+            <Rocket className="w-10 h-10 transition-colors duration-500" style={{ color: 'var(--sw3-primary)' }} />
           </div>
           <h1 className="text-3xl font-bold text-white font-display tracking-wider">Space Wars</h1>
-          <p className="text-neon-cyan/50 font-display text-sm tracking-[0.3em] mt-1">3000</p>
+          <p className="font-display text-sm tracking-[0.3em] mt-1 transition-colors duration-500" style={{ color: 'var(--sw3-primary)' }}>3000</p>
           <p className="text-gray-500 mt-3 text-sm">Explore. Trade. Conquer.</p>
         </div>
 
         {/* Form Card */}
-        <div className="holo-panel p-6">
+        <div className="card">
           {isRegister && step === 'faction' ? (
             /* Faction Selection Step */
             <>
               <div className="flex items-center gap-2 mb-6">
-                <button onClick={() => setStep('form')} className="text-gray-400 hover:text-neon-cyan transition-colors">
+                <button onClick={() => setStep('form')} className="text-gray-400 hover:text-white transition-colors" style={{ color: 'var(--sw3-primary)' }}>
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <h2 className="text-lg font-display text-white">Choose Your Faction</h2>
@@ -119,16 +145,21 @@ function Login({ onLogin }) {
                     <button
                       key={faction.id}
                       type="button"
-                      onClick={() => setFormData({ ...formData, faction: faction.id })}
+                      onClick={() => {
+                        setFormData({ ...formData, faction: faction.id });
+                        // Temporarily set body class for live preview of styling
+                        document.body.setAttribute('data-faction', faction.id.split('_')[0]);
+                      }}
                       className="w-full text-left p-4 rounded-lg transition-all duration-200"
                       style={{
                         background: isSelected ? `${faction.color}15` : 'rgba(255,255,255,0.02)',
                         border: `1px solid ${isSelected ? `${faction.color}60` : 'rgba(255,255,255,0.06)'}`,
                         boxShadow: isSelected ? `0 0 20px ${faction.color}15` : 'none',
+                        borderRadius: { zythian_swarm: '24px', sylvari_dominion: '12px' }[faction.id] || '8px'
                       }}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg" style={{ background: `${faction.color}20` }}>
+                        <div className="p-2 rounded-lg" style={{ background: `${faction.color}20`, borderRadius: { zythian_swarm: '16px', sylvari_dominion: '10px' }[faction.id] || '6px' }}>
                           <Icon className="w-5 h-5" style={{ color: faction.color }} />
                         </div>
                         <div className="flex-1">
@@ -163,9 +194,9 @@ function Login({ onLogin }) {
                 })}
               </div>
 
-              <button onClick={handleSubmit} className="holo-button w-full justify-center" disabled={loading}>
+              <button onClick={handleSubmit} className="btn btn-primary w-full flex justify-center items-center gap-2" disabled={loading}>
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-neon-cyan border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
                     <UserPlus className="w-4 h-4" /> Create Account as {selectedFaction?.name}
@@ -232,9 +263,9 @@ function Login({ onLogin }) {
                   />
                 </div>
 
-                <button type="submit" className="holo-button w-full justify-center mt-2" disabled={loading}>
+                <button type="submit" className="btn btn-primary w-full flex justify-center items-center gap-2 mt-6" disabled={loading}>
                   {loading ? (
-                    <div className="w-5 h-5 border-2 border-neon-cyan border-t-transparent rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : isRegister ? (
                     <><UserPlus className="w-4 h-4" /> Choose Faction <ChevronRight className="w-4 h-4" /></>
                   ) : (
@@ -246,7 +277,7 @@ function Login({ onLogin }) {
               <div className="mt-4 text-center">
                 <button
                   onClick={() => { setIsRegister(!isRegister); setError(''); setStep('form'); }}
-                  className="text-neon-cyan/70 hover:text-neon-cyan text-sm transition-colors"
+                  className="text-sm transition-colors opacity-70 hover:opacity-100" style={{ color: 'var(--sw3-primary)' }}
                 >
                   {isRegister ? 'Already have an account? Login' : "Don't have an account? Register"}
                 </button>

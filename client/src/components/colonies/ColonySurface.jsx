@@ -5,7 +5,7 @@ import { colonies as coloniesApi, buildings as buildingsApi, groundCombatApi } f
 import { TERRAIN_COLORS, isBuildable } from '../../utils/terrainGenerator';
 import { useNotifications } from '../../contexts/NotificationContext';
 import SurfaceToolbar from './SurfaceToolbar';
-import { ArrowLeft, Sparkles, MapPin, RotateCcw, Blocks, Shield, Swords, Share2, Eye, Cloud, CloudOff, CheckCircle, Gift, ClipboardCopy } from 'lucide-react';
+import { ArrowLeft, Sparkles, MapPin, RotateCcw, Blocks, Shield, Swords, Share2, Eye, Cloud, CloudOff, CheckCircle, Gift, ClipboardCopy, Box } from 'lucide-react';
 
 const TILE_SIZE = 20;
 
@@ -976,6 +976,15 @@ function ColonySurface({ user, readOnly = false }) {
           {weatherEnabled ? <Cloud className="w-3 h-3" /> : <CloudOff className="w-3 h-3" />}
           Weather
         </button>
+        {!readOnly && !surfaceData?.needs_initialization && (
+          <button
+            onClick={() => navigate(`/colony/${colonyId}/voxel`)}
+            className="bg-space-900/90 border border-green-500/40 rounded-lg px-3 py-1.5 text-xs flex items-center gap-1 text-green-400 hover:text-green-300 hover:border-green-400/60 transition-colors backdrop-blur-sm"
+            title="Enter first-person 3D voxel view"
+          >
+            <Box className="w-3 h-3" /> 3D View
+          </button>
+        )}
         {!readOnly && selectedTool && (
           <button
             onClick={() => setSelectedTool(null)}

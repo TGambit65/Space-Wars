@@ -369,6 +369,47 @@ export const admin = {
   getTickStatus: () => api.get('/admin/ticks/status'),
   getUsers: (params) => api.get('/admin/users', { params }),
   updateUserTier: (userId, tier) => api.put('/admin/users/tier', { user_id: userId, subscription_tier: tier }),
+  // Server
+  getServerStatus: () => api.get('/admin/server/status'),
+  getRuntimeLog: (params) => api.get('/admin/server/runtime-log', { params }),
+  startTicks: () => api.post('/admin/server/ticks/start'),
+  stopTicks: () => api.post('/admin/server/ticks/stop'),
+  // Economy
+  getEconomyOverview: () => api.get('/admin/economy/overview'),
+  getTransfers: (params) => api.get('/admin/economy/transfers', { params }),
+  forceEconomyTick: () => api.post('/admin/economy/force-tick'),
+  resetPortStocks: () => api.post('/admin/economy/reset-stocks'),
+  // Player Support
+  getUserDetail: (userId) => api.get(`/admin/users/${userId}/detail`),
+  adjustCredits: (userId, data) => api.post(`/admin/users/${userId}/credits`, data),
+  reviveShip: (userId, data) => api.post(`/admin/users/${userId}/revive-ship`, data),
+  repairShip: (userId, data) => api.post(`/admin/users/${userId}/repair-ship`, data),
+  moveShip: (userId, data) => api.post(`/admin/users/${userId}/move-ship`, data),
+  setActiveShip: (userId, data) => api.post(`/admin/users/${userId}/set-active-ship`, data),
+  // Wars
+  getWars: (params) => api.get('/admin/wars', { params }),
+  getActiveWars: () => api.get('/admin/wars/active'),
+  declareWar: (data) => api.post('/admin/wars/declare', data),
+  resolveWar: (warId) => api.post(`/admin/wars/${warId}/resolve`),
+  // Events
+  getEvents: (params) => api.get('/admin/events', { params }),
+  createEvent: (data) => api.post('/admin/events', data),
+  endEvent: (eventId) => api.put(`/admin/events/${eventId}/end`),
+  deleteEvent: (eventId) => api.delete(`/admin/events/${eventId}`),
+  // Audit
+  getAuditLogs: (params) => api.get('/admin/action-audit', { params }),
+  getAuditSummary: () => api.get('/admin/audit/summary'),
+};
+
+// AI Agent
+export const agents = {
+  get: () => api.get('/agents'),
+  create: (data) => api.post('/agents', data),
+  update: (data) => api.put('/agents', data),
+  remove: () => api.delete('/agents'),
+  setStatus: (status) => api.post('/agents/status', { status }),
+  regenerateKey: () => api.post('/agents/regenerate-key'),
+  getLogs: (params) => api.get('/agents/logs', { params }),
 };
 
 export default api;

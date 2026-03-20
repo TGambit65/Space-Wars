@@ -20,13 +20,16 @@
 import { CHUNK_SIZE, CHUNK_HEIGHT } from './Chunk.js';
 
 // Face directions: [dx, dy, dz]
+// flipWinding: the natural quad winding (u-axis × v-axis) doesn't match the
+// face normal for some directions, so we flip the triangle indices to ensure
+// front-face visibility with THREE.FrontSide culling.
 const FACES = [
-  { name: 'py', dir: [0,  1, 0], axis: 1, positive: true  }, // top    (+Y)
-  { name: 'ny', dir: [0, -1, 0], axis: 1, positive: false }, // bottom (-Y)
-  { name: 'px', dir: [1,  0, 0], axis: 0, positive: true  }, // east   (+X)
-  { name: 'nx', dir: [-1, 0, 0], axis: 0, positive: false }, // west   (-X)
-  { name: 'pz', dir: [0,  0, 1], axis: 2, positive: true  }, // south  (+Z)
-  { name: 'nz', dir: [0,  0,-1], axis: 2, positive: false }, // north  (-Z)
+  { name: 'py', dir: [0,  1, 0], axis: 1, positive: true,  flipWinding: true  }, // top    (+Y)
+  { name: 'ny', dir: [0, -1, 0], axis: 1, positive: false, flipWinding: false }, // bottom (-Y)
+  { name: 'px', dir: [1,  0, 0], axis: 0, positive: true,  flipWinding: true  }, // east   (+X)
+  { name: 'nx', dir: [-1, 0, 0], axis: 0, positive: false, flipWinding: false }, // west   (-X)
+  { name: 'pz', dir: [0,  0, 1], axis: 2, positive: true,  flipWinding: false }, // south  (+Z)
+  { name: 'nz', dir: [0,  0,-1], axis: 2, positive: false, flipWinding: true  }, // north  (-Z)
 ];
 
 // AO value table: (side1 + side2 + corner) → brightness
@@ -331,11 +334,21 @@ export function greedyMesh(chunk, neighbors, blockRegistry) {
 
           aos.push(ao0, ao1, ao2, ao3);
 
-          // Two triangles — flip based on AO to avoid anisotropy artifacts
-          if (ao0 + ao2 > ao1 + ao3) {
-            indices.push(vi, vi + 1, vi + 2, vi, vi + 2, vi + 3);
+          // Two triangles — flip based on AO to avoid anisotropy artifacts.
+          // For faces where the natural quad winding is inverted, reverse the
+          // triangle vertex order so front-face culling works correctly.
+          if (face.flipWinding) {
+            if (ao0 + ao2 > ao1 + ao3) {
+              indices.push(vi, vi + 2, vi + 1, vi, vi + 3, vi + 2);
+            } else {
+              indices.push(vi + 1, vi + 3, vi + 2, vi, vi + 3, vi + 1);
+            }
           } else {
-            indices.push(vi + 1, vi + 2, vi + 3, vi, vi + 1, vi + 3);
+            if (ao0 + ao2 > ao1 + ao3) {
+              indices.push(vi, vi + 1, vi + 2, vi, vi + 2, vi + 3);
+            } else {
+              indices.push(vi + 1, vi + 2, vi + 3, vi, vi + 1, vi + 3);
+            }
           }
 
           vertexCount += 4;

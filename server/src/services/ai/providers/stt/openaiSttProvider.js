@@ -16,8 +16,14 @@ class OpenAISttProvider extends BaseSttProvider {
   }
 
   async transcribe(audioBuffer, format = 'webm') {
-    const ext = format === 'webm' ? 'webm' : format === 'mp3' ? 'mp3' : 'wav';
-    const mimeType = format === 'webm' ? 'audio/webm' : format === 'mp3' ? 'audio/mpeg' : 'audio/wav';
+    const normalizedFormat = String(format || 'webm').toLowerCase();
+    const formatMap = {
+      webm: { ext: 'webm', mimeType: 'audio/webm' },
+      ogg: { ext: 'ogg', mimeType: 'audio/ogg' },
+      mp3: { ext: 'mp3', mimeType: 'audio/mpeg' },
+      wav: { ext: 'wav', mimeType: 'audio/wav' },
+    };
+    const { ext, mimeType } = formatMap[normalizedFormat] || formatMap.wav;
 
     const formData = new FormData();
     const blob = new Blob([audioBuffer], { type: mimeType });

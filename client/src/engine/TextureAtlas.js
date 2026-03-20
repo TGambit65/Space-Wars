@@ -205,23 +205,32 @@ const TEXTURE_GENERATORS = {
   },
   metal_plate: {
     all(ctx, ox, oy, rng) {
-      // Riveted metal look
-      fillNoisy(ctx, ox, oy, [178, 188, 198], 10, rng);
+      fillNoisy(ctx, ox, oy, [112, 132, 156], 8, rng);
+      for (let py = 0; py < TILE_SIZE; py += 4) {
+        ctx.fillStyle = rgbStr(vary([78, 94, 112], 4, rng));
+        ctx.fillRect(ox, oy + py, TILE_SIZE, 1);
+      }
       // Rivets at corners
       for (const [rx, ry] of [[2,2],[13,2],[2,13],[13,13]]) {
-        ctx.fillStyle = rgbStr(vary([110, 120, 130], 5, rng));
+        ctx.fillStyle = rgbStr(vary([180, 198, 220], 5, rng));
         ctx.fillRect(ox + rx, oy + ry, 2, 2);
       }
     }
   },
   landing_pad: {
     all(ctx, ox, oy, rng) {
-      fillNoisy(ctx, ox, oy, [108, 126, 156], 8, rng);
+      fillNoisy(ctx, ox, oy, [92, 112, 144], 7, rng);
       // Bright center guidance stripe
       for (let px = 0; px < TILE_SIZE; px++) {
         if ((px + 1) % 4 < 2) {
-          ctx.fillStyle = rgbStr(vary([240, 214, 72], 8, rng));
+          ctx.fillStyle = rgbStr(vary([255, 228, 92], 8, rng));
           ctx.fillRect(ox + px, oy + 7, 1, 2);
+        }
+      }
+      for (let py = 1; py < TILE_SIZE - 1; py += 1) {
+        if (py === 5 || py === 10) {
+          ctx.fillStyle = rgbStr(vary([120, 246, 255], 8, rng));
+          ctx.fillRect(ox + 2, oy + py, TILE_SIZE - 4, 1);
         }
       }
       // Perimeter brackets
@@ -384,12 +393,12 @@ const TEXTURE_GENERATORS = {
   },
   terminal: {
     all(ctx, ox, oy, rng) {
-      fillNoisy(ctx, ox, oy, [50, 55, 60], 5, rng);
+      fillNoisy(ctx, ox, oy, [44, 50, 58], 5, rng);
       // Green screen
       for (let py = 3; py < 12; py++) {
         for (let px = 3; px < 13; px++) {
           const scanline = py % 2 === 0;
-          const base = scanline ? [20, 180, 60] : [15, 140, 45];
+          const base = scanline ? [60, 240, 210] : [20, 176, 166];
           ctx.fillStyle = rgbStr(vary(base, 8, rng));
           ctx.fillRect(ox + px, oy + py, 1, 1);
         }
@@ -414,7 +423,7 @@ const TEXTURE_GENERATORS = {
       for (let py = 0; py < TILE_SIZE; py++) {
         for (let px = 0; px < TILE_SIZE; px++) {
           const isGrid = (px % 4 === 0) || (py % 4 === 0);
-          const base = isGrid ? [180, 185, 190] : [30, 50, 120];
+          const base = isGrid ? [190, 210, 230] : [24, 92, 196];
           ctx.fillStyle = rgbStr(vary(base, 6, rng));
           ctx.fillRect(ox + px, oy + py, 1, 1);
         }
@@ -437,11 +446,12 @@ const TEXTURE_GENERATORS = {
   },
   building_core: {
     all(ctx, ox, oy, rng) {
-      fillNoisy(ctx, ox, oy, [88, 110, 152], 8, rng);
+      fillNoisy(ctx, ox, oy, [92, 116, 144], 7, rng);
       // Glowing center indicator
-      for (let py = 5; py < 11; py++) {
-        for (let px = 5; px < 11; px++) {
-          ctx.fillStyle = rgbStr(vary([120, 235, 255], 8, rng));
+      for (let py = 3; py < 13; py++) {
+        for (let px = 3; px < 13; px++) {
+          const edgeGlow = px === 3 || px === 12 || py === 3 || py === 12;
+          ctx.fillStyle = rgbStr(vary(edgeGlow ? [255, 220, 104] : [140, 250, 255], 8, rng));
           ctx.fillRect(ox + px, oy + py, 1, 1);
         }
       }
@@ -449,17 +459,25 @@ const TEXTURE_GENERATORS = {
   },
   building_wall: {
     all(ctx, ox, oy, rng) {
-      fillNoisy(ctx, ox, oy, [175, 180, 188], 6, rng);
+      fillNoisy(ctx, ox, oy, [188, 202, 226], 7, rng);
       // Panel seam
       for (let i = 0; i < TILE_SIZE; i++) {
-        ctx.fillStyle = rgbStr(vary([128, 133, 140], 4, rng));
+        ctx.fillStyle = rgbStr(vary([112, 240, 255], 4, rng));
         ctx.fillRect(ox + i, oy + 8, 1, 1);
+      }
+      for (const x of [3, 12]) {
+        ctx.fillStyle = rgbStr(vary([238, 248, 255], 5, rng));
+        ctx.fillRect(ox + x, oy + 2, 1, 12);
       }
     }
   },
   building_roof: {
     all(ctx, ox, oy, rng) {
-      fillNoisy(ctx, ox, oy, [100, 110, 125], 8, rng);
+      fillNoisy(ctx, ox, oy, [88, 100, 124], 7, rng);
+      for (let px = 0; px < TILE_SIZE; px += 4) {
+        ctx.fillStyle = rgbStr(vary([170, 196, 230], 5, rng));
+        ctx.fillRect(ox + px, oy + 3, 2, TILE_SIZE - 6);
+      }
     }
   },
 };
@@ -539,6 +557,10 @@ export function createTextureAtlas(blockRegistry) {
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.colorSpace = THREE.SRGBColorSpace;
+  // Disable flipY so canvas coordinates (y=0 at top) match UV coordinates
+  // directly. Without this, UV v=0 maps to the bottom of the canvas (empty
+  // transparent space) and every fragment gets discarded by the alpha test.
+  texture.flipY = false;
   texture.needsUpdate = true;
 
   /**

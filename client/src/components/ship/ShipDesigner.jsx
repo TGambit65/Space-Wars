@@ -173,7 +173,7 @@ const ShipDesigner = () => {
     const powerPercent = Math.min(100, (stats.power_used / stats.power_max) * 100);
 
     return (
-        <div className="max-w-6xl mx-auto space-y-6">
+        <div className="max-w-6xl mx-auto space-y-6 shipyard-bg-grid shipyard-scanline p-6 relative">
             {/* Notifications via global toast system */}
             <header className="flex justify-between items-center mb-6">
                 <div>

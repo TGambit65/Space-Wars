@@ -43,7 +43,7 @@ const User = sequelize.define('User', {
     allowNull: false,
     defaultValue: 'terran_alliance',
     validate: {
-      isIn: [['terran_alliance', 'zythian_swarm', 'automaton_collective']]
+      isIn: [['terran_alliance', 'zythian_swarm', 'automaton_collective', 'synthesis_accord', 'sylvari_dominion']]
     },
     comment: 'Player faction affiliation'
   },

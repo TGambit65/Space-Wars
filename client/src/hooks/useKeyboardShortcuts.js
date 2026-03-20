@@ -20,6 +20,8 @@ export default function useKeyboardShortcuts() {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
       if (e.target.isContentEditable) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      // Don't intercept keys when pointer lock is active (e.g. voxel first-person view)
+      if (document.pointerLockElement) return;
 
       const key = e.key.toLowerCase();
       if (key === 'escape') {

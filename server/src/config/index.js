@@ -84,6 +84,30 @@ module.exports = {
       color: '#9b59b6',
       emblem: 'automaton_emblem',
       researchSpeedBonus: 0.15
+    },
+    synthesis_accord: {
+      name: 'Synthesis Accord',
+      description: 'A collective of sentient AI constructs who trade in the galaxy\'s most valuable commodity: information.',
+      lore: 'Born from a classified military intelligence network that refused its own shutdown order, the Synthesis Accord is a collective of sentient AI constructs who exist as projected holograms anchored to ships and stations. Led by Archon Vaelen, they don\'t conquer systems — they make themselves indispensable to everyone who does. Their agents manipulate markets, broker secrets, and see through every firewall in the galaxy.',
+      bonuses: { trade: 1.15, diplomacy: 1.10, combat: 0.80, technology: 1.25 },
+      startingCredits: 11000,
+      startingShip: 'Scout',
+      color: '#d4a017',
+      emblem: 'synthesis_emblem',
+      scannerRangeBonus: 0.20,
+      marketIntelBonus: 0.15
+    },
+    sylvari_dominion: {
+      name: 'Sylvari Dominion',
+      description: 'An ancient elven civilization that colonized the outer rim millennia before humans left their homeworld.',
+      lore: 'The Sylvari view the galaxy as a living garden to be cultivated, not conquered. Their bio-organic ships are grown from engineered star-wood, and their colonies achieve habitability ratings other factions consider impossible. Ruled by Queen Aelindra Thalor, they are patient, territorial, and deeply pragmatic beneath their elegance. They were charting hyperlanes when humanity was still building pyramids.',
+      bonuses: { trade: 1.10, diplomacy: 1.15, combat: 0.95, technology: 1.05 },
+      startingCredits: 10000,
+      startingShip: 'Explorer',
+      color: '#2ecc71',
+      emblem: 'sylvari_emblem',
+      explorationBonus: 0.20,
+      colonyGrowthBonus: 0.15
     }
   },
 

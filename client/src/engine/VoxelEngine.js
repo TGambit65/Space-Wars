@@ -10,7 +10,7 @@ import { ChunkManager } from './ChunkManager.js';
 import { createTextureAtlas } from './TextureAtlas.js';
 import { BLOCKS } from './BlockRegistry.js';
 import { createVoxelMaterial } from './shaders/voxelShader.js';
-import { SkyRenderer } from './SkyRenderer.js';
+import { SkyRenderer, getSkyPalette } from './SkyRenderer.js';
 import { WaterRenderer } from './WaterRenderer.js';
 
 const DEFAULT_RENDER_DISTANCE = 8;
@@ -47,13 +47,20 @@ export class VoxelEngine {
 
     const planetType = colonyData?.planetType || 'Terran';
     const seed = colonyData?.seed || 42;
+    this.renderDistance = colonyData?.renderDistance || DEFAULT_RENDER_DISTANCE;
     const biomeGrid = colonyData?.biomeGrid || null;
     const serverDeltas = colonyData?.serverDeltas || null;
     const spawnChunk = colonyData?.spawnChunk || null;
+    const showWater = colonyData?.showWater !== false;
+    const skyPalette = getSkyPalette(planetType);
 
     // --- Scene ---
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x010103);
+    const topColor = new THREE.Color(skyPalette.top);
+    const horizonColor = new THREE.Color(skyPalette.horizon);
+    const bottomColor = new THREE.Color(skyPalette.bottom);
+    const fogColor = horizonColor.clone().lerp(bottomColor, 0.22);
+    this.scene.background = fogColor.clone();
 
     // --- Camera ---
     const aspect = container.clientWidth / container.clientHeight;
@@ -64,23 +71,24 @@ export class VoxelEngine {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(container.clientWidth, container.clientHeight);
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.4;
     container.appendChild(this.renderer.domElement);
 
     // --- Lighting ---
-    this.sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    this.sunLight = new THREE.DirectionalLight(0xffffff, 1.85);
     this.sunLight.position.set(200, 300, 150);
     this.scene.add(this.sunLight);
 
-    this.hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x808080, 0.4);
+    this.hemiLight = new THREE.HemisphereLight(0xc9eeff, 0x29384d, 0.78);
     this.scene.add(this.hemiLight);
 
     // --- Texture Atlas ---
     this.atlas = createTextureAtlas(BLOCKS);
 
     // --- Fog ---
-    const fogColor = this.scene.background.clone();
-    const fogNear = this.renderDistance * 0.7 * BLOCKS_PER_CHUNK;
-    const fogFar = this.renderDistance * BLOCKS_PER_CHUNK;
+    const fogNear = this.renderDistance * 0.82 * BLOCKS_PER_CHUNK;
+    const fogFar = this.renderDistance * 1.28 * BLOCKS_PER_CHUNK;
     this.scene.fog = new THREE.Fog(fogColor, fogNear, fogFar);
 
     // --- Voxel Material ---
@@ -103,7 +111,14 @@ export class VoxelEngine {
     this.skyRenderer = new SkyRenderer(this.scene, planetType);
 
     // --- Water ---
-    this.waterRenderer = new WaterRenderer(this.scene);
+    if (showWater) {
+      this.waterRenderer = new WaterRenderer(this.scene, {
+        waterColor: horizonColor.clone().lerp(bottomColor, 0.35),
+        alpha: 0.16,
+      });
+    } else {
+      this.waterRenderer = null;
+    }
 
     // --- Resize listener ---
     this._onResize = () => this.resize();
@@ -182,6 +197,34 @@ export class VoxelEngine {
   /** @returns {THREE.WebGLRenderer} */
   getRenderer() {
     return this.renderer;
+  }
+
+  setLandingSiteHighlights(primary = null, secondary = null) {
+    if (!this.material?.uniforms) return;
+
+    const setUniformSet = (suffix, config) => {
+      const origin = this.material.uniforms[`uHighlightOrigin${suffix}`].value;
+      const color = this.material.uniforms[`uHighlightColor${suffix}`].value;
+      const radius = this.material.uniforms[`uHighlightRadius${suffix}`];
+      const intensity = this.material.uniforms[`uHighlightIntensity${suffix}`];
+
+      if (!config) {
+        origin.set(0, 0, 0);
+        color.set(0, 0, 0);
+        radius.value = 0;
+        intensity.value = 0;
+        return;
+      }
+
+      origin.set(config.x, config.y, config.z);
+      const highlightColor = new THREE.Color(config.color);
+      color.set(highlightColor.r, highlightColor.g, highlightColor.b);
+      radius.value = config.radius;
+      intensity.value = config.intensity;
+    };
+
+    setUniformSet('A', primary);
+    setUniformSet('B', secondary);
   }
 
   /** Handle container / window resize. */

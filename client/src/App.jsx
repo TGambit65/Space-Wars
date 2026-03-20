@@ -44,6 +44,9 @@ const MessagingPage = lazy(() => import('./components/messaging/MessagingPage'))
 const ShipCustomizer = lazy(() => import('./components/ship/ShipCustomizer'));
 const OutpostsPage = lazy(() => import('./components/outposts/OutpostsPage'));
 const EventsPage = lazy(() => import('./components/events/EventsPage'));
+const ShipInteriorView = lazy(() => import('./components/traversal/ShipInteriorView'));
+const DerelictBoardingView = lazy(() => import('./components/traversal/DerelictBoardingView'));
+const AgentPage = lazy(() => import('./components/agent/AgentPage'));
 
 function RouteLoadingFallback() {
   return (
@@ -68,6 +71,14 @@ function App() {
       .catch(() => clearToken())
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (user?.faction) {
+      document.body.setAttribute('data-faction', user.faction.split('_')[0]);
+    } else {
+      document.body.removeAttribute('data-faction');
+    }
+  }, [user?.faction]);
 
   const handleLogin = (userData, token) => {
     setToken(token);
@@ -120,6 +131,8 @@ function App() {
         <Route path="/map" element={<GalaxyMap user={user} />} />
         <Route path="/system" element={<SystemView user={user} onHailNPC={handleHailNPC} />} />
         <Route path="/ships" element={<ShipPanel user={user} />} />
+        <Route path="/ship/:shipId/interior" element={<ShipInteriorView user={user} />} />
+        <Route path="/ship/:shipId/derelict" element={<DerelictBoardingView user={user} />} />
         <Route path="/designer" element={<ShipDesigner user={user} />} />
         <Route path="/trading" element={<TradingPage user={user} />} />
         <Route path="/combat" element={<CombatPage user={user} socket={socket} />} />
@@ -146,6 +159,7 @@ function App() {
         <Route path="/customizer" element={<ShipCustomizer user={user} />} />
         <Route path="/outposts" element={<OutpostsPage user={user} />} />
         <Route path="/events" element={<EventsPage user={user} />} />
+        <Route path="/agent" element={<AgentPage user={user} />} />
         {user.is_admin && <Route path="/admin" element={<AdminPage user={user} />} />}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -12,10 +12,10 @@ const TYPE_CONFIG = {
   },
   info: {
     icon: Info,
-    border: 'rgba(0, 255, 255, 0.4)',
-    bg: 'rgba(0, 255, 255, 0.06)',
-    glow: 'rgba(0, 255, 255, 0.15)',
-    color: '#00ffff',
+    border: 'var(--sw3-primary-glow)',
+    bg: 'var(--sw3-primary-alpha)',
+    glow: 'var(--sw3-primary-glow)',
+    color: 'var(--sw3-primary)',
   },
   warning: {
     icon: AlertTriangle,
@@ -49,8 +49,9 @@ function Toast({ notification, onDismiss }) {
 
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3 rounded-lg backdrop-blur-md transition-all duration-200 max-w-sm"
+      className="flex items-center gap-3 px-4 py-3 backdrop-blur-md transition-all duration-200 max-w-sm"
       style={{
+        borderRadius: 'var(--sw3-border-radius)',
         background: cfg.bg,
         border: `1px solid ${cfg.border}`,
         boxShadow: `0 0 20px ${cfg.glow}, 0 4px 12px rgba(0,0,0,0.3)`,

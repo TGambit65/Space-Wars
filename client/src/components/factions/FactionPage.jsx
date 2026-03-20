@@ -1,18 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { factions as factionsApi } from '../../services/api';
-import { Shield, Swords, TrendingUp, Users, Star, Trophy, ArrowRight } from 'lucide-react';
+import { Shield, Swords, TrendingUp, Eye, Leaf, Users, Star, Trophy, ArrowRight } from 'lucide-react';
 
 const FACTION_ICONS = {
   terran_alliance: Shield,
   zythian_swarm: Swords,
   automaton_collective: TrendingUp,
+  synthesis_accord: Eye,
+  sylvari_dominion: Leaf,
 };
 
 const FACTION_COLORS = {
   terran_alliance: '#3498db',
   zythian_swarm: '#e74c3c',
   automaton_collective: '#9b59b6',
+  synthesis_accord: '#d4a017',
+  sylvari_dominion: '#2ecc71',
 };
 
 const FACTION_TIPS = {
@@ -30,6 +34,16 @@ const FACTION_TIPS = {
     { action: 'Trade rare tech at Automaton ports', link: '/trading' },
     { action: 'Research advanced technologies', link: '/progression' },
     { action: 'Build colonies in deep space', link: '/colonies' },
+  ],
+  synthesis_accord: [
+    { action: 'Scan sectors for intel at Synthesis stations', link: '/map' },
+    { action: 'Trade market data with Synthesis brokers', link: '/trading' },
+    { action: 'Research encryption technologies', link: '/progression' },
+  ],
+  sylvari_dominion: [
+    { action: 'Explore uncharted systems', link: '/map' },
+    { action: 'Establish colonies on frontier worlds', link: '/colonies' },
+    { action: 'Complete Sylvari exploration missions', link: '/missions' },
   ],
 };
 

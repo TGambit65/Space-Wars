@@ -13,16 +13,20 @@ import * as THREE from 'three';
  * Each has three stops: top (zenith), horizon, and bottom (nadir).
  */
 const SKY_PALETTES = {
-  Terran:      { top: '#001133', horizon: '#4488cc', bottom: '#88bbee' },
-  Desert:      { top: '#1a0800', horizon: '#cc6600', bottom: '#ffaa44' },
-  Ice:         { top: '#000d1a', horizon: '#6699cc', bottom: '#aaccee' },
-  Volcanic:    { top: '#1a0000', horizon: '#993300', bottom: '#ff4400' },
-  Oceanic:     { top: '#000022', horizon: '#003366', bottom: '#0066aa' },
-  Jungle:      { top: '#001100', horizon: '#226633', bottom: '#44aa55' },
-  Barren:      { top: '#0a0a0a', horizon: '#333333', bottom: '#666666' },
+  Terran:      { top: '#102b63', horizon: '#5f9df0', bottom: '#b8e0ff' },
+  Desert:      { top: '#4a1804', horizon: '#d16c1b', bottom: '#ffc36a' },
+  Ice:         { top: '#14315a', horizon: '#77b4e6', bottom: '#d6f3ff' },
+  Volcanic:    { top: '#3d0a02', horizon: '#c84a14', bottom: '#ff8645' },
+  Oceanic:     { top: '#082453', horizon: '#2f72c7', bottom: '#8bc6ff' },
+  Jungle:      { top: '#10311c', horizon: '#3c8d56', bottom: '#8bd785' },
+  Barren:      { top: '#232833', horizon: '#66748a', bottom: '#b2bdc9' },
   // Fallback for Toxic, Crystalline, Gas Giant, etc.
-  _default:    { top: '#0a000d', horizon: '#442266', bottom: '#773399' },
+  _default:    { top: '#24103d', horizon: '#6b48b6', bottom: '#c1abff' },
 };
+
+export function getSkyPalette(planetType) {
+  return SKY_PALETTES[planetType] || SKY_PALETTES._default;
+}
 
 const SKY_VERTEX = /* glsl */ `
   varying float vY;
@@ -62,7 +66,7 @@ export class SkyRenderer {
   constructor(scene, planetType) {
     this.scene = scene;
 
-    const palette = SKY_PALETTES[planetType] || SKY_PALETTES._default;
+    const palette = getSkyPalette(planetType);
 
     const topColor = new THREE.Color(palette.top);
     const horizonColor = new THREE.Color(palette.horizon);

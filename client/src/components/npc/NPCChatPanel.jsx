@@ -118,10 +118,20 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
     const onDialogueMessage = (data) => {
       if (data.npc_id !== npc.npc_id) return;
 
+      const audioPayload = data.response_audio || (
+        data.audio_base64
+          ? {
+              audio_base64: data.audio_base64,
+              mime_type: data.mime_type || data.audio_mime_type || null,
+              format: data.format || data.audio_format || null,
+            }
+          : null
+      );
+
       setMessages(prev => [...prev, {
         sender: 'npc',
         text: data.text,
-        audio: data.audio_base64 || null,
+        audio: audioPayload,
         isAI: data.is_ai,
         timestamp: Date.now()
       }]);

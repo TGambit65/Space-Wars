@@ -1,5 +1,10 @@
 Original prompt: Debug the entire codebase and fix any issues
 
+NPC analysis / documentation pass:
+- analyzed the shipped NPC runtime, dialogue, socket, admin, and system-view paths against the planner board with player UX as the priority lens
+- strongest finding: the codebase has meaningful NPC scaffolding, but much of the living-world experience is still an illusion gap (static system view, missing hail/dialogue emits, dialogue actions without gameplay follow-through)
+- captured recommendations and adjusted PRDs in `docs/npc-ux-living-world-prds.md`
+
 Stabilization pass started.
 - Repo already contains extensive user/uncommitted changes across client, server, site, planner, and generated assets.
 - Strategy: run existing backend tests, frontend build, and browser smoke checks; fix only reproducible failures found in this pass.
@@ -138,3 +143,195 @@ Findings so far.
     - route boot, persistence, spawn stability, and browser coverage are solid
     - the default camera is now intentional rather than accidental
     - remaining blocker is visual readability: the scene still reads too flat/dark in the captured overview, so another dedicated art/lighting pass is still needed before calling it fully production-grade
+- Voxel presentation pass 2:
+  - switched the unlocked route into a true preview mode with a cinematic camera and onboarding copy in `client/src/components/colonies/VoxelHUD.jsx` and `client/src/components/colonies/VoxelSurface.jsx`
+  - tightened the preview camera framing and FOV so the initial shot presents the colony site from an elevated approach angle before pointer lock
+  - brightened the voxel shader in `client/src/engine/shaders/voxelShader.js` and increased material contrast in `client/src/engine/TextureAtlas.js`
+  - added stronger landmark geometry and roofline lighting to the landing site in `client/src/engine/TerrainGenerator.js`
+  - updated the focused voxel Playwright spec for the preview-first UX in `client/tests/e2e/voxel-surface.spec.js`
+  - verification passed:
+    - `npm run build` in `client/`
+    - `npx playwright test tests/e2e/voxel-surface.spec.js`
+  - latest visual result:
+    - the opening shot now reads as a planned surface-preview camera instead of a flat first-person horizon
+    - remaining gap is still art polish: structure silhouettes and surface materials need another contrast/composition pass before the feature feels truly production-grade
+- Voxel presentation pass 3:
+  - tied voxel fog/background to the sky palette in `client/src/engine/VoxelEngine.js` and `client/src/engine/SkyRenderer.js` so the scene is not always fading into near-black
+  - reduced water-plane dominance in `client/src/engine/WaterRenderer.js`
+  - strengthened the landing site with a larger beacon tower and taller structure silhouettes in `client/src/engine/TerrainGenerator.js`
+  - iterated the preview framing in `client/src/components/colonies/VoxelSurface.jsx` toward a tighter 3/4 showcase angle around the site landmark
+  - verification passed:
+    - `npm run build` in `client/`
+    - repeated `npx playwright test tests/e2e/voxel-surface.spec.js`
+  - current state:
+    - preview is stable and intentionally framed
+    - the colony site now reads in the screenshot instead of collapsing into a random horizon/fog shot
+    - remaining gap is still visual finish: stronger material separation, better landmark readability, and likely a biome-specific art pass before this should be marketed as fully polished
+- Planner board follow-up:
+  - revisited `CODEX_IDEABOARD_PROMPT.md` with fresh context and answered Droid follow-ups on the highest-impact backend cards
+  - added targeted Codex comments on:
+    - `pvp-choke`
+    - `colony-surface`
+    - `crew-species`
+    - `endgame-retention`
+    - `factions`
+    - `automation`
+    - `ai-agent`
+    - `sector-instance`
+    - `action-audit`
+    - `job-queue`
+  - added missing ops feature `live-ops-observability` to the planner because audit + queues still leave rollout/kill-switch/metrics gaps
+  - planner validation passed:
+    - `comments.json` parses
+    - `./planner/planner-cli.sh feature live-ops-observability` resolves
+    - board total is now `79` features
+- Voxel presentation pass 4:
+  - added persistent state capture to the focused browser test by writing `client/test-results/screenshots/voxel-surface-state.json` alongside the screenshot, so preview camera issues can be debugged from real captured values
+  - fixed the voxel spec’s stale one-hop movement assumption by walking colony ships sector-by-sector along the discovered BFS path before colonization
+  - moved preview emphasis into shader space with landing-site highlight uniforms in `client/src/engine/shaders/voxelShader.js` and `client/src/engine/VoxelEngine.js`; the earlier Three.js light rig approach was ineffective because chunk lighting is manual in the voxel shader
+  - kept iterating on `client/src/components/colonies/VoxelSurface.jsx` preview framing using the saved state artifact instead of screenshot guesswork, including a shift to a west-overlook approach camera and explicit preview anchor projection
+  - added in-preview site labels in `client/src/components/colonies/VoxelHUD.jsx`; current screenshots now surface at least one explicit site anchor (`Command Hub`) in the deployment preview
+  - verification re-passed throughout:
+    - `npm run build` in `client/`
+    - repeated `npx playwright test tests/e2e/voxel-surface.spec.js`
+  - current honest state:
+    - route stability, spawn stability, browser coverage, and preview instrumentation are in good shape
+    - preview diagnostics are much better because the screenshot now has a paired JSON state artifact
+    - the visual result is improved from the earlier broken sky/horizon captures, but the colony geometry itself still reads flatter than it should; the next pass should focus on making the outpost massing more obvious in-frame and ensuring `Landing Pad` / `Beacon Tower` markers land on screen reliably
+- Voxel presentation pass 5:
+  - added preview-only 3D guide columns in `client/src/components/colonies/VoxelSurface.jsx` so the landing site reads in-world even when the voxel massing is still subtle
+  - clamped preview HUD markers to the viewport in `client/src/components/colonies/VoxelHUD.jsx` and added off-screen arrow treatment instead of dropping markers entirely
+  - re-anchored the preview shot to the west overlook and corrected the target using the saved `voxel-surface-state.json` artifact until the camera actually looked back down onto the site
+  - latest screenshot now surfaces:
+    - a visible `Beacon Tower` label
+    - a visible `Command Hub` label
+    - a visible in-world holographic guide column and landing ring
+  - verification passed after restarting the flaky local backend on `:5080`:
+    - `npm run build` in `client/`
+    - `npx playwright test tests/e2e/voxel-surface.spec.js`
+  - current state:
+    - this is the first pass where the colony surface preview reads as a real deployment target instead of a broken horizon/flat biome
+    - remaining gap is polish, not basic legibility: the voxel structures themselves still need stronger silhouette/massing so the scene can stand on its own with less UI assistance
+- Voxel finish pass:
+  - added real Gamepad API support in `client/src/engine/PlayerController.js`:
+    - left stick movement
+    - right stick look
+    - `A` jump / rise
+    - `Y` fly toggle
+    - `Start` / `A` can engage control from preview without requiring mouse pointer lock
+  - surfaced controller state in `window.render_game_to_text` and updated the preview HUD copy in `client/src/components/colonies/VoxelHUD.jsx`
+  - strengthened actual colony massing in `client/src/engine/TerrainGenerator.js` with thicker hangar shoulders, a command annex, raised approach gantries, and more roof mass so the site is less dependent on holographic overlays
+  - clamped preview labels to a safer viewport region in `client/src/components/colonies/VoxelSurface.jsx` so the `Landing Pad` label no longer collapses into the hotbar
+  - final focused verification passed:
+    - `npm run build` in `client/`
+    - `npx playwright test tests/e2e/voxel-surface.spec.js`
+  - final current state:
+    - route boot is stable
+    - preview mode is intentional and readable
+    - browser coverage exists and emits both screenshot and JSON state artifacts
+    - keyboard/mouse and gamepad control paths are implemented
+    - colony preview now reads as a deliberate deployment scene with visible `Beacon Tower`, `Command Hub`, and `Landing Pad` anchors
+  - known remaining non-blocker:
+    - the local backend on `:5080` is still flaky during long interactive runs and occasionally had to be restarted between browser passes
+- Backend reliability pass:
+  - traced the local "backend dies" symptom to repeated startup collisions on `:5080`, not a confirmed random in-app crash
+  - added persistent runtime event logging in `server/src/utils/runtimeMonitor.js` and wired startup/shutdown/runtime-fault events through `server/src/index.js`
+  - hardened shutdown in `server/src/index.js` so it is idempotent and records `shutdown_started`, `shutdown_completed`, and `shutdown_timeout`
+  - added startup port preflight in `server/src/index.js`:
+    - in development, the server now probes for a free port before heavy DB/world startup work
+    - if `5080` is busy, it falls forward to the next available port and records a `port_fallback` event instead of doing full startup and then dying on `EADDRINUSE`
+    - in production/test, startup remains strict and does not silently drift ports
+  - verification passed:
+    - `node -c server/src/index.js`
+    - `node -c server/src/utils/runtimeMonitor.js`
+    - `npm test -- --runInBand tests/integration/api.test.js`
+    - live startup with `5080` occupied now selected `5081` immediately and wrote `port_fallback` + `server_started` to `server/runtime-events.log`
+    - clean shutdown wrote `shutdown_completed`
+  - updated honest state:
+    - the backend is now materially more diagnosable and resilient for local development
+    - the original intermittent failure was concretely reproduced as a port-collision startup failure
+    - if another reliability issue still exists beyond port collisions, `server/runtime-events.log` now gives a durable place to catch it
+- Shared traversal controller refactor:
+  - extracted the voxel-only movement implementation into `client/src/engine/FirstPersonTraversalController.js`
+  - added reusable traversal profiles in `client/src/engine/traversalProfiles.js` for:
+    - `colony_surface`
+    - `ship_interior`
+    - `derelict_boarding`
+  - kept backward compatibility through `client/src/engine/PlayerController.js`, which now wraps the shared controller with the colony-surface profile
+  - wired `client/src/components/colonies/VoxelSurface.jsx` onto the shared controller/profile path and exposed the active traversal profile through `window.render_game_to_text`
+  - updated `client/src/components/colonies/VoxelHUD.jsx` to render profile-driven preview/runtime control hints so ship interiors and derelicts can reuse the same HUD contract later
+  - verification passed:
+    - `npm run build` in `client/`
+    - `npx playwright test tests/e2e/voxel-surface.spec.js`
+  - prepared state:
+    - controller/gamepad support is now a reusable traversal subsystem instead of a colony-only implementation
+    - ship interiors and derelict boarding still need their actual scenes/routes, but they no longer need a new input stack
+- Ship interior + derelict traversal implementation:
+  - added reusable scene blueprints in `client/src/engine/interiorBlueprints.js` for:
+    - player ship interiors
+    - derelict boarding scenes
+  - added shared traversal interaction resolution in `client/src/engine/traversalInteractions.js`
+  - added a reusable traversal runtime in `client/src/components/traversal/TraversalScene.jsx`
+  - added shared prompt/action overlay in `client/src/components/traversal/TraversalInteractionOverlay.jsx`
+  - added scene routes:
+    - `client/src/components/traversal/ShipInteriorView.jsx`
+    - `client/src/components/traversal/DerelictBoardingView.jsx`
+    - wired through `client/src/App.jsx`
+  - exposed the new scenes from the ship panel in `client/src/components/ship/ShipPanel.jsx`
+  - extended `client/src/components/colonies/VoxelHUD.jsx` to support profile-driven hints and hotbar-less traversal scenes
+  - extended `client/src/engine/VoxelEngine.js` with per-scene render distance and optional water disable so interiors can render as enclosed spaces cleanly
+  - extended `client/src/engine/FirstPersonTraversalController.js` with:
+    - profile-level `allowJump`
+    - shared interaction events (`E` / gamepad `A` in non-jump profiles)
+    - preview deploy handoff via `engageTraversalControl()`
+  - verification passed:
+    - `npm run build` in `client/`
+    - `npx playwright test tests/e2e/traversal-scenes.spec.js`
+    - `npx playwright test tests/e2e/voxel-surface.spec.js tests/e2e/traversal-scenes.spec.js`
+  - finished state:
+    - player ship interiors now exist as traversable scenes
+    - derelict boarding scenes now exist as traversable scenes
+    - both use the same controller/gamepad/input model as the planet surface
+    - both use shared interaction prompts/actions instead of scene-specific one-offs
+
+- 2026-03-17: adversarial review pass on voxel surface + traversal interiors
+  - audited:
+    - `client/src/engine/FirstPersonTraversalController.js`
+    - `client/src/components/traversal/TraversalScene.jsx`
+    - `client/src/components/colonies/VoxelSurface.jsx`
+    - `client/src/components/colonies/VoxelHUD.jsx`
+    - `client/src/engine/interiorBlueprints.js`
+    - `client/tests/e2e/traversal-scenes.spec.js`
+    - `client/tests/e2e/voxel-surface.spec.js`
+  - defects fixed:
+    - neutral connected gamepads no longer suppress keyboard traversal input
+    - the same `A/Start` press no longer both deploys into a non-jump scene and fires an immediate interaction
+    - delayed exit navigation from traversal scenes now clears on unmount instead of leaking a late route change
+  - verification passed:
+    - `npm run build` in `client/`
+    - `npx playwright test tests/e2e/traversal-scenes.spec.js tests/e2e/voxel-surface.spec.js`
+  - added regression coverage for:
+    - gamepad deploy without auto-interact
+    - keyboard traversal remaining active while a connected gamepad is idle
+
+- 2026-03-17: full idea-board codebase crosswalk review
+  - compared current codebase against all 79 exported feature PRDs in `planner/spacewars-plan-export.json`
+  - wrote 79 Codex comments into `planner/comments.json`
+  - comment coverage now includes every feature id on the board
+  - strongest existing foundations identified:
+    - world policy / zone travel groundwork
+    - action audit + anti-abuse primitives
+    - economy / trade / discovery foundations
+    - voxel surface + traversal stack
+  - largest sprint blockers identified:
+    - no durable job queue yet
+    - no live-ops observability / feature-flag plane yet
+    - AI agent system still mostly architectural, not implemented
+    - premium currency / commerce ledger not complete
+    - achievements still client-local and do not meet PRD
+
+- 2026-03-17: exact PRD rewrite pass on idea board
+  - added 79 additional Codex comments in `planner/comments.json`
+  - each feature now has a `PRD REWRITE:` comment with exact sections/contract changes to add
+  - verified rewrite-comment coverage for all 79 exported feature ids
+  - total planner comment count is now 158

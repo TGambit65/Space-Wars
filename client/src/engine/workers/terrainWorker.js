@@ -22,6 +22,7 @@ self.onmessage = function (e) {
   } = e.data;
 
   try {
+    console.log(`[TerrainWorker] Generating chunk (${chunkX}, ${chunkZ}) seed=${seed} biome=${biomeGrid?.[chunkZ]?.[chunkX] || 'null'}`);
     const chunk = generateChunk(chunkX, chunkZ, seed, planetType, biomeGrid, spawnChunk);
 
     // Serialize sections to transferable ArrayBuffers

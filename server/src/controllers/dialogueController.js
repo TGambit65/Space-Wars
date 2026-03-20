@@ -1,4 +1,5 @@
 const dialogueService = require('../services/dialogueService');
+const { serializeDialogueResult } = require('../utils/audioPayload');
 
 /**
  * POST /api/dialogue/:npcId/start
@@ -24,7 +25,7 @@ const selectOption = async (req, res) => {
     }
 
     const result = await dialogueService.selectMenuOption(req.userId, req.params.npcId, option);
-    res.json({ success: true, data: result });
+    res.json({ success: true, data: serializeDialogueResult(result) });
   } catch (err) {
     res.status(err.statusCode || 500).json({ success: false, message: err.message });
   }
@@ -45,7 +46,7 @@ const sendMessage = async (req, res) => {
     }
 
     const result = await dialogueService.processFreeText(req.userId, req.params.npcId, text);
-    res.json({ success: true, data: result });
+    res.json({ success: true, data: serializeDialogueResult(result) });
   } catch (err) {
     res.status(err.statusCode || 500).json({ success: false, message: err.message });
   }
@@ -87,10 +88,10 @@ const sendVoice = async (req, res) => {
 
     // If voice returned an error object (not thrown), still return 200 with error data
     if (result.error) {
-      return res.json({ success: false, data: result });
+      return res.json({ success: false, data: serializeDialogueResult(result) });
     }
 
-    res.json({ success: true, data: result });
+    res.json({ success: true, data: serializeDialogueResult(result) });
   } catch (err) {
     res.status(err.statusCode || 500).json({ success: false, message: err.message });
   }
@@ -102,7 +103,7 @@ const sendVoice = async (req, res) => {
 const endDialogue = async (req, res) => {
   try {
     const result = await dialogueService.endDialogue(req.userId, req.params.npcId);
-    res.json({ success: true, data: result });
+    res.json({ success: true, data: serializeDialogueResult(result) });
   } catch (err) {
     res.status(err.statusCode || 500).json({ success: false, message: err.message });
   }
