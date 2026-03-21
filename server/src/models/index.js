@@ -34,6 +34,7 @@ const PlayerMission = require('./PlayerMission');
 const Corporation = require('./Corporation');
 const CorporationMember = require('./CorporationMember');
 const AutomatedTask = require('./AutomatedTask');
+const Job = require('./Job');
 // Phase C: Colony Buildings
 const ColonyBuilding = require('./ColonyBuilding');
 // Colony Surface
@@ -450,6 +451,7 @@ module.exports = {
   Corporation,
   CorporationMember,
   AutomatedTask,
+  Job,
   // Phase C
   ColonyBuilding,
   // Colony Surface

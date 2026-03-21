@@ -49,6 +49,12 @@ router.get('/economy/transfers', adminEconomyController.getTransfers);
 router.post('/economy/force-tick', adminEconomyController.forceEconomyTick);
 router.post('/economy/reset-stocks', adminEconomyController.resetPortStocks);
 
+// Job Queue
+router.get('/jobs/stats', adminController.getJobStats);
+router.get('/jobs', adminController.getJobs);
+router.post('/jobs/cleanup', adminController.cleanupJobs);
+router.post('/jobs/:jobId/retry', adminController.retryJob);
+
 // User Management
 router.get('/users', gameSettingsController.getUserList);
 router.put('/users/tier', gameSettingsController.updateUserTier);

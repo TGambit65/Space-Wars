@@ -1,7 +1,7 @@
 /**
  * Test helper functions and fixtures
  */
-const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, PriceHistory, PlayerSkill, TechResearch, Wonder, Blueprint, CraftingJob, Mission, PlayerMission, Corporation, CorporationMember, AutomatedTask, ColonyBuilding, SurfaceAnomaly, CustomBlock, GroundUnit, GroundCombatUnit, GroundCombatInstance, FactionStanding, FactionWar, CombatInstance, Message, CosmeticUnlock, CorporationAgreement, CommunityEvent, EventContribution, Outpost, ShipDesignTemplate, Fleet, DailyQuest, VoxelBlock, PlayerProtectionState, ActionAuditLog, SectorInstanceAssignment, TransferLedger, ColonyRaidProtection, NpcConversationSession, AgentAccount, AgentActionLog, sequelize } = require('../src/models');
+const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, PriceHistory, PlayerSkill, TechResearch, Wonder, Blueprint, CraftingJob, Mission, PlayerMission, Corporation, CorporationMember, AutomatedTask, Job, ColonyBuilding, SurfaceAnomaly, CustomBlock, GroundUnit, GroundCombatUnit, GroundCombatInstance, FactionStanding, FactionWar, CombatInstance, Message, CosmeticUnlock, CorporationAgreement, CommunityEvent, EventContribution, Outpost, ShipDesignTemplate, Fleet, DailyQuest, VoxelBlock, PlayerProtectionState, ActionAuditLog, SectorInstanceAssignment, TransferLedger, ColonyRaidProtection, NpcConversationSession, AgentAccount, AgentActionLog, sequelize } = require('../src/models');
 const authService = require('../src/services/authService');
 const gameSettingsService = require('../src/services/gameSettingsService');
 const bcrypt = require('bcryptjs');
@@ -235,6 +235,8 @@ const createTestGameSetting = async (overrides = {}) => {
 
 const cleanDatabase = async () => {
   // Delete in order to respect foreign key constraints
+  // Job queue
+  await Job.destroy({ where: {} });
   // Agent system first — references User
   await AgentActionLog.destroy({ where: {} });
   await AgentAccount.destroy({ where: {} });
@@ -466,6 +468,24 @@ const createTestGroundUnit = async (colonyId, userId, overrides = {}) => {
   return GroundUnit.create({ ...defaults, ...restOverrides });
 };
 
+// ============== Job Queue Helpers ==============
+
+/**
+ * Create a test job
+ */
+const createTestJob = async (overrides = {}) => {
+  const defaults = {
+    type: 'test_job',
+    payload: { test: true },
+    status: 'pending',
+    priority: 0,
+    max_attempts: 3,
+    attempts: 0,
+    run_at: new Date()
+  };
+  return Job.create({ ...defaults, ...overrides });
+};
+
 // ============== Agent Helpers ==============
 
 /**
@@ -522,6 +542,8 @@ module.exports = {
   createTestFleet,
   // Ground combat helpers
   createTestGroundUnit,
+  // Job queue helpers
+  createTestJob,
   // Agent helpers
   createTestAgent, createTestAgentWithKey,
   cleanDatabase, generateTestToken

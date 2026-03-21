@@ -1,8 +1,9 @@
 const config = require('../config');
-const { Sector, SectorConnection, Planet, Port, NPC, Crew, Ship, ShipCargo, ShipComponent, CombatLog, Transaction: TxModel, User, Colony, Fleet, ActionAuditLog } = require('../models');
+const { Sector, SectorConnection, Planet, Port, NPC, Crew, Ship, ShipCargo, ShipComponent, CombatLog, Transaction: TxModel, User, Colony, Fleet, ActionAuditLog, Job } = require('../models');
 const { Op, fn, col } = require('sequelize');
 const universeGenerator = require('../services/universeGenerator');
 const actionAuditService = require('../services/actionAuditService');
+const jobQueueService = require('../services/jobQueueService');
 
 /**
  * POST /api/admin/universe/generate
@@ -386,6 +387,69 @@ const setActiveShip = async (req, res, next) => {
   }
 };
 
+// ─── Job Queue Admin ──────────────────────────────────────────────
+
+const getJobStats = async (req, res, next) => {
+  try {
+    const stats = await jobQueueService.getStats();
+    const schedules = jobQueueService.getSchedules();
+    res.json({ success: true, data: { stats, schedules } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getJobs = async (req, res, next) => {
+  try {
+    const { status, type, page, limit } = req.query;
+    const data = await jobQueueService.getJobs({
+      status,
+      type,
+      page: Math.max(1, parseInt(page, 10) || 1),
+      limit: Math.min(parseInt(limit, 10) || 50, 200)
+    });
+    res.json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const cleanupJobs = async (req, res, next) => {
+  try {
+    const olderThanHours = parseInt(req.body.older_than_hours, 10);
+    const ageHours = Number.isFinite(olderThanHours) ? olderThanHours : 24;
+    const ms = ageHours * 60 * 60 * 1000;
+    const deleted = await jobQueueService.cleanup(ms);
+    res.json({ success: true, data: { deleted } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const retryJob = async (req, res, next) => {
+  try {
+    const job = await Job.findByPk(req.params.jobId);
+    if (!job) {
+      return res.status(404).json({ success: false, message: 'Job not found' });
+    }
+    if (job.status !== 'dead' && job.status !== 'failed') {
+      return res.status(400).json({ success: false, message: 'Only dead/failed jobs can be retried' });
+    }
+    await job.update({
+      status: 'pending',
+      run_at: new Date(),
+      attempts: 0,
+      last_error: null,
+      started_at: null,
+      completed_at: null,
+      result: null
+    });
+    res.json({ success: true, data: job });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   generateUniverse,
   getUniverseConfig,
@@ -396,5 +460,9 @@ module.exports = {
   reviveShip,
   repairShip,
   moveShip,
-  setActiveShip
+  setActiveShip,
+  getJobStats,
+  getJobs,
+  cleanupJobs,
+  retryJob
 };
