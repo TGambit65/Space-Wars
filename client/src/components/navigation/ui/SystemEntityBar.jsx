@@ -13,6 +13,22 @@ const PLANET_DOT_COLORS = {
   'Crystalline': '#E6E6FA'
 };
 
+const FACTION_COLORS = {
+  terran_alliance: 'text-blue-400',
+  zythian_swarm: 'text-red-400',
+  automaton_collective: 'text-purple-400',
+  synthesis_accord: 'text-yellow-400',
+  sylvari_dominion: 'text-green-400'
+};
+
+const FACTION_SHORT = {
+  terran_alliance: 'TER',
+  zythian_swarm: 'ZYT',
+  automaton_collective: 'AUT',
+  synthesis_accord: 'SYN',
+  sylvari_dominion: 'SYL'
+};
+
 const NPC_STATE_BADGES = {
   attacking:  { label: 'Engaging',   className: 'bg-red-900/60 text-red-300' },
   fleeing:    { label: 'Fleeing',    className: 'bg-yellow-900/60 text-yellow-300' },
@@ -161,7 +177,8 @@ const SystemEntityBar = ({ systemDetail, selectedEntityId, onEntitySelect, curre
             {npcs.map(npc => {
               const isHostile = npc.npc_type === 'PIRATE' || npc.npc_type === 'PIRATE_LORD' || npc.npc_type === 'BOUNTY_HUNTER';
               const isFriendly = npc.npc_type === 'TRADER';
-              const npcColor = isHostile ? 'text-red-400' : isFriendly ? 'text-green-400' : 'text-yellow-400';
+              const factionColor = npc.faction && FACTION_COLORS[npc.faction];
+              const npcColor = factionColor || (isHostile ? 'text-red-400' : isFriendly ? 'text-green-400' : 'text-yellow-400');
               const stateBadge = NPC_STATE_BADGES[npc.behavior_state];
               return (
                 <button
@@ -177,6 +194,9 @@ const SystemEntityBar = ({ systemDetail, selectedEntityId, onEntitySelect, curre
                     <Skull className={`w-3 h-3 ${npcColor} shrink-0`} />
                   ) : (
                     <Crosshair className={`w-3 h-3 ${npcColor} shrink-0`} />
+                  )}
+                  {npc.faction && FACTION_SHORT[npc.faction] && (
+                    <span className={`text-[8px] font-bold ${factionColor || 'text-gray-500'}`}>{FACTION_SHORT[npc.faction]}</span>
                   )}
                   <span className="truncate max-w-[100px]">{npc.name}</span>
                   {stateBadge && (

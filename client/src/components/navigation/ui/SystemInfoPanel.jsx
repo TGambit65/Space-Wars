@@ -14,6 +14,21 @@ const PLANET_TYPE_COLORS = {
   'Crystalline': 'text-purple-300'
 };
 
+const FACTION_PANEL_COLORS = {
+  terran_alliance: '#3498db',
+  zythian_swarm: '#e74c3c',
+  automaton_collective: '#9b59b6',
+  synthesis_accord: '#d4a017',
+  sylvari_dominion: '#2ecc71'
+};
+const FACTION_PANEL_LABELS = {
+  terran_alliance: 'Terran',
+  zythian_swarm: 'Zythian',
+  automaton_collective: 'Automaton',
+  synthesis_accord: 'Synthesis',
+  sylvari_dominion: 'Sylvari'
+};
+
 const INTERACTIVE_TYPES = ['TRADER', 'PATROL', 'BOUNTY_HUNTER'];
 
 const SystemInfoPanel = ({ selectedType, selectedEntity, onClose, onScanPlanet, onHailNPC, onJump, sectorId, scanning, moving, currentShip, user, systemData }) => {
@@ -218,7 +233,17 @@ const SystemInfoPanel = ({ selectedType, selectedEntity, onClose, onScanPlanet, 
             )}
             <div>
               <div className="text-white text-sm font-bold">{selectedEntity.name}</div>
-              <div className="text-xs text-accent-orange">{selectedEntity.npc_type}</div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-accent-orange">{selectedEntity.npc_type}</span>
+                {selectedEntity.faction && (
+                  <span className="text-[10px] font-medium px-1 rounded" style={{
+                    color: FACTION_PANEL_COLORS[selectedEntity.faction] || '#888',
+                    border: `1px solid ${FACTION_PANEL_COLORS[selectedEntity.faction] || '#888'}40`
+                  }}>
+                    {FACTION_PANEL_LABELS[selectedEntity.faction] || selectedEntity.faction}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 

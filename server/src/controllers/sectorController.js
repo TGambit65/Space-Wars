@@ -392,7 +392,7 @@ const getSystemDetail = async (req, res, next) => {
     // Get NPCs in sector
     const npcs = await NPC.findAll({
       where: { current_sector_id: sectorId, is_alive: true },
-      attributes: ['npc_id', 'name', 'npc_type', 'ship_type', 'aggression_level', 'hull_points', 'max_hull_points']
+      attributes: ['npc_id', 'name', 'npc_type', 'ship_type', 'aggression_level', 'hull_points', 'max_hull_points', 'behavior_state', 'faction']
     });
 
     // Get connected neighbors

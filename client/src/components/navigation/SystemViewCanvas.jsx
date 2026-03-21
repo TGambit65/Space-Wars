@@ -2,6 +2,22 @@ import { useRef, useEffect, useCallback, useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
+// ============== Faction Colors ==============
+const FACTION_HEX = {
+  terran_alliance: 0x3498db,
+  zythian_swarm: 0xe74c3c,
+  automaton_collective: 0x9b59b6,
+  synthesis_accord: 0xd4a017,
+  sylvari_dominion: 0x2ecc71
+};
+const FACTION_CSS = {
+  terran_alliance: '#3498db',
+  zythian_swarm: '#e74c3c',
+  automaton_collective: '#9b59b6',
+  synthesis_accord: '#d4a017',
+  sylvari_dominion: '#2ecc71'
+};
+
 // ============== Visual Configuration ==============
 
 // Map Space Wars planet types to visual configs
@@ -663,7 +679,13 @@ const SystemViewCanvas = ({
     // --- NPCs ---
     for (const npc of npcs) {
       const isHostile = npc.npc_type === 'PIRATE' || npc.npc_type === 'PIRATE_LORD';
-      const npcColor = isHostile ? 0xef4444 : 0xf59e0b;
+      // Faction-colored NPCs: faction color > type color
+      const npcColor = npc.faction && FACTION_HEX[npc.faction]
+        ? FACTION_HEX[npc.faction]
+        : isHostile ? 0xef4444 : 0xf59e0b;
+      const npcCssColor = npc.faction && FACTION_CSS[npc.faction]
+        ? FACTION_CSS[npc.faction]
+        : isHostile ? '#ef4444' : '#f59e0b';
 
       // Simple ship shape (cone)
       const npcGeo = new THREE.ConeGeometry(0.8, 2.5, 6);
@@ -683,7 +705,7 @@ const SystemViewCanvas = ({
 
       // NPC label
       const nLabel = new THREE.Sprite(new THREE.SpriteMaterial({
-        map: createLabelTexture(npc.name, isHostile ? '#ef4444' : '#f59e0b'),
+        map: createLabelTexture(npc.name, npcCssColor),
         transparent: true,
         depthTest: false,
       }));

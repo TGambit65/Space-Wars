@@ -7,6 +7,21 @@ import SystemInfoPanel from './ui/SystemInfoPanel';
 import SystemEntityBar from './ui/SystemEntityBar';
 import SectorActivityFeed from '../npc/SectorActivityFeed';
 
+const FACTION_COLORS = {
+  terran_alliance: '#3498db',
+  zythian_swarm: '#e74c3c',
+  automaton_collective: '#9b59b6',
+  synthesis_accord: '#d4a017',
+  sylvari_dominion: '#2ecc71'
+};
+const FACTION_LABELS = {
+  terran_alliance: 'Terran',
+  zythian_swarm: 'Zythian',
+  automaton_collective: 'Automaton',
+  synthesis_accord: 'Synthesis',
+  sylvari_dominion: 'Sylvari'
+};
+
 const STAR_CLASS_LABELS = {
   O: 'Blue Supergiant',
   B: 'Blue Giant',
@@ -162,6 +177,19 @@ const SystemView = ({ user, onHailNPC, activityFeed = [], sectorNPCs = [] }) => 
   const scannedCount = systemDetail?.planets?.filter(p => p.is_scanned).length || 0;
   const totalCount = systemDetail?.planets?.length || 0;
 
+  // Compute faction presence from live NPCs
+  const factionPresence = useMemo(() => {
+    const counts = {};
+    for (const npc of liveNPCs) {
+      if (npc.faction) {
+        counts[npc.faction] = (counts[npc.faction] || 0) + 1;
+      }
+    }
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([faction, count]) => ({ faction, count }));
+  }, [liveNPCs]);
+
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
       {/* Three.js Canvas */}
@@ -200,11 +228,25 @@ const SystemView = ({ user, onHailNPC, activityFeed = [], sectorNPCs = [] }) => 
             </div>
           </div>
         </div>
-        {currentShip && (
-          <div className="text-xs text-gray-500 mt-1">
-            Ship: {currentShip.name}
-          </div>
-        )}
+        <div className="flex items-center gap-2 mt-1">
+          {currentShip && (
+            <span className="text-xs text-gray-500">
+              Ship: {currentShip.name}
+            </span>
+          )}
+          {factionPresence.length > 0 && (
+            <>
+              <span className="w-px h-3 bg-space-600" />
+              <div className="flex items-center gap-1.5">
+                {factionPresence.slice(0, 3).map(({ faction, count }) => (
+                  <span key={faction} className="text-[10px] font-medium" style={{ color: FACTION_COLORS[faction] || '#888' }}>
+                    {FACTION_LABELS[faction] || faction} ({count})
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Phenomena Banner */}
