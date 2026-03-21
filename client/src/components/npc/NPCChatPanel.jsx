@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, Send, Volume2, Loader, History } from 'lucide-react';
 import { dialogue } from '../../services/api';
 import useVoiceChat from '../../hooks/useVoiceChat';
@@ -14,6 +15,7 @@ const TYPE_BADGE = {
 };
 
 const NPCChatPanel = ({ npc, socket, onClose, user }) => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [menuOptions, setMenuOptions] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -198,6 +200,30 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
       const data = res.data.data;
       addNPCResponse(data.response_text, data.response_audio);
       if (data.new_menu_options) setMenuOptions(data.new_menu_options);
+
+      // Execute client-side action payloads
+      if (data.data) {
+        const { action } = data.data;
+        if (action === 'open_trade_ui') {
+          setTimeout(() => navigate('/trading'), 800);
+        }
+        if (data.data.credits_deducted) {
+          addNPCResponse(`[${data.data.credits_deducted} credits deducted]`);
+        }
+        if (data.data.bribe_failed) {
+          addNPCResponse("[You don't have enough credits for the bribe]");
+        }
+        if (action === 'bounty_info' && data.data.targets?.length > 0) {
+          const targetStr = data.data.targets.map(t => `${t.sector_name}: ${t.hostile_count} hostile(s)`).join('\n');
+          addNPCResponse(`[Bounty Intel]\n${targetStr}`);
+        }
+        if (action === 'report_crime' && data.data.patrols_alerted > 0) {
+          addNPCResponse(`[${data.data.patrols_alerted} patrol(s) alerted in sector]`);
+        }
+        if (data.data.npc_disengaged) {
+          addNPCResponse('[NPC has disengaged]');
+        }
+      }
     } catch (err) {
       addNPCResponse(err.response?.data?.message || 'The NPC seems distracted...');
     } finally {

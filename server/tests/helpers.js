@@ -1,7 +1,7 @@
 /**
  * Test helper functions and fixtures
  */
-const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, PriceHistory, PlayerSkill, TechResearch, Wonder, Blueprint, CraftingJob, Mission, PlayerMission, Corporation, CorporationMember, AutomatedTask, ColonyBuilding, SurfaceAnomaly, CustomBlock, GroundUnit, GroundCombatUnit, GroundCombatInstance, FactionStanding, FactionWar, CombatInstance, Message, CosmeticUnlock, CorporationAgreement, CommunityEvent, EventContribution, Outpost, ShipDesignTemplate, Fleet, DailyQuest, VoxelBlock, PlayerProtectionState, ActionAuditLog, SectorInstanceAssignment, TransferLedger, ColonyRaidProtection, sequelize } = require('../src/models');
+const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, PriceHistory, PlayerSkill, TechResearch, Wonder, Blueprint, CraftingJob, Mission, PlayerMission, Corporation, CorporationMember, AutomatedTask, ColonyBuilding, SurfaceAnomaly, CustomBlock, GroundUnit, GroundCombatUnit, GroundCombatInstance, FactionStanding, FactionWar, CombatInstance, Message, CosmeticUnlock, CorporationAgreement, CommunityEvent, EventContribution, Outpost, ShipDesignTemplate, Fleet, DailyQuest, VoxelBlock, PlayerProtectionState, ActionAuditLog, SectorInstanceAssignment, TransferLedger, ColonyRaidProtection, NpcConversationSession, sequelize } = require('../src/models');
 const authService = require('../src/services/authService');
 const gameSettingsService = require('../src/services/gameSettingsService');
 const bcrypt = require('bcryptjs');
@@ -268,6 +268,8 @@ const cleanDatabase = async () => {
   await TechResearch.destroy({ where: {} });
   await PlayerSkill.destroy({ where: {} });
   await PriceHistory.destroy({ where: {} });
+  // NPC Conversation Sessions
+  await NpcConversationSession.destroy({ where: {} });
   // AI NPC system
   await GameSetting.destroy({ where: {} });
   gameSettingsService.clearCache();

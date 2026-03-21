@@ -58,6 +58,8 @@ const GroundCombatInstance = require('./GroundCombatInstance');
 const DailyQuest = require('./DailyQuest');
 // Voxel Blocks
 const VoxelBlock = require('./VoxelBlock');
+// NPC Conversation Sessions
+const NpcConversationSession = require('./NpcConversationSession');
 // AI Agent System
 const AgentAccount = require('./AgentAccount');
 const AgentActionLog = require('./AgentActionLog');
@@ -377,6 +379,12 @@ VoxelBlock.belongsTo(Colony, { foreignKey: 'colony_id' });
 User.hasMany(VoxelBlock, { foreignKey: 'placed_by', as: 'placedVoxels' });
 VoxelBlock.belongsTo(User, { foreignKey: 'placed_by', as: 'placer' });
 
+// ============== NPC Conversation Sessions ==============
+NPC.hasMany(NpcConversationSession, { foreignKey: 'npc_id', as: 'conversationSessions' });
+NpcConversationSession.belongsTo(NPC, { foreignKey: 'npc_id', as: 'npc' });
+User.hasMany(NpcConversationSession, { foreignKey: 'user_id', as: 'npcConversations' });
+NpcConversationSession.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
 // ============== AI Agent System ==============
 User.hasOne(AgentAccount, { foreignKey: 'owner_id', as: 'agentAccount' });
 AgentAccount.belongsTo(User, { foreignKey: 'owner_id', as: 'owner' });
@@ -477,6 +485,8 @@ module.exports = {
   SectorInstanceAssignment,
   TransferLedger,
   ColonyRaidProtection,
+  // NPC Conversation Sessions
+  NpcConversationSession,
   // AI Agent System
   AgentAccount,
   AgentActionLog

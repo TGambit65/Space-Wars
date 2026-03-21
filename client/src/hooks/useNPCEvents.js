@@ -11,24 +11,27 @@ const useNPCEvents = (socket) => {
   const [sectorNPCs, setSectorNPCs] = useState([]);
   const [pendingHails, setPendingHails] = useState([]);
   const [combatAlert, setCombatAlert] = useState(null);
+  const [activityFeed, setActivityFeed] = useState([]);
 
   useEffect(() => {
     if (!socket) return;
 
     const onEnteredSector = (data) => {
       setSectorNPCs(prev => {
-        // Avoid duplicates
         if (prev.some(n => n.npc_id === data.npc_id)) return prev;
         return [...prev, data];
       });
+      addToFeed({ type: 'entered', npc_id: data.npc_id, name: data.name, npc_type: data.npc_type });
     };
 
     const onLeftSector = (data) => {
       setSectorNPCs(prev => prev.filter(n => n.npc_id !== data.npc_id));
+      addToFeed({ type: 'left', npc_id: data.npc_id, name: data.name });
     };
 
     const onDestroyed = (data) => {
       setSectorNPCs(prev => prev.filter(n => n.npc_id !== data.npc_id));
+      addToFeed({ type: 'destroyed', npc_id: data.npc_id, name: data.name, destroyed_by: data.destroyed_by });
     };
 
     const onStateChange = (data) => {
@@ -54,6 +57,22 @@ const useNPCEvents = (socket) => {
       setCombatAlert(null);
     };
 
+    // New presence events — add to activity feed
+    const addToFeed = (entry) => {
+      setActivityFeed(prev => {
+        const updated = [{ ...entry, timestamp: Date.now() }, ...prev];
+        return updated.slice(0, 20); // Keep last 20 entries
+      });
+    };
+
+    const onCombatWarning = (data) => {
+      addToFeed({ type: 'combat_warning', ...data });
+    };
+
+    const onServiceOffer = (data) => {
+      addToFeed({ type: 'service_offer', ...data });
+    };
+
     // Handler map for dispatching batch updates
     const eventHandlers = {
       'npc:entered_sector': onEnteredSector,
@@ -62,6 +81,8 @@ const useNPCEvents = (socket) => {
       'npc:state_change': onStateChange,
       'npc:hails_player': onHailsPlayer,
       'npc:attacks_player': onAttacksPlayer,
+      'npc:combat_warning': onCombatWarning,
+      'npc:service_offer': onServiceOffer,
     };
 
     // Batched NPC updates: single socket event containing multiple changes
@@ -81,6 +102,8 @@ const useNPCEvents = (socket) => {
     socket.on('npc:attacks_player', onAttacksPlayer);
     socket.on('combat:ended', onCombatEnded);
     socket.on('npc:batch_update', onBatchUpdate);
+    socket.on('npc:combat_warning', onCombatWarning);
+    socket.on('npc:service_offer', onServiceOffer);
 
     return () => {
       socket.off('npc:entered_sector', onEnteredSector);
@@ -91,6 +114,8 @@ const useNPCEvents = (socket) => {
       socket.off('npc:attacks_player', onAttacksPlayer);
       socket.off('combat:ended', onCombatEnded);
       socket.off('npc:batch_update', onBatchUpdate);
+      socket.off('npc:combat_warning', onCombatWarning);
+      socket.off('npc:service_offer', onServiceOffer);
     };
   }, [socket]);
 
@@ -107,13 +132,19 @@ const useNPCEvents = (socket) => {
     setCombatAlert(null);
   }, []);
 
+  const clearActivityFeed = useCallback(() => {
+    setActivityFeed([]);
+  }, []);
+
   return {
     sectorNPCs,
     pendingHails,
     combatAlert,
+    activityFeed,
     resetSectorNPCs,
     dismissHail,
-    clearCombatAlert
+    clearCombatAlert,
+    clearActivityFeed
   };
 };
 

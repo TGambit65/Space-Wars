@@ -90,10 +90,16 @@ const executeAction = async (npc, decision, context = {}, socketService = null) 
 
       case 'attack_player':
       case 'finish_target': {
-        await npc.update({
+        const targetUpdate = {
           behavior_state: 'engaging',
           last_action_at: new Date()
-        });
+        };
+        // Persist combat target for consistent targeting across ticks
+        if (target) {
+          targetUpdate.target_ship_id = target.ship_id || null;
+          targetUpdate.target_user_id = target.owner_user_id || null;
+        }
+        await npc.update(targetUpdate);
 
         if (target && socketService) {
           // target is a Ship model — extract owner_user_id

@@ -5,6 +5,7 @@ import useSystemData from './hooks/useSystemData';
 import SystemViewCanvas from './SystemViewCanvas';
 import SystemInfoPanel from './ui/SystemInfoPanel';
 import SystemEntityBar from './ui/SystemEntityBar';
+import SectorActivityFeed from '../npc/SectorActivityFeed';
 
 const STAR_CLASS_LABELS = {
   O: 'Blue Supergiant',
@@ -18,7 +19,7 @@ const STAR_CLASS_LABELS = {
   BlackHole: 'Black Hole'
 };
 
-const SystemView = ({ user, onHailNPC }) => {
+const SystemView = ({ user, onHailNPC, activityFeed = [] }) => {
   const navigate = useNavigate();
   const {
     systemDetail,
@@ -216,6 +217,11 @@ const SystemView = ({ user, onHailNPC }) => {
         user={user}
         systemData={systemDetail}
       />
+
+      {/* Bottom-left: Sector activity feed */}
+      <div className="absolute bottom-20 left-4 w-72 pointer-events-auto z-20">
+        <SectorActivityFeed activityFeed={activityFeed} />
+      </div>
 
       {/* Bottom bar: Entity list */}
       <SystemEntityBar

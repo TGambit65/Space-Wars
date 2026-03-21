@@ -7,6 +7,7 @@ const dialogueCacheService = require('./dialogueCacheService');
 const economyTickService = require('./economyTickService');
 const automationService = require('./automationService');
 const missionService = require('./missionService');
+const npcPresenceService = require('./npcPresenceService');
 const { NPC, Ship, Port, User } = require('../models');
 const { Op, col } = require('sequelize');
 const { getAdjacentSectorIds, getPortSectorIds, buildAdjacencyMap } = require('./sectorGraphService');
@@ -20,6 +21,7 @@ let combatInterval = null;
 let maintenanceInterval = null;
 let economyInterval = null;
 let automationInterval = null;
+let presenceInterval = null;
 let processingTactical = false;
 let processingCombat = false;
 let socketService = null;
@@ -28,10 +30,12 @@ const stats = {
   tacticalTicks: 0,
   combatTicks: 0,
   maintenanceTicks: 0,
+  presenceTicks: 0,
   avgTacticalMs: 0,
   lastTacticalAt: null,
   startedAt: null,
-  lastNPCCount: 0
+  lastNPCCount: 0,
+  lastPresenceBeats: 0
 };
 
 // ─── Tick Lifecycle ──────────────────────────────────────────────
@@ -56,9 +60,10 @@ const startTicks = (io = null) => {
   maintenanceInterval = setInterval(processMaintenanceTick, 5 * 60 * 1000);
   economyInterval = setInterval(processEconomyTick, config.economy.economyTickIntervalMs);
   automationInterval = setInterval(processAutomationTick, config.automation.executionIntervalMs);
+  presenceInterval = setInterval(processPresenceTick, 60 * 1000); // Every 60 seconds
 
   stats.startedAt = Date.now();
-  console.log(`[TickService] Game tick system started (tactical: ${tickRate}s, combat: ${combatTickRate}s, maintenance: 300s, economy: ${config.economy.economyTickIntervalMs / 1000}s, automation: ${config.automation.executionIntervalMs / 1000}s)`);
+  console.log(`[TickService] Game tick system started (tactical: ${tickRate}s, combat: ${combatTickRate}s, maintenance: 300s, economy: ${config.economy.economyTickIntervalMs / 1000}s, automation: ${config.automation.executionIntervalMs / 1000}s, presence: 60s)`);
 };
 
 /**
@@ -70,12 +75,14 @@ const stopTicks = () => {
   if (maintenanceInterval) clearInterval(maintenanceInterval);
   if (economyInterval) clearInterval(economyInterval);
   if (automationInterval) clearInterval(automationInterval);
+  if (presenceInterval) clearInterval(presenceInterval);
 
   tacticalInterval = null;
   combatInterval = null;
   maintenanceInterval = null;
   economyInterval = null;
   automationInterval = null;
+  presenceInterval = null;
   socketService = null;
 
   console.log('[TickService] Game tick system stopped');
@@ -97,9 +104,11 @@ const getStatus = () => ({
   tacticalTicks: stats.tacticalTicks,
   combatTicks: stats.combatTicks,
   maintenanceTicks: stats.maintenanceTicks,
+  presenceTicks: stats.presenceTicks,
   avgTacticalMs: Math.round(stats.avgTacticalMs),
   lastTacticalAt: stats.lastTacticalAt,
-  activeNPCCount: stats.lastNPCCount
+  activeNPCCount: stats.lastNPCCount,
+  lastPresenceBeats: stats.lastPresenceBeats
 });
 
 // ─── Tactical Tick ───────────────────────────────────────────────
@@ -192,17 +201,29 @@ const processCombatTick = async () => {
 
     for (const npc of engagingNPCs) {
       try {
-        // Find a player ship in the same sector to fight
-        const playerShip = await Ship.findOne({
-          where: {
-            current_sector_id: npc.current_sector_id,
-            is_active: true
-          }
-        });
+        // Use persisted target if available, otherwise find weakest ship
+        let playerShip = null;
+        if (npc.target_ship_id) {
+          playerShip = await Ship.findOne({
+            where: {
+              ship_id: npc.target_ship_id,
+              current_sector_id: npc.current_sector_id,
+              is_active: true
+            }
+          });
+        }
+        if (!playerShip) {
+          playerShip = await Ship.findOne({
+            where: {
+              current_sector_id: npc.current_sector_id,
+              is_active: true
+            }
+          });
+        }
 
         if (!playerShip) {
-          // No player in sector — disengage
-          await npc.update({ behavior_state: 'idle', last_action_at: new Date() });
+          // No player in sector — disengage and clear target
+          await npc.update({ behavior_state: 'idle', target_ship_id: null, target_user_id: null, last_action_at: new Date() });
 
           if (socketService) {
             socketService.emitToSector(npc.current_sector_id, 'npc:state_change', {
@@ -271,6 +292,8 @@ const processCombatTick = async () => {
             hull_points: 0,
             shield_points: 0,
             behavior_state: 'idle',
+            target_ship_id: null,
+            target_user_id: null,
             respawn_at: new Date(Date.now() + 5 * 60 * 1000)
           });
 
@@ -318,8 +341,8 @@ const processCombatTick = async () => {
             is_active: false
           });
 
-          // NPC disengages after winning
-          await npc.update({ behavior_state: 'idle' });
+          // NPC disengages after winning, clear target
+          await npc.update({ behavior_state: 'idle', target_ship_id: null, target_user_id: null });
 
           if (socketService && playerShip.owner_user_id) {
             socketService.emitToUser(playerShip.owner_user_id, 'combat:ended', {
@@ -421,6 +444,21 @@ const processAutomationTick = async () => {
     await automationService.processAutomationTick();
   } catch (err) {
     console.error('[AutomationTick] Error:', err.message);
+  }
+};
+
+// ─── Presence Tick ──────────────────────────────────────────────
+
+/**
+ * Process one presence tick: generate proactive NPC beats for nearby players.
+ */
+const processPresenceTick = async () => {
+  try {
+    const beatsEmitted = await npcPresenceService.processPresenceTick(socketService);
+    stats.presenceTicks++;
+    stats.lastPresenceBeats = beatsEmitted;
+  } catch (err) {
+    console.error('[PresenceTick] Error:', err.message);
   }
 };
 

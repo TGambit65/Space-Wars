@@ -165,16 +165,19 @@ describe('NPC Personality Service', () => {
     });
 
     it('should add TRADER price context when available', () => {
-      const context = { portPrices: { Iron: 50, Gold: 200 } };
+      const context = { portCommodities: [
+        { commodity_name: 'Iron', buy_price: 50, sell_price: 45 },
+        { commodity_name: 'Gold', buy_price: 200, sell_price: 180 }
+      ] };
       const messages = npcPersonalityService.buildInteractivePrompt(npc, personality, [], context);
-      expect(messages[0].content).toContain('trade prices');
+      expect(messages[0].content).toContain('Trade prices');
     });
 
     it('should add PATROL danger context when available', () => {
       const patrolNpc = { ...npc, npc_type: 'PATROL' };
-      const context = { sectorDanger: 5 };
+      const context = { sectorInfo: { hostileCount: 5 } };
       const messages = npcPersonalityService.buildInteractivePrompt(patrolNpc, personality, [], context);
-      expect(messages[0].content).toContain('danger level');
+      expect(messages[0].content).toContain('Hostile activity');
     });
   });
 });

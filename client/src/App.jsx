@@ -63,7 +63,7 @@ function App() {
   const [chatOpen, setChatOpen] = useState(false);
 
   const { socket, connected: socketConnected } = useSocket(user);
-  const { pendingHails, dismissHail } = useNPCEvents(socket);
+  const { pendingHails, dismissHail, activityFeed } = useNPCEvents(socket);
 
   useEffect(() => {
     auth.getProfile({ skipAuthRedirect: true })
@@ -129,7 +129,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Dashboard user={user} />} />
         <Route path="/map" element={<GalaxyMap user={user} />} />
-        <Route path="/system" element={<SystemView user={user} onHailNPC={handleHailNPC} />} />
+        <Route path="/system" element={<SystemView user={user} onHailNPC={handleHailNPC} activityFeed={activityFeed} />} />
         <Route path="/ships" element={<ShipPanel user={user} />} />
         <Route path="/ship/:shipId/interior" element={<ShipInteriorView user={user} />} />
         <Route path="/ship/:shipId/derelict" element={<DerelictBoardingView user={user} />} />

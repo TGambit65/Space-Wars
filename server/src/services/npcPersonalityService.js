@@ -125,15 +125,25 @@ const buildInteractivePrompt = (npc, personality, conversationHistory = [], cont
     `Your hull is at ${hullPercent}%.`
   ];
 
-  // Add type-specific context
-  if (npc.npc_type === 'TRADER' && context.portPrices) {
-    systemParts.push(`You know about these trade prices: ${JSON.stringify(context.portPrices).slice(0, 200)}`);
+  // Add type-specific context from buildDialogueContext()
+  if (npc.npc_type === 'TRADER' && context.portCommodities && context.portCommodities.length > 0) {
+    const priceStr = context.portCommodities.slice(0, 5).map(c =>
+      `${c.commodity_name}: buy ${c.buy_price}cr, sell ${c.sell_price}cr`
+    ).join('; ');
+    systemParts.push(`Trade prices at this port: ${priceStr}.`);
   }
-  if (npc.npc_type === 'PATROL' && context.sectorDanger !== undefined) {
-    systemParts.push(`Sector danger level: ${context.sectorDanger}. You maintain order here.`);
+  if (npc.npc_type === 'PATROL') {
+    const hostiles = context.sectorInfo?.hostileCount || 0;
+    systemParts.push(`Hostile activity in sector: ${hostiles} threats. You maintain order here.`);
   }
-  if (npc.npc_type === 'BOUNTY_HUNTER' && context.activeBounties) {
-    systemParts.push(`Active bounties you're tracking: ${context.activeBounties}`);
+  if (context.adjacentSectors && context.adjacentSectors.length > 0) {
+    const nearby = context.adjacentSectors.slice(0, 3).map(s => {
+      const notes = [];
+      if (s.hasPort) notes.push('has port');
+      if (s.hostileCount > 0) notes.push(`${s.hostileCount} hostiles`);
+      return `${s.name}${notes.length ? ` (${notes.join(', ')})` : ''}`;
+    }).join('; ');
+    systemParts.push(`Nearby sectors: ${nearby}.`);
   }
 
   systemParts.push('Stay in character. Keep responses under 2 sentences. Never break character or mention being an AI.');

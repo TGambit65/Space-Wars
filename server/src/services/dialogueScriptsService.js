@@ -173,7 +173,7 @@ const patrolScripts = {
       "Crime report logged. We'll look into it. If you see the suspect again, keep your distance.",
       "Acknowledged. Can't promise immediate action — we're stretched thin — but we'll investigate."
     ];
-    return { text: pick(variants) };
+    return { text: pick(variants), data: { action: 'report_crime' } };
   },
 
   ask_safety: (npc, context) => {
@@ -198,8 +198,11 @@ const patrolScripts = {
   ask_bounties: (npc, context) => {
     const dangerousSectors = (context.adjacentSectors || []).filter(s => s.hostileCount > 0);
     if (dangerousSectors.length > 0) {
-      const targets = dangerousSectors.map(s => `${s.name} (${s.hostileCount} hostiles)`).join(', ');
-      return { text: `Known hostile activity in: ${targets}. Take them out and you'll be doing us all a favor.` };
+      const targets = dangerousSectors.map(s => ({
+        sector_name: s.name, sector_id: s.sector_id, hostile_count: s.hostileCount
+      }));
+      const targetStr = dangerousSectors.map(s => `${s.name} (${s.hostileCount} hostiles)`).join(', ');
+      return { text: `Known hostile activity in: ${targetStr}. Take them out and you'll be doing us all a favor.`, data: { action: 'bounty_info', targets } };
     }
 
     const variants = [
@@ -216,7 +219,7 @@ const patrolScripts = {
       "Can't leave my post, I'm afraid. Orders are orders. Stay near patrolled sectors and you'll be fine.",
       "Escort duty isn't in my mandate right now. Stick to well-traveled routes and keep your weapons hot."
     ];
-    return { text: pick(variants) };
+    return { text: pick(variants), data: { action: 'escort_denied', reason: 'patrol_duty' } };
   },
 
   farewell: (npc) => {
@@ -257,7 +260,7 @@ const bountyHunterScripts = {
       "A contract? I'm listening. But understand — I set my own terms.",
       "I might be interested. Depends on the target and the pay. What are you offering?"
     ];
-    return { text: pick(variants) };
+    return { text: pick(variants), data: { action: 'contract_inquiry', npc_name: npc.name } };
   },
 
   ask_price: (npc) => {
@@ -267,7 +270,7 @@ const bountyHunterScripts = {
       `${baseRate} credits gets you my gun for one job. Take it or leave it.`,
       `For a standard bounty, I charge ${baseRate} credits. Hazard pay extra.`
     ];
-    return { text: pick(variants) };
+    return { text: pick(variants), data: { action: 'price_quote', rate: baseRate } };
   },
 
   threaten: (npc) => {

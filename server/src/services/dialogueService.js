@@ -1,4 +1,4 @@
-const { NPC, Ship, User, Port, PortCommodity, Commodity, Sector } = require('../models');
+const { NPC, Ship, User, Port, PortCommodity, Commodity, Sector, NpcConversationSession } = require('../models');
 const { Op } = require('sequelize');
 const gameSettingsService = require('./gameSettingsService');
 const dialogueScriptsService = require('./dialogueScriptsService');
@@ -182,26 +182,39 @@ const startDialogue = async (userId, npcId) => {
     throw Object.assign(new Error('This NPC type does not support dialogue'), { statusCode: 400 });
   }
 
-  // Check if NPC is already in dialogue with someone else
-  const dialogueState = npc.dialogue_state;
-  if (dialogueState && dialogueState.active && dialogueState.user_id !== userId) {
-    // Auto-clear stale dialogues (e.g., player disconnected without ending)
-    const elapsed = Date.now() - (dialogueState.started_at || 0);
-    if (elapsed < STALE_DIALOGUE_MS) {
-      throw Object.assign(new Error('NPC is busy talking to someone else'), { statusCode: 409 });
+  // Close any stale sessions for this user+NPC pair
+  await NpcConversationSession.update(
+    { is_active: false },
+    {
+      where: {
+        user_id: userId,
+        npc_id: npcId,
+        is_active: true,
+        last_message_at: { [Op.lt]: new Date(Date.now() - STALE_DIALOGUE_MS) }
+      }
     }
-    // Stale — clear it and proceed
-    await npc.update({ dialogue_state: null });
+  );
+
+  // Check for existing active session (resume it)
+  let session = await NpcConversationSession.findOne({
+    where: { user_id: userId, npc_id: npcId, is_active: true }
+  });
+
+  if (!session) {
+    // Create new session
+    session = await NpcConversationSession.create({
+      npc_id: npcId,
+      user_id: userId,
+      started_at: new Date(),
+      last_message_at: new Date(),
+      history: [],
+      is_active: true
+    });
   }
 
-  // Initialize dialogue state on NPC
+  // Also set legacy dialogue_state for backward compat with tick system skip
   await npc.update({
-    dialogue_state: {
-      active: true,
-      user_id: userId,
-      started_at: Date.now(),
-      history: []
-    }
+    dialogue_state: { active: true, user_id: userId, started_at: Date.now(), history: [] }
   });
 
   // Check voice access
@@ -215,6 +228,7 @@ const startDialogue = async (userId, npcId) => {
 
   return {
     conversation_id: npc.npc_id,
+    session_id: session.session_id,
     npc: {
       name: npc.name,
       npc_type: npc.npc_type,
@@ -224,6 +238,60 @@ const startDialogue = async (userId, npcId) => {
     voice_enabled: voiceEnabled,
     subscription_tier: user ? user.subscription_tier : 'free'
   };
+};
+
+/**
+ * Execute server-side effects for dialogue action payloads.
+ * Handles bribes (credit deduction), intimidation (NPC disengage), etc.
+ */
+const executeActionPayload = async (userId, npc, data) => {
+  if (!data) return {};
+
+  // Pirate bribe accepted — deduct credits from player
+  if (data.bribe_accepted && data.bribe_amount) {
+    const player = await User.findByPk(userId);
+    if (player && player.credits >= data.bribe_amount) {
+      await player.update({ credits: player.credits - data.bribe_amount });
+      // Disengage the pirate
+      await npc.update({
+        behavior_state: 'idle',
+        target_ship_id: null,
+        target_user_id: null
+      });
+      return { credits_deducted: data.bribe_amount, npc_disengaged: true };
+    }
+    // Not enough credits — bribe fails
+    return { bribe_failed: true, reason: 'insufficient_credits' };
+  }
+
+  // Pirate backed down from intimidation — disengage
+  if (data.backed_down === true) {
+    await npc.update({
+      behavior_state: 'idle',
+      target_ship_id: null,
+      target_user_id: null
+    });
+    return { npc_disengaged: true };
+  }
+
+  // Patrol report crime — boost patrol aggression in sector temporarily
+  if (data.action === 'report_crime') {
+    const patrols = await NPC.findAll({
+      where: {
+        current_sector_id: npc.current_sector_id,
+        npc_type: 'PATROL',
+        is_alive: true
+      }
+    });
+    for (const patrol of patrols) {
+      if (patrol.aggression_level < 0.8) {
+        await patrol.update({ aggression_level: Math.min(1.0, patrol.aggression_level + 0.2) });
+      }
+    }
+    return { patrols_alerted: patrols.length };
+  }
+
+  return {};
 };
 
 /**
@@ -237,9 +305,11 @@ const selectMenuOption = async (userId, npcId, optionKey) => {
   const npc = await NPC.findByPk(npcId);
   if (!npc) throw Object.assign(new Error('NPC not found'), { statusCode: 404 });
 
-  // Validate active dialogue
-  const state = npc.dialogue_state;
-  if (!state || !state.active || state.user_id !== userId) {
+  // Find active session for this user+NPC
+  const session = await NpcConversationSession.findOne({
+    where: { user_id: userId, npc_id: npcId, is_active: true }
+  });
+  if (!session) {
     throw Object.assign(new Error('No active dialogue with this NPC'), { statusCode: 400 });
   }
 
@@ -259,17 +329,18 @@ const selectMenuOption = async (userId, npcId, optionKey) => {
   }
 
   // Append to conversation history (capped)
-  const history = state.history || [];
+  const history = session.history || [];
   history.push(
     { role: 'user', content: `[${optionKey}]` },
     { role: 'assistant', content: response.text }
   );
   trimHistory(history);
 
-  // Update NPC's dialogue state
-  await npc.update({
-    dialogue_state: { ...state, history }
-  });
+  // Update session
+  await session.update({ history, last_message_at: new Date() });
+
+  // Execute server-side action payloads
+  const actionResult = await executeActionPayload(userId, npc, response.data);
 
   // Generate TTS if voice enabled for user
   let responseAudio = null;
@@ -282,7 +353,7 @@ const selectMenuOption = async (userId, npcId, optionKey) => {
     response_text: response.text,
     response_audio: responseAudio,
     new_menu_options: MENU_OPTIONS[npc.npc_type],
-    data: response.data || null
+    data: response.data ? { ...response.data, ...actionResult } : null
   };
 };
 
@@ -298,12 +369,15 @@ const processFreeText = async (userId, npcId, text) => {
   const npc = await NPC.findByPk(npcId);
   if (!npc) throw Object.assign(new Error('NPC not found'), { statusCode: 404 });
 
-  const state = npc.dialogue_state;
-  if (!state || !state.active || state.user_id !== userId) {
+  // Find active session
+  const session = await NpcConversationSession.findOne({
+    where: { user_id: userId, npc_id: npcId, is_active: true }
+  });
+  if (!session) {
     throw Object.assign(new Error('No active dialogue with this NPC'), { statusCode: 400 });
   }
 
-  const history = state.history || [];
+  const history = session.history || [];
   const personality = npc.ai_personality || {};
 
   // Add player message to history
@@ -313,11 +387,11 @@ const processFreeText = async (userId, npcId, text) => {
   const user = await User.findByPk(userId, { attributes: ['user_id', 'subscription_tier'] });
   const canVoice = voiceService.isVoiceEnabledForUser(user);
 
-  // Helper to finalize response: update history, generate TTS, return result
+  // Helper to finalize response: update session, generate TTS, return result
   const finalizeResponse = async (responseText, isAI) => {
     history.push({ role: 'assistant', content: responseText });
     trimHistory(history);
-    await npc.update({ dialogue_state: { ...state, history } });
+    await session.update({ history, last_message_at: new Date() });
 
     let responseAudio = null;
     if (canVoice && isAI) {
@@ -332,7 +406,7 @@ const processFreeText = async (userId, npcId, text) => {
   };
 
   // Check cache first
-  const cacheKey = `${npc.npc_type}:general:${hashContext(npc.npc_id, text)}`;
+  const cacheKey = `${npc.npc_type}:general:${hashContext(npc.npc_id, text, npc.current_sector_id)}`;
   const cached = dialogueCacheService.getCached(cacheKey);
   if (cached) {
     return finalizeResponse(cached.text, true);
@@ -420,8 +494,11 @@ const endDialogue = async (userId, npcId) => {
   const npc = await NPC.findByPk(npcId);
   if (!npc) throw Object.assign(new Error('NPC not found'), { statusCode: 404 });
 
-  const state = npc.dialogue_state;
-  if (!state || !state.active || state.user_id !== userId) {
+  // Find and close active session
+  const session = await NpcConversationSession.findOne({
+    where: { user_id: userId, npc_id: npcId, is_active: true }
+  });
+  if (!session) {
     throw Object.assign(new Error('No active dialogue with this NPC'), { statusCode: 400 });
   }
 
@@ -429,8 +506,16 @@ const endDialogue = async (userId, npcId) => {
   const farewell = dialogueScriptsService.getScriptedResponse(npc.npc_type, 'farewell', npc, {});
   const farewellText = farewell ? farewell.text : 'Goodbye.';
 
-  // Clear dialogue state
-  await npc.update({ dialogue_state: null });
+  // Close session
+  await session.update({ is_active: false });
+
+  // Clear legacy dialogue_state if this was the last active session for this NPC
+  const remainingSessions = await NpcConversationSession.count({
+    where: { npc_id: npcId, is_active: true }
+  });
+  if (remainingSessions === 0) {
+    await npc.update({ dialogue_state: null });
+  }
 
   // Generate TTS if voice enabled for user
   let responseAudio = null;
@@ -454,17 +539,22 @@ const getConversationState = async (userId, npcId) => {
   });
   if (!npc) throw Object.assign(new Error('NPC not found'), { statusCode: 404 });
 
-  const state = npc.dialogue_state;
-  if (!state || !state.active || state.user_id !== userId) {
+  // Check session-based state first
+  const session = await NpcConversationSession.findOne({
+    where: { user_id: userId, npc_id: npcId, is_active: true }
+  });
+
+  if (!session) {
     return { active: false };
   }
 
   return {
     active: true,
+    session_id: session.session_id,
     npc_name: npc.name,
     npc_type: npc.npc_type,
-    started_at: state.started_at,
-    history: state.history || [],
+    started_at: session.started_at,
+    history: session.history || [],
     menu_options: MENU_OPTIONS[npc.npc_type] || []
   };
 };
@@ -494,10 +584,10 @@ const trimHistory = (history) => {
 /**
  * Generate a short hash for cache keying.
  */
-const hashContext = (npcId, text) => {
+const hashContext = (npcId, text, sectorId) => {
   return crypto
     .createHash('md5')
-    .update(`${npcId}:${text.toLowerCase().trim()}`)
+    .update(`${npcId}:${sectorId || ''}:${text.toLowerCase().trim()}`)
     .digest('hex')
     .slice(0, 12);
 };

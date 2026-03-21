@@ -14,6 +14,7 @@ const voiceService = require('../../src/services/voiceService');
 const aiProviderFactory = require('../../src/services/ai/aiProviderFactory');
 const dialogueCacheService = require('../../src/services/dialogueCacheService');
 const gameSettingsService = require('../../src/services/gameSettingsService');
+const { NpcConversationSession } = require('../../src/models');
 const {
   createTestUser, createTestSector, createTestShip, createTestNPC,
   cleanDatabase
@@ -133,33 +134,36 @@ describe('Dialogue Service', () => {
       ).rejects.toHaveProperty('statusCode', 400);
     });
 
-    it('should throw 409 for busy NPC (active non-stale dialogue)', async () => {
+    it('should allow concurrent conversations with same NPC (per-player sessions)', async () => {
       const otherUser = await createTestUser({ username: 'otherplayer' });
-      await testNpc.update({
-        dialogue_state: {
-          active: true,
-          user_id: otherUser.user_id,
-          started_at: Date.now(),
-          history: []
-        }
-      });
-      await expect(
-        dialogueService.startDialogue(testUser.user_id, testNpc.npc_id)
-      ).rejects.toHaveProperty('statusCode', 409);
+      const otherShip = await createTestShip(otherUser.user_id, testNpc.current_sector_id);
+      // First user starts dialogue
+      const result1 = await dialogueService.startDialogue(testUser.user_id, testNpc.npc_id);
+      expect(result1.session_id).toBeTruthy();
+      // Second user can also start dialogue (concurrent sessions)
+      const result2 = await dialogueService.startDialogue(otherUser.user_id, testNpc.npc_id);
+      expect(result2.session_id).toBeTruthy();
+      expect(result2.session_id).not.toBe(result1.session_id);
     });
 
-    it('should clear stale dialogue and allow new one', async () => {
-      const otherUser = await createTestUser({ username: 'staleuser' });
-      await testNpc.update({
-        dialogue_state: {
-          active: true,
-          user_id: otherUser.user_id,
-          started_at: Date.now() - 10 * 60 * 1000, // 10 minutes ago (stale)
-          history: []
-        }
+    it('should clear stale session and allow new one', async () => {
+      // Create a stale session for this user
+      await NpcConversationSession.create({
+        npc_id: testNpc.npc_id,
+        user_id: testUser.user_id,
+        started_at: new Date(Date.now() - 10 * 60 * 1000),
+        last_message_at: new Date(Date.now() - 10 * 60 * 1000),
+        history: [],
+        is_active: true
       });
       const result = await dialogueService.startDialogue(testUser.user_id, testNpc.npc_id);
       expect(result.conversation_id).toBe(testNpc.npc_id);
+      // Stale session should be closed, only the new one active
+      const activeSessions = await NpcConversationSession.findAll({
+        where: { user_id: testUser.user_id, npc_id: testNpc.npc_id, is_active: true }
+      });
+      expect(activeSessions).toHaveLength(1);
+      expect(activeSessions[0].session_id).toBe(result.session_id);
     });
   });
 
@@ -188,6 +192,7 @@ describe('Dialogue Service', () => {
     });
 
     it('should throw 400 when no active dialogue', async () => {
+      await NpcConversationSession.update({ is_active: false }, { where: { npc_id: testNpc.npc_id } });
       await testNpc.update({ dialogue_state: null });
       await expect(
         dialogueService.selectMenuOption(testUser.user_id, testNpc.npc_id, 'greet')
@@ -235,6 +240,7 @@ describe('Dialogue Service', () => {
     });
 
     it('should throw 400 for no active dialogue', async () => {
+      await NpcConversationSession.update({ is_active: false }, { where: { npc_id: testNpc.npc_id } });
       await testNpc.update({ dialogue_state: null });
       await expect(
         dialogueService.processFreeText(testUser.user_id, testNpc.npc_id, 'hello')
@@ -265,6 +271,7 @@ describe('Dialogue Service', () => {
     });
 
     it('should throw 400 when no active dialogue', async () => {
+      await NpcConversationSession.update({ is_active: false }, { where: { npc_id: testNpc.npc_id } });
       await testNpc.update({ dialogue_state: null });
       await expect(
         dialogueService.endDialogue(testUser.user_id, testNpc.npc_id)
@@ -300,6 +307,53 @@ describe('Dialogue Service', () => {
       await expect(
         dialogueService.getConversationState(testUser.user_id, '00000000-0000-0000-0000-000000000000')
       ).rejects.toHaveProperty('statusCode', 404);
+    });
+  });
+
+  // ─── Action Payload Execution ─────────────────────────────────────
+
+  describe('action payload execution', () => {
+    it('should deduct credits on accepted pirate bribe', async () => {
+      // Create a pirate NPC with cowardly trait (bribe always accepted)
+      const pirate = await createTestNPC(testSector.sector_id, {
+        npc_type: 'PIRATE',
+        ai_personality: {
+          trait_primary: 'greedy',
+          trait_secondary: 'cunning',
+          speech_style: 'pirate_slang',
+          quirk: 'counts coins',
+          voice_profile: 'gruff'
+        }
+      });
+
+      await dialogueService.startDialogue(testUser.user_id, pirate.npc_id);
+      const result = await dialogueService.selectMenuOption(testUser.user_id, pirate.npc_id, 'bribe');
+
+      // Greedy pirates always accept bribes
+      expect(result.data.bribe_accepted).toBe(true);
+      expect(result.data.credits_deducted).toBeTruthy();
+      expect(result.data.npc_disengaged).toBe(true);
+
+      // Verify credits were deducted
+      await testUser.reload();
+      expect(testUser.credits).toBeLessThan(10000);
+
+      // Verify NPC disengaged
+      await pirate.reload();
+      expect(pirate.behavior_state).toBe('idle');
+      expect(pirate.target_ship_id).toBeNull();
+    });
+
+    it('should return trade UI action data without side effects', async () => {
+      await dialogueService.startDialogue(testUser.user_id, testNpc.npc_id);
+      const result = await dialogueService.selectMenuOption(testUser.user_id, testNpc.npc_id, 'buy');
+
+      expect(result.data).toHaveProperty('action', 'open_trade_ui');
+      expect(result.data).toHaveProperty('mode', 'buy');
+
+      // Credits unchanged
+      await testUser.reload();
+      expect(testUser.credits).toBe(10000);
     });
   });
 });

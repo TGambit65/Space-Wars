@@ -87,10 +87,30 @@ const NPC = sequelize.define('NPC', {
     allowNull: true,
     comment: 'Sector where NPC was spawned / patrols around'
   },
+  target_ship_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'Persisted combat target ship ID (cleared on disengage)'
+  },
+  target_user_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'Persisted combat target user ID (cleared on disengage)'
+  },
   dialogue_state: {
     type: DataTypes.JSON,
     allowNull: true,
-    comment: 'Current conversation tracking state'
+    comment: 'Legacy conversation state — sessions now in NpcConversationSession table'
+  },
+  last_hail_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    comment: 'Last time this NPC proactively hailed a player (presence pacing)'
+  },
+  last_presence_beat_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    comment: 'Last ambient presence event timestamp'
   },
   // Status
   is_alive: { type: DataTypes.BOOLEAN, defaultValue: true },
