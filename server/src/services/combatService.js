@@ -2,6 +2,39 @@ const { Ship, NPC, CombatLog, User, Sector, sequelize } = require('../models');
 const config = require('../config');
 const maintenanceService = require('./maintenanceService');
 const shipDesignerService = require('./shipDesignerService');
+const achievementService = require('./achievementService');
+const worldPolicyService = require('./worldPolicyService');
+
+const getSectorCombatPolicy = async (sectorId, transaction = null) => {
+  const sector = await Sector.findByPk(sectorId, { transaction });
+  if (!sector) {
+    const error = new Error('Sector not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return {
+    sector,
+    policy: worldPolicyService.buildDefaultSectorPolicy(sector)
+  };
+};
+
+const getRewardMultiplier = (policy) => Number(policy?.rule_flags?.reward_multiplier || 1);
+
+const trackCombatAchievements = async (userId, { hullRemaining, maxHull }) => {
+  const updates = [
+    achievementService.incrementProgress(userId, 'first_kill', 1),
+    achievementService.incrementProgress(userId, 'combat_wins_10', 1),
+    achievementService.incrementProgress(userId, 'combat_wins_50', 1),
+    achievementService.incrementProgress(userId, 'combat_wins_200', 1)
+  ];
+
+  if (maxHull > 0 && (hullRemaining / maxHull) < 0.1) {
+    updates.push(achievementService.incrementProgress(userId, 'survive_low_hull', 1));
+  }
+
+  await Promise.allSettled(updates);
+};
 
 /**
  * Calculate damage with variance
@@ -155,6 +188,12 @@ const attackNPC = async (userId, shipId, npcId) => {
       throw Object.assign(new Error('Target not in same sector'), { statusCode: 400 });
     }
 
+    // Zone enforcement: block combat in safe harbors
+    const { policy: sectorPolicy } = await getSectorCombatPolicy(ship.current_sector_id, t);
+    if (sectorPolicy.rule_flags?.safe_harbor) {
+      throw Object.assign(new Error('Combat is not allowed in safe harbor zones'), { statusCode: 403 });
+    }
+
     // Mark ship as in combat
     await ship.update({ in_combat: true }, { transaction: t });
 
@@ -237,11 +276,12 @@ const attackNPC = async (userId, shipId, npcId) => {
     else if (attackerState.hull_points <= 0) winner = 'defender';
     else winner = 'draw';
 
-    // Calculate rewards
+    // Calculate rewards with zone multiplier
+    const rewardMultiplier = getRewardMultiplier(sectorPolicy);
     let creditsLooted = 0, experienceGained = 0;
     if (winner === 'attacker') {
-      creditsLooted = npc.credits_carried;
-      experienceGained = npc.experience_value;
+      creditsLooted = Math.round((npc.credits_carried || 0) * rewardMultiplier);
+      experienceGained = Math.round((npc.experience_value || 0) * rewardMultiplier);
 
       // Update NPC - destroyed
       await npc.update({
@@ -313,6 +353,11 @@ const attackNPC = async (userId, shipId, npcId) => {
         const missionService = require('./missionService');
         await missionService.updateMissionProgress(userId, 'combat_kill', { npc_id: npcId });
       } catch (e) { /* Mission progress failure should not block combat result */ }
+
+      trackCombatAchievements(userId, {
+        hullRemaining: attackerState.hull_points,
+        maxHull: ship.max_hull || ship.hull_strength || 100
+      }).catch(() => null);
     }
 
     return {
@@ -332,7 +377,8 @@ const attackNPC = async (userId, shipId, npcId) => {
         hull: defenderState.hull_points,
         shields: defenderState.shield_points,
         destroyed: winner === 'attacker'
-      }
+      },
+      reward_multiplier: rewardMultiplier
     };
   } catch (error) {
     await t.rollback();

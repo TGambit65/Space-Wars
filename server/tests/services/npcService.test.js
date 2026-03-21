@@ -15,8 +15,8 @@ describe('NPC Service', () => {
   beforeEach(async () => {
     await cleanDatabase();
 
-    testSector = await createTestSector({ name: 'Test Sector' });
-    otherSector = await createTestSector({ name: 'Other Sector' });
+    testSector = await createTestSector({ name: 'Test Sector', type: 'Mid' });
+    otherSector = await createTestSector({ name: 'Other Sector', type: 'Mid' });
     await createSectorConnection(testSector.sector_id, otherSector.sector_id);
   });
 

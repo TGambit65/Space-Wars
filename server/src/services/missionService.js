@@ -1,7 +1,8 @@
-const { Mission, PlayerMission, Port, User, Commodity, PortCommodity, NPC } = require('../models');
+const { Mission, PlayerMission, Port, User, Commodity, PortCommodity, Ship, Sector, NPC } = require('../models');
 const { Op } = require('sequelize');
 const { sequelize } = require('../config/database');
 const config = require('../config');
+const worldPolicyService = require('./worldPolicyService');
 
 /**
  * Generate missions for a port based on its type
@@ -273,6 +274,53 @@ const updateMissionProgress = async (userId, eventType, eventData) => {
   }
 };
 
+const resolveMissionRewardContext = async ({ userId, mission, transaction = null } = {}) => {
+  let sector = null;
+
+  const user = await User.findByPk(userId, {
+    attributes: ['user_id', 'active_ship_id'],
+    ...(transaction && { transaction })
+  });
+
+  if (user?.active_ship_id) {
+    const activeShip = await Ship.findByPk(user.active_ship_id, {
+      attributes: ['ship_id', 'current_sector_id'],
+      ...(transaction && { transaction })
+    });
+
+    if (activeShip?.current_sector_id) {
+      sector = await Sector.findByPk(activeShip.current_sector_id, {
+        ...(transaction && { transaction })
+      });
+    }
+  }
+
+  if (!sector) {
+    let missionPort = mission?.port || null;
+
+    if (!missionPort && mission?.port_id) {
+      missionPort = await Port.findByPk(mission.port_id, {
+        attributes: ['port_id', 'sector_id'],
+        ...(transaction && { transaction })
+      });
+    }
+
+    if (missionPort?.sector_id) {
+      sector = await Sector.findByPk(missionPort.sector_id, {
+        ...(transaction && { transaction })
+      });
+    }
+  }
+
+  const policy = sector ? worldPolicyService.buildDefaultSectorPolicy(sector) : null;
+
+  return {
+    sector,
+    policy,
+    rewardMultiplier: Number(policy?.rule_flags?.reward_multiplier || 1)
+  };
+};
+
 /**
  * Check if mission requirements are met
  */
@@ -300,7 +348,11 @@ const isMissionComplete = (mission, progress) => {
 const completeMission = async (userId, playerMissionId) => {
   const pm = await PlayerMission.findOne({
     where: { player_mission_id: playerMissionId, user_id: userId, status: 'accepted' },
-    include: [{ model: Mission, as: 'mission' }]
+    include: [{
+      model: Mission,
+      as: 'mission',
+      include: [{ model: Port, as: 'port', attributes: ['port_id', 'sector_id'] }]
+    }]
   });
   if (!pm) {
     const error = new Error('Active mission not found');
@@ -310,10 +362,18 @@ const completeMission = async (userId, playerMissionId) => {
 
   const transaction = await sequelize.transaction();
   try {
+    const rewardContext = await resolveMissionRewardContext({
+      userId,
+      mission: pm.mission,
+      transaction
+    });
+    const rewardMultiplier = rewardContext.rewardMultiplier;
+    const adjustedRewardCredits = Math.round(Number(pm.mission.reward_credits || 0) * rewardMultiplier);
+
     // Award credits
     const user = await User.findByPk(userId, { transaction, lock: true });
     await user.update({
-      credits: Number(user.credits) + pm.mission.reward_credits
+      credits: Number(user.credits) + adjustedRewardCredits
     }, { transaction });
 
     // Award XP
@@ -332,7 +392,17 @@ const completeMission = async (userId, playerMissionId) => {
     }, { transaction });
 
     await transaction.commit();
-    return pm.reload({ include: [{ model: Mission, as: 'mission' }] });
+    const completedMission = await pm.reload({
+      include: [{
+        model: Mission,
+        as: 'mission',
+        include: [{ model: Port, as: 'port', attributes: ['port_id', 'sector_id'] }]
+      }]
+    });
+    completedMission.setDataValue('reward_multiplier', rewardMultiplier);
+    completedMission.setDataValue('adjusted_reward_credits', adjustedRewardCredits);
+    completedMission.setDataValue('base_reward_credits', pm.mission.reward_credits);
+    return completedMission;
   } catch (err) {
     await transaction.rollback();
     throw err;

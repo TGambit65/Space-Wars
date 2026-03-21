@@ -20,7 +20,7 @@ describe('Combat Service', () => {
     await NPC.destroy({ where: {} });
     await ShipComponent.destroy({ where: {} });
     
-    testSector = await createTestSector();
+    testSector = await createTestSector({ type: 'Mid' });
     testUser = await createTestUser();
     testShip = await createTestShip(testUser.user_id, testSector.sector_id, {
       hull_points: 100,
@@ -225,7 +225,8 @@ describe('Combat Service', () => {
 
       if (result.winner === 'attacker') {
         await testUser.reload();
-        expect(testUser.credits).toBe(initialCredits + 500); // NPC credits_carried
+        // Mid sector reward_multiplier is 1.25, so credits = 500 * 1.25 = 625
+        expect(testUser.credits).toBe(initialCredits + result.credits_looted);
       }
     });
   });

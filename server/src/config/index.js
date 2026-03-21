@@ -136,6 +136,8 @@ module.exports = {
     hostilityDurationMs: parseInt(process.env.HOSTILITY_DURATION_MS, 10) || 5 * 60 * 1000,
     newbieProtectionMs: parseInt(process.env.NEWBIE_PROTECTION_MS, 10) || 2 * 60 * 60 * 1000,
     travelProtectionDefaultMs: parseInt(process.env.TRAVEL_PROTECTION_DEFAULT_MS, 10) || 15 * 1000,
+    pvpRepeatTargetCooldownMs: parseInt(process.env.PVP_REPEAT_TARGET_COOLDOWN_MS, 10) || 30 * 60 * 1000,
+    offlinePvpThresholdMs: parseInt(process.env.OFFLINE_PVP_THRESHOLD_MS, 10) || 5 * 60 * 1000,
     combatCommandWindowMs: parseInt(process.env.COMBAT_COMMAND_WINDOW_MS, 10) || 1000,
     combatCommandsPerWindow: parseInt(process.env.COMBAT_COMMANDS_PER_WINDOW, 10) || 20,
     sectorInstanceAssignmentTtlMs: parseInt(process.env.SECTOR_INSTANCE_ASSIGNMENT_TTL_MS, 10) || 10 * 60 * 1000,
@@ -163,6 +165,18 @@ module.exports = {
     INTERCEPTOR: { name: 'Interceptor', hull: 60, shields: 80, fuel: 120, cargo: 10 },
     MINING_BARGE: { name: 'Mining Barge', hull: 250, shields: 50, fuel: 100, cargo: 800 },
     EXPLORER: { name: 'Explorer', hull: 120, shields: 100, fuel: 200, cargo: 100 }
+  },
+
+  zoneDifficulty: {
+    core:       { npcStatMultiplier: 0.5,  npcLevelRange: [1, 3],   spawnDensity: 0.3 },
+    inner_ring: { npcStatMultiplier: 0.75, npcLevelRange: [2, 5],   spawnDensity: 0.5 },
+    mid_ring:   { npcStatMultiplier: 1.0,  npcLevelRange: [3, 7],   spawnDensity: 0.7 },
+    outer_ring: { npcStatMultiplier: 1.25, npcLevelRange: [5, 10],  spawnDensity: 0.8 },
+    frontier:   { npcStatMultiplier: 1.5,  npcLevelRange: [7, 12],  spawnDensity: 1.0 },
+    deep_space: { npcStatMultiplier: 2.0,  npcLevelRange: [10, 15], spawnDensity: 1.2 },
+    home:       { npcStatMultiplier: 0.3,  npcLevelRange: [1, 2],   spawnDensity: 0.2 },
+    adventure:  { npcStatMultiplier: 1.75, npcLevelRange: [8, 13],  spawnDensity: 1.0 },
+    transit:    { npcStatMultiplier: 0.6,  npcLevelRange: [1, 4],   spawnDensity: 0.4 }
   },
 
   // ============== Phase 2: Economy Configuration ==============

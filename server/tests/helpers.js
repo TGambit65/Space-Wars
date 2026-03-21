@@ -1,9 +1,10 @@
 /**
  * Test helper functions and fixtures
  */
-const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, PriceHistory, PlayerSkill, TechResearch, Wonder, Blueprint, CraftingJob, Mission, PlayerMission, Corporation, CorporationMember, AutomatedTask, Job, ColonyBuilding, SurfaceAnomaly, CustomBlock, GroundUnit, GroundCombatUnit, GroundCombatInstance, FactionStanding, FactionWar, CombatInstance, Message, CosmeticUnlock, CorporationAgreement, CommunityEvent, EventContribution, Outpost, ShipDesignTemplate, Fleet, DailyQuest, VoxelBlock, PlayerProtectionState, ActionAuditLog, SectorInstanceAssignment, TransferLedger, ColonyRaidProtection, NpcConversationSession, NpcMemory, AgentAccount, AgentActionLog, sequelize } = require('../src/models');
+const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, PriceHistory, PlayerSkill, TechResearch, Wonder, Blueprint, CraftingJob, Mission, PlayerMission, Corporation, CorporationMember, AutomatedTask, Job, ColonyBuilding, SurfaceAnomaly, CustomBlock, GroundUnit, GroundCombatUnit, GroundCombatInstance, FactionStanding, FactionWar, CombatInstance, Message, CosmeticUnlock, CorporationAgreement, CommunityEvent, EventContribution, Outpost, ShipDesignTemplate, Fleet, DailyQuest, VoxelBlock, PlayerProtectionState, PvpCooldown, ActionAuditLog, SectorInstanceAssignment, TransferLedger, ColonyRaidProtection, NpcConversationSession, NpcMemory, Achievement, PlayerAchievement, AgentAccount, AgentActionLog, sequelize } = require('../src/models');
 const authService = require('../src/services/authService');
 const gameSettingsService = require('../src/services/gameSettingsService');
+const worldPolicyService = require('../src/services/worldPolicyService');
 const bcrypt = require('bcryptjs');
 
 /**
@@ -37,6 +38,55 @@ const createTestSector = async (overrides = {}) => {
   return Sector.create({ ...defaults, ...overrides });
 };
 
+const zoneClassToLegacyType = {
+  core: 'Core',
+  inner_ring: 'Inner',
+  mid_ring: 'Mid',
+  outer_ring: 'Outer',
+  frontier: 'Fringe',
+  deep_space: 'Unknown',
+  home: 'Core',
+  adventure: 'Unknown',
+  transit: 'Inner'
+};
+
+const createTestSectorWithZone = async (zoneClass, securityClass, overrides = {}) => {
+  const legacyType = overrides.type || zoneClassToLegacyType[zoneClass] || 'Mid';
+  const desiredPolicy = worldPolicyService.buildDefaultSectorPolicy({
+    type: legacyType,
+    owner_user_id: overrides.owner_user_id,
+    owner_corporation_id: overrides.owner_corporation_id,
+    rule_flags: overrides.rule_flags || {}
+  });
+
+  const desiredRuleFlags = {
+    ...desiredPolicy.rule_flags,
+    ...(overrides.rule_flags || {})
+  };
+
+  const sector = await createTestSector({
+    ...overrides,
+    type: legacyType,
+    zone_class: zoneClass,
+    security_class: securityClass,
+    access_mode: overrides.access_mode || desiredPolicy.access_mode,
+    rule_flags: desiredRuleFlags
+  });
+
+  await Sector.update({
+    zone_class: zoneClass,
+    security_class: securityClass,
+    access_mode: overrides.access_mode || desiredPolicy.access_mode,
+    rule_flags: desiredRuleFlags
+  }, {
+    where: { sector_id: sector.sector_id },
+    hooks: false,
+    validate: false
+  });
+
+  return Sector.findByPk(sector.sector_id);
+};
+
 /**
  * Create a test ship for a user
  */
@@ -46,13 +96,19 @@ const createTestShip = async (userId, sectorId, overrides = {}) => {
     current_sector_id: sectorId,
     ship_type: 'Scout',
     name: `Test Ship ${Date.now()}`,
-    hull_strength: 100,
-    max_hull: 100,
-    shields: 50,
-    max_shields: 50,
+    hull_points: 100,
+    max_hull_points: 100,
+    shield_points: 50,
+    max_shield_points: 50,
     fuel: 100,
     max_fuel: 100,
-    cargo_capacity: 50
+    cargo_capacity: 50,
+    attack_power: 10,
+    defense_rating: 5,
+    speed: 10,
+    energy: 100,
+    max_energy: 100,
+    is_active: true
   };
   return Ship.create({ ...defaults, ...overrides });
 };
@@ -252,6 +308,7 @@ const cleanDatabase = async () => {
   await CombatInstance.destroy({ where: {} });
   await Outpost.destroy({ where: {} });
   await FactionStanding.destroy({ where: {} });
+  await PvpCooldown.destroy({ where: {} });
   await FactionWar.destroy({ where: {} });
   // Phase 5 models first (most dependent)
   await AutomatedTask.destroy({ where: {} });
@@ -273,6 +330,9 @@ const cleanDatabase = async () => {
   await TechResearch.destroy({ where: {} });
   await PlayerSkill.destroy({ where: {} });
   await PriceHistory.destroy({ where: {} });
+  // Achievements
+  await PlayerAchievement.destroy({ where: {} });
+  await Achievement.destroy({ where: {} });
   // NPC Memory + Conversation Sessions
   await NpcMemory.destroy({ where: {} });
   await NpcConversationSession.destroy({ where: {} });
@@ -298,6 +358,8 @@ const cleanDatabase = async () => {
   // Fleet system - clear fleet_id on ships before deleting fleets
   await Ship.update({ fleet_id: null }, { where: {} });
   await Fleet.destroy({ where: {} });
+  // Clear active_ship_id before deleting ships (User.active_ship_id → ships FK)
+  await User.update({ active_ship_id: null }, { where: {} });
   // Core models - Corporation before User due to FK
   await Ship.destroy({ where: {} });
   await SectorInstanceAssignment.destroy({ where: {} });
@@ -487,6 +549,28 @@ const createTestJob = async (overrides = {}) => {
   return Job.create({ ...defaults, ...overrides });
 };
 
+// ============== Achievement Helpers ==============
+
+/**
+ * Create a test achievement
+ */
+const createTestAchievement = async (overrides = {}) => {
+  const defaults = {
+    achievement_id: `test_achievement_${Date.now()}`,
+    name: 'Test Achievement',
+    description: 'A test achievement',
+    category: 'special',
+    rarity: 'common',
+    target_value: 1,
+    reward_credits: 100,
+    reward_xp: 0,
+    is_hidden: false,
+    is_active: true,
+    sort_order: 0
+  };
+  return Achievement.create({ ...defaults, ...overrides });
+};
+
 // ============== Agent Helpers ==============
 
 /**
@@ -528,7 +612,7 @@ const createTestAgentWithKey = async (userId, overrides = {}) => {
 };
 
 module.exports = {
-  createTestUser, createTestSector, createTestShip, createSectorConnection,
+  createTestUser, createTestSector, createTestSectorWithZone, createTestShip, createSectorConnection,
   createTestCommodity, createTestPort, addCommodityToPort, addCargoToShip,
   // Phase 4 helpers
   createTestPlanet, createTestPlanetResource, createTestColony, createTestCrew, createTestArtifact,
@@ -545,6 +629,8 @@ module.exports = {
   createTestGroundUnit,
   // Job queue helpers
   createTestJob,
+  // Achievement helpers
+  createTestAchievement,
   // Agent helpers
   createTestAgent, createTestAgentWithKey,
   cleanDatabase, generateTestToken

@@ -3,6 +3,22 @@ const config = require('../config');
 const { User } = require('../models');
 const { getAuthTokenFromRequest, getCookieToken, setAuthCookie } = require('../utils/authCookie');
 
+const LAST_ACTIVE_WRITE_THROTTLE_MS = 30 * 1000;
+
+const touchLastActive = (user) => {
+  if (!user) return;
+
+  const now = Date.now();
+  const lastActiveAtMs = user.last_active_at ? new Date(user.last_active_at).getTime() : 0;
+  if (lastActiveAtMs && (now - lastActiveAtMs) < LAST_ACTIVE_WRITE_THROTTLE_MS) {
+    return;
+  }
+
+  const lastActiveAt = new Date(now);
+  user.last_active_at = lastActiveAt;
+  user.update({ last_active_at: lastActiveAt }, { fields: ['last_active_at'] }).catch(() => null);
+};
+
 const authMiddleware = async (req, res, next) => {
   try {
     const token = getAuthTokenFromRequest(req);
@@ -30,10 +46,11 @@ const authMiddleware = async (req, res, next) => {
     // Attach user to request
     req.user = user;
     req.userId = user.user_id;
+    touchLastActive(user);
     if (req.headers.authorization?.startsWith('Bearer ') && !getCookieToken(req.headers.cookie)) {
       setAuthCookie(res, token, req);
     }
-    
+
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
@@ -68,6 +85,7 @@ const optionalAuth = async (req, res, next) => {
       if (user) {
         req.user = user;
         req.userId = user.user_id;
+        touchLastActive(user);
         if (req.headers.authorization?.startsWith('Bearer ') && !getCookieToken(req.headers.cookie)) {
           setAuthCookie(res, token, req);
         }

@@ -8,7 +8,8 @@ const economyTickService = require('./economyTickService');
 const automationService = require('./automationService');
 const missionService = require('./missionService');
 const npcPresenceService = require('./npcPresenceService');
-const { NPC, Ship, Port, User } = require('../models');
+const worldPolicyService = require('./worldPolicyService');
+const { NPC, Ship, Port, User, Sector } = require('../models');
 const { Op, col } = require('sequelize');
 const { getAdjacentSectorIds, getPortSectorIds, buildAdjacencyMap } = require('./sectorGraphService');
 const groupBy = require('../utils/groupBy');
@@ -194,13 +195,33 @@ const processCombatTick = async () => {
   try {
     // Find all NPCs currently engaging in combat
     const engagingNPCs = await NPC.findAll({
-      where: { behavior_state: 'engaging', is_alive: true }
+      where: { behavior_state: 'engaging', is_alive: true },
+      include: [{
+        model: Sector,
+        as: 'currentSector',
+        attributes: ['sector_id', 'name', 'zone_class', 'security_class', 'access_mode', 'rule_flags']
+      }]
     });
 
     if (engagingNPCs.length === 0) return;
 
     for (const npc of engagingNPCs) {
       try {
+        // Zone enforcement: disengage hostile NPCs in safe zones
+        const sectorPolicy = worldPolicyService.buildDefaultSectorPolicy(npc.currentSector || {});
+        const hostileNpcsAllowed = sectorPolicy.rule_flags?.allow_hostile_npcs !== false
+          && !sectorPolicy.rule_flags?.safe_harbor;
+
+        if (!hostileNpcsAllowed) {
+          await npc.update({
+            behavior_state: 'idle',
+            target_ship_id: null,
+            target_user_id: null,
+            last_action_at: new Date()
+          });
+          continue;
+        }
+
         // Use persisted target if available, otherwise find weakest ship
         let playerShip = null;
         if (npc.target_ship_id) {
@@ -284,8 +305,9 @@ const processCombatTick = async () => {
 
         // Check if NPC destroyed
         if (round.attacker_destroyed || npcState.hull_points <= 0) {
-          const creditsLooted = npc.credits_carried || 0;
-          const experienceGained = npc.experience_value || 0;
+          const rewardMultiplier = Number(sectorPolicy.rule_flags?.reward_multiplier || 1);
+          const creditsLooted = Math.round((npc.credits_carried || 0) * rewardMultiplier);
+          const experienceGained = Math.round((npc.experience_value || 0) * rewardMultiplier);
 
           await npc.update({
             is_alive: false,
@@ -502,7 +524,16 @@ const buildBatchTickCache = async (activeNPCs, difficulty) => {
   // 5. Group NPCs by sector from the already-fetched array (no query)
   const npcsBySector = groupBy(activeNPCs, 'current_sector_id');
 
-  return { adjacencyMap, shipsBySector, portsBySector, npcsBySector, difficulty };
+  // 6. Build sector policies from NPC sector data (no extra query — uses included Sector)
+  const sectorPoliciesById = new Map();
+  for (const npc of activeNPCs) {
+    if (!sectorPoliciesById.has(npc.current_sector_id)) {
+      const sectorLike = npc.currentSector || { sector_id: npc.current_sector_id };
+      sectorPoliciesById.set(npc.current_sector_id, worldPolicyService.buildDefaultSectorPolicy(sectorLike));
+    }
+  }
+
+  return { adjacencyMap, shipsBySector, portsBySector, npcsBySector, sectorPoliciesById, difficulty };
 };
 
 /**
@@ -520,6 +551,10 @@ const buildTickContextFromCache = (npc, cache) => {
   const playersInSector = cache.shipsBySector.get(sectorId) || [];
   const npcsInSector = (cache.npcsBySector.get(sectorId) || [])
     .filter(n => n.npc_id !== npc.npc_id);
+  const sectorPolicy = cache.sectorPoliciesById.get(sectorId) || null;
+  const hostileNpcsAllowed = sectorPolicy
+    ? sectorPolicy.rule_flags?.allow_hostile_npcs !== false && !sectorPolicy.rule_flags?.safe_harbor
+    : true;
 
   const adjacentSectors = adjacentIds.map(id => ({
     sector_id: id,
@@ -546,6 +581,8 @@ const buildTickContextFromCache = (npc, cache) => {
     adjacentSectors,
     sectorHasPort: cache.portsBySector.has(sectorId),
     difficulty: cache.difficulty,
+    sectorPolicy,
+    hostileNpcsAllowed,
     currentTarget
   };
 };

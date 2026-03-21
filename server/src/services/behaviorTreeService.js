@@ -82,7 +82,12 @@ const findSafestAdjacentSector = (adjacentSectors) => {
  * @returns {Promise<{ action: string, target?: Object, targetSectorId?: string, reason: string, needsAI: boolean }>}
  */
 const evaluateNPCDecision = async (npc, context = {}) => {
-  const { playersInSector = [], adjacentSectors = [], sectorHasPort = false } = context;
+  const {
+    playersInSector = [],
+    adjacentSectors = [],
+    sectorHasPort = false,
+    hostileNpcsAllowed = true
+  } = context;
   const difficulty = context.difficulty || gameSettingsService.getSetting('npc.difficulty', 3);
   const npcConfig = config.npcTypes[npc.npc_type] || {};
 
@@ -119,6 +124,14 @@ const evaluateNPCDecision = async (npc, context = {}) => {
   }
 
   // 4. HOSTILE ENCOUNTER: hostile NPC + player in sector
+  if (npcConfig.hostility === 'hostile' && !hostileNpcsAllowed) {
+    return {
+      action: 'idle',
+      reason: 'hostile NPC combat disabled in this sector',
+      needsAI: false
+    };
+  }
+
   if (npcConfig.hostility === 'hostile' && playersInSector.length > 0) {
     // Pick weakest player as target
     const target = playersInSector.reduce((weakest, p) => {

@@ -2,7 +2,30 @@ const { NPC, Sector, SectorConnection, Ship, sequelize } = require('../models');
 const config = require('../config');
 const { Op } = require('sequelize');
 const npcPersonalityService = require('./npcPersonalityService');
+const worldPolicyService = require('./worldPolicyService');
 const { getAdjacentSectorIds, buildAdjacencyMap } = require('./sectorGraphService');
+
+const HOSTILE_NPC_TYPES = new Set(
+  Object.entries(config.npcTypes || {})
+    .filter(([, npcTypeConfig]) => npcTypeConfig?.hostility === 'hostile')
+    .map(([npcType]) => npcType)
+);
+
+const getZoneDifficultyForSector = (sectorLikeOrZoneClass = null) => {
+  const zoneClass = typeof sectorLikeOrZoneClass === 'string'
+    ? sectorLikeOrZoneClass
+    : sectorLikeOrZoneClass?.zone_class;
+
+  return config.zoneDifficulty?.[zoneClass]
+    || config.zoneDifficulty?.mid_ring
+    || { npcStatMultiplier: 1, npcLevelRange: [1, 5], spawnDensity: 1 };
+};
+
+const getSpawnDensityForSector = (sectorLikeOrZoneClass = null) => {
+  return Number(getZoneDifficultyForSector(sectorLikeOrZoneClass)?.spawnDensity || 1);
+};
+
+const getSectorPolicy = (sectorLike = null) => worldPolicyService.buildDefaultSectorPolicy(sectorLike || {});
 
 // NPC name prefixes for generation
 const namePrefixes = {
@@ -65,22 +88,24 @@ const generateNPCName = (npcType) => {
 /**
  * Get NPC stats based on type and ship
  */
-const getNPCStats = (npcType, shipType) => {
-  const npcConfig = config.npcTypes[npcType];
+const getNPCStats = (npcType, shipType, zoneDifficulty = null) => {
+  const npcConfig = config.npcTypes[npcType] || {};
   const shipConfig = Object.values(config.shipTypes).find(s => s.name === shipType);
-  
+
   if (!shipConfig) {
     return { hull: 100, shields: 50, attack: 10, defense: 5, speed: 10 };
   }
 
-  // Scale stats based on NPC type
-  const statMultiplier = npcConfig.isBoss ? 2.0 : 1.0;
+  // Scale stats based on NPC type and zone difficulty
+  const bossMultiplier = npcConfig.isBoss ? 2.0 : 1.0;
+  const zoneMultiplier = Number(zoneDifficulty?.npcStatMultiplier || 1);
+  const statMultiplier = bossMultiplier * zoneMultiplier;
   return {
-    hull: Math.floor(shipConfig.hull * statMultiplier),
-    shields: Math.floor(shipConfig.shields * statMultiplier),
-    attack: Math.floor((shipType === 'Fighter' ? 20 : shipType === 'Destroyer' ? 35 : 15) * statMultiplier),
-    defense: Math.floor((shipType === 'Freighter' ? 10 : 8) * statMultiplier),
-    speed: Math.floor((shipType === 'Fighter' ? 15 : shipType === 'Freighter' ? 5 : 10))
+    hull: Math.max(1, Math.floor(shipConfig.hull * statMultiplier)),
+    shields: Math.max(0, Math.floor(shipConfig.shields * statMultiplier)),
+    attack: Math.max(1, Math.floor((shipType === 'Fighter' ? 20 : shipType === 'Destroyer' ? 35 : 15) * statMultiplier)),
+    defense: Math.max(0, Math.floor((shipType === 'Freighter' ? 10 : 8) * statMultiplier)),
+    speed: Math.max(1, Math.floor((shipType === 'Fighter' ? 15 : shipType === 'Freighter' ? 5 : 10)))
   };
 };
 
@@ -94,26 +119,35 @@ const spawnNPC = async (sectorId, npcType = null, transaction = null) => {
     throw Object.assign(new Error('Sector not found'), { statusCode: 404 });
   }
 
-  // Random type if not specified
+  const sectorPolicy = getSectorPolicy(sector);
+  const zoneDifficulty = getZoneDifficultyForSector(sector);
+
+  // Random type if not specified (respecting zone policy)
   if (!npcType) {
-    const types = Object.keys(config.npcTypes);
-    const weights = types.map(t => config.npcTypes[t].spawnChance);
+    const types = Object.keys(config.npcTypes).filter((type) => {
+      if (sectorPolicy.rule_flags?.allow_hostile_npcs === false) {
+        return !HOSTILE_NPC_TYPES.has(type);
+      }
+      return true;
+    });
+    const candidateTypes = types.length > 0 ? types : Object.keys(config.npcTypes);
+    const weights = candidateTypes.map(t => config.npcTypes[t].spawnChance);
     const totalWeight = weights.reduce((a, b) => a + b, 0);
     let random = Math.random() * totalWeight;
-    
-    for (let i = 0; i < types.length; i++) {
+
+    for (let i = 0; i < candidateTypes.length; i++) {
       random -= weights[i];
       if (random <= 0) {
-        npcType = types[i];
+        npcType = candidateTypes[i];
         break;
       }
     }
-    npcType = npcType || 'PIRATE';
+    npcType = npcType || candidateTypes[0] || 'PIRATE';
   }
 
   const npcConfig = config.npcTypes[npcType];
   const shipType = npcConfig.ships[Math.floor(Math.random() * npcConfig.ships.length)];
-  const stats = getNPCStats(npcType, shipType);
+  const stats = getNPCStats(npcType, shipType, zoneDifficulty);
   
   // Calculate credits based on type
   const baseCredits = npcConfig.isBoss ? 1000 : npcType === 'TRADER' ? 500 : 200;
@@ -253,6 +287,14 @@ const moveNPC = async (npcId, targetSectorId, transaction = null) => {
  * Returns the most aggressive hostile NPC if found
  */
 const getAggressiveNPCInSector = async (sectorId, transaction = null) => {
+  const sector = await Sector.findByPk(sectorId, { ...(transaction && { transaction }) });
+  if (!sector) return null;
+
+  const sPolicy = getSectorPolicy(sector);
+  if (sPolicy.rule_flags?.safe_harbor || sPolicy.rule_flags?.allow_hostile_npcs === false) {
+    return null;
+  }
+
   // Find hostile NPCs ordered by aggression level (descending)
   const hostileNPC = await NPC.findOne({
     where: {
@@ -308,13 +350,19 @@ const getActiveNPCsNearPlayers = async () => {
       current_sector_id: { [Op.in]: [...allRelevantSectorIds] },
       is_alive: true
     },
-    include: [{ model: Sector, as: 'currentSector', attributes: ['sector_id', 'name'] }]
+    include: [{
+      model: Sector,
+      as: 'currentSector',
+      attributes: ['sector_id', 'name', 'zone_class', 'security_class', 'access_mode', 'rule_flags']
+    }]
   });
 };
 
 module.exports = {
   generateNPCName,
   getNPCStats,
+  getZoneDifficultyForSector,
+  getSpawnDensityForSector,
   spawnNPC,
   getNPCsInSector,
   getNPCById,

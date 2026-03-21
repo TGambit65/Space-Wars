@@ -42,6 +42,8 @@ const fleetRoutes = require('./fleet');
 // AI Agent System
 const agentRoutes = require('./agentRoutes');
 const agentGameRoutes = require('./agentGameRoutes');
+// Achievements
+const achievementRoutes = require('./achievementRoutes');
 // Admin
 const adminRoutes = require('./adminRoutes');
 const { sequelize } = require('../config/database');
@@ -125,6 +127,8 @@ router.use('/fleets', fleetRoutes);
 // AI Agent System
 router.use('/agents', agentRoutes);
 router.use('/agent-api', agentGameRoutes);
+// Achievements
+router.use('/achievements', achievementRoutes);
 // Admin
 router.use('/admin', adminRoutes);
 

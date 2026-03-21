@@ -90,6 +90,15 @@ const executeAction = async (npc, decision, context = {}, socketService = null) 
 
       case 'attack_player':
       case 'finish_target': {
+        if (context.hostileNpcsAllowed === false) {
+          await npc.update({
+            behavior_state: 'idle',
+            target_ship_id: null,
+            target_user_id: null,
+            last_action_at: new Date()
+          });
+          break;
+        }
         const targetUpdate = {
           behavior_state: 'engaging',
           last_action_at: new Date()

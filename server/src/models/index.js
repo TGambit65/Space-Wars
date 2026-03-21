@@ -63,6 +63,11 @@ const VoxelBlock = require('./VoxelBlock');
 const NpcConversationSession = require('./NpcConversationSession');
 // NPC Memory (per-player relationship)
 const NpcMemory = require('./NpcMemory');
+// Achievements
+const Achievement = require('./Achievement');
+const PlayerAchievement = require('./PlayerAchievement');
+// PvP Cooldowns (anti-grief)
+const PvpCooldown = require('./PvpCooldown');
 // AI Agent System
 const AgentAccount = require('./AgentAccount');
 const AgentActionLog = require('./AgentActionLog');
@@ -396,6 +401,12 @@ NpcMemory.belongsTo(NPC, { foreignKey: 'npc_id', as: 'npc' });
 User.hasMany(NpcMemory, { foreignKey: 'user_id', as: 'npcMemories' });
 NpcMemory.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
+// ============== Achievements ==============
+Achievement.hasMany(PlayerAchievement, { foreignKey: 'achievement_id', as: 'playerProgress' });
+PlayerAchievement.belongsTo(Achievement, { foreignKey: 'achievement_id', as: 'achievement' });
+User.hasMany(PlayerAchievement, { foreignKey: 'user_id', as: 'achievements' });
+PlayerAchievement.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
 // ============== AI Agent System ==============
 User.hasOne(AgentAccount, { foreignKey: 'owner_id', as: 'agentAccount' });
 AgentAccount.belongsTo(User, { foreignKey: 'owner_id', as: 'owner' });
@@ -423,6 +434,12 @@ Colony.hasOne(ColonyRaidProtection, { foreignKey: 'colony_id', as: 'raidProtecti
 ColonyRaidProtection.belongsTo(Colony, { foreignKey: 'colony_id', as: 'colony' });
 User.hasMany(ColonyRaidProtection, { foreignKey: 'last_attacker_id', as: 'recentRaidTargets' });
 ColonyRaidProtection.belongsTo(User, { foreignKey: 'last_attacker_id', as: 'lastAttacker' });
+
+// ============== PvP Cooldowns ==============
+User.hasMany(PvpCooldown, { foreignKey: 'attacker_user_id', as: 'outgoingPvpCooldowns' });
+PvpCooldown.belongsTo(User, { foreignKey: 'attacker_user_id', as: 'attacker' });
+User.hasMany(PvpCooldown, { foreignKey: 'victim_user_id', as: 'incomingPvpCooldowns' });
+PvpCooldown.belongsTo(User, { foreignKey: 'victim_user_id', as: 'victim' });
 
 module.exports = {
   sequelize,
@@ -501,6 +518,11 @@ module.exports = {
   NpcConversationSession,
   // NPC Memory
   NpcMemory,
+  // Achievements
+  Achievement,
+  PlayerAchievement,
+  // PvP Cooldowns
+  PvpCooldown,
   // AI Agent System
   AgentAccount,
   AgentActionLog

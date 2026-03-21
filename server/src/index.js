@@ -9,6 +9,7 @@ const gameSettingsService = require('./services/gameSettingsService');
 const socketService = require('./services/socketService');
 const { ensureSprintWorldSchema } = require('./services/schemaPatchService');
 const tickService = require('./services/tickService');
+const achievementService = require('./services/achievementService');
 const { Sector, Commodity, Port } = require('./models');
 const { recordRuntimeEvent, normalizeError, RUNTIME_LOG_PATH } = require('./utils/runtimeMonitor');
 
@@ -153,6 +154,9 @@ const startServer = async () => {
         console.log(`✓ Economy exists with ${commodityCount} commodities and ${portCount} ports`);
       }
     }
+
+    // Seed achievement catalog
+    await achievementService.seedAchievements();
 
     // Load game settings from database
     await gameSettingsService.loadAllSettings();

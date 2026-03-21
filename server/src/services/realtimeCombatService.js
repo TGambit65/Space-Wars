@@ -1,7 +1,62 @@
-const { Ship, NPC, CombatInstance, CombatLog, User, sequelize } = require('../models');
+const { Ship, NPC, CombatInstance, CombatLog, User, Sector, PvpCooldown, sequelize } = require('../models');
 const config = require('../config');
 const { getIO, emitToSector, emitToUser } = require('./socketService');
 const { applyDamage } = require('./combatService');
+const worldPolicyService = require('./worldPolicyService');
+
+const getSectorPolicy = async (sectorId, transaction = null) => {
+  const sector = await Sector.findByPk(sectorId, { transaction });
+  if (!sector) {
+    const error = new Error('Sector not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return {
+    sector,
+    policy: worldPolicyService.buildDefaultSectorPolicy(sector)
+  };
+};
+
+const getRewardMultiplier = (policy) => Number(policy?.rule_flags?.reward_multiplier || 1);
+
+const assertCombatAllowedInSector = async (sectorId, { requirePvp = false, transaction = null } = {}) => {
+  const { policy } = await getSectorPolicy(sectorId, transaction);
+
+  if (policy.rule_flags?.safe_harbor) {
+    const error = new Error('Combat is not allowed in safe harbor zones');
+    error.statusCode = 403;
+    throw error;
+  }
+
+  if (requirePvp && !policy.rule_flags?.allow_pvp) {
+    const error = new Error('PvP combat is not allowed in this security zone');
+    error.statusCode = 403;
+    throw error;
+  }
+
+  return policy;
+};
+
+const recordPvpRepeatAttackCooldown = async ({
+  attackerUserId,
+  victimUserId,
+  transaction = null
+} = {}) => {
+  if (!attackerUserId || !victimUserId || attackerUserId === victimUserId) {
+    return null;
+  }
+
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + config.antiCheat.pvpRepeatTargetCooldownMs);
+
+  return PvpCooldown.upsert({
+    attacker_user_id: attackerUserId,
+    victim_user_id: victimUserId,
+    expires_at: expiresAt,
+    created_at: now
+  }, { transaction });
+};
 
 // ─── Module-level State ─────────────────────────────────────────
 
@@ -392,9 +447,20 @@ const initiatePlayerCombat = async (attackerShipId, defenderShipId) => {
     throw Object.assign(new Error('One or both ships are already in combat'), { statusCode: 400 });
   }
 
+  // Zone enforcement: PvP must be allowed in this sector
+  await assertCombatAllowedInSector(attacker.current_sector_id, { requirePvp: true });
+
   // Mark both ships as in combat
-  await attacker.update({ in_combat: true });
-  await defender.update({ in_combat: true });
+  try {
+    await attacker.update({ in_combat: true });
+    await defender.update({ in_combat: true });
+  } catch (error) {
+    await Promise.allSettled([
+      attacker.update({ in_combat: false }).catch(() => null),
+      defender.update({ in_combat: false }).catch(() => null)
+    ]);
+    throw error;
+  }
 
   const ships = [
     {
@@ -464,8 +530,16 @@ const initiateNPCCombat = async (shipId, npcId) => {
     throw Object.assign(new Error('Ship is already in combat'), { statusCode: 400 });
   }
 
+  // Zone enforcement: block combat in safe harbors
+  await assertCombatAllowedInSector(ship.current_sector_id);
+
   // Mark ship as in combat
-  await ship.update({ in_combat: true });
+  try {
+    await ship.update({ in_combat: true });
+  } catch (error) {
+    await ship.update({ in_combat: false }).catch(() => null);
+    throw error;
+  }
 
   const ships = [
     {
@@ -683,19 +757,23 @@ const resolveCombat = async (combatId) => {
       }
     }
 
+    // Get zone reward multiplier
+    const { policy: resolvedSectorPolicy } = await getSectorPolicy(sectorId, t).catch(() => ({ policy: {} }));
+    const rewardMultiplier = getRewardMultiplier(resolvedSectorPolicy);
+
     // Award loot/credits to winners
     if (winnerType === 'player' && winnerOwnerId) {
       let creditsLooted = 0;
       let experienceGained = 0;
 
-      // Collect loot from destroyed NPCs
+      // Collect loot from destroyed NPCs (with zone multiplier)
       for (const ship of destroyed) {
         if (ship.isNPC) {
           try {
             const npc = await NPC.findByPk(ship.shipId, { transaction: t });
             if (npc) {
-              creditsLooted += npc.credits_carried || 0;
-              experienceGained += npc.experience_value || 0;
+              creditsLooted += Math.round((npc.credits_carried || 0) * rewardMultiplier);
+              experienceGained += Math.round((npc.experience_value || 0) * rewardMultiplier);
             }
           } catch (err) {
             console.error(`[RealtimeCombat] Failed to fetch NPC loot for ${ship.shipId}:`, err);
@@ -760,6 +838,21 @@ const resolveCombat = async (combatId) => {
       } catch (e) {
         console.error('[RealtimeCombat] Faction scoring failed:', e);
       }
+
+      // Record PvP repeat-target cooldowns
+      for (const winner of survivors.filter(s => !s.isNPC && s.ownerId)) {
+        for (const loser of destroyed.filter(s => !s.isNPC && s.ownerId)) {
+          try {
+            await recordPvpRepeatAttackCooldown({
+              attackerUserId: winner.ownerId,
+              victimUserId: loser.ownerId,
+              transaction: t
+            });
+          } catch (cooldownError) {
+            console.error('[RealtimeCombat] Failed to record PvP repeat-target cooldown:', cooldownError);
+          }
+        }
+      }
     }
 
     // Build combat result for CombatInstance
@@ -769,7 +862,8 @@ const resolveCombat = async (combatId) => {
       survivors: survivors.map(s => ({ shipId: s.shipId, isNPC: s.isNPC, hull: Math.floor(s.stats.hull) })),
       destroyed: destroyed.map(s => ({ shipId: s.shipId, isNPC: s.isNPC })),
       escaped: escaped.map(s => ({ shipId: s.shipId, isNPC: s.isNPC })),
-      duration: Date.now() - startedAt.getTime()
+      duration: Date.now() - startedAt.getTime(),
+      rewardMultiplier
     };
 
     // Update CombatInstance

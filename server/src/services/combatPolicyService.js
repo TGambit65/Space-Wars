@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { User, Ship, Sector, PlayerProtectionState } = require('../models');
+const { User, Ship, Sector, PlayerProtectionState, PvpCooldown } = require('../models');
 const config = require('../config');
 const worldPolicyService = require('./worldPolicyService');
 const actionAuditService = require('./actionAuditService');
@@ -179,6 +179,21 @@ const getCombatZonePolicy = async (sectorId, transaction = null) => {
   const sectorPolicy = worldPolicyService.buildDefaultSectorPolicy(sector);
   return { sector, sectorPolicy };
 };
+
+const getRepeatAttackCooldown = async ({
+  attackerUserId,
+  victimUserId,
+  transaction = null
+} = {}) => PvpCooldown.findOne({
+  where: {
+    attacker_user_id: attackerUserId,
+    victim_user_id: victimUserId,
+    expires_at: {
+      [Op.gt]: new Date()
+    }
+  },
+  transaction
+});
 
 const canTogglePvp = async ({
   userId,
@@ -366,6 +381,33 @@ const authorizePvpInitiation = async ({
       {
         defender_travel_protection_reason: defenderProtection.travel_protection_reason,
         defender_travel_protection_until: defenderProtection.travel_protection_until
+      }
+    );
+  }
+
+  const defenderLastActiveAtMs = toDate(defenderUser?.last_active_at)?.getTime() || 0;
+  if (
+    defenderLastActiveAtMs > 0 &&
+    (Date.now() - defenderLastActiveAtMs) > config.antiCheat.offlinePvpThresholdMs
+  ) {
+    await deny('This player is offline and protected from PvP', 403, {
+      defender_last_active_at: defenderUser.last_active_at
+    });
+  }
+
+  const repeatAttackCooldown = await getRepeatAttackCooldown({
+    attackerUserId: attackerShip.owner_user_id,
+    victimUserId: defenderShip.owner_user_id,
+    transaction
+  });
+  if (repeatAttackCooldown) {
+    const expiresAtMs = toDate(repeatAttackCooldown.expires_at)?.getTime() || Date.now();
+    const minutesLeft = Math.max(1, Math.ceil((expiresAtMs - Date.now()) / 60000));
+    await deny(
+      `Anti-griefing cooldown: you cannot attack this player for ${minutesLeft} more minutes`,
+      403,
+      {
+        cooldown_expires_at: repeatAttackCooldown.expires_at
       }
     );
   }

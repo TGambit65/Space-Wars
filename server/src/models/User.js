@@ -87,6 +87,11 @@ const User = sequelize.define('User', {
     type: DataTypes.DATE,
     allowNull: true
   },
+  last_active_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    comment: 'Most recent authenticated activity timestamp used for offline PvP protection'
+  },
   // Phase 5: Player Progression
   total_xp: {
     type: DataTypes.BIGINT,

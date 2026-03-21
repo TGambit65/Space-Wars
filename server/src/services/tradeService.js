@@ -1,6 +1,68 @@
-const { Ship, Port, Commodity, PortCommodity, ShipCargo, Transaction, User, sequelize } = require('../models');
+const { Ship, Port, Commodity, PortCommodity, ShipCargo, Transaction, User, Sector, sequelize } = require('../models');
 const pricingService = require('./pricingService');
 const economyAbuseService = require('./economyAbuseService');
+const achievementService = require('./achievementService');
+const worldPolicyService = require('./worldPolicyService');
+
+const getSectorRewardMultiplier = async (sectorId, transaction = null) => {
+  if (!sectorId) return 1;
+  const sector = await Sector.findByPk(sectorId, { ...(transaction && { transaction }) });
+  if (!sector) return 1;
+  const policy = worldPolicyService.buildDefaultSectorPolicy(sector);
+  return Number(policy?.rule_flags?.reward_multiplier || 1);
+};
+
+const calculateRemainingCostBasis = async ({ userId, shipId, commodityId, transaction = null } = {}) => {
+  const history = await Transaction.findAll({
+    where: { user_id: userId, ship_id: shipId, commodity_id: commodityId },
+    order: [['created_at', 'ASC']],
+    ...(transaction && { transaction })
+  });
+
+  let runningQuantity = 0;
+  let runningCost = 0;
+
+  for (const entry of history) {
+    const qty = Number(entry.quantity || 0);
+    const totalPrice = Number(entry.total_price || 0);
+    if (qty <= 0) continue;
+
+    if (entry.transaction_type === 'BUY') {
+      runningQuantity += qty;
+      runningCost += totalPrice;
+    } else if (entry.transaction_type === 'SELL' && runningQuantity > 0) {
+      const quantityToRemove = Math.min(qty, runningQuantity);
+      const averageUnitCost = runningQuantity > 0 ? (runningCost / runningQuantity) : 0;
+      runningQuantity -= quantityToRemove;
+      runningCost = Math.max(0, runningCost - (averageUnitCost * quantityToRemove));
+    }
+  }
+
+  return {
+    quantity: runningQuantity,
+    totalCost: runningCost,
+    averageUnitCost: runningQuantity > 0 ? (runningCost / runningQuantity) : 0
+  };
+};
+
+const trackTradeAchievements = async ({ userId, isIllegalTrade = false, totalCreditsEarned = 0 }) => {
+  const updates = [
+    achievementService.incrementProgress(userId, 'first_trade', 1),
+    achievementService.incrementProgress(userId, 'trades_50', 1),
+    achievementService.incrementProgress(userId, 'trades_500', 1)
+  ];
+
+  if (totalCreditsEarned > 0) {
+    updates.push(achievementService.incrementProgress(userId, 'earn_100k', totalCreditsEarned));
+    updates.push(achievementService.incrementProgress(userId, 'earn_1m', totalCreditsEarned));
+  }
+
+  if (isIllegalTrade) {
+    updates.push(achievementService.incrementProgress(userId, 'trade_illegal', 1));
+  }
+
+  await Promise.allSettled(updates);
+};
 
 /**
  * Get ship's current cargo
@@ -197,6 +259,8 @@ const buyCommodity = async (userId, shipId, portId, commodityId, quantity, optio
       await missionService.updateMissionProgress(userId, 'trade', { type: 'buy', total_value: total });
     } catch (e) { /* Mission progress failure should not block trade */ }
 
+    trackTradeAchievements({ userId, isIllegalTrade: !portCommodity.commodity.is_legal }).catch(() => null);
+
     return resultPayload;
   } catch (error) {
     await t.rollback();
@@ -290,8 +354,17 @@ const sellCommodity = async (userId, shipId, portId, commodityId, quantity, opti
       finalTotal = Math.floor(factionService.applyFactionBonus(total, user.faction, 'trade'));
     } catch (e) { /* faction bonus failure should not block trade */ }
 
+    // Zone reward multiplier: bonus on profit for trading in riskier zones
+    const rewardMultiplier = await getSectorRewardMultiplier(ship.current_sector_id, t);
+    const costBasis = await calculateRemainingCostBasis({ userId, shipId, commodityId, transaction: t });
+    const estimatedCostBasis = Math.round((costBasis.averageUnitCost || 0) * quantity);
+    const baseProfit = Math.max(0, Math.round(finalTotal - estimatedCostBasis));
+    const adjustedProfit = Math.round(baseProfit * rewardMultiplier);
+    const zoneBonus = Math.max(0, adjustedProfit - baseProfit);
+    const payoutTotal = Math.max(0, Math.round(finalTotal + zoneBonus));
+
     // Execute trade
-    await user.update({ credits: Number(user.credits) + finalTotal }, { transaction: t });
+    await user.update({ credits: Number(user.credits) + payoutTotal }, { transaction: t });
 
     // Update port stock (capped at max)
     const newPortQty = Math.min(portCommodity.quantity + quantity, portCommodity.max_quantity);
@@ -308,7 +381,7 @@ const sellCommodity = async (userId, shipId, portId, commodityId, quantity, opti
     // Record transaction
     await Transaction.create({
       user_id: userId, ship_id: shipId, port_id: portId, commodity_id: commodityId,
-      transaction_type: 'SELL', quantity, unit_price: unitPrice, tax_amount: tax, total_price: total
+      transaction_type: 'SELL', quantity, unit_price: unitPrice, tax_amount: tax, total_price: payoutTotal
     }, { transaction: t });
 
     // Phase 5: Award XP for trading (1 XP per 100 credits traded)
@@ -318,7 +391,15 @@ const sellCommodity = async (userId, shipId, portId, commodityId, quantity, opti
       await progressionService.awardXP(userId, tradeXP, 'trade', t);
     } catch (e) { /* XP failure should not block trade */ }
 
-    const resultPayload = { success: true, quantity, unit_price: unitPrice, tax, total: finalTotal, new_balance: Number(user.credits) + finalTotal };
+    const resultPayload = {
+      success: true, quantity, unit_price: unitPrice, tax,
+      base_total: finalTotal, total: payoutTotal,
+      reward_multiplier: rewardMultiplier,
+      estimated_cost_basis: estimatedCostBasis,
+      base_profit: baseProfit, adjusted_profit: adjustedProfit,
+      zone_bonus: zoneBonus,
+      new_balance: Number(user.credits) + payoutTotal
+    };
 
     await t.commit();
 
@@ -329,7 +410,7 @@ const sellCommodity = async (userId, shipId, portId, commodityId, quantity, opti
       sourceId: portId,
       destinationType: 'user',
       destinationId: userId,
-      creditsAmount: finalTotal,
+      creditsAmount: payoutTotal,
       commodityId,
       commodityQuantity: quantity,
       idempotencyKey: options.idempotencyKey,
@@ -348,6 +429,8 @@ const sellCommodity = async (userId, shipId, portId, commodityId, quantity, opti
         commodity_name: portCommodity.commodity.name, quantity
       });
     } catch (e) { /* Mission progress failure should not block trade */ }
+
+    trackTradeAchievements({ userId, isIllegalTrade: !portCommodity.commodity.is_legal, totalCreditsEarned: finalTotal }).catch(() => null);
 
     return resultPayload;
   } catch (error) {

@@ -1,4 +1,4 @@
-const { Ship, Sector, SectorConnection, User, TechResearch, sequelize } = require('../models');
+const { Ship, Sector, SectorConnection, User, TechResearch, PlayerDiscovery, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const config = require('../config');
 const maintenanceService = require('./maintenanceService');
@@ -8,6 +8,20 @@ const worldPolicyService = require('./worldPolicyService');
 const combatPolicyService = require('./combatPolicyService');
 const actionAuditService = require('./actionAuditService');
 const sectorInstanceService = require('./sectorInstanceService');
+const achievementService = require('./achievementService');
+
+const trackMovementAchievements = async (userId) => {
+  await achievementService.incrementProgress(userId, 'first_jump', 1);
+
+  const discoveryCount = await PlayerDiscovery.count({
+    where: { user_id: userId, discovery_type: 'sector' }
+  });
+
+  await achievementService.setProgress(userId, 'explore_10', discoveryCount);
+  await achievementService.setProgress(userId, 'explore_50', discoveryCount);
+  await achievementService.setProgress(userId, 'explore_200', discoveryCount);
+  await achievementService.setProgress(userId, 'explore_500', discoveryCount);
+};
 
 const getShipById = async (shipId, userId = null) => {
   const whereClause = { ship_id: shipId };
@@ -185,6 +199,9 @@ const moveShip = async (shipId, targetSectorId, userId) => {
       }]
     });
 
+    // Track exploration achievements (fire-and-forget)
+    trackMovementAchievements(userId).catch(() => null);
+
     // Check for hostile NPCs in the new sector (potential ambush)
     // This is done after commit so failures don't affect the move
     try {
@@ -287,6 +304,8 @@ const grantRescueShip = async (userId) => {
     order: [['updated_at', 'DESC']]
   });
 
+  const wasRecoveringFromDestruction = Boolean(destroyedShip && destroyedShip.is_active === false);
+
   let sectorId;
   if (destroyedShip) {
     sectorId = destroyedShip.current_sector_id;
@@ -322,6 +341,10 @@ const grantRescueShip = async (userId) => {
   await ship.reload({
     include: [{ model: Sector, as: 'currentSector' }]
   });
+
+  if (wasRecoveringFromDestruction) {
+    achievementService.incrementProgress(userId, 'survive_destruction', 1).catch(() => null);
+  }
 
   return ship;
 };
