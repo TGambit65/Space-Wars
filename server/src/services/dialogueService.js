@@ -224,10 +224,23 @@ const startDialogue = async (userId, npcId) => {
     ? `${personality.trait_primary}, ${personality.speech_style || 'normal'}`
     : 'unknown';
 
-  // Check for existing relationship memory — recognition greeting
+  // Check for existing relationship memory — recognition greeting + full relationship
   let recognition = null;
+  let relationship = null;
   try {
     recognition = await npcMemoryService.getRecognition(npcId, userId, npc.npc_type);
+    const rel = await npcMemoryService.getRelationship(npcId, userId);
+    if (rel && rel.interaction_count > 0) {
+      relationship = {
+        trust: rel.trust,
+        fear: rel.fear,
+        respect: rel.respect,
+        interaction_count: rel.interaction_count,
+        label: rel.label,
+        notable_fact: rel.notable_fact,
+        last_interaction_type: rel.last_interaction_type
+      };
+    }
   } catch (err) {
     // Non-critical — skip recognition if memory lookup fails
   }
@@ -249,7 +262,8 @@ const startDialogue = async (userId, npcId) => {
     recognition: recognition ? {
       greeting: recognition.greeting,
       relationship_label: recognition.label
-    } : null
+    } : null,
+    relationship
   };
 };
 

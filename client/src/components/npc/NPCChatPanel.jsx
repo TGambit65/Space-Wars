@@ -50,6 +50,7 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState([]);
   const [relationshipLabel, setRelationshipLabel] = useState(null);
+  const [relationship, setRelationship] = useState(null);
 
   const isPremium = subscriptionTier === 'premium' || subscriptionTier === 'elite';
 
@@ -110,6 +111,7 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
         setVoiceEnabled(!!data.voice_enabled);
         if (data.subscription_tier) setSubscriptionTier(data.subscription_tier);
         if (data.recognition?.relationship_label) setRelationshipLabel(data.recognition.relationship_label);
+        if (data.relationship) setRelationship(data.relationship);
 
         // Add NPC greeting — prefer hail text > recognition > personality summary
         let greeting;
@@ -440,7 +442,11 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
               </span>
             )}
             {relationshipLabel && (
-              <span className="text-[10px] text-accent-cyan/70 font-medium">{relationshipLabel}</span>
+              <span className={`text-[10px] font-medium ${
+                relationship?.trust > 0.3 ? 'text-green-400' :
+                relationship?.trust < -0.3 ? 'text-red-400' :
+                'text-accent-cyan/70'
+              }`}>{relationshipLabel}</span>
             )}
           </div>
         </div>
@@ -467,6 +473,23 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
               <span className="text-gray-400">{msg.text.length > 120 ? msg.text.slice(0, 120) + '...' : msg.text}</span>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Relationship Summary */}
+      {relationship && relationship.interaction_count >= 2 && (
+        <div className="px-3 py-2 border-b border-space-700 bg-space-800/30">
+          <div className="flex items-center gap-3 text-[10px]">
+            <RelationshipBar label="Trust" value={relationship.trust} color="cyan" />
+            <RelationshipBar label="Respect" value={relationship.respect} color="green" />
+            <RelationshipBar label="Fear" value={relationship.fear} color="red" />
+            <span className="text-gray-600 ml-auto">{relationship.interaction_count} encounters</span>
+          </div>
+          {relationship.notable_fact && (
+            <div className="text-[10px] text-gray-500 mt-1 italic truncate">
+              Remembers: {relationship.notable_fact}
+            </div>
+          )}
         </div>
       )}
 
@@ -743,6 +766,30 @@ const ActionCard = ({ card }) => {
     default:
       return null;
   }
+};
+
+// ─── Thinking Dots ───────────────────────────────────────────────────
+
+// ─── Relationship Bar ──────────────────────────────────────────────
+
+const REL_COLORS = {
+  cyan: { bar: 'bg-accent-cyan', label: 'text-gray-400' },
+  green: { bar: 'bg-green-400', label: 'text-gray-400' },
+  red: { bar: 'bg-red-400', label: 'text-gray-400' },
+};
+
+const RelationshipBar = ({ label, value, color }) => {
+  const c = REL_COLORS[color] || REL_COLORS.cyan;
+  // Map -1..1 to 0..100 for display
+  const pct = Math.round(((value || 0) + 1) * 50);
+  return (
+    <div className="flex items-center gap-1 min-w-0">
+      <span className={`${c.label} shrink-0`}>{label}</span>
+      <div className="w-10 h-1.5 bg-space-700 rounded-full overflow-hidden">
+        <div className={`h-full rounded-full ${c.bar}`} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
 };
 
 // ─── Thinking Dots ───────────────────────────────────────────────────
