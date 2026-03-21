@@ -24,6 +24,8 @@ const GalaxyMap = ({ user }) => {
     moving,
     isAdjacent,
     moveShip,
+    jumpShip,
+    jumpDriveInfo,
     fetchSystemDetail
   } = useGalaxyData();
 
@@ -137,6 +139,29 @@ const GalaxyMap = ({ user }) => {
     navigate('/combat', { state: { npc } });
   };
 
+  // Calculate distance to selected system for jump drive
+  const distanceToSelected = useMemo(() => {
+    if (!selectedSystem || !currentSectorId || !sectorMap) return null;
+    const current = sectorMap.get(currentSectorId);
+    if (!current) return null;
+    const dx = selectedSystem.x_coord - current.x_coord;
+    const dy = selectedSystem.y_coord - current.y_coord;
+    return Math.sqrt(dx * dx + dy * dy);
+  }, [selectedSystem, currentSectorId, sectorMap]);
+
+  const handleJumpDrive = async () => {
+    if (!selectedSystem || !jumpDriveInfo) return;
+    try {
+      setMoveError(null);
+      await jumpShip(selectedSystem.sector_id);
+      setSelectedSystem(null);
+      setRoutePath([]);
+    } catch (err) {
+      setMoveToast(err.response?.data?.message || 'Jump failed');
+      setTimeout(() => setMoveToast(null), 4000);
+    }
+  };
+
   // Selection complete callback — called from useViewport via GalaxyMapCanvas
   const handleSelectionComplete = useCallback((rect, screenToWorld, quadtree) => {
     if (!userShipsBySector || userShipsBySector.size === 0) return;
@@ -232,6 +257,10 @@ const GalaxyMap = ({ user }) => {
         onClose={() => { setSelectedSystem(null); setRoutePath([]); }}
         onEnterCombat={handleEnterCombat}
         isCurrentSector={selectedSystem?.sector_id === currentSectorId}
+        jumpDriveInfo={jumpDriveInfo}
+        distanceToSelected={distanceToSelected}
+        onJumpDrive={handleJumpDrive}
+        jumping={moving}
       />
 
       {/* Movement Confirm Dialog */}

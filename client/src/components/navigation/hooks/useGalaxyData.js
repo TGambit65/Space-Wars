@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { sectors as sectorsApi, ships as shipsApi, npcs as npcsApi } from '../../../services/api';
+import { sectors as sectorsApi, ships as shipsApi, npcs as npcsApi, designer } from '../../../services/api';
 
 export default function useGalaxyData() {
   const [mapData, setMapData] = useState(null);
@@ -8,6 +8,7 @@ export default function useGalaxyData() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [moving, setMoving] = useState(false);
+  const [jumpDriveInfo, setJumpDriveInfo] = useState(null); // { jumpRange, cooldownMs, fuelCost, cooldownUntil, condition }
 
   // Fetch galaxy map data + ship on mount
   useEffect(() => {
@@ -35,6 +36,32 @@ export default function useGalaxyData() {
     };
     fetchData();
   }, []);
+
+  // Fetch jump drive status for active ship
+  useEffect(() => {
+    if (!currentShip?.ship_id) { setJumpDriveInfo(null); return; }
+    designer.getDesign(currentShip.ship_id)
+      .then(res => {
+        const design = res.data.data;
+        const jd = design?.components?.jump_drive?.[0];
+        if (!jd) { setJumpDriveInfo(null); return; }
+        // Look up special_properties from full component list (getDesign only has summary)
+        // We'll fetch the component detail from slot info
+        setJumpDriveInfo({
+          installed: true,
+          name: jd.name,
+          tier: jd.tier,
+          condition: jd.condition,
+          cooldownUntil: currentShip.last_jump_at
+            ? new Date(new Date(currentShip.last_jump_at).getTime() + (jd.tier >= 5 ? 60000 : jd.tier >= 4 ? 90000 : 120000))
+            : null,
+          // Estimate from tier (server has exact values)
+          jumpRange: jd.tier >= 5 ? 8 : jd.tier >= 4 ? 5 : 3,
+          maxDistance: (jd.tier >= 5 ? 8 : jd.tier >= 4 ? 5 : 3) * jd.condition * 25,
+        });
+      })
+      .catch(() => setJumpDriveInfo(null));
+  }, [currentShip?.ship_id]);
 
   // Build index maps
   const sectorMap = useMemo(() => {
@@ -104,6 +131,40 @@ export default function useGalaxyData() {
     }
   }, [currentShip, moving, sectorMap]);
 
+  // Jump drive to distant sector
+  const jumpShip = useCallback(async (targetSectorId) => {
+    if (!currentShip || moving) return;
+    try {
+      setMoving(true);
+      const res = await shipsApi.jump(currentShip.ship_id, targetSectorId);
+      const targetSys = sectorMap.get(targetSectorId);
+      setCurrentShip(prev => ({
+        ...prev,
+        current_sector_id: targetSectorId,
+        currentSector: targetSys ? { sector_id: targetSys.sector_id, name: targetSys.name } : prev.currentSector,
+        fuel: res.data.data?.ship?.fuel ?? prev.fuel,
+        last_jump_at: new Date().toISOString()
+      }));
+      // Update jump drive cooldown
+      const details = res.data.data?.jump_details;
+      if (details && jumpDriveInfo) {
+        setJumpDriveInfo(prev => ({
+          ...prev,
+          cooldownUntil: new Date(details.cooldown_until)
+        }));
+      }
+      window.dispatchEvent(new CustomEvent('sw3k:sector-changed', { detail: { sectorId: targetSectorId } }));
+      window.dispatchEvent(new Event('sw3k:profile-dirty'));
+      setSystemDetail(null);
+      return res.data.data;
+    } catch (err) {
+      console.error('Jump failed', err);
+      throw err;
+    } finally {
+      setMoving(false);
+    }
+  }, [currentShip, moving, sectorMap, jumpDriveInfo]);
+
   // Fetch system detail
   const fetchSystemDetail = useCallback(async (sectorId) => {
     try {
@@ -127,6 +188,8 @@ export default function useGalaxyData() {
     moving,
     isAdjacent,
     moveShip,
+    jumpShip,
+    jumpDriveInfo,
     fetchSystemDetail
   };
 }

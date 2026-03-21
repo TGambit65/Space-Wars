@@ -1,6 +1,6 @@
-import { X, Crosshair, Skull, User, Anchor, Globe } from 'lucide-react';
+import { X, Crosshair, Skull, User, Anchor, Globe, Zap } from 'lucide-react';
 
-const MapHUD = ({ currentShip, selectedSystem, systemDetail, onClose, onEnterCombat, isCurrentSector }) => {
+const MapHUD = ({ currentShip, selectedSystem, systemDetail, onClose, onEnterCombat, isCurrentSector, jumpDriveInfo, distanceToSelected, onJumpDrive, jumping }) => {
   if (!selectedSystem) return null;
 
   return (
@@ -35,6 +35,65 @@ const MapHUD = ({ currentShip, selectedSystem, systemDetail, onClose, onEnterCom
           </div>
         </div>
       </div>
+
+      {/* Jump Drive Section */}
+      {jumpDriveInfo?.installed && !isCurrentSector && distanceToSelected != null && (() => {
+        const inRange = distanceToSelected <= jumpDriveInfo.maxDistance;
+        const onCooldown = jumpDriveInfo.cooldownUntil && new Date() < jumpDriveInfo.cooldownUntil;
+        const cooldownRemaining = onCooldown
+          ? Math.ceil((jumpDriveInfo.cooldownUntil.getTime() - Date.now()) / 1000)
+          : 0;
+        const canJump = inRange && !onCooldown && jumpDriveInfo.condition >= 0.2;
+
+        return (
+          <div className="p-3 border-b border-space-800">
+            <div className="flex items-center gap-2 mb-2">
+              <Zap className="w-3.5 h-3.5 text-purple-400" />
+              <span className="text-xs text-purple-300 uppercase font-bold tracking-wider">Jump Drive</span>
+              <span className="text-[10px] text-gray-500 ml-auto">{jumpDriveInfo.name}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-1 text-[10px] mb-2">
+              <div>
+                <span className="text-gray-500">Distance:</span>
+                <span className={`ml-1 ${inRange ? 'text-green-400' : 'text-red-400'}`}>
+                  {Math.round(distanceToSelected)} units
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500">Max range:</span>
+                <span className="ml-1 text-gray-300">{Math.round(jumpDriveInfo.maxDistance)}</span>
+              </div>
+              <div>
+                <span className="text-gray-500">Condition:</span>
+                <span className={`ml-1 ${jumpDriveInfo.condition < 0.3 ? 'text-red-400' : 'text-gray-300'}`}>
+                  {Math.round(jumpDriveInfo.condition * 100)}%
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500">Status:</span>
+                <span className={`ml-1 ${onCooldown ? 'text-yellow-400' : 'text-green-400'}`}>
+                  {onCooldown ? `${cooldownRemaining}s` : 'Ready'}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={onJumpDrive}
+              disabled={!canJump || jumping}
+              className="w-full text-xs py-1.5 rounded font-bold transition-all flex items-center justify-center gap-1.5"
+              style={{
+                background: canJump ? 'rgba(147,51,234,0.2)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${canJump ? 'rgba(147,51,234,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                color: canJump ? '#c084fc' : '#555',
+                cursor: canJump ? 'pointer' : 'not-allowed',
+                boxShadow: canJump ? '0 0 10px rgba(147,51,234,0.15)' : 'none',
+              }}
+            >
+              <Zap className="w-3 h-3" />
+              {jumping ? 'Jumping...' : !inRange ? 'Out of Range' : onCooldown ? `Recharging (${cooldownRemaining}s)` : 'Activate Jump Drive'}
+            </button>
+          </div>
+        );
+      })()}
 
       {/* System Detail (loaded when available) */}
       {systemDetail && (
