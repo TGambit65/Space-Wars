@@ -214,11 +214,6 @@ const startDialogue = async (userId, npcId) => {
     });
   }
 
-  // Also set legacy dialogue_state for backward compat with tick system skip
-  await npc.update({
-    dialogue_state: { active: true, user_id: userId, started_at: Date.now(), history: [] }
-  });
-
   // Check voice access
   const user = await User.findByPk(userId, { attributes: ['user_id', 'subscription_tier'] });
   const voiceEnabled = voiceService.isVoiceEnabledForUser(user);
@@ -488,8 +483,8 @@ const processFreeText = async (userId, npcId, text) => {
     };
   };
 
-  // Check cache first
-  const cacheKey = `${npc.npc_type}:general:${hashContext(npc.npc_id, text, npc.current_sector_id)}`;
+  // Check cache — include NPC type and behavior state for context-aware keying
+  const cacheKey = `${npc.npc_type}:${npc.behavior_state || 'idle'}:${hashContext(npc.npc_id, text, npc.current_sector_id)}`;
   const cached = dialogueCacheService.getCached(cacheKey);
   if (cached) {
     return finalizeResponse(cached.text, true);
@@ -505,6 +500,21 @@ const processFreeText = async (userId, npcId, text) => {
       const provider = aiProviderFactory.getProvider('interactive');
       // Build context for richer AI responses
       const context = await buildDialogueContext(npc);
+
+      // Enrich context with relationship memory for the current player
+      try {
+        const relationship = await npcMemoryService.getRelationship(npcId, userId);
+        if (relationship) {
+          context.relationship = {
+            label: relationship.label,
+            trust: relationship.trust,
+            respect: relationship.respect,
+            fear: relationship.fear,
+            notable_facts: relationship.notable_fact ? [relationship.notable_fact] : []
+          };
+        }
+      } catch { /* non-critical */ }
+
       const messages = npcPersonalityService.buildInteractivePrompt(npc, personality, history, context);
       const result = await provider.generateText(messages);
 
@@ -591,14 +601,6 @@ const endDialogue = async (userId, npcId) => {
 
   // Close session
   await session.update({ is_active: false });
-
-  // Clear legacy dialogue_state if this was the last active session for this NPC
-  const remainingSessions = await NpcConversationSession.count({
-    where: { npc_id: npcId, is_active: true }
-  });
-  if (remainingSessions === 0) {
-    await npc.update({ dialogue_state: null });
-  }
 
   // Generate TTS if voice enabled for user
   let responseAudio = null;

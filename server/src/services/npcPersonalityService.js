@@ -146,6 +146,21 @@ const buildInteractivePrompt = (npc, personality, conversationHistory = [], cont
     systemParts.push(`Nearby sectors: ${nearby}.`);
   }
 
+  // Add relationship context if available (from NpcMemory)
+  if (context.relationship) {
+    const rel = context.relationship;
+    const relParts = [];
+    if (rel.label) relParts.push(`Your relationship with this player: ${rel.label}.`);
+    if (rel.trust != null) relParts.push(`Trust level: ${rel.trust > 0.3 ? 'high' : rel.trust < -0.3 ? 'low' : 'neutral'}.`);
+    if (rel.respect != null) relParts.push(`Respect level: ${rel.respect > 0.3 ? 'high' : rel.respect < -0.3 ? 'low' : 'neutral'}.`);
+    if (rel.notable_facts && rel.notable_facts.length > 0) {
+      relParts.push(`You remember: ${rel.notable_facts.slice(0, 3).join('; ')}.`);
+    }
+    if (relParts.length > 0) {
+      systemParts.push(relParts.join(' '));
+    }
+  }
+
   systemParts.push('Stay in character. Keep responses under 2 sentences. Never break character or mention being an AI.');
 
   const messages = [

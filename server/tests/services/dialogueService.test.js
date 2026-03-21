@@ -98,12 +98,15 @@ describe('Dialogue Service', () => {
       expect(result.menu_options).toHaveLength(7);
     });
 
-    it('should set dialogue_state on NPC', async () => {
-      await dialogueService.startDialogue(testUser.user_id, testNpc.npc_id);
-      await testNpc.reload();
-      expect(testNpc.dialogue_state).not.toBeNull();
-      expect(testNpc.dialogue_state.active).toBe(true);
-      expect(testNpc.dialogue_state.user_id).toBe(testUser.user_id);
+    it('should create a conversation session', async () => {
+      const result = await dialogueService.startDialogue(testUser.user_id, testNpc.npc_id);
+      expect(result.session_id).toBeDefined();
+      const { NpcConversationSession } = require('../../src/models');
+      const session = await NpcConversationSession.findOne({
+        where: { npc_id: testNpc.npc_id, user_id: testUser.user_id, is_active: true }
+      });
+      expect(session).not.toBeNull();
+      expect(session.is_active).toBe(true);
     });
 
     it('should throw 404 for missing NPC', async () => {

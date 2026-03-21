@@ -230,10 +230,12 @@ const respawnNPCs = async () => {
       hull_points: stats.hull,
       shield_points: stats.shields,
       respawn_at: null,
-      // Reset Phase 2 AI state
+      // Reset AI and combat state
       behavior_state: 'idle',
       movement_target_id: null,
-      dialogue_state: null
+      dialogue_state: null,
+      target_ship_id: null,
+      target_user_id: null
     });
   }
 

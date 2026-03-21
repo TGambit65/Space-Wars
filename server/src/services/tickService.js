@@ -9,7 +9,7 @@ const automationService = require('./automationService');
 const missionService = require('./missionService');
 const npcPresenceService = require('./npcPresenceService');
 const worldPolicyService = require('./worldPolicyService');
-const { NPC, Ship, Port, User, Sector } = require('../models');
+const { NPC, Ship, Port, User, Sector, NpcConversationSession } = require('../models');
 const { Op, col } = require('sequelize');
 const { getAdjacentSectorIds, getPortSectorIds, buildAdjacencyMap } = require('./sectorGraphService');
 const groupBy = require('../utils/groupBy');
@@ -145,11 +145,19 @@ const processTacticalTick = async () => {
     // ── Batch pre-fetch all context data (replaces per-NPC queries) ──
     const tickCache = await buildBatchTickCache(npcs, difficulty);
 
+    // Batch-fetch NPCs currently in active dialogue sessions (avoid per-NPC query)
+    const npcIds = npcs.map(n => n.npc_id);
+    const activeSessions = await NpcConversationSession.findAll({
+      where: { npc_id: { [Op.in]: npcIds }, is_active: true },
+      attributes: ['npc_id']
+    });
+    const npcsInDialogue = new Set(activeSessions.map(s => s.npc_id));
+
     // Process each NPC sequentially (actions may mutate DB)
     for (const npc of npcs) {
       try {
-        // Skip NPCs in active dialogue
-        if (npc.dialogue_state && npc.dialogue_state.active) continue;
+        // Skip NPCs in active dialogue sessions
+        if (npcsInDialogue.has(npc.npc_id)) continue;
 
         // Build context from pre-fetched cache (no DB queries)
         const context = buildTickContextFromCache(npc, tickCache);
