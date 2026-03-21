@@ -7,6 +7,8 @@ const voiceService = require('./voiceService');
 const npcPersonalityService = require('./npcPersonalityService');
 const aiProviderFactory = require('./ai/aiProviderFactory');
 const { getAdjacentSectorIds } = require('./sectorGraphService');
+const missionService = require('./missionService');
+const npcMemoryService = require('./npcMemoryService');
 const crypto = require('crypto');
 
 // Max conversation history entries to prevent unbounded growth
@@ -226,6 +228,17 @@ const startDialogue = async (userId, npcId) => {
     ? `${personality.trait_primary}, ${personality.speech_style || 'normal'}`
     : 'unknown';
 
+  // Check for existing relationship memory — recognition greeting
+  let recognition = null;
+  try {
+    recognition = await npcMemoryService.getRecognition(npcId, userId, npc.npc_type);
+  } catch (err) {
+    // Non-critical — skip recognition if memory lookup fails
+  }
+
+  // Record greeting interaction
+  npcMemoryService.recordStandardInteraction(npcId, userId, 'greeting').catch(() => {});
+
   return {
     conversation_id: npc.npc_id,
     session_id: session.session_id,
@@ -236,7 +249,11 @@ const startDialogue = async (userId, npcId) => {
     },
     menu_options: MENU_OPTIONS[npc.npc_type],
     voice_enabled: voiceEnabled,
-    subscription_tier: user ? user.subscription_tier : 'free'
+    subscription_tier: user ? user.subscription_tier : 'free',
+    recognition: recognition ? {
+      greeting: recognition.greeting,
+      relationship_label: recognition.label
+    } : null
   };
 };
 
@@ -291,6 +308,66 @@ const executeActionPayload = async (userId, npc, data) => {
     return { patrols_alerted: patrols.length };
   }
 
+  // Patrol/bounty hunter bounty offer — create a bounty mission for the player
+  if (data.action === 'bounty_info' && data.create_mission && data.targets && data.targets.length > 0) {
+    try {
+      const target = data.targets[0];
+      const { mission, playerMission } = await missionService.createNPCBountyMission(
+        npc.npc_id, userId,
+        { kills: target.hostile_count, sectorName: target.sector_name, rewardCredits: data.reward_credits }
+      );
+      return {
+        action: 'mission_accepted',
+        mission_id: mission.mission_id,
+        mission_title: mission.title,
+        reward_credits: mission.reward_credits,
+        reward_xp: mission.reward_xp
+      };
+    } catch (err) {
+      return { action: 'mission_failed', reason: err.message };
+    }
+  }
+
+  // Bounty hunter contract — create a bounty mission when player confirms
+  if (data.action === 'accept_contract') {
+    try {
+      const sector = await Sector.findByPk(npc.current_sector_id, { attributes: ['name'] });
+      const sectorName = sector ? sector.name : 'this sector';
+      const { mission, playerMission } = await missionService.createNPCBountyMission(
+        npc.npc_id, userId,
+        { kills: data.kills || 2, sectorName, rewardCredits: data.reward_credits }
+      );
+      return {
+        action: 'mission_accepted',
+        mission_id: mission.mission_id,
+        mission_title: mission.title,
+        reward_credits: mission.reward_credits,
+        reward_xp: mission.reward_xp
+      };
+    } catch (err) {
+      return { action: 'mission_failed', reason: err.message };
+    }
+  }
+
+  // Patrol escort request — create a patrol mission instead of flat denial
+  if (data.action === 'patrol_mission_offer') {
+    try {
+      const { mission, playerMission } = await missionService.createNPCPatrolMission(
+        npc.npc_id, userId,
+        { sectorsToVisit: data.sectors || 4, rewardCredits: data.reward_credits }
+      );
+      return {
+        action: 'mission_accepted',
+        mission_id: mission.mission_id,
+        mission_title: mission.title,
+        reward_credits: mission.reward_credits,
+        reward_xp: mission.reward_xp
+      };
+    } catch (err) {
+      return { action: 'mission_failed', reason: err.message };
+    }
+  }
+
   return {};
 };
 
@@ -341,6 +418,12 @@ const selectMenuOption = async (userId, npcId, optionKey) => {
 
   // Execute server-side action payloads
   const actionResult = await executeActionPayload(userId, npc, response.data);
+
+  // Record interaction in NPC memory (fire and forget)
+  const memoryType = mapOptionToInteractionType(optionKey, response.data, actionResult);
+  if (memoryType) {
+    npcMemoryService.recordStandardInteraction(npcId, userId, memoryType).catch(() => {});
+  }
 
   // Generate TTS if voice enabled for user
   let responseAudio = null;
@@ -548,6 +631,12 @@ const getConversationState = async (userId, npcId) => {
     return { active: false };
   }
 
+  // Include relationship info if available
+  let relationship = null;
+  try {
+    relationship = await npcMemoryService.getRelationship(npcId, userId);
+  } catch { /* non-critical */ }
+
   return {
     active: true,
     session_id: session.session_id,
@@ -555,7 +644,12 @@ const getConversationState = async (userId, npcId) => {
     npc_type: npc.npc_type,
     started_at: session.started_at,
     history: session.history || [],
-    menu_options: MENU_OPTIONS[npc.npc_type] || []
+    menu_options: MENU_OPTIONS[npc.npc_type] || [],
+    relationship: relationship ? {
+      label: relationship.label,
+      trust: relationship.trust,
+      respect: relationship.respect
+    } : null
   };
 };
 
@@ -579,6 +673,35 @@ const trimHistory = (history) => {
   if (history.length > MAX_HISTORY_LENGTH) {
     history.splice(0, history.length - MAX_HISTORY_LENGTH);
   }
+};
+
+/**
+ * Map a dialogue option + action result to an interaction type for memory.
+ */
+const mapOptionToInteractionType = (optionKey, responseData, actionResult) => {
+  if (optionKey === 'farewell') return 'farewell';
+  if (optionKey === 'greet') return 'greeting';
+  if (optionKey === 'buy' || optionKey === 'sell') return 'trade';
+  if (optionKey === 'ask_rumors') return 'rumor_shared';
+  if (optionKey === 'ask_prices' || optionKey === 'ask_price') return 'price_inquiry';
+  if (optionKey === 'report_crime') return 'report_crime';
+  if (optionKey === 'threaten' || optionKey === 'threaten_back') {
+    if (responseData && responseData.backed_down) return 'threat_backed_down';
+    return 'threat';
+  }
+  if (optionKey === 'bribe') {
+    if (actionResult && actionResult.credits_deducted) return 'bribe_accepted';
+    return 'bribe_refused';
+  }
+  if (optionKey === 'offer_contract' || optionKey === 'ask_bounties') {
+    if (actionResult && actionResult.action === 'mission_accepted') return 'bounty_contract';
+    return 'price_inquiry';
+  }
+  if (optionKey === 'request_escort') {
+    if (actionResult && actionResult.action === 'mission_accepted') return 'patrol_mission';
+    return null;
+  }
+  return null;
 };
 
 /**

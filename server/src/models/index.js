@@ -61,6 +61,8 @@ const DailyQuest = require('./DailyQuest');
 const VoxelBlock = require('./VoxelBlock');
 // NPC Conversation Sessions
 const NpcConversationSession = require('./NpcConversationSession');
+// NPC Memory (per-player relationship)
+const NpcMemory = require('./NpcMemory');
 // AI Agent System
 const AgentAccount = require('./AgentAccount');
 const AgentActionLog = require('./AgentActionLog');
@@ -258,6 +260,8 @@ CraftingJob.belongsTo(Ship, { foreignKey: 'ship_id', as: 'ship' });
 // Mission relationships
 Port.hasMany(Mission, { foreignKey: 'port_id', as: 'missions' });
 Mission.belongsTo(Port, { foreignKey: 'port_id', as: 'port' });
+NPC.hasMany(Mission, { foreignKey: 'issued_by_npc_id', as: 'issuedMissions' });
+Mission.belongsTo(NPC, { foreignKey: 'issued_by_npc_id', as: 'issuingNpc' });
 
 // PlayerMission relationships
 User.hasMany(PlayerMission, { foreignKey: 'user_id', as: 'playerMissions' });
@@ -386,6 +390,12 @@ NpcConversationSession.belongsTo(NPC, { foreignKey: 'npc_id', as: 'npc' });
 User.hasMany(NpcConversationSession, { foreignKey: 'user_id', as: 'npcConversations' });
 NpcConversationSession.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
+// ============== NPC Memory ==============
+NPC.hasMany(NpcMemory, { foreignKey: 'npc_id', as: 'memories' });
+NpcMemory.belongsTo(NPC, { foreignKey: 'npc_id', as: 'npc' });
+User.hasMany(NpcMemory, { foreignKey: 'user_id', as: 'npcMemories' });
+NpcMemory.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
 // ============== AI Agent System ==============
 User.hasOne(AgentAccount, { foreignKey: 'owner_id', as: 'agentAccount' });
 AgentAccount.belongsTo(User, { foreignKey: 'owner_id', as: 'owner' });
@@ -489,6 +499,8 @@ module.exports = {
   ColonyRaidProtection,
   // NPC Conversation Sessions
   NpcConversationSession,
+  // NPC Memory
+  NpcMemory,
   // AI Agent System
   AgentAccount,
   AgentActionLog

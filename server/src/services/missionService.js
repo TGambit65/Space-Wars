@@ -1,4 +1,4 @@
-const { Mission, PlayerMission, Port, User, Commodity, PortCommodity } = require('../models');
+const { Mission, PlayerMission, Port, User, Commodity, PortCommodity, NPC } = require('../models');
 const { Op } = require('sequelize');
 const { sequelize } = require('../config/database');
 const config = require('../config');
@@ -378,6 +378,104 @@ const refreshPortMissions = async () => {
   return generated;
 };
 
+/**
+ * Create a bounty mission issued by an NPC (patrol or bounty hunter).
+ * Returns the created Mission and auto-accepts it for the player.
+ * @param {string} npcId - Issuing NPC ID
+ * @param {string} userId - Player accepting the mission
+ * @param {Object} opts - { kills, sectorName, rewardCredits, rewardXp }
+ * @returns {Promise<{ mission: Object, playerMission: Object }>}
+ */
+const createNPCBountyMission = async (npcId, userId, opts = {}) => {
+  const kills = opts.kills || 1 + Math.floor(Math.random() * 3);
+  const rewardCredits = opts.rewardCredits || 500 + Math.floor(Math.random() * 1500);
+  const rewardXp = opts.rewardXp || 25 + Math.floor(Math.random() * 75);
+  const sectorName = opts.sectorName || 'nearby space';
+
+  // Check max active missions
+  const activeCount = await PlayerMission.count({
+    where: { user_id: userId, status: 'accepted' }
+  });
+  if (activeCount >= config.missions.maxActiveMissions) {
+    const error = new Error(`Maximum active missions reached (${config.missions.maxActiveMissions})`);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const mission = await Mission.create({
+    port_id: null,
+    issued_by_npc_id: npcId,
+    mission_type: 'bounty',
+    title: `Bounty: Eliminate ${kills} hostile(s) near ${sectorName}`,
+    description: `Destroy ${kills} hostile NPCs. Contract issued by NPC.`,
+    requirements: { kills },
+    reward_credits: rewardCredits,
+    reward_xp: rewardXp,
+    min_level: 1,
+    max_level: 100,
+    expires_at: new Date(Date.now() + 4 * 60 * 60 * 1000), // 4 hours
+    is_active: true
+  });
+
+  const playerMission = await PlayerMission.create({
+    user_id: userId,
+    mission_id: mission.mission_id,
+    status: 'accepted',
+    progress: {},
+    accepted_at: new Date()
+  });
+
+  return { mission, playerMission };
+};
+
+/**
+ * Create a patrol mission issued by a patrol NPC.
+ * @param {string} npcId - Issuing patrol NPC ID
+ * @param {string} userId - Player accepting the mission
+ * @param {Object} opts - { sectorsToVisit, rewardCredits, rewardXp }
+ * @returns {Promise<{ mission: Object, playerMission: Object }>}
+ */
+const createNPCPatrolMission = async (npcId, userId, opts = {}) => {
+  const sectors = opts.sectorsToVisit || 3 + Math.floor(Math.random() * 5);
+  const rewardCredits = opts.rewardCredits || 300 + Math.floor(Math.random() * 700);
+  const rewardXp = opts.rewardXp || 20 + Math.floor(Math.random() * 40);
+
+  // Check max active missions
+  const activeCount = await PlayerMission.count({
+    where: { user_id: userId, status: 'accepted' }
+  });
+  if (activeCount >= config.missions.maxActiveMissions) {
+    const error = new Error(`Maximum active missions reached (${config.missions.maxActiveMissions})`);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const mission = await Mission.create({
+    port_id: null,
+    issued_by_npc_id: npcId,
+    mission_type: 'patrol',
+    title: `Patrol ${sectors} sectors`,
+    description: `Visit ${sectors} different sectors to help maintain order. Contract issued by patrol NPC.`,
+    requirements: { sectors_visited: sectors },
+    reward_credits: rewardCredits,
+    reward_xp: rewardXp,
+    min_level: 1,
+    max_level: 100,
+    expires_at: new Date(Date.now() + 6 * 60 * 60 * 1000), // 6 hours
+    is_active: true
+  });
+
+  const playerMission = await PlayerMission.create({
+    user_id: userId,
+    mission_id: mission.mission_id,
+    status: 'accepted',
+    progress: {},
+    accepted_at: new Date()
+  });
+
+  return { mission, playerMission };
+};
+
 module.exports = {
   generateMissionsForPort,
   getAvailableMissions,
@@ -387,5 +485,7 @@ module.exports = {
   updateMissionProgress,
   completeMission,
   expireOldMissions,
-  refreshPortMissions
+  refreshPortMissions,
+  createNPCBountyMission,
+  createNPCPatrolMission
 };

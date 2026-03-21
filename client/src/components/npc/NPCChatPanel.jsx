@@ -14,6 +14,22 @@ const TYPE_BADGE = {
   BOUNTY_HUNTER: 'badge-orange',
 };
 
+const FACTION_COLORS = {
+  terran_alliance: '#3498db',
+  zythian_swarm: '#e74c3c',
+  automaton_collective: '#9b59b6',
+  synthesis_accord: '#d4a017',
+  sylvari_dominion: '#2ecc71'
+};
+
+const FACTION_LABELS = {
+  terran_alliance: 'Terran',
+  zythian_swarm: 'Zythian',
+  automaton_collective: 'Automaton',
+  synthesis_accord: 'Synthesis',
+  sylvari_dominion: 'Sylvari'
+};
+
 const NPCChatPanel = ({ npc, socket, onClose, user }) => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
@@ -33,6 +49,7 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
 
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState([]);
+  const [relationshipLabel, setRelationshipLabel] = useState(null);
 
   const isPremium = subscriptionTier === 'premium' || subscriptionTier === 'elite';
 
@@ -92,11 +109,17 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
         setMenuOptions(data.menu_options || []);
         setVoiceEnabled(!!data.voice_enabled);
         if (data.subscription_tier) setSubscriptionTier(data.subscription_tier);
+        if (data.recognition?.relationship_label) setRelationshipLabel(data.recognition.relationship_label);
 
-        // Add NPC greeting
-        const greeting = data.npc?.personality_summary
-          ? `*${data.npc.personality_summary}*\n\nWhat would you like to discuss?`
-          : 'What would you like to discuss?';
+        // Add NPC greeting — use recognition if NPC remembers this player
+        let greeting;
+        if (data.recognition?.greeting) {
+          greeting = data.recognition.greeting;
+        } else {
+          greeting = data.npc?.personality_summary
+            ? `*${data.npc.personality_summary}*\n\nWhat would you like to discuss?`
+            : 'What would you like to discuss?';
+        }
 
         setMessages([{
           sender: 'npc',
@@ -213,12 +236,21 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
         if (data.data.bribe_failed) {
           addNPCResponse("[You don't have enough credits for the bribe]");
         }
-        if (action === 'bounty_info' && data.data.targets?.length > 0) {
+        if (action === 'mission_accepted') {
+          addNPCResponse(`[Mission Accepted: ${data.data.mission_title}]\nReward: ${data.data.reward_credits} credits, ${data.data.reward_xp} XP`);
+        }
+        if (action === 'mission_failed') {
+          addNPCResponse(`[Cannot accept mission: ${data.data.reason}]`);
+        }
+        if (action === 'bounty_info' && data.data.targets?.length > 0 && !data.data.mission_id) {
           const targetStr = data.data.targets.map(t => `${t.sector_name}: ${t.hostile_count} hostile(s)`).join('\n');
           addNPCResponse(`[Bounty Intel]\n${targetStr}`);
         }
         if (action === 'report_crime' && data.data.patrols_alerted > 0) {
           addNPCResponse(`[${data.data.patrols_alerted} patrol(s) alerted in sector]`);
+        }
+        if (action === 'price_quote' && data.data.rate) {
+          addNPCResponse(`[Quote: ${data.data.rate} credits per kill]`);
         }
         if (data.data.npc_disengaged) {
           addNPCResponse('[NPC has disengaged]');
@@ -335,10 +367,18 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
             <span className={`badge ${TYPE_BADGE[npc.npc_type] || 'badge-cyan'} text-[10px]`}>
               {npc.npc_type?.replace('_', ' ')}
             </span>
+            {npc.faction && (
+              <span className="text-[10px] font-medium px-1 rounded" style={{ color: FACTION_COLORS[npc.faction] || '#888', borderColor: FACTION_COLORS[npc.faction] || '#888', border: '1px solid' }}>
+                {FACTION_LABELS[npc.faction] || npc.faction}
+              </span>
+            )}
             {npc.ai_personality?.trait_primary && (
               <span className="text-[10px] text-gray-500 italic truncate">
                 {npc.ai_personality.trait_primary}{npc.ai_personality.trait_secondary ? `, ${npc.ai_personality.trait_secondary}` : ''}
               </span>
+            )}
+            {relationshipLabel && (
+              <span className="text-[10px] text-accent-cyan/70 font-medium">{relationshipLabel}</span>
             )}
           </div>
         </div>

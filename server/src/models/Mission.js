@@ -9,8 +9,13 @@ const Mission = sequelize.define('Mission', {
   },
   port_id: {
     type: DataTypes.UUID,
-    allowNull: false,
+    allowNull: true,
     references: { model: 'ports', key: 'port_id' }
+  },
+  issued_by_npc_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: { model: 'npcs', key: 'npc_id' }
   },
   mission_type: {
     type: DataTypes.STRING(30),
@@ -58,6 +63,7 @@ const Mission = sequelize.define('Mission', {
   timestamps: true,
   indexes: [
     { fields: ['port_id', 'is_active'] },
+    { fields: ['issued_by_npc_id'] },
     { fields: ['mission_type'] },
     { fields: ['expires_at'] }
   ]

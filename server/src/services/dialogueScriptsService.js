@@ -58,11 +58,20 @@ const farewellText = (npc) => {
 
 // ─── Trader Scripts ────────────────────────────────────────────────
 
+const FACTION_NAMES = {
+  terran_alliance: 'Terran Alliance',
+  zythian_swarm: 'Zythian Swarm',
+  automaton_collective: 'Automaton Collective',
+  synthesis_accord: 'Synthesis Accord',
+  sylvari_dominion: 'Sylvari Dominion'
+};
+
 const traderScripts = {
   greet: (npc, context) => {
+    const factionTag = npc.faction ? `, representing the ${FACTION_NAMES[npc.faction]}` : '';
     const variants = [
-      `${greetPrefix(npc)} I'm ${npc.name}, and I've got goods to move. Looking to trade?`,
-      `${greetPrefix(npc)} ${npc.name} at your service. My hold's full of merchandise — interested?`,
+      `${greetPrefix(npc)} I'm ${npc.name}${factionTag}, and I've got goods to move. Looking to trade?`,
+      `${greetPrefix(npc)} ${npc.name} at your service${factionTag}. My hold's full of merchandise — interested?`,
       `${greetPrefix(npc)} They call me ${npc.name}. You look like someone who knows a good deal when they see one.`
     ];
     return { text: pick(variants) };
@@ -159,10 +168,11 @@ const traderScripts = {
 
 const patrolScripts = {
   greet: (npc, context) => {
+    const factionTag = npc.faction ? ` ${FACTION_NAMES[npc.faction]}` : '';
     const variants = [
-      `${greetPrefix(npc)} This is ${npc.name}, sector patrol. Everything in order here?`,
-      `${greetPrefix(npc)} ${npc.name}, on duty. You're cleared to proceed — for now.`,
-      `${greetPrefix(npc)} I'm ${npc.name}. I keep the peace in these parts. Need something?`
+      `${greetPrefix(npc)} This is ${npc.name},${factionTag} sector patrol. Everything in order here?`,
+      `${greetPrefix(npc)} ${npc.name},${factionTag} patrol on duty. You're cleared to proceed — for now.`,
+      `${greetPrefix(npc)} I'm ${npc.name}. I keep the peace in these parts${npc.faction ? ` on behalf of the ${FACTION_NAMES[npc.faction]}` : ''}. Need something?`
     ];
     return { text: pick(variants) };
   },
@@ -202,7 +212,11 @@ const patrolScripts = {
         sector_name: s.name, sector_id: s.sector_id, hostile_count: s.hostileCount
       }));
       const targetStr = dangerousSectors.map(s => `${s.name} (${s.hostileCount} hostiles)`).join(', ');
-      return { text: `Known hostile activity in: ${targetStr}. Take them out and you'll be doing us all a favor.`, data: { action: 'bounty_info', targets } };
+      const rewardCredits = 500 + Math.floor(Math.random() * 1000);
+      return {
+        text: `Known hostile activity in: ${targetStr}. Take them out and I'll authorize a ${rewardCredits} credit bounty for you.`,
+        data: { action: 'bounty_info', targets, create_mission: true, reward_credits: rewardCredits }
+      };
     }
 
     const variants = [
@@ -214,12 +228,14 @@ const patrolScripts = {
   },
 
   request_escort: (npc) => {
+    const sectors = 3 + Math.floor(Math.random() * 4);
+    const rewardCredits = 300 + Math.floor(Math.random() * 500);
     const variants = [
-      "I appreciate the request, but my patrol route keeps me tied to this sector. You're on your own out there.",
-      "Can't leave my post, I'm afraid. Orders are orders. Stay near patrolled sectors and you'll be fine.",
-      "Escort duty isn't in my mandate right now. Stick to well-traveled routes and keep your weapons hot."
+      `Can't escort you personally, but I can authorize a patrol sweep. Visit ${sectors} sectors and report back — ${rewardCredits} credits for your trouble.`,
+      `Escort duty isn't in my mandate, but how about this: patrol ${sectors} sectors nearby and I'll see you get ${rewardCredits} credits. Deal?`,
+      `I'm stuck on post, but I need someone to cover my sector sweep. ${sectors} sectors, ${rewardCredits} credits. Interested?`
     ];
-    return { text: pick(variants), data: { action: 'escort_denied', reason: 'patrol_duty' } };
+    return { text: pick(variants), data: { action: 'patrol_mission_offer', sectors, reward_credits: rewardCredits } };
   },
 
   farewell: (npc) => {
@@ -254,13 +270,20 @@ const bountyHunterScripts = {
     return { text: pick(variants) };
   },
 
-  offer_contract: (npc) => {
+  offer_contract: (npc, context) => {
+    const kills = 1 + Math.floor(Math.random() * 3);
+    const rewardCredits = 800 + Math.floor(Math.random() * 1200);
+    const dangerousSectors = (context.adjacentSectors || []).filter(s => s.hostileCount > 0);
+    const sectorHint = dangerousSectors.length > 0
+      ? ` I know there are targets in ${dangerousSectors[0].name}.`
+      : '';
+
     const variants = [
-      "You want to hire me? Interesting. I don't come cheap, but I get results. What's the job?",
-      "A contract? I'm listening. But understand — I set my own terms.",
-      "I might be interested. Depends on the target and the pay. What are you offering?"
+      `I'll take a contract from you. ${kills} kill${kills > 1 ? 's' : ''}, ${rewardCredits} credits on completion.${sectorHint} Say the word and it's done.`,
+      `Alright, here's the deal: I need ${kills} confirmed kill${kills > 1 ? 's' : ''}. Reward is ${rewardCredits} credits.${sectorHint} Accept?`,
+      `${kills} hostile${kills > 1 ? 's' : ''} eliminated, ${rewardCredits} credits in your pocket.${sectorHint} Standard terms. Want in?`
     ];
-    return { text: pick(variants), data: { action: 'contract_inquiry', npc_name: npc.name } };
+    return { text: pick(variants), data: { action: 'accept_contract', kills, reward_credits: rewardCredits } };
   },
 
   ask_price: (npc) => {

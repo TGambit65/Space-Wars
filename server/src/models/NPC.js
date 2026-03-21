@@ -112,6 +112,15 @@ const NPC = sequelize.define('NPC', {
     allowNull: true,
     comment: 'Last ambient presence event timestamp'
   },
+  // Faction affiliation
+  faction: {
+    type: DataTypes.STRING(30),
+    allowNull: true,
+    comment: 'Faction this NPC serves (null = independent)',
+    validate: {
+      isIn: [['terran_alliance', 'zythian_swarm', 'automaton_collective', 'synthesis_accord', 'sylvari_dominion']]
+    }
+  },
   // Status
   is_alive: { type: DataTypes.BOOLEAN, defaultValue: true },
   respawn_at: { type: DataTypes.DATE, allowNull: true },
@@ -126,7 +135,8 @@ const NPC = sequelize.define('NPC', {
     { fields: ['npc_type'] },
     { fields: ['is_alive'] },
     { fields: ['respawn_at'] },
-    { fields: ['behavior_state'] }
+    { fields: ['behavior_state'] },
+    { fields: ['faction'] }
   ]
 });
 

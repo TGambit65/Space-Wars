@@ -15,6 +15,43 @@ const namePrefixes = {
 
 const namePostfixes = ['Vex', 'Kira', 'Rex', 'Nova', 'Zane', 'Luna', 'Drake', 'Hawk', 'Storm', 'Blaze'];
 
+const FACTIONS = ['terran_alliance', 'zythian_swarm', 'automaton_collective', 'synthesis_accord', 'sylvari_dominion'];
+
+/**
+ * Assign a faction to a newly spawned NPC based on type and sector zone.
+ * - Patrols and Traders in core/inner sectors get a faction.
+ * - Pirates and bounty hunters in frontier/outer sectors are independent (null).
+ * - Mid-ring is mixed.
+ */
+const assignFaction = (npcType, sector) => {
+  const zone = sector.zone_class || 'mid_ring';
+
+  // Pirates and pirate lords are always independent
+  if (npcType === 'PIRATE' || npcType === 'PIRATE_LORD') return null;
+
+  // Bounty hunters are independent in outer/frontier, faction-aligned in core/inner
+  if (npcType === 'BOUNTY_HUNTER') {
+    if (zone === 'core' || zone === 'inner_ring' || zone === 'home') {
+      return FACTIONS[Math.floor(Math.random() * FACTIONS.length)];
+    }
+    return null;
+  }
+
+  // Patrols and Traders: high faction affiliation in secure zones
+  if (zone === 'core' || zone === 'inner_ring' || zone === 'home') {
+    return FACTIONS[Math.floor(Math.random() * FACTIONS.length)];
+  }
+  if (zone === 'mid_ring' || zone === 'transit') {
+    // 60% chance of faction alignment in mid-ring
+    return Math.random() < 0.6 ? FACTIONS[Math.floor(Math.random() * FACTIONS.length)] : null;
+  }
+  // Outer/frontier/deep_space: 20% chance
+  if (Math.random() < 0.2) {
+    return FACTIONS[Math.floor(Math.random() * FACTIONS.length)];
+  }
+  return null;
+};
+
 /**
  * Generate a random NPC name
  */
@@ -86,6 +123,9 @@ const spawnNPC = async (sectorId, npcType = null, transaction = null) => {
   const personality = npcPersonalityService.generatePersonality(npcType);
   const intelligenceTier = config.npcAI.defaultIntelligenceTier[npcType] || 1;
 
+  // Assign faction based on NPC type and sector zone
+  const faction = assignFaction(npcType, sector);
+
   const npc = await NPC.create({
     name: generateNPCName(npcType),
     npc_type: npcType,
@@ -107,7 +147,8 @@ const spawnNPC = async (sectorId, npcType = null, transaction = null) => {
     behavior_state: 'idle',
     ai_personality: personality,
     intelligence_tier: intelligenceTier,
-    home_sector_id: sectorId
+    home_sector_id: sectorId,
+    faction
   }, { transaction });
 
   return npc;
@@ -123,7 +164,7 @@ const getNPCsInSector = async (sectorId) => {
       'npc_id', 'name', 'npc_type', 'ship_type',
       'hull_points', 'max_hull_points', 'shield_points', 'max_shield_points',
       'attack_power', 'defense_rating',
-      'behavior_state', 'intelligence_tier', 'ai_personality'
+      'behavior_state', 'intelligence_tier', 'ai_personality', 'faction'
     ]
   });
 };
