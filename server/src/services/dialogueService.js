@@ -133,6 +133,7 @@ const buildDialogueContext = async (npc) => {
     });
     if (port) {
       context.sectorInfo.hasPort = true;
+      context.portName = port.name || 'Local Port';
       const portCommodities = await PortCommodity.findAll({
         where: { port_id: port.port_id },
         include: [{ model: Commodity, as: 'commodity', attributes: ['name', 'base_price'] }],

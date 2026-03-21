@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Send, Volume2, Loader, History } from 'lucide-react';
+import { X, Send, Volume2, Loader, History, ShoppingCart, Target, Shield, Coins, Navigation, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { dialogue } from '../../services/api';
 import useVoiceChat from '../../hooks/useVoiceChat';
 import NPCPortrait from './NPCPortrait';
@@ -173,12 +173,13 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
   }, [socket, npc.npc_id]);
 
   // Add NPC response to messages + handle audio
-  const addNPCResponse = useCallback((text, audio, isAI) => {
+  const addNPCResponse = useCallback((text, audio, isAI, card) => {
     setMessages(prev => [...prev, {
       sender: 'npc',
       text,
       audio: audio || null,
       isAI: !!isAI,
+      card: card || null,
       timestamp: Date.now()
     }]);
 
@@ -226,36 +227,95 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
       addNPCResponse(data.response_text, data.response_audio);
       if (data.new_menu_options) setMenuOptions(data.new_menu_options);
 
-      // Execute client-side action payloads
+      // Execute client-side action payloads with rich cards
       if (data.data) {
         const { action } = data.data;
+
         if (action === 'open_trade_ui') {
-          setTimeout(() => navigate('/trading'), 800);
+          addNPCResponse(null, null, false, {
+            type: 'trade_shortcut',
+            mode: data.data.mode,
+            onAction: () => navigate('/trading')
+          });
         }
+
         if (data.data.credits_deducted) {
-          addNPCResponse(`[${data.data.credits_deducted} credits deducted]`);
+          addNPCResponse(null, null, false, {
+            type: 'credits_change',
+            amount: -data.data.credits_deducted
+          });
         }
+
         if (data.data.bribe_failed) {
-          addNPCResponse("[You don't have enough credits for the bribe]");
+          addNPCResponse(null, null, false, {
+            type: 'status',
+            variant: 'error',
+            text: "You don't have enough credits for the bribe"
+          });
         }
+
         if (action === 'mission_accepted') {
-          addNPCResponse(`[Mission Accepted: ${data.data.mission_title}]\nReward: ${data.data.reward_credits} credits, ${data.data.reward_xp} XP`);
+          addNPCResponse(null, null, false, {
+            type: 'mission_accepted',
+            title: data.data.mission_title,
+            credits: data.data.reward_credits,
+            xp: data.data.reward_xp,
+            onView: () => navigate('/missions')
+          });
         }
+
         if (action === 'mission_failed') {
-          addNPCResponse(`[Cannot accept mission: ${data.data.reason}]`);
+          addNPCResponse(null, null, false, {
+            type: 'status',
+            variant: 'error',
+            text: `Cannot accept mission: ${data.data.reason}`
+          });
         }
+
         if (action === 'bounty_info' && data.data.targets?.length > 0 && !data.data.mission_id) {
-          const targetStr = data.data.targets.map(t => `${t.sector_name}: ${t.hostile_count} hostile(s)`).join('\n');
-          addNPCResponse(`[Bounty Intel]\n${targetStr}`);
+          addNPCResponse(null, null, false, {
+            type: 'bounty_intel',
+            targets: data.data.targets
+          });
         }
+
         if (action === 'report_crime' && data.data.patrols_alerted > 0) {
-          addNPCResponse(`[${data.data.patrols_alerted} patrol(s) alerted in sector]`);
+          addNPCResponse(null, null, false, {
+            type: 'status',
+            variant: 'success',
+            text: `${data.data.patrols_alerted} patrol(s) alerted in sector`
+          });
         }
+
         if (action === 'price_quote' && data.data.rate) {
-          addNPCResponse(`[Quote: ${data.data.rate} credits per kill]`);
+          addNPCResponse(null, null, false, {
+            type: 'price_quote',
+            rate: data.data.rate
+          });
         }
+
+        if (action === 'price_list' && data.data.prices?.length > 0) {
+          addNPCResponse(null, null, false, {
+            type: 'price_list',
+            prices: data.data.prices,
+            portName: data.data.port_name
+          });
+        }
+
+        if (action === 'route_tip' && data.data.routes?.length > 0) {
+          addNPCResponse(null, null, false, {
+            type: 'route_tip',
+            routes: data.data.routes,
+            onNavigate: (sectorId) => navigate(`/map`)
+          });
+        }
+
         if (data.data.npc_disengaged) {
-          addNPCResponse('[NPC has disengaged]');
+          addNPCResponse(null, null, false, {
+            type: 'status',
+            variant: 'info',
+            text: 'NPC has disengaged'
+          });
         }
       }
     } catch (err) {
@@ -496,6 +556,18 @@ const MessageBubble = ({ message, npcType, onPlayAudio, playingMsgTs }) => {
   const isThisPlaying = playingMsgTs === message.timestamp;
 
   if (isNPC) {
+    // Card-only message (no text)
+    if (!message.text && message.card) {
+      return (
+        <div className="flex items-start gap-2">
+          <NPCPortrait npcType={npcType} size="sm" />
+          <div className="max-w-[85%]">
+            <ActionCard card={message.card} />
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex items-start gap-2">
         <NPCPortrait npcType={npcType} size="sm" />
@@ -506,6 +578,7 @@ const MessageBubble = ({ message, npcType, onPlayAudio, playingMsgTs }) => {
               <span className="text-[9px] text-accent-purple mt-1 block">AI response</span>
             )}
           </div>
+          {message.card && <ActionCard card={message.card} />}
           {message.audio && (
             <button
               onClick={() => onPlayAudio(message.audio, message.timestamp)}
@@ -530,6 +603,146 @@ const MessageBubble = ({ message, npcType, onPlayAudio, playingMsgTs }) => {
       </div>
     </div>
   );
+};
+
+// ─── Action Card ─────────────────────────────────────────────────────
+
+const ActionCard = ({ card }) => {
+  if (!card) return null;
+
+  switch (card.type) {
+    case 'trade_shortcut':
+      return (
+        <div className="mt-1 bg-green-900/20 border border-green-700/40 rounded-lg p-2">
+          <button
+            onClick={card.onAction}
+            className="flex items-center gap-2 text-xs text-green-300 hover:text-green-200 w-full"
+          >
+            <ShoppingCart className="w-4 h-4 shrink-0" />
+            <span>Open Trading ({card.mode === 'buy' ? 'Buy' : 'Sell'} Mode)</span>
+            <Navigation className="w-3 h-3 ml-auto" />
+          </button>
+        </div>
+      );
+
+    case 'mission_accepted':
+      return (
+        <div className="mt-1 bg-accent-cyan/10 border border-accent-cyan/30 rounded-lg p-2.5">
+          <div className="flex items-center gap-2 mb-1">
+            <CheckCircle className="w-4 h-4 text-accent-cyan shrink-0" />
+            <span className="text-xs font-bold text-accent-cyan">Mission Accepted</span>
+          </div>
+          <div className="text-xs text-gray-300 mb-1.5">{card.title}</div>
+          <div className="flex gap-3 text-[10px] text-gray-400">
+            <span className="flex items-center gap-1"><Coins className="w-3 h-3 text-yellow-400" />{card.credits?.toLocaleString()} cr</span>
+            <span>{card.xp} XP</span>
+          </div>
+          {card.onView && (
+            <button onClick={card.onView} className="mt-1.5 text-[10px] text-accent-cyan hover:underline">
+              View Missions
+            </button>
+          )}
+        </div>
+      );
+
+    case 'credits_change':
+      return (
+        <div className={`mt-1 rounded-lg p-2 flex items-center gap-2 text-xs ${
+          card.amount < 0
+            ? 'bg-red-900/20 border border-red-700/40 text-red-300'
+            : 'bg-green-900/20 border border-green-700/40 text-green-300'
+        }`}>
+          <Coins className="w-4 h-4 shrink-0" />
+          <span>{card.amount < 0 ? '' : '+'}{card.amount.toLocaleString()} credits</span>
+        </div>
+      );
+
+    case 'bounty_intel':
+      return (
+        <div className="mt-1 bg-orange-900/15 border border-orange-700/30 rounded-lg p-2.5">
+          <div className="flex items-center gap-2 mb-1.5">
+            <Target className="w-4 h-4 text-orange-400 shrink-0" />
+            <span className="text-xs font-bold text-orange-300">Bounty Intel</span>
+          </div>
+          <div className="space-y-1">
+            {card.targets.map((t, i) => (
+              <div key={i} className="flex justify-between text-[11px]">
+                <span className="text-gray-300">{t.sector_name}</span>
+                <span className="text-red-400">{t.hostile_count} hostile{t.hostile_count > 1 ? 's' : ''}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 'price_list':
+      return (
+        <div className="mt-1 bg-space-800 border border-space-600 rounded-lg p-2.5">
+          <div className="flex items-center gap-2 mb-1.5">
+            <Coins className="w-4 h-4 text-yellow-400 shrink-0" />
+            <span className="text-xs font-bold text-gray-200">{card.portName || 'Port Prices'}</span>
+          </div>
+          <div className="grid grid-cols-3 gap-x-2 text-[10px] text-gray-500 mb-1 font-bold">
+            <span>Commodity</span><span className="text-right">Buy</span><span className="text-right">Sell</span>
+          </div>
+          {card.prices.map((p, i) => (
+            <div key={i} className="grid grid-cols-3 gap-x-2 text-[11px] py-0.5 border-t border-space-700">
+              <span className="text-gray-300 truncate">{p.name}</span>
+              <span className="text-right text-yellow-300">{p.buy ? `${p.buy}cr` : '—'}</span>
+              <span className="text-right text-green-300">{p.sell ? `${p.sell}cr` : '—'}</span>
+            </div>
+          ))}
+        </div>
+      );
+
+    case 'price_quote':
+      return (
+        <div className="mt-1 bg-space-800 border border-space-600 rounded-lg p-2 flex items-center gap-2 text-xs">
+          <Coins className="w-4 h-4 text-yellow-400 shrink-0" />
+          <span className="text-gray-300">Rate: <span className="text-yellow-300 font-bold">{card.rate.toLocaleString()} cr</span> per kill</span>
+        </div>
+      );
+
+    case 'route_tip':
+      return (
+        <div className="mt-1 bg-blue-900/15 border border-blue-700/30 rounded-lg p-2.5">
+          <div className="flex items-center gap-2 mb-1.5">
+            <Navigation className="w-4 h-4 text-blue-400 shrink-0" />
+            <span className="text-xs font-bold text-blue-300">Trade Route Tip</span>
+          </div>
+          {card.routes.map((r, i) => (
+            <div key={i} className="text-[11px] text-gray-300">
+              {r.to ? `${r.from} ↔ ${r.to}` : r.from}
+            </div>
+          ))}
+          {card.onNavigate && (
+            <button onClick={() => card.onNavigate()} className="mt-1.5 text-[10px] text-blue-400 hover:underline">
+              View on Map
+            </button>
+          )}
+        </div>
+      );
+
+    case 'status': {
+      const variants = {
+        success: { icon: CheckCircle, bg: 'bg-green-900/20 border-green-700/40', color: 'text-green-300' },
+        error: { icon: XCircle, bg: 'bg-red-900/20 border-red-700/40', color: 'text-red-300' },
+        info: { icon: Shield, bg: 'bg-blue-900/20 border-blue-700/40', color: 'text-blue-300' },
+        warning: { icon: AlertTriangle, bg: 'bg-yellow-900/20 border-yellow-700/40', color: 'text-yellow-300' },
+      };
+      const v = variants[card.variant] || variants.info;
+      const Icon = v.icon;
+      return (
+        <div className={`mt-1 rounded-lg border p-2 flex items-center gap-2 text-xs ${v.bg} ${v.color}`}>
+          <Icon className="w-4 h-4 shrink-0" />
+          <span>{card.text}</span>
+        </div>
+      );
+    }
+
+    default:
+      return null;
+  }
 };
 
 // ─── Thinking Dots ───────────────────────────────────────────────────

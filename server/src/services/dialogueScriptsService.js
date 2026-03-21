@@ -125,11 +125,23 @@ const traderScripts = {
 
   ask_prices: (npc, context) => {
     if (context.portCommodities && context.portCommodities.length > 0) {
-      const items = context.portCommodities.slice(0, 4);
+      const items = context.portCommodities.slice(0, 6);
       const priceList = items.map(pc =>
         `${pc.commodity_name}: ${pc.buy_price || '—'}cr buy / ${pc.sell_price || '—'}cr sell`
       ).join('. ');
-      return { text: `Current prices at this port: ${priceList}. Anything catch your eye?` };
+      return {
+        text: `Current prices at this port: ${priceList}. Anything catch your eye?`,
+        data: {
+          action: 'price_list',
+          prices: items.map(pc => ({
+            name: pc.commodity_name,
+            buy: pc.buy_price,
+            sell: pc.sell_price,
+            quantity: pc.quantity
+          })),
+          port_name: context.portName || null
+        }
+      };
     }
 
     const variants = [
@@ -145,10 +157,22 @@ const traderScripts = {
     if (portSectors.length >= 2) {
       const a = portSectors[0];
       const b = portSectors[1];
-      return { text: `I'd suggest running cargo between ${a.name} and ${b.name}. Both have ports, and the price differences should turn a profit.` };
+      return {
+        text: `I'd suggest running cargo between ${a.name} and ${b.name}. Both have ports, and the price differences should turn a profit.`,
+        data: {
+          action: 'route_tip',
+          routes: [{ from: a.name, to: b.name, from_id: a.sector_id, to_id: b.sector_id }]
+        }
+      };
     }
     if (portSectors.length === 1) {
-      return { text: `There's a port in ${portSectors[0].name}. Start there and work outward — trade routes build themselves once you know the sector.` };
+      return {
+        text: `There's a port in ${portSectors[0].name}. Start there and work outward — trade routes build themselves once you know the sector.`,
+        data: {
+          action: 'route_tip',
+          routes: [{ from: portSectors[0].name, from_id: portSectors[0].sector_id }]
+        }
+      };
     }
 
     const variants = [
