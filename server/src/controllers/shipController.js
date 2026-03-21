@@ -161,10 +161,40 @@ const activateShip = async (req, res, next) => {
   }
 };
 
+const jumpDrive = async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    const { shipId } = req.params;
+    const { target_sector_id } = req.body;
+
+    const result = await shipService.jumpDrive(shipId, target_sector_id, req.userId);
+
+    res.json({
+      success: true,
+      message: `Jump drive activated! Traveled ${result.jump_details.distance} units to ${result.ship.currentSector?.name || 'target sector'}`,
+      data: {
+        ship: result.ship.toJSON(),
+        jump_details: result.jump_details
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getShips,
   getShipStatus,
   moveShip,
+  jumpDrive,
   getAdjacentSectors,
   getCrewEffectiveness,
   activateShip

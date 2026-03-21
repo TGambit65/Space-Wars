@@ -313,24 +313,25 @@ module.exports = {
     ENGINE: 'engine',
     SCANNER: 'scanner',
     CARGO_POD: 'cargo_pod',
-    ARMOR: 'armor'
+    ARMOR: 'armor',
+    JUMP_DRIVE: 'jump_drive'
   },
 
   // Component slot types per ship type
   shipSlots: {
-    SCOUT: { weapon: 1, shield: 1, engine: 1, scanner: 2, cargo_pod: 1, armor: 1 },
-    MERCHANT_CRUISER: { weapon: 2, shield: 2, engine: 1, scanner: 1, cargo_pod: 3, armor: 1 },
-    FREIGHTER: { weapon: 1, shield: 2, engine: 1, scanner: 1, cargo_pod: 5, armor: 2 },
-    FIGHTER: { weapon: 3, shield: 1, engine: 2, scanner: 1, cargo_pod: 0, armor: 1 },
-    CORVETTE: { weapon: 2, shield: 2, engine: 2, scanner: 1, cargo_pod: 1, armor: 2 },
-    DESTROYER: { weapon: 4, shield: 3, engine: 2, scanner: 2, cargo_pod: 1, armor: 3 },
-    CARRIER: { weapon: 2, shield: 4, engine: 1, scanner: 3, cargo_pod: 2, armor: 4 },
-    COLONY_SHIP: { weapon: 1, shield: 3, engine: 1, scanner: 2, cargo_pod: 4, armor: 2 },
-    INSTA_COLONY_SHIP: { weapon: 0, shield: 2, engine: 1, scanner: 1, cargo_pod: 3, armor: 1 },
-    BATTLECRUISER: { weapon: 5, shield: 3, engine: 2, scanner: 2, cargo_pod: 1, armor: 3 },
-    INTERCEPTOR: { weapon: 2, shield: 1, engine: 3, scanner: 1, cargo_pod: 0, armor: 1 },
-    MINING_BARGE: { weapon: 1, shield: 2, engine: 1, scanner: 2, cargo_pod: 6, armor: 2 },
-    EXPLORER: { weapon: 1, shield: 2, engine: 2, scanner: 3, cargo_pod: 2, armor: 1 }
+    SCOUT: { weapon: 1, shield: 1, engine: 1, scanner: 2, cargo_pod: 1, armor: 1, jump_drive: 0 },
+    MERCHANT_CRUISER: { weapon: 2, shield: 2, engine: 1, scanner: 1, cargo_pod: 3, armor: 1, jump_drive: 1 },
+    FREIGHTER: { weapon: 1, shield: 2, engine: 1, scanner: 1, cargo_pod: 5, armor: 2, jump_drive: 0 },
+    FIGHTER: { weapon: 3, shield: 1, engine: 2, scanner: 1, cargo_pod: 0, armor: 1, jump_drive: 0 },
+    CORVETTE: { weapon: 2, shield: 2, engine: 2, scanner: 1, cargo_pod: 1, armor: 2, jump_drive: 0 },
+    DESTROYER: { weapon: 4, shield: 3, engine: 2, scanner: 2, cargo_pod: 1, armor: 3, jump_drive: 1 },
+    CARRIER: { weapon: 2, shield: 4, engine: 1, scanner: 3, cargo_pod: 2, armor: 4, jump_drive: 1 },
+    COLONY_SHIP: { weapon: 1, shield: 3, engine: 1, scanner: 2, cargo_pod: 4, armor: 2, jump_drive: 1 },
+    INSTA_COLONY_SHIP: { weapon: 0, shield: 2, engine: 1, scanner: 1, cargo_pod: 3, armor: 1, jump_drive: 0 },
+    BATTLECRUISER: { weapon: 5, shield: 3, engine: 2, scanner: 2, cargo_pod: 1, armor: 3, jump_drive: 1 },
+    INTERCEPTOR: { weapon: 2, shield: 1, engine: 3, scanner: 1, cargo_pod: 0, armor: 1, jump_drive: 0 },
+    MINING_BARGE: { weapon: 1, shield: 2, engine: 1, scanner: 2, cargo_pod: 6, armor: 2, jump_drive: 0 },
+    EXPLORER: { weapon: 1, shield: 2, engine: 2, scanner: 3, cargo_pod: 2, armor: 1, jump_drive: 1 }
   },
 
   // Component definitions
@@ -394,6 +395,13 @@ module.exports = {
       { name: 'Reactive Armor', tier: 3, hullBonus: 80, damageReduction: 0.15, price: 2200, description: 'Explosive-resistant armor' },
       { name: 'Ablative Armor', tier: 4, hullBonus: 120, damageReduction: 0.20, price: 5500, description: 'Energy weapon resistant' },
       { name: 'Quantum Armor', tier: 5, hullBonus: 200, damageReduction: 0.25, price: 14000, description: 'Top-tier hull protection' }
+    ],
+
+    // Jump Drives
+    jumpDrives: [
+      { name: 'Prototype Jump Drive', tier: 3, jumpRange: 3, cooldownMs: 120000, fuelCost: 25, energyCost: 20, price: 8000, description: 'Early-stage jump engine capable of short-range jumps' },
+      { name: 'Advanced Jump Drive', tier: 4, jumpRange: 5, cooldownMs: 90000, fuelCost: 35, energyCost: 30, price: 20000, description: 'Professional-grade jump engine with extended range' },
+      { name: 'Quantum Jump Engine', tier: 5, jumpRange: 8, cooldownMs: 60000, fuelCost: 50, energyCost: 45, price: 45000, description: 'Experimental quantum-tunneling drive for extreme range jumps' }
     ]
   },
 

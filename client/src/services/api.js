@@ -51,6 +51,7 @@ export const ships = {
   move: (shipId, targetSectorId) => api.post(`/ships/${shipId}/move`, { target_sector_id: targetSectorId }),
   getCrewEffectiveness: (shipId) => api.get(`/ships/${shipId}/crew-effectiveness`),
   activate: (shipId) => api.post(`/ships/${shipId}/activate`),
+  jump: (shipId, targetSectorId) => api.post(`/ships/${shipId}/jump`, { target_sector_id: targetSectorId }),
 };
 
 // Sectors

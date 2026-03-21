@@ -634,7 +634,8 @@ const seedComponents = async (transaction) => {
     engines: 'engine',
     scanners: 'scanner',
     cargoPods: 'cargo_pod',
-    armor: 'armor'
+    armor: 'armor',
+    jumpDrives: 'jump_drive'
   };
 
   const components = [];
@@ -662,7 +663,10 @@ const seedComponents = async (transaction) => {
         special_properties: {
           shieldBonus: def.shieldBonus,
           detectsCloaked: def.detectsCloaked,
-          protectedCargo: def.protectedCargo
+          protectedCargo: def.protectedCargo,
+          jumpRange: def.jumpRange,
+          cooldownMs: def.cooldownMs,
+          fuelCost: def.fuelCost
         }
       }, { transaction });
       components.push(component);

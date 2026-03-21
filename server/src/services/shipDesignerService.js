@@ -14,6 +14,7 @@ const getShipTypeKey = (shipTypeName) => {
     'Destroyer': 'DESTROYER',
     'Carrier': 'CARRIER',
     'Colony Ship': 'COLONY_SHIP',
+    'Insta Colony Ship': 'INSTA_COLONY_SHIP',
     'Battlecruiser': 'BATTLECRUISER',
     'Interceptor': 'INTERCEPTOR',
     'Mining Barge': 'MINING_BARGE',
@@ -249,6 +250,9 @@ const recalculateShipStats = async (ship, transaction = null) => {
         break;
       case 'cargo_pod':
         cargoBonus += Math.floor(comp.cargo_capacity * effectiveness);
+        break;
+      case 'jump_drive':
+        // Jump drives don't modify base stats — their effect is checked at jump time
         break;
     }
   }

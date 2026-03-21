@@ -122,6 +122,13 @@ const Ship = sequelize.define('Ship', {
       key: 'fleet_id'
     }
   },
+  // Jump drive cooldown
+  last_jump_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
+    comment: 'Timestamp of last jump drive activation for cooldown tracking'
+  },
   // Phase 6: Visual customization
   visual_config: {
     type: DataTypes.JSON,

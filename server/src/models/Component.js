@@ -19,7 +19,7 @@ const Component = sequelize.define('Component', {
     type: DataTypes.STRING(50),
     allowNull: false,
     validate: {
-      isIn: [['weapon', 'shield', 'engine', 'scanner', 'cargo_pod', 'armor']]
+      isIn: [['weapon', 'shield', 'engine', 'scanner', 'cargo_pod', 'armor', 'jump_drive']]
     }
   },
   tier: {

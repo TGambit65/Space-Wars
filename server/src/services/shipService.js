@@ -1,4 +1,4 @@
-const { Ship, Sector, SectorConnection, User, TechResearch, PlayerDiscovery, sequelize } = require('../models');
+const { Ship, Sector, SectorConnection, User, TechResearch, PlayerDiscovery, ShipComponent, Component, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const config = require('../config');
 const maintenanceService = require('./maintenanceService');
@@ -384,12 +384,216 @@ const validateShipUnlock = async (userId, shipType) => {
   }
 };
 
+/**
+ * Jump drive — long-range travel bypassing hyperlane connections.
+ * Requires an installed jump_drive component. Uses sector coordinate distance.
+ */
+const jumpDrive = async (shipId, targetSectorId, userId) => {
+  const transaction = await sequelize.transaction();
+  let originSectorId = null;
+
+  try {
+    const ship = await Ship.findOne({
+      where: { ship_id: shipId, owner_user_id: userId },
+      include: [{ model: Sector, as: 'currentSector' }],
+      lock: transaction.LOCK.UPDATE,
+      transaction
+    });
+
+    if (!ship) {
+      throw Object.assign(new Error('Ship not found'), { statusCode: 404 });
+    }
+
+    if (!ship.is_active) {
+      throw Object.assign(new Error('Ship is destroyed'), { statusCode: 400 });
+    }
+
+    if (ship.current_sector_id === targetSectorId) {
+      throw Object.assign(new Error('Ship is already in the target sector'), { statusCode: 400 });
+    }
+
+    if (ship.in_combat) {
+      throw Object.assign(new Error('Cannot jump while in combat'), { statusCode: 400 });
+    }
+
+    originSectorId = ship.current_sector_id;
+
+    // Find installed jump drive component
+    const jumpDriveComponent = await ShipComponent.findOne({
+      where: { ship_id: shipId, is_active: true },
+      include: [{
+        model: Component,
+        as: 'component',
+        where: { type: 'jump_drive' }
+      }],
+      transaction
+    });
+
+    if (!jumpDriveComponent) {
+      throw Object.assign(new Error('No jump drive installed on this ship'), { statusCode: 400 });
+    }
+
+    const driveProps = jumpDriveComponent.component.special_properties || {};
+    const jumpRange = driveProps.jumpRange || 3;
+    const cooldownMs = driveProps.cooldownMs || 120000;
+    const fuelCost = driveProps.fuelCost || 25;
+    const effectiveness = jumpDriveComponent.condition;
+
+    if (effectiveness < 0.2) {
+      throw Object.assign(new Error('Jump drive is too damaged to function (condition below 20%)'), { statusCode: 400 });
+    }
+
+    // Check cooldown
+    if (ship.last_jump_at) {
+      const elapsed = Date.now() - new Date(ship.last_jump_at).getTime();
+      if (elapsed < cooldownMs) {
+        const remaining = Math.ceil((cooldownMs - elapsed) / 1000);
+        throw Object.assign(
+          new Error(`Jump drive is recharging. Ready in ${remaining}s`),
+          { statusCode: 400 }
+        );
+      }
+    }
+
+    // Validate target sector exists
+    const targetSector = await Sector.findByPk(targetSectorId, { transaction });
+    if (!targetSector) {
+      throw Object.assign(new Error('Target sector not found'), { statusCode: 404 });
+    }
+
+    // Calculate distance between sectors using coordinates
+    const dx = targetSector.x_coord - ship.currentSector.x_coord;
+    const dy = targetSector.y_coord - ship.currentSector.y_coord;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Jump range scales with effectiveness (damaged drives have shorter range)
+    const effectiveRange = jumpRange * effectiveness;
+    // Convert jumpRange (sector hops) to coordinate distance
+    // Average sector spacing is ~25 coordinate units per hop
+    const maxDistance = effectiveRange * 25;
+
+    if (distance > maxDistance) {
+      throw Object.assign(
+        new Error(`Target is out of jump range. Distance: ${Math.round(distance)}, Max range: ${Math.round(maxDistance)}`),
+        { statusCode: 400 }
+      );
+    }
+
+    // Check zone policy for the target sector
+    const toPolicy = worldPolicyService.buildDefaultSectorPolicy(targetSector);
+    if (toPolicy.access_mode !== 'public') {
+      throw Object.assign(
+        new Error('Cannot jump into restricted sector'),
+        { statusCode: 403 }
+      );
+    }
+
+    // Scale fuel cost with distance (closer = cheaper)
+    const distanceFactor = Math.max(0.5, distance / maxDistance);
+    const adjustedFuelCost = Math.ceil(fuelCost * distanceFactor);
+
+    if (ship.fuel < adjustedFuelCost) {
+      throw Object.assign(
+        new Error(`Insufficient fuel for jump. Required: ${adjustedFuelCost}, Available: ${ship.fuel}`),
+        { statusCode: 400 }
+      );
+    }
+
+    // Execute jump
+    await ship.update({
+      current_sector_id: targetSectorId,
+      fuel: ship.fuel - adjustedFuelCost,
+      last_jump_at: new Date()
+    }, { transaction });
+
+    // Jump drives take extra wear (2x degradation)
+    await maintenanceService.degradeOnJump(shipId, transaction);
+    await maintenanceService.degradeOnJump(shipId, transaction);
+
+    // Discover target sector
+    await discoverSectorAndNeighbors(userId, targetSectorId, transaction);
+
+    // Handle sector instance assignment
+    await sectorInstanceService.assignUserToSector({
+      userId, sectorId: targetSectorId, transaction
+    });
+    await sectorInstanceService.releaseUserFromSector({
+      userId, sectorId: originSectorId, transaction
+    });
+
+    // Entry protection for zone transitions
+    const entryProtection = combatPolicyService.resolveEntryProtection({
+      connectionPolicy: null,
+      toPolicy
+    });
+    if (entryProtection) {
+      await combatPolicyService.grantTravelProtection({
+        userId,
+        durationMs: entryProtection.durationMs,
+        reason: entryProtection.reason,
+        transaction
+      });
+    }
+
+    await transaction.commit();
+
+    await ship.reload({
+      include: [{ model: Sector, as: 'currentSector' }]
+    });
+
+    // Track achievements (fire-and-forget)
+    trackMovementAchievements(userId).catch(() => null);
+
+    await actionAuditService.record({
+      userId,
+      actionType: 'jump_drive',
+      scopeType: 'ship',
+      scopeId: shipId,
+      status: 'allow',
+      reason: 'authorized',
+      metadata: {
+        from_sector_id: originSectorId,
+        to_sector_id: targetSectorId,
+        distance: Math.round(distance),
+        fuel_cost: adjustedFuelCost,
+        drive_name: jumpDriveComponent.component.name
+      }
+    }).catch(() => null);
+
+    return {
+      ship,
+      jump_details: {
+        distance: Math.round(distance),
+        fuel_cost: adjustedFuelCost,
+        drive_name: jumpDriveComponent.component.name,
+        cooldown_ms: cooldownMs,
+        cooldown_until: new Date(Date.now() + cooldownMs).toISOString()
+      }
+    };
+  } catch (error) {
+    if (!transaction.finished) {
+      await transaction.rollback();
+    }
+    await actionAuditService.record({
+      userId,
+      actionType: 'jump_drive',
+      scopeType: 'ship',
+      scopeId: shipId,
+      status: 'deny',
+      reason: error.message,
+      metadata: { from_sector_id: originSectorId, to_sector_id: targetSectorId }
+    }).catch(() => null);
+    throw error;
+  }
+};
+
 module.exports = {
   getShipById,
   getUserShips,
   getAdjacentSectors,
   isAdjacent,
   moveShip,
+  jumpDrive,
   getShipStatus,
   activateShip,
   grantRescueShip,
