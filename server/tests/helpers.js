@@ -1,7 +1,7 @@
 /**
  * Test helper functions and fixtures
  */
-const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, PriceHistory, PlayerSkill, TechResearch, Wonder, Blueprint, CraftingJob, Mission, PlayerMission, Corporation, CorporationMember, AutomatedTask, ColonyBuilding, SurfaceAnomaly, CustomBlock, GroundUnit, GroundCombatUnit, GroundCombatInstance, FactionStanding, FactionWar, CombatInstance, Message, CosmeticUnlock, CorporationAgreement, CommunityEvent, EventContribution, Outpost, ShipDesignTemplate, Fleet, DailyQuest, VoxelBlock, PlayerProtectionState, ActionAuditLog, SectorInstanceAssignment, TransferLedger, ColonyRaidProtection, NpcConversationSession, sequelize } = require('../src/models');
+const { User, Ship, Sector, SectorConnection, Commodity, Port, PortCommodity, ShipCargo, Transaction, Component, ShipComponent, NPC, CombatLog, Planet, PlanetResource, Colony, Crew, Artifact, PlayerDiscovery, GameSetting, PriceHistory, PlayerSkill, TechResearch, Wonder, Blueprint, CraftingJob, Mission, PlayerMission, Corporation, CorporationMember, AutomatedTask, ColonyBuilding, SurfaceAnomaly, CustomBlock, GroundUnit, GroundCombatUnit, GroundCombatInstance, FactionStanding, FactionWar, CombatInstance, Message, CosmeticUnlock, CorporationAgreement, CommunityEvent, EventContribution, Outpost, ShipDesignTemplate, Fleet, DailyQuest, VoxelBlock, PlayerProtectionState, ActionAuditLog, SectorInstanceAssignment, TransferLedger, ColonyRaidProtection, NpcConversationSession, AgentAccount, AgentActionLog, sequelize } = require('../src/models');
 const authService = require('../src/services/authService');
 const gameSettingsService = require('../src/services/gameSettingsService');
 const bcrypt = require('bcryptjs');
@@ -235,6 +235,9 @@ const createTestGameSetting = async (overrides = {}) => {
 
 const cleanDatabase = async () => {
   // Delete in order to respect foreign key constraints
+  // Agent system first — references User
+  await AgentActionLog.destroy({ where: {} });
+  await AgentAccount.destroy({ where: {} });
   // New models (Phases 1-7) first — they reference User/Corp/Sector
   await EventContribution.destroy({ where: {} });
   await CommunityEvent.destroy({ where: {} });
@@ -463,6 +466,46 @@ const createTestGroundUnit = async (colonyId, userId, overrides = {}) => {
   return GroundUnit.create({ ...defaults, ...restOverrides });
 };
 
+// ============== Agent Helpers ==============
+
+/**
+ * Create a test agent account for a user
+ */
+const createTestAgent = async (userId, overrides = {}) => {
+  const defaults = {
+    owner_id: userId,
+    name: `Test Agent ${Date.now()}`,
+    status: 'stopped',
+    permissions: {
+      navigate: true,
+      trade: true,
+      scan: true,
+      dock: true,
+      combat: false,
+      colony: false,
+      fleet: false,
+      social: false
+    },
+    daily_credit_limit: 5000,
+    daily_credits_spent: 0,
+    rate_limit_per_minute: 30,
+    actions_this_minute: 0,
+    directive: 'idle',
+    directive_params: {}
+  };
+  return AgentAccount.create({ ...defaults, ...overrides });
+};
+
+/**
+ * Create a test agent account and return the raw API key once.
+ */
+const createTestAgentWithKey = async (userId, overrides = {}) => {
+  const agent = await createTestAgent(userId, overrides);
+  const apiKey = agent.generateApiKey();
+  await agent.save();
+  return { agent, apiKey };
+};
+
 module.exports = {
   createTestUser, createTestSector, createTestShip, createSectorConnection,
   createTestCommodity, createTestPort, addCommodityToPort, addCargoToShip,
@@ -479,5 +522,7 @@ module.exports = {
   createTestFleet,
   // Ground combat helpers
   createTestGroundUnit,
+  // Agent helpers
+  createTestAgent, createTestAgentWithKey,
   cleanDatabase, generateTestToken
 };
