@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ships, colonies, crew as crewApi, sectors, fleets as fleetsApi, combat, trade } from '../../services/api';
+import { ships, colonies, crew as crewApi, combat } from '../../services/api';
 import { Rocket, Globe, Building2, Users, ArrowRight, Wallet, AlertTriangle, Map, Swords, BarChart3, Shield, TrendingUp, Eye, Leaf, CheckCircle, Circle, X, BookOpen } from 'lucide-react';
-import AchievementsPanel, { checkAchievements } from './Achievements';
+import AchievementsPanel from './Achievements';
 import TerranDashboard from './TerranDashboard';
 import ZythianDashboard from './ZythianDashboard';
 import AutomatonDashboard from './AutomatonDashboard';
@@ -47,34 +47,10 @@ function Dashboard({ user }) {
 
   useEffect(() => {
     if (loading) return;
-    const fetchAchievementStats = async () => {
-      try {
-        const [mapRes, fleetsRes, combatRes, tradeRes] = await Promise.all([
-          sectors.getMapData().catch(() => null),
-          fleetsApi.getAll().catch(() => null),
-          combat.getHistory().catch(() => null),
-          trade.getHistory({ limit: 100 }).catch(() => null),
-        ]);
-        const discoveredSectors = mapRes?.data?.data?.discovered_systems || 0;
-        const fleetCount = (mapRes && fleetsRes?.data?.data?.fleets || fleetsRes?.data?.data || []).length || 0;
-        const logs = combatRes?.data?.combat_logs || [];
-        setCombatLogs(logs);
-        const combatWins = logs.filter(l => l.winner === 'attacker').length;
-        const tradeCount = (tradeRes?.data?.data?.transactions || tradeRes?.data?.data || []).length || 0;
-        checkAchievements({
-          level: user?.player_level || user?.level || 1,
-          credits: user?.credits || 0,
-          colonies: data.colonies.length,
-          sectors: discoveredSectors,
-          fleets: fleetCount,
-          combats: combatWins,
-          trades: tradeCount,
-        });
-        window.dispatchEvent(new CustomEvent('sw3k:achievement-check'));
-      } catch { /* silent */ }
-    };
-    fetchAchievementStats();
-  }, [loading, user, data]);
+    combat.getHistory()
+      .then(res => setCombatLogs(res?.data?.combat_logs || []))
+      .catch(() => {});
+  }, [loading]);
 
   if (loading) {
     return (

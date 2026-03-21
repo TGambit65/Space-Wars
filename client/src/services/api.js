@@ -401,6 +401,12 @@ export const admin = {
   getAuditSummary: () => api.get('/admin/audit/summary'),
 };
 
+// Achievements
+export const achievements = {
+  getAll: () => api.get('/achievements'),
+  getStats: () => api.get('/achievements/stats'),
+};
+
 // AI Agent
 export const agents = {
   get: () => api.get('/agents'),

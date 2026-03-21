@@ -13,7 +13,31 @@ import NPCChatPanel from './components/npc/NPCChatPanel';
 import NPCHailNotification from './components/npc/NPCHailNotification';
 import ChatPanel from './components/chat/ChatPanel';
 import { MessageSquare } from 'lucide-react';
+import { useNotifications } from './contexts/NotificationContext';
 import { clearToken, getToken, setToken } from './services/session';
+
+/** Listens for real-time achievement unlock events via socket and shows toast */
+function AchievementListener({ socket }) {
+  const { success } = useNotifications();
+
+  useEffect(() => {
+    if (!socket) return;
+    const handler = (data) => {
+      const rewardParts = [];
+      if (data.reward_credits > 0) rewardParts.push(`+${Number(data.reward_credits).toLocaleString()} credits`);
+      if (data.reward_xp > 0) rewardParts.push(`+${data.reward_xp} XP`);
+      if (data.reward_title) rewardParts.push(`Title: ${data.reward_title}`);
+      const rewardStr = rewardParts.length > 0 ? ` (${rewardParts.join(', ')})` : '';
+      success(`Achievement Unlocked: ${data.name}!${rewardStr}`, 8000);
+      // Notify dashboard widget to refresh
+      window.dispatchEvent(new CustomEvent('sw3k:achievement-unlocked'));
+    };
+    socket.on('achievement:unlocked', handler);
+    return () => socket.off('achievement:unlocked', handler);
+  }, [socket, success]);
+
+  return null;
+}
 
 const GalaxyMap = lazy(() => import('./components/navigation/GalaxyMap'));
 const SystemView = lazy(() => import('./components/navigation/SystemView'));
@@ -47,6 +71,7 @@ const EventsPage = lazy(() => import('./components/events/EventsPage'));
 const ShipInteriorView = lazy(() => import('./components/traversal/ShipInteriorView'));
 const DerelictBoardingView = lazy(() => import('./components/traversal/DerelictBoardingView'));
 const AgentPage = lazy(() => import('./components/agent/AgentPage'));
+const AchievementsPage = lazy(() => import('./components/common/AchievementsPage'));
 
 function RouteLoadingFallback() {
   return (
@@ -160,6 +185,7 @@ function App() {
         <Route path="/outposts" element={<OutpostsPage user={user} />} />
         <Route path="/events" element={<EventsPage user={user} />} />
         <Route path="/agent" element={<AgentPage user={user} />} />
+        <Route path="/achievements" element={<AchievementsPage />} />
         {user.is_admin && <Route path="/admin" element={<AdminPage user={user} />} />}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -204,6 +230,7 @@ function App() {
         onClose={() => setChatOpen(false)}
       />
 
+      <AchievementListener socket={socket} />
       <ToastContainer />
     </Layout>
     </GameSessionProvider>

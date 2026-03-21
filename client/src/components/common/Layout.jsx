@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Home, Globe, Building2, Users, LogOut, Wallet, Rocket, Map, ShoppingCart, Wrench, Hammer, Settings, Crosshair, TrendingUp, Boxes, Target, UsersRound, Bot, BarChart3, Swords, BookOpen, Shield, Mail, Flag, Landmark, Calendar, Palette, ChevronDown, ChevronRight, Keyboard, Menu, X, Eye, Leaf } from 'lucide-react';
+import { Home, Globe, Building2, Users, LogOut, Wallet, Rocket, Map, ShoppingCart, Wrench, Hammer, Settings, Crosshair, TrendingUp, Boxes, Target, UsersRound, Bot, BarChart3, Swords, BookOpen, Shield, Mail, Flag, Landmark, Calendar, Palette, ChevronDown, ChevronRight, Keyboard, Menu, X, Eye, Leaf, Trophy } from 'lucide-react';
 import StatusBar from './StatusBar';
 import useKeyboardShortcuts, { SHORTCUTS } from '../../hooks/useKeyboardShortcuts';
 import { useGameSession } from '../../contexts/GameSessionContext';
@@ -23,6 +23,7 @@ const coreNavItems = [
   { path: '/combat', icon: Swords, label: 'Combat' },
   { path: '/crew', icon: Users, label: 'Crew' },
   { path: '/progression', icon: TrendingUp, label: 'Progression' },
+  { path: '/achievements', icon: Trophy, label: 'Achievements' },
   { path: '/missions', icon: Target, label: 'Missions' },
   { path: '/messages', icon: Mail, label: 'Messages' },
 ];
