@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Trophy, Star, Crosshair, ShoppingCart, Globe, Rocket, Users, Compass, Swords, Building2, Target, Eye, Crown, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Trophy, Compass, Swords, ShoppingCart, Building2, Users, Star, Sparkles } from 'lucide-react';
 import { achievements as achievementsApi } from '../../services/api';
 
 const RARITY_COLORS = {
@@ -73,7 +74,7 @@ export default function AchievementsPanel() {
           <Trophy className="w-5 h-5 text-neon-orange" />
           Achievements
         </h2>
-        <a href="/achievements" className="text-xs text-neon-cyan hover:underline">View All</a>
+        <Link to="/achievements" className="text-xs text-neon-cyan hover:underline">View All</Link>
       </div>
 
       {/* Completion bar */}

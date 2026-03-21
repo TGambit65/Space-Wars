@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trophy, Lock, CheckCircle, ChevronDown } from 'lucide-react';
+import { Trophy, Lock, CheckCircle } from 'lucide-react';
 import { achievements as achievementsApi } from '../../services/api';
 import { RARITY_COLORS, CATEGORY_ICONS } from './Achievements';
 
