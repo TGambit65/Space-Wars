@@ -99,6 +99,7 @@ const executeAction = async (npc, decision, context = {}, socketService = null) 
           });
           break;
         }
+        const oldState = npc.behavior_state;
         const targetUpdate = {
           behavior_state: 'engaging',
           last_action_at: new Date()
@@ -110,16 +111,25 @@ const executeAction = async (npc, decision, context = {}, socketService = null) 
         }
         await npc.update(targetUpdate);
 
-        if (target && socketService) {
-          // target is a Ship model — extract owner_user_id
-          const targetUserId = target.owner_user_id;
-          if (targetUserId) {
-            socketService.emitToUser(targetUserId, 'npc:attacks_player', {
+        if (socketService) {
+          if (oldState !== 'engaging') {
+            socketService.emitToSector(npc.current_sector_id, 'npc:state_change', {
               npc_id: npc.npc_id,
               name: npc.name,
-              npc_type: npc.npc_type,
-              finishing_blow: action === 'finish_target'
+              old_state: oldState,
+              new_state: 'engaging'
             });
+          }
+          if (target) {
+            const targetUserId = target.owner_user_id;
+            if (targetUserId) {
+              socketService.emitToUser(targetUserId, 'npc:attacks_player', {
+                npc_id: npc.npc_id,
+                name: npc.name,
+                npc_type: npc.npc_type,
+                finishing_blow: action === 'finish_target'
+              });
+            }
           }
         }
         break;
@@ -158,24 +168,51 @@ const executeAction = async (npc, decision, context = {}, socketService = null) 
           }
         } else {
           // No escape route — just update state
+          const oldFleeState = npc.behavior_state;
           await npc.update({ behavior_state: 'fleeing', last_action_at: new Date() });
+          if (socketService && oldFleeState !== 'fleeing') {
+            socketService.emitToSector(npc.current_sector_id, 'npc:state_change', {
+              npc_id: npc.npc_id,
+              name: npc.name,
+              old_state: oldFleeState,
+              new_state: 'fleeing'
+            });
+          }
         }
         break;
       }
 
       case 'trade': {
+        const oldTradeState = npc.behavior_state;
         await npc.update({
           behavior_state: 'trading',
           last_action_at: new Date()
         });
+        if (socketService && oldTradeState !== 'trading') {
+          socketService.emitToSector(npc.current_sector_id, 'npc:state_change', {
+            npc_id: npc.npc_id,
+            name: npc.name,
+            old_state: oldTradeState,
+            new_state: 'trading'
+          });
+        }
         break;
       }
 
       case 'guard': {
+        const oldGuardState = npc.behavior_state;
         await npc.update({
           behavior_state: 'guarding',
           last_action_at: new Date()
         });
+        if (socketService && oldGuardState !== 'guarding') {
+          socketService.emitToSector(npc.current_sector_id, 'npc:state_change', {
+            npc_id: npc.npc_id,
+            name: npc.name,
+            old_state: oldGuardState,
+            new_state: 'guarding'
+          });
+        }
         break;
       }
 

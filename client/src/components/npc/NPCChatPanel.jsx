@@ -111,9 +111,11 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
         if (data.subscription_tier) setSubscriptionTier(data.subscription_tier);
         if (data.recognition?.relationship_label) setRelationshipLabel(data.recognition.relationship_label);
 
-        // Add NPC greeting — use recognition if NPC remembers this player
+        // Add NPC greeting — prefer hail text > recognition > personality summary
         let greeting;
-        if (data.recognition?.greeting) {
+        if (npc.hail_greeting) {
+          greeting = npc.hail_greeting;
+        } else if (data.recognition?.greeting) {
           greeting = data.recognition.greeting;
         } else {
           greeting = data.npc?.personality_summary

@@ -88,7 +88,7 @@ function App() {
   const [chatOpen, setChatOpen] = useState(false);
 
   const { socket, connected: socketConnected } = useSocket(user);
-  const { pendingHails, dismissHail, activityFeed } = useNPCEvents(socket);
+  const { sectorNPCs, pendingHails, dismissHail, activityFeed } = useNPCEvents(socket);
 
   useEffect(() => {
     auth.getProfile({ skipAuthRedirect: true })
@@ -126,7 +126,8 @@ function App() {
     setActiveChatNPC({
       npc_id: hail.npc_id,
       name: hail.name,
-      npc_type: hail.npc_type
+      npc_type: hail.npc_type,
+      hail_greeting: hail.greeting_text || null
     });
   }, [dismissHail]);
 
@@ -154,7 +155,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Dashboard user={user} />} />
         <Route path="/map" element={<GalaxyMap user={user} />} />
-        <Route path="/system" element={<SystemView user={user} onHailNPC={handleHailNPC} activityFeed={activityFeed} />} />
+        <Route path="/system" element={<SystemView user={user} onHailNPC={handleHailNPC} activityFeed={activityFeed} sectorNPCs={sectorNPCs} />} />
         <Route path="/ships" element={<ShipPanel user={user} />} />
         <Route path="/ship/:shipId/interior" element={<ShipInteriorView user={user} />} />
         <Route path="/ship/:shipId/derelict" element={<DerelictBoardingView user={user} />} />

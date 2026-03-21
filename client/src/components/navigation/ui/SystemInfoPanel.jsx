@@ -231,6 +231,20 @@ const SystemInfoPanel = ({ selectedType, selectedEntity, onClose, onScanPlanet, 
               <span className="text-gray-500">Aggression:</span>
               <span className="ml-1 text-gray-300">{selectedEntity.aggression_level}</span>
             </div>
+            {selectedEntity.behavior_state && (
+              <div className="col-span-2">
+                <span className="text-gray-500">Status:</span>
+                <span className={`ml-1 capitalize ${
+                  selectedEntity.behavior_state === 'attacking' || selectedEntity.behavior_state === 'pursuing'
+                    ? 'text-red-400'
+                    : selectedEntity.behavior_state === 'fleeing'
+                      ? 'text-yellow-400'
+                      : selectedEntity.behavior_state === 'trading' || selectedEntity.behavior_state === 'docking'
+                        ? 'text-green-400'
+                        : 'text-gray-300'
+                }`}>{selectedEntity.behavior_state}</span>
+              </div>
+            )}
           </div>
 
           {/* Hull bar */}

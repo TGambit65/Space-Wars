@@ -13,6 +13,16 @@ const PLANET_DOT_COLORS = {
   'Crystalline': '#E6E6FA'
 };
 
+const NPC_STATE_BADGES = {
+  attacking:  { label: 'Engaging',   className: 'bg-red-900/60 text-red-300' },
+  fleeing:    { label: 'Fleeing',    className: 'bg-yellow-900/60 text-yellow-300' },
+  trading:    { label: 'Trading',    className: 'bg-green-900/60 text-green-300' },
+  patrolling: { label: 'Patrolling', className: 'bg-blue-900/60 text-blue-300' },
+  guarding:   { label: 'Guarding',   className: 'bg-blue-900/60 text-blue-300' },
+  pursuing:   { label: 'Pursuing',   className: 'bg-orange-900/60 text-orange-300' },
+  docking:    { label: 'Docking',    className: 'bg-cyan-900/60 text-cyan-300' },
+};
+
 const SystemEntityBar = ({ systemDetail, selectedEntityId, onEntitySelect, currentShip, neighbors, onShipSelect }) => {
   if (!systemDetail) return null;
 
@@ -152,6 +162,7 @@ const SystemEntityBar = ({ systemDetail, selectedEntityId, onEntitySelect, curre
               const isHostile = npc.npc_type === 'PIRATE' || npc.npc_type === 'PIRATE_LORD' || npc.npc_type === 'BOUNTY_HUNTER';
               const isFriendly = npc.npc_type === 'TRADER';
               const npcColor = isHostile ? 'text-red-400' : isFriendly ? 'text-green-400' : 'text-yellow-400';
+              const stateBadge = NPC_STATE_BADGES[npc.behavior_state];
               return (
                 <button
                   key={npc.npc_id}
@@ -168,6 +179,11 @@ const SystemEntityBar = ({ systemDetail, selectedEntityId, onEntitySelect, curre
                     <Crosshair className={`w-3 h-3 ${npcColor} shrink-0`} />
                   )}
                   <span className="truncate max-w-[100px]">{npc.name}</span>
+                  {stateBadge && (
+                    <span className={`text-[9px] px-1 rounded ${stateBadge.className}`}>
+                      {stateBadge.label}
+                    </span>
+                  )}
                 </button>
               );
             })}

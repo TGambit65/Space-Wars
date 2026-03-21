@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Map, AlertTriangle, Star } from 'lucide-react';
 import useSystemData from './hooks/useSystemData';
@@ -19,7 +19,7 @@ const STAR_CLASS_LABELS = {
   BlackHole: 'Black Hole'
 };
 
-const SystemView = ({ user, onHailNPC, activityFeed = [] }) => {
+const SystemView = ({ user, onHailNPC, activityFeed = [], sectorNPCs = [] }) => {
   const navigate = useNavigate();
   const {
     systemDetail,
@@ -37,6 +37,33 @@ const SystemView = ({ user, onHailNPC, activityFeed = [] }) => {
   const [moveError, setMoveError] = useState(null);
 
   const neighbors = systemDetail?.neighbors || [];
+
+  // Merge initial NPC data with live socket updates.
+  // Socket-driven sectorNPCs take priority (newer state), fall back to initial fetch.
+  const liveNPCs = useMemo(() => {
+    const initialNPCs = systemDetail?.npcs || [];
+    if (sectorNPCs.length === 0) return initialNPCs;
+
+    // Build map from socket data (authoritative for presence + state)
+    const socketMap = new Map(sectorNPCs.map(n => [n.npc_id, n]));
+    // Merge: socket NPCs override initial data, keep initial fields socket doesn't have
+    const merged = new Map();
+    for (const npc of initialNPCs) {
+      const live = socketMap.get(npc.npc_id);
+      merged.set(npc.npc_id, live ? { ...npc, ...live } : npc);
+    }
+    // Add any NPCs that arrived via socket but weren't in initial fetch
+    for (const npc of sectorNPCs) {
+      if (!merged.has(npc.npc_id)) merged.set(npc.npc_id, npc);
+    }
+    return Array.from(merged.values());
+  }, [systemDetail?.npcs, sectorNPCs]);
+
+  // Build a system detail view with live NPCs for rendering
+  const liveSystemDetail = useMemo(() => {
+    if (!systemDetail) return null;
+    return { ...systemDetail, npcs: liveNPCs };
+  }, [systemDetail, liveNPCs]);
 
   const selectedEntityId = selectedType === 'ship' ? 'ship' :
     (selectedEntity?.planet_id || selectedEntity?.port_id ||
@@ -139,7 +166,7 @@ const SystemView = ({ user, onHailNPC, activityFeed = [] }) => {
     <div className="relative w-full h-screen overflow-hidden bg-black">
       {/* Three.js Canvas */}
       <SystemViewCanvas
-        systemDetail={systemDetail}
+        systemDetail={liveSystemDetail}
         currentShip={currentShip}
         selectedEntityId={selectedEntityId}
         onEntityClick={handleEntityClick}
@@ -215,7 +242,7 @@ const SystemView = ({ user, onHailNPC, activityFeed = [] }) => {
         moving={moving}
         currentShip={currentShip}
         user={user}
-        systemData={systemDetail}
+        systemData={liveSystemDetail}
       />
 
       {/* Bottom-left: Sector activity feed */}
@@ -225,7 +252,7 @@ const SystemView = ({ user, onHailNPC, activityFeed = [] }) => {
 
       {/* Bottom bar: Entity list */}
       <SystemEntityBar
-        systemDetail={systemDetail}
+        systemDetail={liveSystemDetail}
         selectedEntityId={selectedEntityId}
         onEntitySelect={handleEntitySelect}
         currentShip={currentShip}
