@@ -1,5 +1,6 @@
 import { X, Globe, Anchor, Crosshair, Skull, User, Scan, Flag, Building2, Star, AlertCircle, Orbit, MessageSquare, Navigation, Rocket, Shield, Fuel, Activity, Wrench, Map as MapIcon, Swords } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { FACTION_COLORS as FACTION_PANEL_COLORS, FACTION_LABELS as FACTION_PANEL_LABELS } from '../../../constants/factions';
 
 const PLANET_TYPE_COLORS = {
   'Terran': 'text-blue-400',
@@ -12,21 +13,6 @@ const PLANET_TYPE_COLORS = {
   'Jungle': 'text-green-500',
   'Toxic': 'text-lime-400',
   'Crystalline': 'text-purple-300'
-};
-
-const FACTION_PANEL_COLORS = {
-  terran_alliance: '#3498db',
-  zythian_swarm: '#e74c3c',
-  automaton_collective: '#9b59b6',
-  synthesis_accord: '#d4a017',
-  sylvari_dominion: '#2ecc71'
-};
-const FACTION_PANEL_LABELS = {
-  terran_alliance: 'Terran',
-  zythian_swarm: 'Zythian',
-  automaton_collective: 'Automaton',
-  synthesis_accord: 'Synthesis',
-  sylvari_dominion: 'Sylvari'
 };
 
 const INTERACTIVE_TYPES = ['TRADER', 'PATROL', 'BOUNTY_HUNTER'];

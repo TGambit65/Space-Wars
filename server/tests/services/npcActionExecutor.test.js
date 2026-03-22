@@ -105,7 +105,11 @@ describe('NPC Action Executor', () => {
         needsAI: false
       }, {}, mockSocketService);
 
-      expect(mockSocketService.emitToSector).toHaveBeenCalledTimes(2);
+      expect(mockSocketService.emitToSector).toHaveBeenCalledTimes(3);
+      // State change (idle → patrolling)
+      expect(mockSocketService.emitToSector).toHaveBeenCalledWith(
+        'sector-2', 'npc:state_change', expect.objectContaining({ npc_id: 'npc-1', old_state: 'idle', new_state: 'patrolling' })
+      );
       // Left old sector
       expect(mockSocketService.emitToSector).toHaveBeenCalledWith(
         'sector-1', 'npc:left_sector', expect.objectContaining({ npc_id: 'npc-1' })

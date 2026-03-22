@@ -1,6 +1,12 @@
 const { NpcMemory } = require('../models');
+const { Op } = require('sequelize');
 
 const MAX_MEMORY_BULLETS = 10;
+
+// Memory decay constants
+const DECAY_THRESHOLD_HOURS = 24;
+const DECAY_RATE = 0.02;
+const DECAY_FLOOR = 0.05;
 
 /**
  * Get or create a memory record for an NPC-player pair.
@@ -213,6 +219,46 @@ const recordStandardInteraction = async (npcId, userId, interactionType, memoryB
   });
 };
 
+/**
+ * Decay all stale memory scores. Called from maintenance tick.
+ * Scores for memories not interacted with in DECAY_THRESHOLD_HOURS are
+ * multiplied by (1 - DECAY_RATE). Values below DECAY_FLOOR snap to 0.
+ * @returns {Promise<number>} Number of records decayed
+ */
+const decayAllMemories = async () => {
+  const cutoff = new Date(Date.now() - DECAY_THRESHOLD_HOURS * 60 * 60 * 1000);
+  const staleMemories = await NpcMemory.findAll({
+    where: {
+      last_interaction_at: { [Op.lt]: cutoff },
+      [Op.or]: [
+        { trust: { [Op.ne]: 0 } },
+        { fear: { [Op.ne]: 0 } },
+        { respect: { [Op.ne]: 0 } }
+      ]
+    }
+  });
+
+  let decayed = 0;
+  for (const memory of staleMemories) {
+    const updates = {};
+    const decayScore = (val) => {
+      const newVal = val * (1 - DECAY_RATE);
+      return Math.abs(newVal) < DECAY_FLOOR ? 0 : newVal;
+    };
+
+    if (memory.trust !== 0) updates.trust = decayScore(memory.trust);
+    if (memory.fear !== 0) updates.fear = decayScore(memory.fear);
+    if (memory.respect !== 0) updates.respect = decayScore(memory.respect);
+
+    if (Object.keys(updates).length > 0) {
+      await memory.update(updates);
+      decayed++;
+    }
+  }
+
+  return decayed;
+};
+
 module.exports = {
   getOrCreateMemory,
   recordInteraction,
@@ -220,5 +266,9 @@ module.exports = {
   getRelationshipLabel,
   getRecognition,
   getRelationship,
-  INTERACTION_DELTAS
+  decayAllMemories,
+  INTERACTION_DELTAS,
+  DECAY_THRESHOLD_HOURS,
+  DECAY_RATE,
+  DECAY_FLOOR
 };

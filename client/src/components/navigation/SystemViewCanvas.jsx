@@ -1,22 +1,7 @@
 import { useRef, useEffect, useCallback, useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-
-// ============== Faction Colors ==============
-const FACTION_HEX = {
-  terran_alliance: 0x3498db,
-  zythian_swarm: 0xe74c3c,
-  automaton_collective: 0x9b59b6,
-  synthesis_accord: 0xd4a017,
-  sylvari_dominion: 0x2ecc71
-};
-const FACTION_CSS = {
-  terran_alliance: '#3498db',
-  zythian_swarm: '#e74c3c',
-  automaton_collective: '#9b59b6',
-  synthesis_accord: '#d4a017',
-  sylvari_dominion: '#2ecc71'
-};
+import { FACTION_HEX, FACTION_COLORS as FACTION_CSS } from '../../constants/factions';
 
 // ============== Visual Configuration ==============
 

@@ -9,6 +9,7 @@ const aiProviderFactory = require('./ai/aiProviderFactory');
 const { getAdjacentSectorIds } = require('./sectorGraphService');
 const missionService = require('./missionService');
 const npcMemoryService = require('./npcMemoryService');
+const worldPolicyService = require('./worldPolicyService');
 const crypto = require('crypto');
 
 // Max conversation history entries to prevent unbounded growth
@@ -124,6 +125,43 @@ const buildDialogueContext = async (npc) => {
     }
   } catch (err) {
     console.error('Error building adjacent sector context:', err.message);
+  }
+
+  // Fetch sector metadata and compute territory pressure
+  try {
+    const sector = await Sector.findByPk(npc.current_sector_id, {
+      attributes: ['sector_id', 'name', 'zone_class', 'security_class']
+    });
+    if (sector) {
+      context.sectorInfo.zone_class = sector.zone_class;
+      context.sectorInfo.security_class = sector.security_class;
+      context.sectorInfo.name = sector.name;
+
+      // Count patrols and players for pressure calculation
+      const patrolCount = await NPC.count({
+        where: {
+          current_sector_id: npc.current_sector_id,
+          is_alive: true,
+          npc_type: 'PATROL',
+          npc_id: { [Op.ne]: npc.npc_id }
+        }
+      });
+      const playerCount = await Ship.count({
+        where: { current_sector_id: npc.current_sector_id, is_active: true }
+      });
+
+      const pressure = worldPolicyService.computeSectorPressure({
+        zone_class: sector.zone_class,
+        security_class: sector.security_class,
+        hostileNPCCount: context.sectorInfo.hostileCount || 0,
+        patrolNPCCount: patrolCount,
+        playerCount
+      });
+      context.sectorInfo.pressure = pressure.pressure;
+      context.sectorInfo.pressureLabel = pressure.label;
+    }
+  } catch (err) {
+    console.error('Error building sector pressure context:', err.message);
   }
 
   // Get port commodities if NPC is at a port (relevant for traders)
@@ -409,6 +447,20 @@ const selectMenuOption = async (userId, npcId, optionKey) => {
   // Build context for scripts
   const context = await buildDialogueContext(npc);
 
+  // Attach relationship data so scripts can scale rewards
+  try {
+    const rel = await npcMemoryService.getRelationship(npcId, userId);
+    if (rel) {
+      context.relationship = {
+        trust: rel.trust,
+        fear: rel.fear,
+        respect: rel.respect,
+        interaction_count: rel.interaction_count,
+        label: rel.label
+      };
+    }
+  } catch { /* non-critical */ }
+
   // Get scripted response
   const response = dialogueScriptsService.getScriptedResponse(npc.npc_type, optionKey, npc, context);
   if (!response) {
@@ -498,8 +550,16 @@ const processFreeText = async (userId, npcId, text) => {
     };
   };
 
-  // Check cache — include NPC type and behavior state for context-aware keying
-  const cacheKey = `${npc.npc_type}:${npc.behavior_state || 'idle'}:${hashContext(npc.npc_id, text, npc.current_sector_id)}`;
+  // Fetch relationship early so cache key is context-aware (cheap indexed lookup)
+  let relLabel = '';
+  let relData = null;
+  try {
+    relData = await npcMemoryService.getRelationship(npcId, userId);
+    if (relData) relLabel = relData.label || '';
+  } catch { /* non-critical */ }
+
+  // Check cache — include NPC type, behavior state, and relationship for context-aware keying
+  const cacheKey = `${npc.npc_type}:${npc.behavior_state || 'idle'}:${relLabel}:${hashContext(npc.npc_id, text, npc.current_sector_id)}`;
   const cached = dialogueCacheService.getCached(cacheKey);
   if (cached) {
     return finalizeResponse(cached.text, true);
@@ -516,19 +576,16 @@ const processFreeText = async (userId, npcId, text) => {
       // Build context for richer AI responses
       const context = await buildDialogueContext(npc);
 
-      // Enrich context with relationship memory for the current player
-      try {
-        const relationship = await npcMemoryService.getRelationship(npcId, userId);
-        if (relationship) {
-          context.relationship = {
-            label: relationship.label,
-            trust: relationship.trust,
-            respect: relationship.respect,
-            fear: relationship.fear,
-            notable_facts: relationship.notable_fact ? [relationship.notable_fact] : []
-          };
-        }
-      } catch { /* non-critical */ }
+      // Enrich context with relationship memory (reuse early fetch)
+      if (relData) {
+        context.relationship = {
+          label: relData.label,
+          trust: relData.trust,
+          respect: relData.respect,
+          fear: relData.fear,
+          notable_facts: relData.notable_fact ? [relData.notable_fact] : []
+        };
+      }
 
       const messages = npcPersonalityService.buildInteractivePrompt(npc, personality, history, context);
       const result = await provider.generateText(messages);

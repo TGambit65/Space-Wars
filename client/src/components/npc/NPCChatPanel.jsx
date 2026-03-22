@@ -5,6 +5,7 @@ import { dialogue } from '../../services/api';
 import useVoiceChat from '../../hooks/useVoiceChat';
 import NPCPortrait from './NPCPortrait';
 import VoiceButton from './VoiceButton';
+import { FACTION_COLORS, FACTION_LABELS } from '../../constants/factions';
 
 const TYPE_BADGE = {
   PIRATE: 'badge-red',
@@ -12,22 +13,6 @@ const TYPE_BADGE = {
   TRADER: 'badge-green',
   PATROL: 'badge-cyan',
   BOUNTY_HUNTER: 'badge-orange',
-};
-
-const FACTION_COLORS = {
-  terran_alliance: '#3498db',
-  zythian_swarm: '#e74c3c',
-  automaton_collective: '#9b59b6',
-  synthesis_accord: '#d4a017',
-  sylvari_dominion: '#2ecc71'
-};
-
-const FACTION_LABELS = {
-  terran_alliance: 'Terran',
-  zythian_swarm: 'Zythian',
-  automaton_collective: 'Automaton',
-  synthesis_accord: 'Synthesis',
-  sylvari_dominion: 'Sylvari'
 };
 
 const NPCChatPanel = ({ npc, socket, onClose, user }) => {
@@ -170,6 +155,7 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
       }
     };
 
+    // npc:dialogue is not yet emitted by the server — listener ready for future server-push dialogue
     socket.on('npc:dialogue', onDialogueMessage);
     return () => { socket.off('npc:dialogue', onDialogueMessage); };
   }, [socket, npc.npc_id]);
@@ -308,7 +294,7 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
           addNPCResponse(null, null, false, {
             type: 'route_tip',
             routes: data.data.routes,
-            onNavigate: (sectorId) => navigate(`/map`)
+            onNavigate: (sectorId) => navigate('/map', { state: { focusSector: sectorId } })
           });
         }
 
@@ -432,7 +418,7 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
               {npc.npc_type?.replace('_', ' ')}
             </span>
             {npc.faction && (
-              <span className="text-[10px] font-medium px-1 rounded" style={{ color: FACTION_COLORS[npc.faction] || '#888', borderColor: FACTION_COLORS[npc.faction] || '#888', border: '1px solid' }}>
+              <span className="text-[10px] font-medium px-1 rounded" style={{ color: FACTION_COLORS[npc.faction] || '#888', border: `1px solid ${FACTION_COLORS[npc.faction] || '#888'}40` }}>
                 {FACTION_LABELS[npc.faction] || npc.faction}
               </span>
             )}
@@ -739,7 +725,7 @@ const ActionCard = ({ card }) => {
             </div>
           ))}
           {card.onNavigate && (
-            <button onClick={() => card.onNavigate()} className="mt-1.5 text-[10px] text-blue-400 hover:underline">
+            <button onClick={() => card.onNavigate(card.routes[0]?.from_id)} className="mt-1.5 text-[10px] text-blue-400 hover:underline">
               View on Map
             </button>
           )}
@@ -767,8 +753,6 @@ const ActionCard = ({ card }) => {
       return null;
   }
 };
-
-// ─── Thinking Dots ───────────────────────────────────────────────────
 
 // ─── Relationship Bar ──────────────────────────────────────────────
 

@@ -423,6 +423,49 @@ const resolveTraversal = async ({ fromSectorId, toSectorId, userId = null, trans
   };
 };
 
+// ─── Territory Pressure ──────────────────────────────────────────
+
+const ZONE_BASE_PRESSURE = {
+  core: 0.05,
+  inner_ring: 0.15,
+  mid_ring: 0.30,
+  outer_ring: 0.50,
+  frontier: 0.65,
+  deep_space: 0.75
+};
+
+const SECURITY_MODIFIER = {
+  protected: -0.10,
+  pve: 0.0,
+  contested: 0.10,
+  pvp: 0.15
+};
+
+/**
+ * Compute territory pressure for a sector based on zone, security, and NPC presence.
+ * @param {{ zone_class: string, security_class: string, hostileNPCCount: number, patrolNPCCount: number, playerCount: number }} params
+ * @returns {{ pressure: number, label: string }}
+ */
+const computeSectorPressure = ({ zone_class, security_class, hostileNPCCount = 0, patrolNPCCount = 0, playerCount = 0 }) => {
+  let pressure = ZONE_BASE_PRESSURE[zone_class] || 0.30;
+  pressure += SECURITY_MODIFIER[security_class] || 0;
+  pressure += hostileNPCCount * 0.08;
+  pressure -= patrolNPCCount * 0.05;
+  pressure -= Math.max(0, playerCount - 1) * 0.03;
+
+  // Clamp to [0, 1]
+  pressure = Math.max(0, Math.min(1, pressure));
+
+  let label;
+  if (pressure < 0.15) label = 'Secure';
+  else if (pressure < 0.30) label = 'Low Threat';
+  else if (pressure < 0.55) label = 'Moderate';
+  else if (pressure < 0.75) label = 'Dangerous';
+  else label = 'Hostile Territory';
+
+  return { pressure, label };
+};
+
 module.exports = {
   buildDefaultSectorPolicy,
   buildDefaultConnectionPolicy,
@@ -430,5 +473,6 @@ module.exports = {
   summarizeConnectionPolicy,
   loadUserContext,
   getAccessibleAdjacentSectors,
-  resolveTraversal
+  resolveTraversal,
+  computeSectorPressure
 };

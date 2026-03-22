@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback, useState, useMemo } from 'react';
 import useViewport from './hooks/useViewport';
+import { FACTION_LABELS } from '../../constants/factions';
 
 // Simple Quadtree for spatial indexing (optimized for 1200+ nodes)
 class Quadtree {
@@ -92,6 +93,15 @@ const PHENOMENA_COLORS = {
 
 const STAR_SIZES = {
   Core: 8, Inner: 7, Mid: 6, Outer: 5, Fringe: 4, Unknown: 4
+};
+
+// Faction territory tint colors (RGBA with low alpha for subtle overlay)
+const FACTION_TINT = {
+  terran_alliance: '52, 152, 219',
+  zythian_swarm: '231, 76, 60',
+  automaton_collective: '155, 89, 182',
+  synthesis_accord: '212, 160, 23',
+  sylvari_dominion: '46, 204, 113'
 };
 
 const GalaxyMapCanvas = ({
@@ -538,6 +548,21 @@ function drawSystems(ctx, systems, offset, zoom, currentSectorId,
     const baseSize = Math.max(3, (STAR_SIZES[sys.type] || 5) * Math.min(1.5, zoom * 0.8));
     const starColor = STAR_COLORS[sys.star_class] || '#FFFFFF';
 
+    // Faction territory tint (subtle halo behind star)
+    if (sys.dominant_faction && FACTION_TINT[sys.dominant_faction] && zoom > 0.3) {
+      const factionRgb = FACTION_TINT[sys.dominant_faction];
+      const tintRadius = baseSize * 6;
+      const tintAlpha = Math.min(0.15, zoom * 0.1);
+      const tintGrad = ctx.createRadialGradient(sx, sy, 0, sx, sy, tintRadius);
+      tintGrad.addColorStop(0, `rgba(${factionRgb}, ${tintAlpha})`);
+      tintGrad.addColorStop(0.6, `rgba(${factionRgb}, ${tintAlpha * 0.4})`);
+      tintGrad.addColorStop(1, `rgba(${factionRgb}, 0)`);
+      ctx.fillStyle = tintGrad;
+      ctx.beginPath();
+      ctx.arc(sx, sy, tintRadius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
     // Glow effect
     const glowSize = baseSize * (isCurrent ? 4 : isHovered ? 3 : 2);
     const gradient = ctx.createRadialGradient(sx, sy, 0, sx, sy, glowSize);
@@ -777,6 +802,9 @@ function drawTooltip(ctx, sys, screenX, screenY, isAdjacent, isCurrent, myShips)
     `Star: ${sys.star_class}`,
     `Hazard: ${sys.hazard_level}/10`,
   ];
+  if (sys.dominant_faction) {
+    lines.push(`Faction: ${FACTION_LABELS[sys.dominant_faction] || sys.dominant_faction}`);
+  }
   if (sys.has_port) lines.push('Has Port');
   if (sys.ship_count > 0) lines.push(`Ships: ${sys.ship_count}`);
   if (myShips && myShips.length > 0) lines.push(`My Ships: ${myShips.length}`);

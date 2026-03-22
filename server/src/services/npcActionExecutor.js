@@ -58,6 +58,7 @@ const executeAction = async (npc, decision, context = {}, socketService = null) 
           break;
         }
 
+        const oldMoveState = npc.behavior_state;
         let moved = false;
         try {
           moved = await npcService.moveNPC(npc.npc_id, targetSectorId);
@@ -68,9 +69,18 @@ const executeAction = async (npc, decision, context = {}, socketService = null) 
           break;
         }
         if (moved) {
-          await npc.update({ behavior_state: action === 'patrol' ? 'patrolling' : 'hunting' });
+          const newMoveState = action === 'patrol' ? 'patrolling' : 'hunting';
+          await npc.update({ behavior_state: newMoveState });
 
           if (socketService) {
+            if (oldMoveState !== newMoveState) {
+              socketService.emitToSector(targetSectorId, 'npc:state_change', {
+                npc_id: npc.npc_id,
+                name: npc.name,
+                old_state: oldMoveState,
+                new_state: newMoveState
+              });
+            }
             socketService.emitToSector(oldSectorId, 'npc:left_sector', {
               npc_id: npc.npc_id,
               name: npc.name,
@@ -81,7 +91,7 @@ const executeAction = async (npc, decision, context = {}, socketService = null) 
               name: npc.name,
               npc_type: npc.npc_type,
               ship_type: npc.ship_type,
-              behavior_state: npc.behavior_state
+              behavior_state: newMoveState
             });
           }
         }
@@ -138,6 +148,7 @@ const executeAction = async (npc, decision, context = {}, socketService = null) 
       case 'flee': {
         const fleeTarget = targetSectorId
           || findSafestAdjacentSector(context.adjacentSectors || []);
+        const oldFleeMovState = npc.behavior_state;
 
         if (fleeTarget) {
           let moved = false;
@@ -152,6 +163,14 @@ const executeAction = async (npc, decision, context = {}, socketService = null) 
             await npc.update({ behavior_state: 'fleeing' });
 
             if (socketService) {
+              if (oldFleeMovState !== 'fleeing') {
+                socketService.emitToSector(oldSectorId, 'npc:state_change', {
+                  npc_id: npc.npc_id,
+                  name: npc.name,
+                  old_state: oldFleeMovState,
+                  new_state: 'fleeing'
+                });
+              }
               socketService.emitToSector(oldSectorId, 'npc:left_sector', {
                 npc_id: npc.npc_id,
                 name: npc.name,
@@ -218,7 +237,20 @@ const executeAction = async (npc, decision, context = {}, socketService = null) 
 
       case 'idle':
       default: {
-        await npc.update({ last_action_at: new Date() });
+        const oldIdleState = npc.behavior_state;
+        const updates = { last_action_at: new Date() };
+        if (action === 'idle' && oldIdleState !== 'idle') {
+          updates.behavior_state = 'idle';
+        }
+        await npc.update(updates);
+        if (socketService && action === 'idle' && oldIdleState !== 'idle') {
+          socketService.emitToSector(npc.current_sector_id, 'npc:state_change', {
+            npc_id: npc.npc_id,
+            name: npc.name,
+            old_state: oldIdleState,
+            new_state: 'idle'
+          });
+        }
         break;
       }
     }

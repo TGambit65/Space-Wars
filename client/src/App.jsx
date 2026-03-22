@@ -16,6 +16,21 @@ import { MessageSquare } from 'lucide-react';
 import { useNotifications } from './contexts/NotificationContext';
 import { clearToken, getToken, setToken } from './services/session';
 
+/** Listens for NPC combat alerts and shows a warning toast */
+function CombatAlertListener({ combatAlert, clearCombatAlert }) {
+  const { warning } = useNotifications();
+
+  useEffect(() => {
+    if (!combatAlert) return;
+    const npcName = combatAlert.name || 'Unknown NPC';
+    const npcType = combatAlert.npc_type ? ` (${combatAlert.npc_type})` : '';
+    warning(`Combat Alert: ${npcName}${npcType} is engaging you!`, 8000);
+    clearCombatAlert();
+  }, [combatAlert, clearCombatAlert, warning]);
+
+  return null;
+}
+
 /** Listens for real-time achievement unlock events via socket and shows toast */
 function AchievementListener({ socket }) {
   const { success } = useNotifications();
@@ -88,7 +103,7 @@ function App() {
   const [chatOpen, setChatOpen] = useState(false);
 
   const { socket, connected: socketConnected } = useSocket(user);
-  const { sectorNPCs, pendingHails, dismissHail, activityFeed } = useNPCEvents(socket);
+  const { sectorNPCs, pendingHails, dismissHail, activityFeed, combatAlert, clearCombatAlert } = useNPCEvents(socket);
 
   useEffect(() => {
     auth.getProfile({ skipAuthRedirect: true })
@@ -231,6 +246,7 @@ function App() {
         onClose={() => setChatOpen(false)}
       />
 
+      <CombatAlertListener combatAlert={combatAlert} clearCombatAlert={clearCombatAlert} />
       <AchievementListener socket={socket} />
       <ToastContainer />
     </Layout>

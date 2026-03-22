@@ -7,6 +7,30 @@
  * Speech style variations are applied by wrapping final text through stylize().
  */
 
+// ─── Relationship-Scaled Helpers ──────────────────────────────────
+
+/**
+ * Compute a reward multiplier based on relationship context.
+ * Range: [0.7, 1.5] — higher trust/respect = better rewards.
+ */
+const rewardMultiplier = (context) => {
+  const rel = context && context.relationship;
+  if (!rel) return 1.0;
+  const raw = 1.0 + (rel.trust || 0) * 0.3 + (rel.respect || 0) * 0.2;
+  return Math.max(0.7, Math.min(1.5, raw));
+};
+
+/**
+ * Compute bribe acceptance chance based on relationship context.
+ * Range: [0.2, 0.95] — higher trust/fear = more likely to accept.
+ */
+const bribeAcceptChance = (context) => {
+  const rel = context && context.relationship;
+  if (!rel) return 0.6;
+  const raw = 0.6 + (rel.trust || 0) * 0.15 + (rel.fear || 0) * 0.2;
+  return Math.max(0.2, Math.min(0.95, raw));
+};
+
 // ─── Speech Style Variation ────────────────────────────────────────
 
 const greetingPrefixes = {
@@ -213,12 +237,14 @@ const patrolScripts = {
   ask_safety: (npc, context) => {
     const hostileCount = (context.adjacentSectors || []).reduce((sum, s) => sum + (s.hostileCount || 0), 0);
     const currentHostiles = (context.sectorInfo || {}).hostileCount || 0;
+    const pressureLabel = (context.sectorInfo || {}).pressureLabel;
+    const pressureSuffix = pressureLabel ? ` Sector threat assessment: ${pressureLabel}.` : '';
 
     if (currentHostiles > 0) {
-      return { text: `This sector has ${currentHostiles} hostile contact${currentHostiles > 1 ? 's' : ''} on my scanners. Stay sharp and keep your shields up.` };
+      return { text: `This sector has ${currentHostiles} hostile contact${currentHostiles > 1 ? 's' : ''} on my scanners. Stay sharp and keep your shields up.${pressureSuffix}` };
     }
     if (hostileCount > 0) {
-      return { text: `Current sector reads clear, but adjacent sectors show ${hostileCount} hostile contact${hostileCount > 1 ? 's' : ''} nearby. Watch your approach vectors.` };
+      return { text: `Current sector reads clear, but adjacent sectors show ${hostileCount} hostile contact${hostileCount > 1 ? 's' : ''} nearby. Watch your approach vectors.${pressureSuffix}` };
     }
 
     const variants = [
@@ -226,7 +252,7 @@ const patrolScripts = {
       "All clear in this area. I've been running patrols and nothing's turned up.",
       "Low threat level here. But don't get complacent — things change fast in deep space."
     ];
-    return { text: pick(variants) };
+    return { text: `${pick(variants)}${pressureSuffix}` };
   },
 
   ask_bounties: (npc, context) => {
@@ -236,7 +262,8 @@ const patrolScripts = {
         sector_name: s.name, sector_id: s.sector_id, hostile_count: s.hostileCount
       }));
       const targetStr = dangerousSectors.map(s => `${s.name} (${s.hostileCount} hostiles)`).join(', ');
-      const rewardCredits = 500 + Math.floor(Math.random() * 1000);
+      const mult = rewardMultiplier(context);
+      const rewardCredits = Math.round((500 + Math.floor(Math.random() * 1000)) * mult);
       return {
         text: `Known hostile activity in: ${targetStr}. Take them out and I'll authorize a ${rewardCredits} credit bounty for you.`,
         data: { action: 'bounty_info', targets, create_mission: true, reward_credits: rewardCredits }
@@ -251,9 +278,10 @@ const patrolScripts = {
     return { text: pick(variants) };
   },
 
-  request_escort: (npc) => {
+  request_escort: (npc, context) => {
     const sectors = 3 + Math.floor(Math.random() * 4);
-    const rewardCredits = 300 + Math.floor(Math.random() * 500);
+    const mult = rewardMultiplier(context);
+    const rewardCredits = Math.round((300 + Math.floor(Math.random() * 500)) * mult);
     const variants = [
       `Can't escort you personally, but I can authorize a patrol sweep. Visit ${sectors} sectors and report back — ${rewardCredits} credits for your trouble.`,
       `Escort duty isn't in my mandate, but how about this: patrol ${sectors} sectors nearby and I'll see you get ${rewardCredits} credits. Deal?`,
@@ -296,7 +324,8 @@ const bountyHunterScripts = {
 
   offer_contract: (npc, context) => {
     const kills = 1 + Math.floor(Math.random() * 3);
-    const rewardCredits = 800 + Math.floor(Math.random() * 1200);
+    const mult = rewardMultiplier(context);
+    const rewardCredits = Math.round((800 + Math.floor(Math.random() * 1200)) * mult);
     const dangerousSectors = (context.adjacentSectors || []).filter(s => s.hostileCount > 0);
     const sectorHint = dangerousSectors.length > 0
       ? ` I know there are targets in ${dangerousSectors[0].name}.`
@@ -310,8 +339,9 @@ const bountyHunterScripts = {
     return { text: pick(variants), data: { action: 'accept_contract', kills, reward_credits: rewardCredits } };
   },
 
-  ask_price: (npc) => {
-    const baseRate = 500 + Math.floor(Math.random() * 500);
+  ask_price: (npc, context) => {
+    const mult = rewardMultiplier(context);
+    const baseRate = Math.round((500 + Math.floor(Math.random() * 500)) * mult);
     const variants = [
       `My standard rate is ${baseRate} credits per confirmed kill. Negotiable for bulk work.`,
       `${baseRate} credits gets you my gun for one job. Take it or leave it.`,
@@ -351,7 +381,7 @@ const pirateScripts = {
     return { text: pick(variants) };
   },
 
-  bribe: (npc) => {
+  bribe: (npc, context) => {
     const personality = npc.ai_personality || {};
     const isGreedy = personality.trait_primary === 'greedy';
     const amount = isGreedy
@@ -363,7 +393,7 @@ const pirateScripts = {
     }
 
     const roll = Math.random();
-    if (roll < 0.6) {
+    if (roll < bribeAcceptChance(context)) {
       return { text: `${amount} credits and we never met. Deal?`, data: { bribe_amount: amount, bribe_accepted: true } };
     }
     return { text: "Keep your credits. I'd rather have your cargo. All of it.", data: { bribe_accepted: false } };
@@ -447,5 +477,7 @@ const getAvailableScripts = (npcType) => {
 
 module.exports = {
   getScriptedResponse,
-  getAvailableScripts
+  getAvailableScripts,
+  rewardMultiplier,
+  bribeAcceptChance
 };

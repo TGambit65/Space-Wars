@@ -1,4 +1,5 @@
 import { Globe, Anchor, Crosshair, Skull, HelpCircle, Rocket, Navigation } from 'lucide-react';
+import { FACTION_TAILWIND as FACTION_COLORS, FACTION_SHORT } from '../../../constants/factions';
 
 const PLANET_DOT_COLORS = {
   'Terran': '#4A90D9',
@@ -11,22 +12,6 @@ const PLANET_DOT_COLORS = {
   'Jungle': '#228B22',
   'Toxic': '#9ACD32',
   'Crystalline': '#E6E6FA'
-};
-
-const FACTION_COLORS = {
-  terran_alliance: 'text-blue-400',
-  zythian_swarm: 'text-red-400',
-  automaton_collective: 'text-purple-400',
-  synthesis_accord: 'text-yellow-400',
-  sylvari_dominion: 'text-green-400'
-};
-
-const FACTION_SHORT = {
-  terran_alliance: 'TER',
-  zythian_swarm: 'ZYT',
-  automaton_collective: 'AUT',
-  synthesis_accord: 'SYN',
-  sylvari_dominion: 'SYL'
 };
 
 const NPC_STATE_BADGES = {

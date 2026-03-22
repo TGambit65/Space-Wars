@@ -1,6 +1,7 @@
 const { NPC, Ship, Port, Sector } = require('../models');
 const { Op } = require('sequelize');
 const gameSettingsService = require('./gameSettingsService');
+const worldPolicyService = require('./worldPolicyService');
 const groupBy = require('../utils/groupBy');
 
 // Minimum seconds between proactive hails from the same NPC to anyone
@@ -44,6 +45,42 @@ const BEATS_BY_TYPE = {
   BOUNTY_HUNTER: BOUNTY_HUNTER_BEATS,
 };
 
+// ─── Faction-Specific Territory Beats ──────────────────────────────
+const FACTION_LABELS = {
+  terran_alliance: 'Terran Alliance',
+  zythian_swarm: 'Zythian Swarm',
+  automaton_collective: 'Automaton Collective',
+  synthesis_accord: 'Synthesis Accord',
+  sylvari_dominion: 'Sylvari Dominion'
+};
+
+// Faction-aware beat templates — appended when NPC has faction affiliation
+const FACTION_PATROL_BEATS = [
+  { event: 'npc:service_offer', text: (f) => `${f} patrol sweep in progress. All ships — maintain current heading and stand by for scan.`, offer: 'patrol_sweep' },
+  { event: 'npc:service_offer', text: (f) => `This sector is under ${f} protection. Report any suspicious activity.`, offer: 'safety_report' },
+];
+const FACTION_TRADER_BEATS = [
+  { event: 'npc:service_offer', text: (f) => `${f} trade convoy passing through. Authorized merchants get priority docking.`, offer: 'convoy' },
+  { event: 'npc:service_offer', text: (f) => `Carrying ${f}-subsidized cargo. Better prices for faction allies.`, offer: 'trade' },
+];
+const FACTION_PIRATE_BEATS = [
+  { event: 'npc:combat_warning', text: () => 'This lane is ours. Pay the toll or find another route.', offer: 'toll' },
+  { event: 'npc:combat_warning', text: () => 'No faction patrols out here. Just us. Make it easy on yourself.', offer: 'threat' },
+];
+
+// ─── Territory Pressure Beat Templates ────────────────────────────
+const TERRITORY_PRESSURE_BEATS = {
+  high: [
+    { event: 'npc:combat_warning', text: 'Warning: this sector has elevated threat levels. Hostile contacts may be in the area.', offer: 'warning' },
+    { event: 'npc:combat_warning', text: 'Sensors detect high pirate activity in this region. Travel with caution.', offer: 'warning' },
+    { event: 'npc:combat_warning', text: 'Threat advisory: this sector is classified as dangerous. Stay alert.', offer: 'warning' },
+  ],
+  low: [
+    { event: 'npc:service_offer', text: 'Sector status: secure. All lanes are clear for transit.', offer: 'safety_report' },
+    { event: 'npc:service_offer', text: 'Routine check-in: this area is under patrol protection. Fly safe.', offer: 'safety_report' },
+  ]
+};
+
 // ─── Presence Tick ─────────────────────────────────────────────────
 
 /**
@@ -69,7 +106,7 @@ const processPresenceTick = async (socketService) => {
       include: [{
         model: Sector,
         as: 'currentSector',
-        attributes: ['sector_id', 'name']
+        attributes: ['sector_id', 'name', 'zone_class', 'security_class']
       }]
     });
 
@@ -94,7 +131,7 @@ const processPresenceTick = async (socketService) => {
         ]
       },
       attributes: ['npc_id', 'name', 'npc_type', 'ship_type', 'current_sector_id',
-        'behavior_state', 'aggression_level', 'last_hail_at', 'last_presence_beat_at']
+        'behavior_state', 'aggression_level', 'last_hail_at', 'last_presence_beat_at', 'faction']
     });
 
     if (eligibleNPCs.length === 0) return 0;
@@ -105,11 +142,75 @@ const processPresenceTick = async (socketService) => {
     for (const [sectorId, npcs] of npcsBySector) {
       // Pick a random eligible NPC from this sector
       const npc = npcs[Math.floor(Math.random() * npcs.length)];
-      const beats = BEATS_BY_TYPE[npc.npc_type];
-      if (!beats || beats.length === 0) continue;
+      const baseBeats = BEATS_BY_TYPE[npc.npc_type];
+      if (!baseBeats || baseBeats.length === 0) continue;
+
+      // Compute territory pressure for this sector
+      const sectorShip = activeShips.find(s => s.current_sector_id === sectorId);
+      const sectorData = sectorShip && sectorShip.currentSector;
+      if (sectorData && sectorData.zone_class) {
+        const hostileCount = npcs.filter(n => n.aggression_level >= 0.7).length;
+        const patrolCount = npcs.filter(n => n.npc_type === 'PATROL').length;
+        const playerCount = (shipsBySector.get(sectorId) || []).length;
+        const pressure = worldPolicyService.computeSectorPressure({
+          zone_class: sectorData.zone_class,
+          security_class: sectorData.security_class,
+          hostileNPCCount: hostileCount,
+          patrolNPCCount: patrolCount,
+          playerCount
+        });
+
+        // Chance to emit a territory pressure beat instead of a regular one
+        const pressureRoll = Math.random();
+        if (pressure.pressure >= 0.55 && pressureRoll < 0.20) {
+          // Dangerous/hostile sector — 20% chance of pressure beat
+          const pressureBeat = TERRITORY_PRESSURE_BEATS.high[Math.floor(Math.random() * TERRITORY_PRESSURE_BEATS.high.length)];
+          const playersInSector = shipsBySector.get(sectorId) || [];
+          if (playersInSector.length > 0) {
+            socketService.emitToSector(sectorId, pressureBeat.event, {
+              npc_id: npc.npc_id, name: npc.name, npc_type: npc.npc_type,
+              faction: npc.faction || null, text: pressureBeat.text, offer: pressureBeat.offer,
+              pressure_label: pressure.label
+            });
+            await NPC.update({ last_presence_beat_at: now }, { where: { npc_id: npc.npc_id } });
+            beatsEmitted++;
+            continue;
+          }
+        } else if (pressure.pressure < 0.15 && pressureRoll < 0.10) {
+          // Secure sector — 10% chance of pressure beat
+          const pressureBeat = TERRITORY_PRESSURE_BEATS.low[Math.floor(Math.random() * TERRITORY_PRESSURE_BEATS.low.length)];
+          const playersInSector = shipsBySector.get(sectorId) || [];
+          if (playersInSector.length > 0) {
+            socketService.emitToSector(sectorId, pressureBeat.event, {
+              npc_id: npc.npc_id, name: npc.name, npc_type: npc.npc_type,
+              faction: npc.faction || null, text: pressureBeat.text, offer: pressureBeat.offer,
+              pressure_label: pressure.label
+            });
+            await NPC.update({ last_presence_beat_at: now }, { where: { npc_id: npc.npc_id } });
+            beatsEmitted++;
+            continue;
+          }
+        }
+      }
+
+      // Build beat pool: base beats + faction-specific beats if NPC has faction
+      const factionLabel = npc.faction && FACTION_LABELS[npc.faction];
+      let beatPool = baseBeats;
+      if (factionLabel) {
+        let factionBeats = [];
+        if (npc.npc_type === 'PATROL') factionBeats = FACTION_PATROL_BEATS;
+        else if (npc.npc_type === 'TRADER') factionBeats = FACTION_TRADER_BEATS;
+        else if (npc.npc_type === 'PIRATE' || npc.npc_type === 'PIRATE_LORD') factionBeats = FACTION_PIRATE_BEATS;
+        if (factionBeats.length > 0) {
+          // 40% chance of faction-specific beat when faction NPC
+          beatPool = Math.random() < 0.4
+            ? factionBeats.map(fb => ({ event: fb.event, text: fb.text(factionLabel), offer: fb.offer }))
+            : baseBeats;
+        }
+      }
 
       // Pick a random beat
-      const beat = beats[Math.floor(Math.random() * beats.length)];
+      const beat = beatPool[Math.floor(Math.random() * beatPool.length)];
 
       // Get players in this sector
       const playersInSector = shipsBySector.get(sectorId) || [];
@@ -131,6 +232,7 @@ const processPresenceTick = async (socketService) => {
           name: npc.name,
           npc_type: npc.npc_type,
           ship_type: npc.ship_type,
+          faction: npc.faction || null,
           greeting_text: beat.text,
           offer: beat.offer,
           sector_id: sectorId
@@ -146,6 +248,7 @@ const processPresenceTick = async (socketService) => {
           npc_id: npc.npc_id,
           name: npc.name,
           npc_type: npc.npc_type,
+          faction: npc.faction || null,
           text: beat.text,
           offer: beat.offer
         });

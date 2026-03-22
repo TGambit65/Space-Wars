@@ -6,21 +6,7 @@ import SystemViewCanvas from './SystemViewCanvas';
 import SystemInfoPanel from './ui/SystemInfoPanel';
 import SystemEntityBar from './ui/SystemEntityBar';
 import SectorActivityFeed from '../npc/SectorActivityFeed';
-
-const FACTION_COLORS = {
-  terran_alliance: '#3498db',
-  zythian_swarm: '#e74c3c',
-  automaton_collective: '#9b59b6',
-  synthesis_accord: '#d4a017',
-  sylvari_dominion: '#2ecc71'
-};
-const FACTION_LABELS = {
-  terran_alliance: 'Terran',
-  zythian_swarm: 'Zythian',
-  automaton_collective: 'Automaton',
-  synthesis_accord: 'Synthesis',
-  sylvari_dominion: 'Sylvari'
-};
+import { FACTION_COLORS, FACTION_LABELS } from '../../constants/factions';
 
 const STAR_CLASS_LABELS = {
   O: 'Blue Supergiant',

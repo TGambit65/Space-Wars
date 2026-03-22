@@ -272,6 +272,23 @@ const getMapData = async (req, res, next) => {
     });
     const shipCountMap = new Map(shipCounts.map(r => [r.current_sector_id, parseInt(r.ship_count)]));
 
+    // Dynamic: aggregate dominant faction per sector from alive NPCs (1 lightweight query)
+    const factionCounts = await NPC.findAll({
+      where: { is_alive: true, faction: { [Op.ne]: null } },
+      attributes: ['current_sector_id', 'faction', [fn('COUNT', col('npc_id')), 'cnt']],
+      group: ['current_sector_id', 'faction'],
+      raw: true
+    });
+    // Build map: sector_id → { faction, count } for the dominant faction
+    const dominantFactionMap = new Map();
+    for (const row of factionCounts) {
+      const cnt = parseInt(row.cnt);
+      const existing = dominantFactionMap.get(row.current_sector_id);
+      if (!existing || cnt > existing.count) {
+        dominantFactionMap.set(row.current_sector_id, { faction: row.faction, count: cnt });
+      }
+    }
+
     // Dynamic: fetch current user's ships for map badges (1 query, ~10 rows)
     let userShipsBySector = new Map();
     if (req.userId) {
@@ -309,6 +326,7 @@ const getMapData = async (req, res, next) => {
         ship_count: discovered ? (shipCountMap.get(s.sector_id) || 0) : null,
         phenomena: discovered ? s.phenomena : null,
         policy_summary: discovered ? worldPolicyService.summarizeSectorPolicy(s) : null,
+        dominant_faction: discovered ? (dominantFactionMap.get(s.sector_id)?.faction || null) : null,
         discovered,
         my_ships: discovered ? (userShipsBySector.get(s.sector_id) || []) : []
       };

@@ -8,6 +8,7 @@ const economyTickService = require('./economyTickService');
 const automationService = require('./automationService');
 const missionService = require('./missionService');
 const npcPresenceService = require('./npcPresenceService');
+const npcMemoryService = require('./npcMemoryService');
 const worldPolicyService = require('./worldPolicyService');
 const { NPC, Ship, Port, User, Sector, NpcConversationSession } = require('../models');
 const { Op, col } = require('sequelize');
@@ -439,6 +440,16 @@ const processMaintenanceTick = async () => {
       }
     } catch (err) {
       console.error('[Maintenance] Mission tick error:', err.message);
+    }
+
+    // Decay stale NPC memory scores
+    try {
+      const decayed = await npcMemoryService.decayAllMemories();
+      if (decayed > 0) {
+        console.log(`[Maintenance] Memory scores decayed: ${decayed}`);
+      }
+    } catch (err) {
+      console.error('[Maintenance] Memory decay error:', err.message);
     }
 
     stats.maintenanceTicks++;
