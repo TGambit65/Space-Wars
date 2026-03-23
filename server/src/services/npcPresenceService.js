@@ -131,7 +131,7 @@ const processPresenceTick = async (socketService) => {
         ]
       },
       attributes: ['npc_id', 'name', 'npc_type', 'ship_type', 'current_sector_id',
-        'behavior_state', 'aggression_level', 'last_hail_at', 'last_presence_beat_at', 'faction']
+        'behavior_state', 'aggression_level', 'last_hail_at', 'last_presence_beat_at', 'faction', 'ai_personality']
     });
 
     if (eligibleNPCs.length === 0) return 0;
@@ -233,6 +233,7 @@ const processPresenceTick = async (socketService) => {
           npc_type: npc.npc_type,
           ship_type: npc.ship_type,
           faction: npc.faction || null,
+          ai_personality: npc.ai_personality || null,
           greeting_text: beat.text,
           offer: beat.offer,
           sector_id: sectorId

@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ships, colonies, crew as crewApi, combat } from '../../services/api';
-import { Rocket, Globe, Building2, Users, ArrowRight, Wallet, AlertTriangle, Map, Swords, BarChart3, Shield, TrendingUp, Eye, Leaf, CheckCircle, Circle, X, BookOpen } from 'lucide-react';
+import { ships, colonies, crew as crewApi, combat, factions, events as eventsApi } from '../../services/api';
+import { Rocket, Globe, Building2, Users, ArrowRight, Wallet, AlertTriangle, Map, Swords, BarChart3, Shield, TrendingUp, Eye, Leaf, CheckCircle, Circle, X, BookOpen, Trophy, Calendar, Zap } from 'lucide-react';
 import AchievementsPanel from './Achievements';
 import TerranDashboard from './TerranDashboard';
 import ZythianDashboard from './ZythianDashboard';
 import AutomatonDashboard from './AutomatonDashboard';
+import { useGameSession } from '../../contexts/GameSessionContext';
 
 const FACTION_META = {
   terran_alliance: { name: 'Terran Alliance', color: '#3498db', icon: Shield },
@@ -19,6 +20,8 @@ function Dashboard({ user }) {
   const [data, setData] = useState({ ships: [], colonies: [], crew: [] });
   const [combatLogs, setCombatLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [factionLeaderboard, setFactionLeaderboard] = useState([]);
+  const [activeEvents, setActiveEvents] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,6 +45,26 @@ function Dashboard({ user }) {
     fetchData();
   }, []);
 
+  // P5 Item 15: Leaderboard data
+  useEffect(() => {
+    factions.getLeaderboard()
+      .then(res => {
+        const raw = res.data.data;
+        setFactionLeaderboard(Array.isArray(raw) ? raw.slice(0, 5) : (raw?.leaderboard || []).slice(0, 5));
+      })
+      .catch(() => {});
+  }, []);
+
+  // P5 Item 18: Active events for ticker
+  useEffect(() => {
+    eventsApi.getActive()
+      .then(res => {
+        const raw = res.data.data;
+        setActiveEvents(Array.isArray(raw) ? raw : raw?.events || []);
+      })
+      .catch(() => {});
+  }, []);
+
   const totalSalary = data.crew.reduce((sum, c) => sum + (c.salary || 0), 0);
   const salaryDebt = user?.crew_salary_due || 0;
 
@@ -60,16 +83,19 @@ function Dashboard({ user }) {
     );
   }
 
+  // Onboarding card is shown above ALL faction dashboards so every new player sees it
+  const onboardingCard = <GettingStartedCard user={user} ships={data.ships} />;
+
   if (user?.faction === 'terran_alliance') {
-    return <TerranDashboard user={user} data={data} combatLogs={combatLogs} />;
+    return <>{onboardingCard}<TerranDashboard user={user} data={data} combatLogs={combatLogs} /></>;
   }
 
   if (user?.faction === 'zythian_swarm') {
-    return <ZythianDashboard user={user} data={data} combatLogs={combatLogs} />;
+    return <>{onboardingCard}<ZythianDashboard user={user} data={data} combatLogs={combatLogs} /></>;
   }
 
   if (user?.faction === 'automaton_collective') {
-    return <AutomatonDashboard user={user} data={data} combatLogs={combatLogs} />;
+    return <>{onboardingCard}<AutomatonDashboard user={user} data={data} combatLogs={combatLogs} /></>;
   }
 
   return (
@@ -112,8 +138,8 @@ function Dashboard({ user }) {
         </div>
       )}
 
-      {/* Getting Started */}
-      <GettingStartedCard user={user} ships={data.ships} />
+      {/* Getting Started (fallback factions) */}
+      {onboardingCard}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -207,6 +233,73 @@ function Dashboard({ user }) {
           )}
         </div>
       </div>
+
+      {/* P5 Item 15: Leaderboard + P5 Item 18: Event Ticker */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Faction Leaderboard */}
+        <div className="holo-panel p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="card-header text-sm"><Trophy className="w-4 h-4 text-accent-orange" /> Faction Standings</h2>
+            <Link to="/faction" className="text-xs text-neon-cyan hover:underline">View All</Link>
+          </div>
+          {factionLeaderboard.length === 0 ? (
+            <p className="text-gray-500 text-center py-4 text-xs">No faction data</p>
+          ) : (
+            <div className="space-y-1.5">
+              {factionLeaderboard.map((f, i) => {
+                const meta = FACTION_META[f.faction_name || f.name] || {};
+                return (
+                  <div key={f.faction_id || f.name || i} className="flex items-center justify-between p-2 rounded-lg"
+                    style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono text-gray-500 w-5 text-right">#{i + 1}</span>
+                      <span className="text-sm text-white">{meta.name || f.faction_name || f.name}</span>
+                    </div>
+                    <span className="text-xs font-mono" style={{ color: meta.color || '#999' }}>
+                      {(f.total_power || f.members || f.score || 0).toLocaleString()}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Active Events */}
+        <div className="holo-panel p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="card-header text-sm"><Calendar className="w-4 h-4 text-accent-orange" /> Active Events</h2>
+            <Link to="/events" className="text-xs text-neon-cyan hover:underline">View All</Link>
+          </div>
+          {activeEvents.length === 0 ? (
+            <p className="text-gray-500 text-center py-4 text-xs">No active events</p>
+          ) : (
+            <div className="space-y-2">
+              {activeEvents.slice(0, 3).map(evt => {
+                const id = evt.id || evt.event_id;
+                const current = evt.current_value || 0;
+                const target = evt.target_value || 1;
+                const pct = Math.min(100, (current / target) * 100);
+                return (
+                  <Link key={id} to="/events" className="block p-2.5 rounded-lg hover:bg-white/[0.02] transition-colors"
+                    style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,102,0,0.1)' }}>
+                    <p className="text-sm text-white truncate">{evt.name || evt.title}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: pct >= 100 ? '#4caf50' : '#ff6600' }} />
+                      </div>
+                      <span className="text-[10px] text-gray-500 font-mono">{pct.toFixed(0)}%</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* P5 Item 17: Star Parallax — subtle ambient background */}
+      <StarParallax />
     </div>
   );
 }
@@ -253,24 +346,26 @@ function StatCard({ icon: Icon, label, value, color, subtext }) {
 
 function GettingStartedCard({ user, ships }) {
   const [dismissed, setDismissed] = useState(() => localStorage.getItem('sw3k_onboarding_dismissed') === 'true');
-  const [completed, setCompleted] = useState(() => {
+  const [visited, setVisited] = useState(() => {
     try { return JSON.parse(localStorage.getItem('sw3k_onboarding_steps') || '{}'); }
     catch { return {}; }
   });
+  const { progressionData } = useGameSession();
 
-  const isNewPlayer = (user?.level || 1) <= 2;
-  if (dismissed || !isNewPlayer) return null;
+  const playerLevel = progressionData?.player_level || user?.player_level || 1;
+  if (dismissed || playerLevel > 2) return null;
 
+  // Auto-detect completion from real game data + fallback to visited flag
   const steps = [
-    { key: 'ship', label: 'Check your ship status', link: '/ships', icon: Rocket, done: !!completed.ship },
-    { key: 'map', label: 'Open the galaxy map', link: '/map', icon: Map, done: !!completed.map },
-    { key: 'trade', label: 'Make your first trade', link: '/trading', icon: Wallet, done: !!completed.trade },
-    { key: 'planet', label: 'Scan a planet', link: '/planets', icon: Globe, done: !!completed.planet },
+    { key: 'ship', label: 'Check your ship status', link: '/ships', icon: Rocket, done: !!visited.ship || (ships && ships.length > 0) },
+    { key: 'map', label: 'Open the galaxy map', link: '/map', icon: Map, done: !!visited.map },
+    { key: 'trade', label: 'Make your first trade', link: '/trading', icon: Wallet, done: !!visited.trade || (user?.credits != null && user.credits !== 10000) },
+    { key: 'planet', label: 'Scan a planet', link: '/planets', icon: Globe, done: !!visited.planet },
   ];
 
   const handleStepClick = (key) => {
-    const next = { ...completed, [key]: true };
-    setCompleted(next);
+    const next = { ...visited, [key]: true };
+    setVisited(next);
     localStorage.setItem('sw3k_onboarding_steps', JSON.stringify(next));
   };
 
@@ -337,6 +432,38 @@ function QuickLinkCard({ to, icon: Icon, title, description, color }) {
       <h3 className="text-base font-semibold text-white mt-3 font-display">{title}</h3>
       <p className="text-sm text-gray-500 mt-1">{description}</p>
     </Link>
+  );
+}
+
+/** P5 Item 17: Ambient star parallax */
+function StarParallax() {
+  const stars = useMemo(() => {
+    const result = [];
+    for (let i = 0; i < 60; i++) {
+      result.push({
+        x: Math.random() * 100,
+        y: Math.random() * 200,
+        size: 0.5 + Math.random() * 1.5,
+        opacity: 0.2 + Math.random() * 0.5,
+        layer: i < 20 ? 'slow' : 'fast',
+      });
+    }
+    return result;
+  }, []);
+
+  return (
+    <div className="star-parallax" aria-hidden="true">
+      <svg className="star-parallax-layer star-parallax-layer-slow" viewBox="0 0 100 200" preserveAspectRatio="none">
+        {stars.filter(s => s.layer === 'slow').map((s, i) => (
+          <circle key={i} cx={s.x} cy={s.y} r={s.size * 0.15} fill="white" opacity={s.opacity} />
+        ))}
+      </svg>
+      <svg className="star-parallax-layer star-parallax-layer-fast" viewBox="0 0 100 200" preserveAspectRatio="none" style={{ opacity: 0.6 }}>
+        {stars.filter(s => s.layer === 'fast').map((s, i) => (
+          <circle key={i} cx={s.x} cy={s.y} r={s.size * 0.1} fill="#00ffff" opacity={s.opacity * 0.5} />
+        ))}
+      </svg>
+    </div>
   );
 }
 

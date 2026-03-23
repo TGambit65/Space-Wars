@@ -359,6 +359,7 @@ const SystemViewCanvas = ({
   onEntityDoubleClick,
   neighbors,
   onEntityRightClick,
+  userId,
 }) => {
   const containerRef = useRef(null);
   const sceneRef = useRef(null);
@@ -420,8 +421,16 @@ const SystemViewCanvas = ({
       angle: (Math.PI * 2 / Math.max(1, systemDetail.npcs.length)) * i,
     }));
 
-    return { sector, starConfig, planets, ports, npcs };
-  }, [systemDetail]);
+    const otherPlayerShips = (systemDetail.ships || [])
+      .filter(s => s.owner_user_id && s.owner_user_id !== userId)
+      .map((s, i) => ({
+        ...s,
+        distance: 25 + ((i * 31 + 7) % 120),
+        angle: (Math.PI * 2 / Math.max(1, (systemDetail.ships || []).filter(x => x.owner_user_id !== userId).length)) * i + Math.PI / 6,
+      }));
+
+    return { sector, starConfig, planets, ports, npcs, otherPlayerShips };
+  }, [systemDetail, userId]);
 
   // Memoize neighbors for buildScene dependency
   const neighborsKey = useMemo(() => (neighbors || []).map(n => n.sector_id).join(','), [neighbors]);
@@ -524,6 +533,60 @@ const SystemViewCanvas = ({
     };
     createHabRing(HAB_INNER);
     createHabRing(HAB_OUTER);
+
+    // --- Space Phenomena ---
+    if (sector?.phenomena) {
+      const PHEN_VISUALS = {
+        ion_storm:      { color: 0xffd700, opacity: 0.04, particles: true },
+        nebula:         { color: 0x9b59b6, opacity: 0.06, particles: true },
+        asteroid_field: { color: 0xcd853f, opacity: 0.03, particles: false },
+        solar_flare:    { color: 0xff4500, opacity: 0.05, particles: true },
+        gravity_well:   { color: 0xdc143c, opacity: 0.04, particles: false },
+      };
+      const phenVis = PHEN_VISUALS[sector.phenomena.type] || PHEN_VISUALS.ion_storm;
+      // Translucent tinted sphere enveloping the system
+      const phenRadius = HAB_OUTER + 40;
+      const phenGeo = new THREE.SphereGeometry(phenRadius, 32, 32);
+      const phenMat = new THREE.MeshBasicMaterial({
+        color: phenVis.color,
+        transparent: true,
+        opacity: phenVis.opacity,
+        side: THREE.BackSide,
+        depthWrite: false,
+      });
+      const phenSphere = new THREE.Mesh(phenGeo, phenMat);
+      phenSphere.userData.isPhenomena = true;
+      scene.add(phenSphere);
+      sceneObjectsRef.current.push(phenSphere);
+
+      // Scattered particles for storms/nebulae
+      if (phenVis.particles) {
+        const particleCount = 200;
+        const positions = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount; i++) {
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos(2 * Math.random() - 1);
+          const r = 20 + Math.random() * (phenRadius - 20);
+          positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+          positions[i * 3 + 1] = (Math.random() - 0.5) * 30;
+          positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+        }
+        const particleGeo = new THREE.BufferGeometry();
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const particleMat = new THREE.PointsMaterial({
+          color: phenVis.color,
+          size: 1.5,
+          transparent: true,
+          opacity: 0.3,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        });
+        const particleSystem = new THREE.Points(particleGeo, particleMat);
+        particleSystem.userData.isPhenomena = true;
+        scene.add(particleSystem);
+        sceneObjectsRef.current.push(particleSystem);
+      }
+    }
 
     // --- Planets ---
     for (const pData of planets) {
@@ -697,6 +760,40 @@ const SystemViewCanvas = ({
       nLabel.scale.set(10, 2.5, 1);
       nLabel.position.set(0, 3, 0);
       npcMesh.add(nLabel);
+    }
+
+    // --- Other Player Ships ---
+    for (const playerShip of (entityData.otherPlayerShips || [])) {
+      const factionHex = playerShip.owner?.faction && FACTION_HEX[playerShip.owner.faction]
+        ? FACTION_HEX[playerShip.owner.faction]
+        : 0x8b5cf6; // purple default
+      const factionCss = playerShip.owner?.faction && FACTION_CSS[playerShip.owner.faction]
+        ? FACTION_CSS[playerShip.owner.faction]
+        : '#8b5cf6';
+
+      const pGeo = new THREE.BoxGeometry(1.2, 0.6, 2.0);
+      const pMat = new THREE.MeshPhongMaterial({
+        color: factionHex,
+        emissive: factionHex,
+        emissiveIntensity: 0.3,
+      });
+      const pMesh = new THREE.Mesh(pGeo, pMat);
+      const ppx = Math.cos(playerShip.angle) * playerShip.distance;
+      const ppz = Math.sin(playerShip.angle) * playerShip.distance;
+      pMesh.position.set(ppx, 1.5, ppz);
+      scene.add(pMesh);
+      sceneObjectsRef.current.push(pMesh);
+      meshToEntityRef.current.set(pMesh, { type: 'player', entity: playerShip });
+
+      // Player label
+      const plLabel = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: createLabelTexture(playerShip.owner?.username || playerShip.name, factionCss),
+        transparent: true,
+        depthTest: false,
+      }));
+      plLabel.scale.set(10, 2.5, 1);
+      plLabel.position.set(0, 3, 0);
+      pMesh.add(plLabel);
     }
 
     // --- Player ship near star ---
@@ -917,6 +1014,19 @@ const SystemViewCanvas = ({
             child.scale.set(s, s, s);
           }
         });
+      }
+
+      // Animate phenomena objects (slow rotation + pulsing opacity)
+      for (const obj of sceneObjectsRef.current) {
+        if (obj.userData?.isPhenomena) {
+          obj.rotation.y += 0.0003;
+          if (obj.isMesh && obj.material.side === THREE.BackSide) {
+            if (obj.material.userData?.baseOpacity == null) {
+              obj.material.userData = { baseOpacity: obj.material.opacity };
+            }
+            obj.material.opacity = obj.material.userData.baseOpacity * (0.8 + Math.sin(t * 15) * 0.2);
+          }
+        }
       }
 
       // Animate ship flight — velocity-based physics with gravity

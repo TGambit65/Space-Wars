@@ -5,9 +5,9 @@
 
 /* --- Holographic Panel --- */
 .holo-panel {
-  background: rgba(0, 255, 255, 0.05);
-  border: 1px solid rgba(0, 255, 255, 0.2);
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.15), inset 0 0 20px rgba(0, 255, 255, 0.05);
+  background: var(--sw3-primary-alpha);
+  border: 1px solid color-mix(in srgb, var(--sw3-primary) 20%, transparent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--sw3-primary) 15%, transparent), inset 0 0 20px color-mix(in srgb, var(--sw3-primary) 5%, transparent);
   backdrop-filter: blur(2px);
   border-radius: 8px;
   position: relative;
@@ -24,7 +24,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(0, 255, 255, 0.06),
+    color-mix(in srgb, var(--sw3-primary) 6%, transparent),
     transparent
   );
   animation: holo-sweep 3s ease-in-out infinite;
@@ -56,8 +56,8 @@
   background: repeating-linear-gradient(
     transparent 0px,
     transparent 2px,
-    rgba(0, 255, 255, 0.03) 2px,
-    rgba(0, 255, 255, 0.03) 3px
+    color-mix(in srgb, var(--sw3-primary) 3%, transparent) 2px,
+    color-mix(in srgb, var(--sw3-primary) 3%, transparent) 3px
   );
   animation: holo-scanlines-move 2s linear infinite;
   pointer-events: none;
@@ -94,11 +94,11 @@
 
 /* --- Holographic Text --- */
 .holo-text {
-  color: #00ffff;
+  color: var(--sw3-primary);
   text-shadow:
-    0 0 5px rgba(0, 255, 255, 0.5),
-    0 0 10px rgba(0, 255, 255, 0.3),
-    0 0 20px rgba(0, 255, 255, 0.15);
+    0 0 5px var(--sw3-primary-glow),
+    0 0 10px color-mix(in srgb, var(--sw3-primary) 30%, transparent),
+    0 0 20px color-mix(in srgb, var(--sw3-primary) 15%, transparent);
   animation: holo-text-flicker 2s ease-in-out infinite;
 }
 
@@ -132,16 +132,16 @@
 }
 
 .holo-button {
-  border: 1px solid rgba(0, 255, 255, 0.4);
-  background: rgba(0, 255, 255, 0.08);
-  color: #00ffff;
+  border: 1px solid var(--sw3-primary-glow);
+  background: color-mix(in srgb, var(--sw3-primary) 8%, transparent);
+  color: var(--sw3-primary);
 }
 
 .holo-button:hover {
-  background: rgba(0, 255, 255, 0.15);
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  background: color-mix(in srgb, var(--sw3-primary) 15%, transparent);
+  box-shadow: 0 0 20px var(--sw3-primary-glow);
   transform: translateY(-1px);
-  border-color: rgba(0, 255, 255, 0.6);
+  border-color: color-mix(in srgb, var(--sw3-primary) 60%, transparent);
 }
 
 .holo-button:active {
@@ -164,7 +164,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(0, 255, 255, 0.15),
+    color-mix(in srgb, var(--sw3-primary) 15%, transparent),
     transparent
   );
 }
@@ -236,7 +236,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(0, 255, 255, 0.06),
+    color-mix(in srgb, var(--sw3-primary) 6%, transparent),
     transparent
   );
   animation: holo-sweep 3s ease-in-out infinite;
@@ -251,9 +251,9 @@
 /* --- Terminal window (for logs, data displays) --- */
 .terminal-window {
   background: #000;
-  border: 2px solid rgba(0, 255, 255, 0.3);
+  border: 2px solid color-mix(in srgb, var(--sw3-primary) 30%, transparent);
   border-radius: 8px;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--sw3-primary) 20%, transparent);
   font-family: 'Courier New', Monaco, monospace;
   font-size: 0.9rem;
   overflow: hidden;
@@ -261,7 +261,7 @@
 
 .terminal-header {
   background: linear-gradient(135deg, #1a237e 0%, #0d1557 100%);
-  border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+  border-bottom: 1px solid color-mix(in srgb, var(--sw3-primary) 30%, transparent);
   padding: 0.5rem 1rem;
   display: flex;
   align-items: center;
@@ -269,7 +269,7 @@
 }
 
 .terminal-title {
-  color: #00ffff;
+  color: var(--sw3-primary);
   text-transform: uppercase;
   font-size: 0.8rem;
   letter-spacing: 0.05em;
@@ -320,15 +320,15 @@
   0%, 100% {
     opacity: 1;
     text-shadow:
-      0 0 5px rgba(0, 255, 255, 0.5),
-      0 0 10px rgba(0, 255, 255, 0.3),
-      0 0 20px rgba(0, 255, 255, 0.15);
+      0 0 5px var(--sw3-primary-glow),
+      0 0 10px color-mix(in srgb, var(--sw3-primary) 30%, transparent),
+      0 0 20px color-mix(in srgb, var(--sw3-primary) 15%, transparent);
   }
   50% {
     opacity: 0.85;
     text-shadow:
-      0 0 3px rgba(0, 255, 255, 0.4),
-      0 0 6px rgba(0, 255, 255, 0.2);
+      0 0 3px color-mix(in srgb, var(--sw3-primary) 40%, transparent),
+      0 0 6px color-mix(in srgb, var(--sw3-primary) 20%, transparent);
   }
 }
 
@@ -344,8 +344,8 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.2); }
-  50% { box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
+  0%, 100% { box-shadow: 0 0 10px color-mix(in srgb, var(--sw3-primary) 20%, transparent); }
+  50% { box-shadow: 0 0 25px color-mix(in srgb, var(--sw3-primary) 50%, transparent); }
 }
 
 /* =============================================================

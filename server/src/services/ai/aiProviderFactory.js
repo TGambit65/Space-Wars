@@ -5,6 +5,7 @@ const AnthropicProvider = require('./providers/anthropicProvider');
 const OpenAIProvider = require('./providers/openaiProvider');
 const GeminiProvider = require('./providers/geminiProvider');
 const GrokProvider = require('./providers/grokProvider');
+const NvidiaProvider = require('./providers/nvidiaProvider');
 const OpenRouterProvider = require('./providers/openrouterProvider');
 const LocalProvider = require('./providers/localProvider');
 const NoneProvider = require('./providers/noneProvider');
@@ -37,6 +38,7 @@ const createProvider = (providerType, config) => {
     case 'openai': return new OpenAIProvider(config);
     case 'gemini': return new GeminiProvider(config);
     case 'grok': return new GrokProvider(config);
+    case 'nvidia': return new NvidiaProvider(config);
     case 'openrouter': return new OpenRouterProvider(config);
     case 'local': return new LocalProvider(config);
     case 'none': return new NoneProvider(config);

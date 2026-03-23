@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { admin } from '../../services/api';
 import { Search, ChevronLeft, ChevronRight, X, Heart, Wrench, Navigation, Zap, DollarSign, ArrowLeft } from 'lucide-react';
+import SectorPicker from '../common/SectorPicker';
 
 const TIER_OPTIONS = ['free', 'premium', 'elite'];
 const TIER_COLORS = {
@@ -256,8 +257,7 @@ const UsersTab = () => {
                 <Navigation className="w-3 h-3" /> Move Active Ship to Sector
               </div>
               <div className="flex gap-2">
-                <input type="number" value={moveSectorId} onChange={e => setMoveSectorId(e.target.value)}
-                  className="input text-xs flex-1" placeholder="Sector ID" />
+                <SectorPicker value={moveSectorId} onChange={setMoveSectorId} placeholder="Search sector..." />
                 <button
                   onClick={() => {
                     const activeShip = userDetail.ships.find(s => s.is_active);

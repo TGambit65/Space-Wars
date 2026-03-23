@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { combat, ships, npcs } from '../../services/api';
 import CombatHUD from './CombatHUD';
-import { Shield, Crosshair, AlertTriangle, Skull, Trophy, Zap, Activity, Clock } from 'lucide-react';
+import { Shield, Crosshair, AlertTriangle, Skull, Trophy, Zap, Activity, Clock, TrendingUp } from 'lucide-react';
 import { useNotifications } from '../../contexts/NotificationContext';
+import WikiLink from '../common/WikiLink';
 
 const CombatPage = ({ user, socket }) => {
     const location = useLocation();
@@ -32,10 +33,27 @@ const CombatPage = ({ user, socket }) => {
     const [realtimeState, setRealtimeState] = useState(null);
     const [combatLog, setCombatLog] = useState([]);
 
+    // Visual damage indicators
+    const [shakeActive, setShakeActive] = useState(false);
+    const [damageFlash, setDamageFlash] = useState(false);
+    const [floatingDamage, setFloatingDamage] = useState([]);
+    const damageIdRef = useRef(0);
+
     const scrollRef = useRef(null);
     const intervalRef = useRef(null);
     const speedRef = useRef(combatSpeed);
     const activeShipId = ship?.ship_id;
+
+    const showDamageIndicator = useCallback((amount, side) => {
+        if (!amount) return;
+        setShakeActive(true);
+        setDamageFlash(true);
+        const id = ++damageIdRef.current;
+        setFloatingDamage(prev => [...prev.slice(-4), { id, amount, side }]);
+        setTimeout(() => setShakeActive(false), 400);
+        setTimeout(() => setDamageFlash(false), 500);
+        setTimeout(() => setFloatingDamage(prev => prev.filter(d => d.id !== id)), 1200);
+    }, []);
 
     useEffect(() => {
         speedRef.current = combatSpeed;
@@ -264,6 +282,7 @@ const CombatPage = ({ user, socket }) => {
                 credits: data.credits_looted || 0,
                 xp: data.experience_gained || 0,
                 shipStatus: data.ship_status || null,
+                rewardMultiplier: data.reward_multiplier || 1,
             };
 
             setBattleLog(rounds);
@@ -297,13 +316,16 @@ const CombatPage = ({ user, socket }) => {
 
                     setDisplayLog(prev => [...prev, {
                         round: roundData.round,
-                        message: `Round ${roundData.round}: You dealt ${attackerAction?.damage || 0} dmg. Enemy dealt ${defenderAction?.damage || 0} dmg.`
+                        message: `Round ${roundData.round}: You dealt ${attackerAction?.damage || 0} dmg${attackerAction?.critical ? ' (CRITICAL!)' : ''}. Enemy dealt ${defenderAction?.damage || 0} dmg${defenderAction?.critical ? ' (CRITICAL!)' : ''}.`,
+                        hasCrit: !!(attackerAction?.critical || defenderAction?.critical),
                     }]);
 
                     if (defenderAction) {
                         setPlayerStats(prev => ({ ...prev, hull: defenderAction.target_hull, shields: defenderAction.target_shields }));
+                        if (defenderAction.damage > 0) showDamageIndicator(defenderAction.damage, 'player');
                     }
                     setEnemyStats(prev => ({ ...prev, hull: attackerAction?.target_hull ?? 0, shields: attackerAction?.target_shields ?? 0 }));
+                    if (attackerAction?.damage > 0) showDamageIndicator(attackerAction.damage, 'enemy');
 
                     currentRound++;
                 }, 1000 / speedRef.current);
@@ -317,7 +339,7 @@ const CombatPage = ({ user, socket }) => {
                 const allLogs = rounds.map(rd => {
                     const a = rd.actions?.[0];
                     const d = rd.actions?.[1];
-                    return { round: rd.round, message: `Round ${rd.round}: You dealt ${a?.damage || 0} dmg. Enemy dealt ${d?.damage || 0} dmg.` };
+                    return { round: rd.round, message: `Round ${rd.round}: You dealt ${a?.damage || 0} dmg${a?.critical ? ' (CRITICAL!)' : ''}. Enemy dealt ${d?.damage || 0} dmg${d?.critical ? ' (CRITICAL!)' : ''}.`, hasCrit: !!(a?.critical || d?.critical) };
                 });
                 const lastRound = rounds[rounds.length - 1];
                 const lastD = lastRound?.actions?.[1];
@@ -369,18 +391,53 @@ const CombatPage = ({ user, socket }) => {
 
     if (loading) return <div className="p-12 text-center text-accent-red animate-pulse">Initializing Tactical Display...</div>;
 
+    // Item 5: Threat assessment — estimate win probability
+    const threatAssessment = (() => {
+        if (!ship || (!targetNpc && !pvpTarget)) return null;
+        const pTotal = playerStats.hull + playerStats.shields;
+        const eTotal = enemyStats.hull + enemyStats.shields;
+        if (eTotal === 0) return null;
+        const ratio = pTotal / (pTotal + eTotal);
+        const pct = Math.round(ratio * 100);
+        const label = pct >= 75 ? 'Favorable' : pct >= 50 ? 'Even' : pct >= 30 ? 'Risky' : 'Dangerous';
+        const color = pct >= 75 ? '#4caf50' : pct >= 50 ? '#ffc107' : pct >= 30 ? '#ff6600' : '#f44336';
+        return { pct, label, color };
+    })();
+
     return (
-        <div className="max-w-6xl mx-auto h-[calc(100vh-100px)] flex flex-col">
+        <div className={`max-w-6xl mx-auto h-[calc(100vh-100px)] flex flex-col ${shakeActive ? 'animate-screen-shake' : ''}`}>
+            {/* Damage flash overlay */}
+            {damageFlash && (
+                <div className="damage-flash-overlay fixed inset-0 pointer-events-none z-50" style={{ background: 'rgba(244, 67, 54, 0.15)' }} />
+            )}
+
+            {/* Floating damage numbers */}
+            {floatingDamage.map(d => (
+                <div key={d.id} className="animate-damage-float fixed z-50 font-bold font-mono text-lg pointer-events-none"
+                    style={{
+                        color: d.side === 'player' ? '#f44336' : '#00ffff',
+                        top: '30%',
+                        left: d.side === 'player' ? '20%' : '75%',
+                        textShadow: `0 0 10px ${d.side === 'player' ? 'rgba(244,67,54,0.6)' : 'rgba(0,255,255,0.6)'}`,
+                    }}
+                >
+                    -{d.amount}
+                </div>
+            ))}
+
             <header className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-accent-red flex items-center gap-3">
-                    <Crosshair className="w-8 h-8" />
-                    Tactical Interface
-                    {isRealtimeMode && (
-                        <span className="text-sm font-normal text-accent-cyan bg-accent-cyan/10 border border-accent-cyan/30 px-2 py-0.5 rounded ml-2 animate-pulse">
-                            LIVE
-                        </span>
-                    )}
-                </h1>
+                <div>
+                    <h1 className="text-3xl font-bold text-accent-red flex items-center gap-3">
+                        <Crosshair className="w-8 h-8" />
+                        Tactical Interface
+                        {isRealtimeMode && (
+                            <span className="text-sm font-normal text-accent-cyan bg-accent-cyan/10 border border-accent-cyan/30 px-2 py-0.5 rounded ml-2 animate-pulse">
+                                LIVE
+                            </span>
+                        )}
+                    </h1>
+                    <WikiLink term="combat" className="text-[11px] mt-1">Combat Guide</WikiLink>
+                </div>
                 <div className="space-x-4">
                     <button onClick={() => navigate('/combat/history')} className="btn btn-secondary mr-2">
                         <Clock className="w-4 h-4 inline mr-2" /> History
@@ -532,7 +589,7 @@ const CombatPage = ({ user, socket }) => {
                                 <div className="text-gray-600 text-center mt-10">Waiting for engagement command...</div>
                             )}
                             {displayLog.map((log, i) => (
-                                <div key={i} className="animate-fade-in text-gray-300 border-l-2 border-accent-red pl-2">
+                                <div key={i} className={`animate-fade-in text-gray-300 border-l-2 pl-2 ${log.hasCrit ? 'border-yellow-400 bg-yellow-400/5' : 'border-accent-red'}`}>
                                     <span className="text-accent-red font-bold">R{log.round}</span>: {log.message}
                                 </div>
                             ))}
@@ -541,9 +598,24 @@ const CombatPage = ({ user, socket }) => {
                         {/* Action Bar */}
                         <div className="flex gap-4 justify-center">
                             {!isBattling && !battleResult && (targetNpc || pvpTarget) && (
-                                <button onClick={handleRealtimeEngage} className="btn btn-danger w-full py-3 text-lg font-bold tracking-wider animate-pulse">
-                                    {pvpTarget ? 'ENGAGE COMMANDER' : 'ENGAGE HOSTILE'}
-                                </button>
+                                <div className="w-full space-y-2">
+                                    {threatAssessment && (
+                                        <div className="flex items-center justify-between p-2 rounded-lg text-xs" style={{
+                                            background: `${threatAssessment.color}10`,
+                                            border: `1px solid ${threatAssessment.color}30`,
+                                        }}>
+                                            <span className="flex items-center gap-1.5 text-gray-400">
+                                                <TrendingUp className="w-3.5 h-3.5" /> Win Assessment
+                                            </span>
+                                            <span className="font-bold font-mono" style={{ color: threatAssessment.color }}>
+                                                {threatAssessment.label} ({threatAssessment.pct}%)
+                                            </span>
+                                        </div>
+                                    )}
+                                    <button onClick={handleRealtimeEngage} className="btn btn-danger w-full py-3 text-lg font-bold tracking-wider animate-pulse">
+                                        {pvpTarget ? 'ENGAGE COMMANDER' : 'ENGAGE HOSTILE'}
+                                    </button>
+                                </div>
                             )}
                             {isBattling && !combatId && (
                                 <div className="w-full space-y-2">
@@ -581,6 +653,12 @@ const CombatPage = ({ user, socket }) => {
                                                 <span className="text-neon-cyan font-mono">+{loot.xp.toLocaleString()}</span>
                                             </div>
                                         )}
+                                        {loot?.rewardMultiplier > 1 && (
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-400">Zone Bonus</span>
+                                                <span className="text-accent-purple font-mono">{loot.rewardMultiplier}x</span>
+                                            </div>
+                                        )}
                                         {loot?.items?.length > 0 && (
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-gray-400">Items</span>
@@ -597,16 +675,39 @@ const CombatPage = ({ user, socket }) => {
                                                 {playerStats.hull}/{playerStats.maxHull}
                                             </span>
                                         </div>
+                                        {playerStats.maxShields > 0 && (
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-400">Shields Remaining</span>
+                                                <span className={`font-mono ${playerStats.shields / playerStats.maxShields > 0.5 ? 'text-accent-purple' : 'text-yellow-400'}`}>
+                                                    {playerStats.shields}/{playerStats.maxShields}
+                                                </span>
+                                            </div>
+                                        )}
                                         {playerStats.maxHull - playerStats.hull > 0 && (
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-gray-400">Hull Damage Taken</span>
                                                 <span className="text-accent-red font-mono">-{playerStats.maxHull - playerStats.hull}</span>
                                             </div>
                                         )}
+                                        {displayLog.length > 0 && (
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-400">Component Stress</span>
+                                                <span className={`font-mono ${displayLog.length > 5 ? 'text-accent-orange' : 'text-gray-300'}`}>
+                                                    {displayLog.length} round{displayLog.length !== 1 ? 's' : ''} of wear
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
-                                    <button onClick={() => navigate('/map')} className="btn btn-primary w-full">
-                                        Return to Sector
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button onClick={() => navigate('/map')} className="btn btn-primary flex-1">
+                                            Return to Sector
+                                        </button>
+                                        {playerStats.hull < playerStats.maxHull && (
+                                            <button onClick={() => navigate('/repair')} className="btn btn-secondary flex-1 border-accent-orange text-accent-orange">
+                                                Repair Ship
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                             {battleResult === 'defeat' && (
@@ -619,6 +720,16 @@ const CombatPage = ({ user, socket }) => {
                                             <span className="text-gray-400">Rounds Survived</span>
                                             <span className="text-gray-300 font-mono">{displayLog.length}</span>
                                         </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-gray-400">Enemy Hull Remaining</span>
+                                            <span className="text-accent-red font-mono">{enemyStats.hull}/{enemyStats.maxHull}</span>
+                                        </div>
+                                        {loot?.xp > 0 && (
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-400">XP Earned</span>
+                                                <span className="text-neon-cyan font-mono">+{loot.xp.toLocaleString()}</span>
+                                            </div>
+                                        )}
                                     </div>
                                     <button onClick={() => navigate('/')} className="btn btn-secondary w-full">
                                         Eject Pod

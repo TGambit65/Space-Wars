@@ -7,7 +7,7 @@ const SYSTEM_VIEW_THRESHOLD = 2.5;
 
 export default function useViewport(containerRef) {
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(0.5);
+  const [zoom, setZoom] = useState(1.5);
   const [isDragging, setIsDragging] = useState(false);
   const [viewMode, setViewMode] = useState('galaxy'); // 'galaxy' | 'system'
   const [isSelecting, setIsSelecting] = useState(false);
@@ -17,6 +17,8 @@ export default function useViewport(containerRef) {
   const dragOffset = useRef({ x: 0, y: 0 });
   const selectionStart = useRef(null);
   const onSelectionCompleteRef = useRef(null);
+  const lastTouchDist = useRef(null);
+  const lastTouchCenter = useRef(null);
 
   // Allow callers to set selection complete callback
   const setOnSelectionComplete = useCallback((fn) => {
@@ -127,6 +129,74 @@ export default function useViewport(containerRef) {
     dragStart.current = null;
   }, [isSelecting, selectionRect]);
 
+  // Touch handlers for mobile pan + pinch-zoom
+  const handleTouchStart = useCallback((e) => {
+    if (e.touches.length === 1) {
+      const t = e.touches[0];
+      setIsDragging(true);
+      dragStart.current = { x: t.clientX, y: t.clientY };
+      dragOffset.current = { ...offset };
+      lastTouchDist.current = null;
+      lastTouchCenter.current = null;
+    } else if (e.touches.length === 2) {
+      setIsDragging(false);
+      dragStart.current = null;
+      const t0 = e.touches[0], t1 = e.touches[1];
+      lastTouchDist.current = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+      lastTouchCenter.current = { x: (t0.clientX + t1.clientX) / 2, y: (t0.clientY + t1.clientY) / 2 };
+    }
+  }, [offset]);
+
+  const handleTouchMove = useCallback((e) => {
+    e.preventDefault();
+    if (e.touches.length === 1 && isDragging && dragStart.current) {
+      const t = e.touches[0];
+      const dx = t.clientX - dragStart.current.x;
+      const dy = t.clientY - dragStart.current.y;
+      setOffset({
+        x: dragOffset.current.x + dx,
+        y: dragOffset.current.y + dy
+      });
+    } else if (e.touches.length === 2 && lastTouchDist.current != null) {
+      const t0 = e.touches[0], t1 = e.touches[1];
+      const dist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+      const center = { x: (t0.clientX + t1.clientX) / 2, y: (t0.clientY + t1.clientY) / 2 };
+
+      const container = containerRef.current;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const cx = center.x - rect.left;
+      const cy = center.y - rect.top;
+
+      // Pinch zoom
+      const scale = dist / lastTouchDist.current;
+      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom * scale));
+      const worldX = (cx - offset.x) / zoom;
+      const worldY = (cy - offset.y) / zoom;
+
+      // Pan from center movement
+      const prevCenter = lastTouchCenter.current;
+      const panDx = center.x - prevCenter.x;
+      const panDy = center.y - prevCenter.y;
+
+      setOffset({
+        x: cx - worldX * newZoom + panDx,
+        y: cy - worldY * newZoom + panDy
+      });
+      setZoom(newZoom);
+
+      lastTouchDist.current = dist;
+      lastTouchCenter.current = center;
+    }
+  }, [isDragging, zoom, offset, containerRef]);
+
+  const handleTouchEnd = useCallback(() => {
+    setIsDragging(false);
+    dragStart.current = null;
+    lastTouchDist.current = null;
+    lastTouchCenter.current = null;
+  }, []);
+
   // Track shift key for cursor feedback
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -155,7 +225,7 @@ export default function useViewport(containerRef) {
           break;
         case 'Escape':
           setViewMode('galaxy');
-          setZoom(0.5);
+          setZoom(1.5);
           break;
         default:
           break;
@@ -201,6 +271,9 @@ export default function useViewport(containerRef) {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
     screenToWorld,
     worldToScreen,
     setZoom,

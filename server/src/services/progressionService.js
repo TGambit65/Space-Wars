@@ -26,6 +26,20 @@ const awardXP = async (userId, amount, source, transaction = null) => {
     available_skill_points: newSkillPoints
   }, { transaction });
 
+  // Emit level-up event via socket if player gained levels
+  if (levelsGained > 0) {
+    try {
+      const socketService = require('./socketService');
+      socketService.emitToUser(userId, 'player:level_up', {
+        old_level: oldLevel,
+        new_level: newLevel,
+        levels_gained: levelsGained,
+        available_skill_points: newSkillPoints,
+        source
+      });
+    } catch (_) { /* socket emission should not block XP award */ }
+  }
+
   return {
     xp_gained: amount,
     total_xp: newXP,

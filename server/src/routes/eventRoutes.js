@@ -1,5 +1,5 @@
 const express = require('express');
-const { authMiddleware, adminMiddleware } = require('../middleware/auth');
+const { authMiddleware, adminMiddleware, optionalAuth } = require('../middleware/auth');
 const communityEventService = require('../services/communityEventService');
 
 const router = express.Router();
@@ -17,10 +17,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /active - Get active events
-router.get('/active', async (req, res) => {
+// GET /active - Get active events (with optional per-user contribution data)
+router.get('/active', optionalAuth, async (req, res) => {
   try {
-    const events = await communityEventService.getActiveEvents();
+    const events = await communityEventService.getActiveEvents(req.userId || null);
     res.json({ success: true, data: events });
   } catch (error) {
     res.status(error.statusCode || 500).json({ success: false, message: error.message });

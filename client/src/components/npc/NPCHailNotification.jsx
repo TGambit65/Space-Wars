@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { MessageSquare, X } from 'lucide-react';
+import { MessageSquare, X, Radio } from 'lucide-react';
 import NPCPortrait from './NPCPortrait';
+import { playSfx } from '../../hooks/useSoundEffects';
 
 const DISMISS_TIMEOUT_MS = 15000;
 const MAX_VISIBLE = 3;
@@ -13,6 +14,14 @@ const TYPE_BORDER = {
   BOUNTY_HUNTER: 'border-accent-orange/40',
 };
 
+const TYPE_GLOW = {
+  PIRATE: 'rgba(239,68,68,0.15)',
+  PIRATE_LORD: 'rgba(168,85,247,0.15)',
+  TRADER: 'rgba(34,197,94,0.15)',
+  PATROL: 'rgba(0,255,255,0.15)',
+  BOUNTY_HUNTER: 'rgba(255,165,0,0.15)',
+};
+
 const NPCHailNotification = ({ pendingHails, onAccept, onDismiss }) => {
   const visibleHails = pendingHails.slice(0, MAX_VISIBLE);
 
@@ -20,6 +29,16 @@ const NPCHailNotification = ({ pendingHails, onAccept, onDismiss }) => {
 
   return (
     <div className="fixed top-16 right-4 z-40 space-y-2 w-80">
+      {/* Pulsing incoming hail indicator */}
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg animate-pulse" style={{
+        background: 'rgba(0,255,255,0.06)',
+        border: '1px solid rgba(0,255,255,0.2)',
+      }}>
+        <Radio className="w-3.5 h-3.5 text-accent-cyan" />
+        <span className="text-xs text-accent-cyan font-display tracking-wide">
+          INCOMING HAIL{pendingHails.length > 1 ? `S (${pendingHails.length})` : ''}
+        </span>
+      </div>
       {visibleHails.map(hail => (
         <HailCard
           key={hail.npc_id}
@@ -42,9 +61,10 @@ const HailCard = ({ hail, onAccept, onDismiss }) => {
   const [fading, setFading] = useState(false);
   const timerRef = useRef(null);
 
-  // Slide in on mount
+  // Slide in on mount + play sound
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
+    playSfx('hail');
   }, []);
 
   // Auto-dismiss after timeout
@@ -67,6 +87,7 @@ const HailCard = ({ hail, onAccept, onDismiss }) => {
   };
 
   const borderColor = TYPE_BORDER[hail.npc_type] || 'border-space-600';
+  const glowColor = TYPE_GLOW[hail.npc_type] || 'rgba(0,255,255,0.1)';
 
   return (
     <div
@@ -75,6 +96,7 @@ const HailCard = ({ hail, onAccept, onDismiss }) => {
           ? 'translate-x-0 opacity-100'
           : 'translate-x-8 opacity-0'
       }`}
+      style={{ boxShadow: visible && !fading ? `0 4px 20px ${glowColor}, 0 0 40px ${glowColor}` : undefined }}
     >
       <div className="p-3">
         <div className="flex items-start gap-3">

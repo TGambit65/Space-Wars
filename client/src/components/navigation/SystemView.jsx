@@ -1,12 +1,13 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Map, AlertTriangle, Star } from 'lucide-react';
+import { Map as MapIcon, AlertTriangle, Star, Users, Swords } from 'lucide-react';
 import useSystemData from './hooks/useSystemData';
 import SystemViewCanvas from './SystemViewCanvas';
 import SystemInfoPanel from './ui/SystemInfoPanel';
 import SystemEntityBar from './ui/SystemEntityBar';
 import SectorActivityFeed from '../npc/SectorActivityFeed';
 import { FACTION_COLORS, FACTION_LABELS } from '../../constants/factions';
+import { playSfx } from '../../hooks/useSoundEffects';
 
 const STAR_CLASS_LABELS = {
   O: 'Blue Supergiant',
@@ -67,8 +68,9 @@ const SystemView = ({ user, onHailNPC, activityFeed = [], sectorNPCs = [] }) => 
   }, [systemDetail, liveNPCs]);
 
   const selectedEntityId = selectedType === 'ship' ? 'ship' :
+    (selectedType === 'player' ? selectedEntity?.ship_id :
     (selectedEntity?.planet_id || selectedEntity?.port_id ||
-    selectedEntity?.npc_id || selectedEntity?.sector_id || null);
+    selectedEntity?.npc_id || selectedEntity?.sector_id || null));
 
   const handleEntityClick = useCallback((type, entity) => {
     setSelectedType(type);
@@ -110,6 +112,7 @@ const SystemView = ({ user, onHailNPC, activityFeed = [], sectorNPCs = [] }) => 
     try {
       setMoveError(null);
       await moveToSystem(neighbor.sector_id);
+      playSfx('warp');
       setSelectedType(null);
       setSelectedEntity(null);
     } catch (err) {
@@ -124,6 +127,7 @@ const SystemView = ({ user, onHailNPC, activityFeed = [], sectorNPCs = [] }) => 
       try {
         setMoveError(null);
         await moveToSystem(entity.sector_id);
+        playSfx('warp');
         setSelectedType(null);
         setSelectedEntity(null);
       } catch (err) {
@@ -135,6 +139,19 @@ const SystemView = ({ user, onHailNPC, activityFeed = [], sectorNPCs = [] }) => 
       navigate(`/planet/${entity.planet_id}`);
     }
   }, [moveToSystem, navigate]);
+
+  // Compute faction presence from live NPCs (must be before early returns)
+  const factionPresence = useMemo(() => {
+    const counts = {};
+    for (const npc of liveNPCs) {
+      if (npc.faction) {
+        counts[npc.faction] = (counts[npc.faction] || 0) + 1;
+      }
+    }
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([faction, count]) => ({ faction, count }));
+  }, [liveNPCs]);
 
   if (loading) {
     return (
@@ -163,19 +180,6 @@ const SystemView = ({ user, onHailNPC, activityFeed = [], sectorNPCs = [] }) => 
   const scannedCount = systemDetail?.planets?.filter(p => p.is_scanned).length || 0;
   const totalCount = systemDetail?.planets?.length || 0;
 
-  // Compute faction presence from live NPCs
-  const factionPresence = useMemo(() => {
-    const counts = {};
-    for (const npc of liveNPCs) {
-      if (npc.faction) {
-        counts[npc.faction] = (counts[npc.faction] || 0) + 1;
-      }
-    }
-    return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .map(([faction, count]) => ({ faction, count }));
-  }, [liveNPCs]);
-
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
       {/* Three.js Canvas */}
@@ -187,6 +191,7 @@ const SystemView = ({ user, onHailNPC, activityFeed = [], sectorNPCs = [] }) => 
         onEntityDoubleClick={handleEntityDoubleClick}
         neighbors={neighbors}
         onEntityRightClick={handleEntityRightClick}
+        userId={user?.user_id}
       />
 
       {/* Top-left: Back button + system info */}
@@ -196,7 +201,7 @@ const SystemView = ({ user, onHailNPC, activityFeed = [], sectorNPCs = [] }) => 
             onClick={() => navigate('/map')}
             className="text-gray-400 hover:text-accent-cyan transition-colors flex items-center gap-1 text-sm"
           >
-            <Map className="w-4 h-4" />
+            <MapIcon className="w-4 h-4" />
             <span>Sector Map</span>
           </button>
           <div className="w-px h-6 bg-space-600" />
@@ -273,6 +278,46 @@ const SystemView = ({ user, onHailNPC, activityFeed = [], sectorNPCs = [] }) => 
         systemData={liveSystemDetail}
       />
 
+      {/* Players in Sector */}
+      {(() => {
+        const otherShips = (systemDetail?.ships || []).filter(s => s.owner_user_id !== user?.user_id);
+        if (otherShips.length === 0) return null;
+        // Group by owner
+        const byOwner = {};
+        otherShips.forEach(s => {
+          const key = s.owner?.username || 'Unknown';
+          if (!byOwner[key]) byOwner[key] = { ...s.owner, ships: [] };
+          byOwner[key].ships.push(s);
+        });
+        return (
+          <div className="absolute bottom-20 right-4 bg-space-900/90 border border-space-700 rounded-lg px-3 py-2 backdrop-blur-sm pointer-events-auto w-56 z-20">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Users className="w-3.5 h-3.5 text-accent-cyan" />
+              <span className="text-xs font-display text-accent-cyan tracking-wide">PLAYERS IN SYSTEM</span>
+            </div>
+            <div className="space-y-1.5 max-h-48 overflow-y-auto">
+              {Object.entries(byOwner).map(([username, info]) => (
+                <div key={username} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: FACTION_COLORS[info.faction] || '#888' }} />
+                    <span className="text-white truncate">{username}</span>
+                    <span className="text-[10px] text-gray-500">({info.ships.length})</span>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    {info.pvp_enabled && <Swords className="w-3 h-3 text-red-400" title="PvP enabled" />}
+                    {info.faction && (
+                      <span className="text-[10px]" style={{ color: FACTION_COLORS[info.faction] || '#888' }}>
+                        {FACTION_LABELS[info.faction] || ''}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Bottom-left: Sector activity feed */}
       <div className="absolute bottom-20 left-4 w-72 pointer-events-auto z-20">
         <SectorActivityFeed activityFeed={activityFeed} />
@@ -286,6 +331,7 @@ const SystemView = ({ user, onHailNPC, activityFeed = [], sectorNPCs = [] }) => 
         currentShip={currentShip}
         neighbors={neighbors}
         onShipSelect={() => handleEntityClick('ship', currentShip)}
+        userId={user?.user_id}
       />
 
       {/* Move Error Toast */}

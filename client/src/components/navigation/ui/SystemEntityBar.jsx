@@ -1,4 +1,4 @@
-import { Globe, Anchor, Crosshair, Skull, HelpCircle, Rocket, Navigation } from 'lucide-react';
+import { Globe, Anchor, Crosshair, Skull, HelpCircle, Rocket, Navigation, Scan, ShoppingCart, MessageSquare, Users } from 'lucide-react';
 import { FACTION_TAILWIND as FACTION_COLORS, FACTION_SHORT } from '../../../constants/factions';
 
 const PLANET_DOT_COLORS = {
@@ -24,13 +24,14 @@ const NPC_STATE_BADGES = {
   docking:    { label: 'Docking',    className: 'bg-cyan-900/60 text-cyan-300' },
 };
 
-const SystemEntityBar = ({ systemDetail, selectedEntityId, onEntitySelect, currentShip, neighbors, onShipSelect }) => {
+const SystemEntityBar = ({ systemDetail, selectedEntityId, onEntitySelect, currentShip, neighbors, onShipSelect, userId }) => {
   if (!systemDetail) return null;
 
   const planets = systemDetail.planets || [];
   const ports = systemDetail.ports || [];
   const npcs = systemDetail.npcs || [];
   const jumpPoints = neighbors || [];
+  const otherPlayers = (systemDetail.ships || []).filter(s => s.owner_user_id && s.owner_user_id !== userId);
 
   if (!currentShip && planets.length === 0 && ports.length === 0 && npcs.length === 0 && jumpPoints.length === 0) return null;
 
@@ -84,6 +85,8 @@ const SystemEntityBar = ({ systemDetail, selectedEntityId, onEntitySelect, curre
                   <span className={`truncate max-w-[100px] ${!isScanned ? 'text-gray-500 italic' : ''}`}>
                     {isScanned ? planet.name : `Orbit #${planet.orbital_position}`}
                   </span>
+                  {/* P5 Item 2: Action hint */}
+                  {!isScanned && <Scan className="w-2.5 h-2.5 text-yellow-500 shrink-0" title="Click to scan" />}
                 </button>
               );
             })}
@@ -145,13 +148,46 @@ const SystemEntityBar = ({ systemDetail, selectedEntityId, onEntitySelect, curre
               >
                 <Anchor className="w-3 h-3 text-cyan-400 shrink-0" />
                 <span className="truncate max-w-[100px]">{port.name}</span>
+                <ShoppingCart className="w-2.5 h-2.5 text-cyan-500/50 shrink-0" title="Click to dock & trade" />
               </button>
             ))}
           </>
         )}
 
         {/* Separator */}
-        {(planets.length > 0 || jumpPoints.length > 0 || ports.length > 0) && npcs.length > 0 && (
+        {(planets.length > 0 || jumpPoints.length > 0 || ports.length > 0) && otherPlayers.length > 0 && (
+          <div className="w-px h-5 bg-space-600 shrink-0" />
+        )}
+
+        {/* Other Players */}
+        {otherPlayers.length > 0 && (
+          <>
+            <span className="text-[10px] text-gray-500 uppercase shrink-0 font-bold tracking-widest">Players</span>
+            {otherPlayers.map(ship => {
+              const factionColor = ship.owner?.faction && FACTION_COLORS[ship.owner.faction];
+              return (
+                <button
+                  key={ship.ship_id}
+                  onClick={() => onEntitySelect('player', ship)}
+                  className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs shrink-0 transition-all ${
+                    ship.ship_id === selectedEntityId
+                      ? 'bg-space-600 text-white border border-space-500'
+                      : 'text-gray-300 hover:bg-space-700 hover:text-white'
+                  }`}
+                >
+                  <Users className={`w-3 h-3 ${factionColor || 'text-purple-400'} shrink-0`} />
+                  {ship.owner?.faction && FACTION_SHORT[ship.owner.faction] && (
+                    <span className={`text-[8px] font-bold ${factionColor || 'text-gray-500'}`}>{FACTION_SHORT[ship.owner.faction]}</span>
+                  )}
+                  <span className="truncate max-w-[100px]">{ship.owner?.username || ship.name}</span>
+                </button>
+              );
+            })}
+          </>
+        )}
+
+        {/* Separator */}
+        {(planets.length > 0 || jumpPoints.length > 0 || ports.length > 0 || otherPlayers.length > 0) && npcs.length > 0 && (
           <div className="w-px h-5 bg-space-600 shrink-0" />
         )}
 
@@ -188,6 +224,10 @@ const SystemEntityBar = ({ systemDetail, selectedEntityId, onEntitySelect, curre
                     <span className={`text-[9px] px-1 rounded ${stateBadge.className}`}>
                       {stateBadge.label}
                     </span>
+                  )}
+                  {/* P5 Item 2: Action hint for hailable NPCs */}
+                  {['TRADER', 'PATROL', 'BOUNTY_HUNTER', 'PIRATE'].includes(npc.npc_type) && (
+                    <MessageSquare className="w-2.5 h-2.5 text-gray-500 shrink-0" title="Click to hail" />
                   )}
                 </button>
               );

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { designer, ships, templates } from '../../services/api';
 import { Wrench, Zap, Shield, Crosshair, Cpu, Trash2, PlusCircle, AlertTriangle, Save, FolderOpen, X, Download } from 'lucide-react';
 import { useNotifications } from '../../contexts/NotificationContext';
+import WikiLink from '../../components/common/WikiLink';
 
 const ShipDesigner = () => {
     const [ship, setShip] = useState(null);
@@ -183,6 +184,8 @@ const ShipDesigner = () => {
                     </h1>
                     <p className="text-gray-400 mt-1">
                         Modifying: <span className="text-white font-mono">{ship.name}</span>
+                        <span className="mx-2 text-space-600">|</span>
+                        <WikiLink term="ship designer" className="text-[11px]">Guide</WikiLink>
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -334,12 +337,14 @@ const ShipDesigner = () => {
 
                     <div className="space-y-3">
                         {available.map((comp) => {
-                            const canAfford = true; // Assuming free component pool or prepaid for now based on prompt simplicity. 
-                            // Real logic would check User Credits vs Price if components cost money.
-                            // Tasks.md doesn't specify component costs in listing, only install/uninstall.
-
                             const fitsPower = (stats.power_used + comp.energy_cost) <= stats.power_max;
                             const hasSlots = installed.length < ship.slots;
+
+                            // P5 Item 6: Before/after stat comparison
+                            const statDelta = comp.stats ? Object.entries(comp.stats).map(([k, v]) => {
+                                const current = stats[k] || 0;
+                                return { key: k, current, after: current + v, delta: v };
+                            }) : [];
 
                             return (
                                 <div key={comp.id || comp.name} className="card p-4 flex justify-between items-center">
@@ -353,15 +358,24 @@ const ShipDesigner = () => {
                                                 <span className={`${!fitsPower ? 'text-accent-red' : ''}`}>Pwr: {comp.energy_cost}</span>
                                                 <span>{comp.type}</span>
                                             </div>
-                                            {comp.stats && (
-                                                <div className="text-xs text-accent-cyan mt-1">
-                                                    {Object.entries(comp.stats).map(([k, v]) => `${k}: ${v}`).join(', ')}
+                                            {statDelta.length > 0 && (
+                                                <div className="text-xs mt-1 flex flex-wrap gap-x-3 gap-y-0.5">
+                                                    {statDelta.map(s => (
+                                                        <span key={s.key} className="flex items-center gap-1">
+                                                            <span className="text-gray-500">{s.key}:</span>
+                                                            <span className="text-gray-400 font-mono">{s.current}</span>
+                                                            <span className="text-gray-600">→</span>
+                                                            <span className={`font-mono ${s.delta > 0 ? 'text-accent-green' : s.delta < 0 ? 'text-accent-red' : 'text-gray-400'}`}>
+                                                                {s.after}{s.delta !== 0 && <span className="text-[10px] ml-0.5">({s.delta > 0 ? '+' : ''}{s.delta})</span>}
+                                                            </span>
+                                                        </span>
+                                                    ))}
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                     <button
-                                        onClick={() => handleInstall(comp.id || comp.component_id)} // Check API response field for ID
+                                        onClick={() => handleInstall(comp.id || comp.component_id)}
                                         disabled={actionLoading || !hasSlots || !fitsPower}
                                         className="btn btn-primary text-xs px-3 py-1 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >

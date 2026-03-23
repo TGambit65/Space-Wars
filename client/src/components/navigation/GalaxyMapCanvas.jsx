@@ -119,7 +119,7 @@ const GalaxyMapCanvas = ({
 }) => {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
-  const [canvasSize, setCanvasSize] = useState({ width: window.innerWidth - 256, height: window.innerHeight });
+  const [canvasSize, setCanvasSize] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [hoveredSystem, setHoveredSystem] = useState(null);
   const animFrameRef = useRef(null);
   const timeRef = useRef(0);
@@ -128,6 +128,7 @@ const GalaxyMapCanvas = ({
     offset, zoom, isDragging,
     centerOn, handleWheel,
     handleMouseDown, handleMouseMove, handleMouseUp,
+    handleTouchStart, handleTouchMove, handleTouchEnd,
     worldToScreen, screenToWorld,
     setZoom,
     isSelecting, selectionRect, shiftHeld,
@@ -185,7 +186,7 @@ const GalaxyMapCanvas = ({
   useEffect(() => {
     if (!currentSectorId || !systemPositions.has(currentSectorId)) return;
     const pos = systemPositions.get(currentSectorId);
-    centerOn(pos.x, pos.y, 0.6);
+    centerOn(pos.x, pos.y, 1.5);
   }, [currentSectorId, systemPositions.size > 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Resize handling
@@ -379,11 +380,15 @@ const GalaxyMapCanvas = ({
     <div
       ref={containerRef}
       className="w-full h-full"
+      style={{ touchAction: 'none' }}
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={(e) => { handleMouseMove(e); handleHover(e); }}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
     >
@@ -503,7 +508,7 @@ function drawHyperlanes(ctx, hyperlanes, systemPositions, offset, zoom,
       ctx.stroke();
     } else {
       // Normal hyperlanes (both discovered)
-      ctx.strokeStyle = 'rgba(100, 116, 139, 0.4)';
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.5)';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(x1, y1);
@@ -538,14 +543,14 @@ function drawSystems(ctx, systems, offset, zoom, currentSectorId,
       ctx.arc(sx, sy, dimSize * 3, 0, Math.PI * 2);
       ctx.fill();
       // Dot
-      ctx.fillStyle = 'rgba(100, 116, 139, 0.4)';
+      ctx.fillStyle = 'rgba(148, 163, 184, 0.6)';
       ctx.beginPath();
-      ctx.arc(sx, sy, dimSize, 0, Math.PI * 2);
+      ctx.arc(sx, sy, dimSize + 1, 0, Math.PI * 2);
       ctx.fill();
       continue;
     }
 
-    const baseSize = Math.max(3, (STAR_SIZES[sys.type] || 5) * Math.min(1.5, zoom * 0.8));
+    const baseSize = Math.max(4, (STAR_SIZES[sys.type] || 5) * Math.min(1.8, zoom * 0.9 + 0.3));
     const starColor = STAR_COLORS[sys.star_class] || '#FFFFFF';
 
     // Faction territory tint (subtle halo behind star)
@@ -563,11 +568,12 @@ function drawSystems(ctx, systems, offset, zoom, currentSectorId,
       ctx.fill();
     }
 
-    // Glow effect
-    const glowSize = baseSize * (isCurrent ? 4 : isHovered ? 3 : 2);
+    // Glow effect (brighter, larger)
+    const glowSize = baseSize * (isCurrent ? 5 : isHovered ? 4 : 3);
     const gradient = ctx.createRadialGradient(sx, sy, 0, sx, sy, glowSize);
     gradient.addColorStop(0, starColor);
-    gradient.addColorStop(0.3, starColor + '80');
+    gradient.addColorStop(0.25, starColor + 'CC');
+    gradient.addColorStop(0.5, starColor + '55');
     gradient.addColorStop(1, starColor + '00');
     ctx.fillStyle = gradient;
     ctx.beginPath();

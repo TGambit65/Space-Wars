@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { combat } from '../../services/api';
 import { Shield, Crosshair, Skull, Award, Clock, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
+import Breadcrumb from '../common/Breadcrumb';
+import LoadingScreen from '../common/LoadingScreen';
 
 const CombatHistory = () => {
     const navigate = useNavigate();
@@ -78,11 +80,12 @@ const CombatHistory = () => {
         return <Shield className="w-5 h-5 text-accent-orange" />; // flee or draw
     };
 
-    if (loading) return <div className="p-8 text-center text-accent-cyan animate-pulse">Decrypting Battle Logs...</div>;
+    if (loading) return <LoadingScreen variant="combat" />;
     if (error) return <div className="p-8 text-center text-accent-red flex items-center justify-center gap-2"><AlertCircle /> {error}</div>;
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">
+            <Breadcrumb items={[{ label: 'Combat', path: '/combat' }, { label: 'Battle Logs' }]} className="mb-2" />
             <header className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-white flex items-center gap-3">

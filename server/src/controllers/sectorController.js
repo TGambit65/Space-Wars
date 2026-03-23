@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator');
 const { Op, fn, col, literal } = require('sequelize');
-const { Sector, SectorConnection, Port, Ship, NPC, Planet, Colony, sequelize } = require('../models');
+const { Sector, SectorConnection, Port, Ship, NPC, Planet, Colony, User, sequelize } = require('../models');
 const config = require('../config');
 const { getDiscoveredSectorIds } = require('../services/discoveryService');
 const worldPolicyService = require('../services/worldPolicyService');
@@ -401,16 +401,21 @@ const getSystemDetail = async (req, res, next) => {
       attributes: ['port_id', 'name', 'type', 'description', 'tax_rate', 'allows_illegal']
     });
 
-    // Get ships in sector
+    // Get ships in sector (include owner info for social presence)
     const ships = await Ship.findAll({
       where: { current_sector_id: sectorId },
-      attributes: ['ship_id', 'name', 'ship_type', 'owner_user_id']
+      attributes: ['ship_id', 'name', 'ship_type', 'owner_user_id'],
+      include: [{
+        model: User,
+        as: 'owner',
+        attributes: ['username', 'faction', 'pvp_enabled'],
+      }],
     });
 
     // Get NPCs in sector
     const npcs = await NPC.findAll({
       where: { current_sector_id: sectorId, is_alive: true },
-      attributes: ['npc_id', 'name', 'npc_type', 'ship_type', 'aggression_level', 'hull_points', 'max_hull_points', 'behavior_state', 'faction']
+      attributes: ['npc_id', 'name', 'npc_type', 'ship_type', 'aggression_level', 'hull_points', 'max_hull_points', 'behavior_state', 'faction', 'ai_personality']
     });
 
     // Get connected neighbors
@@ -460,6 +465,7 @@ const getSystemDetail = async (req, res, next) => {
           star_color,
           hazard_level: sector.hazard_level,
           description: sector.description,
+          phenomena: sector.phenomena || null,
           policy_summary: worldPolicyService.summarizeSectorPolicy(sector)
         },
         planets,

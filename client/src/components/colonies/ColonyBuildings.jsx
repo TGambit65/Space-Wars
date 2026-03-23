@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { buildings } from '../../services/api';
-import { Factory, Zap, Users, ArrowUp, Trash2, Power, Wrench, ChevronDown, ChevronUp } from 'lucide-react';
+import { Factory, Zap, Users, ArrowUp, Trash2, Power, Wrench, ChevronDown, ChevronUp, Lock, GitBranch } from 'lucide-react';
 
 const categoryIcons = {
   extraction: '⛏️',
@@ -275,6 +275,43 @@ function ColonyBuildings({ colonyId, colony }) {
             ))
           )
         )}
+
+        {/* P5 Item 8: Locked buildings with prerequisites */}
+        {(() => {
+          const locked = availableBuildings.filter(b => !b.canBuild);
+          if (locked.length === 0) return null;
+          return (
+            <>
+              <div className="flex items-center gap-2 mt-2">
+                <GitBranch className="w-3.5 h-3.5 text-gray-500" />
+                <span className="text-xs text-gray-500 font-display uppercase tracking-wider">Locked ({locked.length})</span>
+              </div>
+              {locked.map(b => (
+                <div key={b.building_type} className="p-3 rounded-lg opacity-60" style={{ background: 'rgba(100,100,100,0.04)', border: '1px solid rgba(100,100,100,0.1)' }}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Lock className="w-3.5 h-3.5 text-gray-500" />
+                    <span className="text-sm font-medium text-gray-400">{b.name}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded border ${tierColors[b.tier] || tierColors[1]}`}>T{b.tier}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+                    {b.prerequisiteInfrastructure > 0 && (
+                      <span className={colony?.infrastructure_level >= b.prerequisiteInfrastructure ? 'text-green-400' : 'text-red-400'}>
+                        Infrastructure Lv.{b.prerequisiteInfrastructure}
+                      </span>
+                    )}
+                    {b.prerequisiteTech && (
+                      <span className="text-red-400">
+                        Tech: {b.prerequisiteTech.replace(/_/g, ' ')}
+                      </span>
+                    )}
+                    {b.reason && <span className="text-gray-600">{b.reason}</span>}
+                    <span className="text-accent-orange">{b.cost?.toLocaleString()} cr</span>
+                  </div>
+                </div>
+              ))}
+            </>
+          );
+        })()}
       </div>
     </div>
   );

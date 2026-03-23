@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import { sectors, ships } from '../../services/api';
 import { createDerelictBoardingScene } from '../../engine/interiorBlueprints';
 import TraversalScene from './TraversalScene';
+import Breadcrumb from '../common/Breadcrumb';
+import LoadingScreen from '../common/LoadingScreen';
 
 function DerelictBoardingView() {
   const { shipId } = useParams();
@@ -44,11 +46,16 @@ function DerelictBoardingView() {
     return <div className="p-8 text-center text-red-400">{error}</div>;
   }
 
-  if (!scene) {
-    return <div className="p-8 text-center text-cyan-300">Reconstructing derelict boarding telemetry...</div>;
-  }
+  if (!scene) return <LoadingScreen variant="navigation" />;
 
-  return <TraversalScene scene={scene} />;
+  return (
+    <div className="relative w-full h-screen">
+      <div className="absolute top-4 left-4 z-20 pointer-events-auto">
+        <Breadcrumb items={[{ label: 'Ships', path: '/ships' }, { label: 'Derelict Boarding' }]} />
+      </div>
+      <TraversalScene scene={scene} />
+    </div>
+  );
 }
 
 export default DerelictBoardingView;

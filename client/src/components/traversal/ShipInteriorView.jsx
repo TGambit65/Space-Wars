@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import { ships } from '../../services/api';
 import { createShipInteriorScene } from '../../engine/interiorBlueprints';
 import TraversalScene from './TraversalScene';
+import Breadcrumb from '../common/Breadcrumb';
+import LoadingScreen from '../common/LoadingScreen';
 
 function ShipInteriorView({ user }) {
   const { shipId } = useParams();
@@ -36,11 +38,16 @@ function ShipInteriorView({ user }) {
     return <div className="p-8 text-center text-red-400">{error}</div>;
   }
 
-  if (!scene) {
-    return <div className="p-8 text-center text-cyan-300">Syncing ship interior telemetry...</div>;
-  }
+  if (!scene) return <LoadingScreen variant="ship" />;
 
-  return <TraversalScene scene={scene} />;
+  return (
+    <div className="relative w-full h-screen">
+      <div className="absolute top-4 left-4 z-20 pointer-events-auto">
+        <Breadcrumb items={[{ label: 'Ships', path: '/ships' }, { label: 'Interior' }]} />
+      </div>
+      <TraversalScene scene={scene} />
+    </div>
+  );
 }
 
 export default ShipInteriorView;

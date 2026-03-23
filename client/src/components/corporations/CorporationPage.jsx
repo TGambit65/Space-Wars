@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { corporations, agreements } from '../../services/api';
-import { Users, Crown, Shield, LogOut, Link2, Check, X as XIcon } from 'lucide-react';
+import { Users, Crown, Shield, LogOut, Link2, Check, X as XIcon, TrendingUp, Activity } from 'lucide-react';
 import CorporationPicker from '../common/CorporationPicker';
 
 function CorporationPage({ user }) {
@@ -374,6 +374,59 @@ function CorporationPage({ user }) {
                 <p className="text-sm text-gray-400">{corp.description || 'No description set.'}</p>
                 <p className="text-xs text-gray-600 mt-2">Members: {corp.member_count || corp.members?.length || 0} | Your role: {corp.role}</p>
               </div>
+
+              {/* P5 Item 13: Corp Stats Overview */}
+              {corp.members && corp.members.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="holo-panel p-4 flex items-center gap-3">
+                    <Users className="w-5 h-5 text-neon-cyan shrink-0" />
+                    <div>
+                      <p className="text-lg font-bold text-white">{corp.members.length}</p>
+                      <p className="text-xs text-gray-500">Members</p>
+                    </div>
+                  </div>
+                  <div className="holo-panel p-4 flex items-center gap-3">
+                    <TrendingUp className="w-5 h-5 text-neon-orange shrink-0" />
+                    <div>
+                      <p className="text-lg font-bold text-neon-orange">{corp.members.reduce((s, m) => s + (m.contribution || 0), 0).toLocaleString()}</p>
+                      <p className="text-xs text-gray-500">Total Contributed</p>
+                    </div>
+                  </div>
+                  <div className="holo-panel p-4 flex items-center gap-3">
+                    <Activity className="w-5 h-5 text-accent-green shrink-0" />
+                    <div>
+                      <p className="text-lg font-bold text-white">{corpAgreements.filter(a => a.status === 'active').length}</p>
+                      <p className="text-xs text-gray-500">Active Agreements</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Top Contributors */}
+              {corp.members && corp.members.length > 1 && (
+                <div className="holo-panel p-4">
+                  <h3 className="text-sm font-display text-neon-cyan mb-3 flex items-center gap-2">
+                    <Crown className="w-4 h-4" /> Top Contributors
+                  </h3>
+                  <div className="space-y-2">
+                    {[...corp.members].sort((a, b) => (b.contribution || 0) - (a.contribution || 0)).slice(0, 5).map((m, i) => {
+                      const maxContrib = Math.max(...corp.members.map(x => x.contribution || 0), 1);
+                      const pct = ((m.contribution || 0) / maxContrib) * 100;
+                      return (
+                        <div key={m.user_id} className="flex items-center gap-3">
+                          <span className="text-xs text-gray-500 w-4 text-right">#{i + 1}</span>
+                          <span className="text-sm text-white flex-1 truncate">{m.username}</span>
+                          <div className="w-24 h-1.5 bg-space-700 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-neon-orange/60" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="text-xs text-gray-400 w-20 text-right font-mono">{(m.contribution || 0).toLocaleString()}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-3">
                 <button onClick={handleLeave} disabled={actionLoading === 'leave'} className="holo-button-danger text-sm px-4 py-2">
                   <LogOut className="w-4 h-4 inline mr-1" /> {actionLoading === 'leave' ? 'Leaving...' : 'Leave Corporation'}

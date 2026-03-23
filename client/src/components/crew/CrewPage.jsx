@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { crew as crewApi, ships, ports as portsApi } from '../../services/api';
-import { Users, UserPlus, Wallet, AlertCircle, RefreshCw, Rocket, Building } from 'lucide-react';
+import { Users, UserPlus, Wallet, AlertCircle, RefreshCw, Rocket, Building, Trash2 } from 'lucide-react';
 import CrewCard from './CrewCard';
+import WikiLink from '../common/WikiLink';
 import CrewDetails from './CrewDetails';
 import HireCrewModal from './HireCrewModal';
 
@@ -82,6 +83,8 @@ function CrewPage({ user }) {
     );
   }
 
+  const idleCrew = myCrew.filter(c => !c.ship_id);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -90,9 +93,25 @@ function CrewPage({ user }) {
             <Users className="w-7 h-7 text-accent-purple" />
             Crew Management
           </h1>
-          <p className="text-gray-400">Hire, manage, and assign crew members to your ships</p>
+          <p className="text-gray-400">Hire, manage, and assign crew members to your ships <WikiLink term="crew" className="text-[11px] ml-2">Guide</WikiLink></p>
         </div>
         <div className="flex gap-2">
+          {idleCrew.length > 1 && (
+            <button
+              onClick={async () => {
+                if (!confirm(`Dismiss ${idleCrew.length} unassigned crew members?`)) return;
+                let dismissed = 0;
+                for (const c of idleCrew) {
+                  try { await crewApi.dismiss(c.crew_id); dismissed++; } catch { /* skip */ }
+                }
+                await fetchData();
+                if (dismissed > 0) setError('');
+              }}
+              className="btn btn-secondary flex items-center gap-2 text-accent-red border-accent-red/30 hover:bg-accent-red/10"
+            >
+              <Trash2 className="w-4 h-4" /> Dismiss Idle ({idleCrew.length})
+            </button>
+          )}
           <button onClick={fetchData} className="btn btn-secondary flex items-center gap-2">
             <RefreshCw className="w-4 h-4" />
           </button>

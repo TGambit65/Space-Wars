@@ -1,9 +1,9 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Suspense, lazy, useState, useEffect, useCallback } from 'react';
 import { auth } from './services/api';
 import useSocket from './hooks/useSocket';
 import useNPCEvents from './hooks/useNPCEvents';
-import { GameSessionProvider } from './contexts/GameSessionContext';
+import { GameSessionProvider, useGameSession } from './contexts/GameSessionContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import ToastContainer from './components/common/ToastContainer';
 import Layout from './components/common/Layout';
@@ -12,9 +12,20 @@ import Dashboard from './components/common/Dashboard';
 import NPCChatPanel from './components/npc/NPCChatPanel';
 import NPCHailNotification from './components/npc/NPCHailNotification';
 import ChatPanel from './components/chat/ChatPanel';
+import MiniMap from './components/navigation/MiniMap';
 import { MessageSquare } from 'lucide-react';
 import { useNotifications } from './contexts/NotificationContext';
 import { clearToken, getToken, setToken } from './services/session';
+import { ships as shipsApi } from './services/api';
+import { playSfx } from './hooks/useSoundEffects';
+import LevelUpModal from './components/common/LevelUpModal';
+
+/** Renders MiniMap using activeShip from GameSessionContext */
+function MiniMapWidget({ onNavigate }) {
+  const { activeShip } = useGameSession();
+  if (!activeShip) return null;
+  return <MiniMap activeShip={activeShip} onNavigate={onNavigate} />;
+}
 
 /** Listens for NPC combat alerts and shows a warning toast */
 function CombatAlertListener({ combatAlert, clearCombatAlert }) {
@@ -25,8 +36,31 @@ function CombatAlertListener({ combatAlert, clearCombatAlert }) {
     const npcName = combatAlert.name || 'Unknown NPC';
     const npcType = combatAlert.npc_type ? ` (${combatAlert.npc_type})` : '';
     warning(`Combat Alert: ${npcName}${npcType} is engaging you!`, 8000);
+    playSfx('combatHit');
     clearCombatAlert();
   }, [combatAlert, clearCombatAlert, warning]);
+
+  return null;
+}
+
+/** Listens for level-up events via socket and shows a modal + toast */
+function LevelUpListener({ socket, onLevelUp }) {
+  const { success } = useNotifications();
+  const { refreshProgression } = useGameSession();
+
+  useEffect(() => {
+    if (!socket) return;
+    const handler = (data) => {
+      const lvl = data.new_level || '?';
+      const pts = data.available_skill_points || 0;
+      success(`Level Up! You are now level ${lvl}! (${pts} skill points available)`, 8000);
+      playSfx('levelUp');
+      refreshProgression().catch(() => {});
+      if (onLevelUp) onLevelUp(data);
+    };
+    socket.on('player:level_up', handler);
+    return () => socket.off('player:level_up', handler);
+  }, [socket, success, refreshProgression, onLevelUp]);
 
   return null;
 }
@@ -44,6 +78,7 @@ function AchievementListener({ socket }) {
       if (data.reward_title) rewardParts.push(`Title: ${data.reward_title}`);
       const rewardStr = rewardParts.length > 0 ? ` (${rewardParts.join(', ')})` : '';
       success(`Achievement Unlocked: ${data.name}!${rewardStr}`, 8000);
+      playSfx('notification');
       // Notify dashboard widget to refresh
       window.dispatchEvent(new CustomEvent('sw3k:achievement-unlocked'));
     };
@@ -88,26 +123,33 @@ const DerelictBoardingView = lazy(() => import('./components/traversal/DerelictB
 const AgentPage = lazy(() => import('./components/agent/AgentPage'));
 const AchievementsPage = lazy(() => import('./components/common/AchievementsPage'));
 
+import LoadingScreen from './components/common/LoadingScreen';
+
 function RouteLoadingFallback() {
-  return (
-    <div className="min-h-[16rem] flex items-center justify-center">
-      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-neon-cyan"></div>
-    </div>
-  );
+  return <LoadingScreen variant="default" />;
 }
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const appNavigate = useNavigate();
   const [activeChatNPC, setActiveChatNPC] = useState(null);
   const [chatOpen, setChatOpen] = useState(false);
+  const [levelUpData, setLevelUpData] = useState(null);
 
   const { socket, connected: socketConnected } = useSocket(user);
   const { sectorNPCs, pendingHails, dismissHail, activityFeed, combatAlert, clearCombatAlert } = useNPCEvents(socket);
 
   useEffect(() => {
     auth.getProfile({ skipAuthRedirect: true })
-      .then(res => setUser(res.data.data))
+      .then(res => {
+        setUser(res.data.data);
+        // Restore last page on refresh (only when landing on root)
+        const lastPage = localStorage.getItem('sw3k_last_page');
+        if (lastPage && lastPage !== '/' && window.location.pathname === '/') {
+          appNavigate(lastPage, { replace: true });
+        }
+      })
       .catch(() => clearToken())
       .finally(() => setLoading(false));
   }, []);
@@ -128,9 +170,18 @@ function App() {
   const handleLogout = () => {
     auth.logout().catch(() => {});
     clearToken();
+    localStorage.removeItem('sw3k_last_page');
     setUser(null);
     setActiveChatNPC(null);
   };
+
+  const handleLevelUp = useCallback((data) => {
+    setLevelUpData(data);
+  }, []);
+
+  const handleCloseLevelUp = useCallback(() => {
+    setLevelUpData(null);
+  }, []);
 
   const handleHailNPC = useCallback((npc) => {
     setActiveChatNPC(npc);
@@ -149,6 +200,19 @@ function App() {
   const handleCloseChat = useCallback(() => {
     setActiveChatNPC(null);
   }, []);
+
+  const handleMiniMapNavigate = useCallback(async (sectorId) => {
+    try {
+      const shipsRes = await shipsApi.getAll();
+      const activeId = shipsRes.data.data?.active_ship_id;
+      if (activeId) {
+        await shipsApi.move(activeId, sectorId);
+        appNavigate('/system');
+      }
+    } catch {
+      appNavigate('/map');
+    }
+  }, [appNavigate]);
 
   if (loading) {
     return (
@@ -224,18 +288,24 @@ function App() {
         />
       )}
 
+      {/* P5 Item 1: Mini Navigation Map */}
+      <MiniMapWidget onNavigate={handleMiniMapNavigate} />
+
       {/* Chat Toggle Button */}
       <button
         onClick={() => setChatOpen(!chatOpen)}
-        className="fixed bottom-4 right-4 z-30 p-3 rounded-full transition-all duration-200 hover:scale-110"
+        className="fixed bottom-4 right-4 z-30 flex items-center gap-2 px-4 py-2.5 rounded-full transition-all duration-200 hover:scale-105"
         style={{
-          background: chatOpen ? 'rgba(0, 255, 255, 0.2)' : 'rgba(10, 10, 30, 0.8)',
+          background: chatOpen ? 'rgba(0, 255, 255, 0.2)' : 'rgba(10, 10, 30, 0.85)',
           border: '1px solid rgba(0, 255, 255, 0.3)',
-          boxShadow: chatOpen ? '0 0 15px rgba(0, 255, 255, 0.2)' : 'none',
+          boxShadow: chatOpen ? '0 0 15px rgba(0, 255, 255, 0.2)' : '0 0 8px rgba(0, 255, 255, 0.08)',
         }}
         title="Toggle Chat"
       >
-        <MessageSquare className={`w-5 h-5 ${chatOpen ? 'text-neon-cyan' : 'text-gray-400'}`} />
+        <MessageSquare className={`w-5 h-5 ${chatOpen ? 'text-neon-cyan' : 'text-gray-300'}`} />
+        <span className={`text-xs font-medium ${chatOpen ? 'text-neon-cyan' : 'text-gray-300'}`}>
+          {chatOpen ? 'Close' : 'Chat'}
+        </span>
       </button>
 
       {/* Real-time Chat Panel */}
@@ -247,7 +317,9 @@ function App() {
       />
 
       <CombatAlertListener combatAlert={combatAlert} clearCombatAlert={clearCombatAlert} />
+      <LevelUpListener socket={socket} onLevelUp={handleLevelUp} />
       <AchievementListener socket={socket} />
+      {levelUpData && <LevelUpModal data={levelUpData} onClose={handleCloseLevelUp} />}
       <ToastContainer />
     </Layout>
     </GameSessionProvider>

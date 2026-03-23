@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { crafting, ships as shipsApi, trade } from '../../services/api';
 import { Hammer, Clock, Package, X, CheckCircle } from 'lucide-react';
+import WikiLink from '../common/WikiLink';
+import LoadingScreen from '../common/LoadingScreen';
 
 function CraftingPage({ user }) {
   const [blueprints, setBlueprints] = useState([]);
@@ -93,20 +96,14 @@ function CraftingPage({ user }) {
     } catch (err) { /* ignore */ }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neon-cyan"></div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen variant="crafting" />;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Crafting</h1>
-          <p className="text-gray-500 text-sm mt-1">Blueprints and manufacturing</p>
+          <p className="text-gray-500 text-sm mt-1">Blueprints and manufacturing <WikiLink term="crafting" className="text-[11px] ml-2">Guide</WikiLink></p>
         </div>
         <div className="flex items-center gap-3">
           <select value={selectedShip} onChange={e => setSelectedShip(e.target.value)} className="input text-sm">
@@ -152,7 +149,11 @@ function CraftingPage({ user }) {
             />
           ))}
           {blueprints.length === 0 && (
-            <p className="text-gray-500 text-sm col-span-full text-center py-8">No blueprints available</p>
+            <div className="col-span-full text-center py-8">
+              <Package className="w-10 h-10 text-gray-600 mx-auto mb-2" />
+              <p className="text-gray-400 text-sm mb-1">No blueprints available</p>
+              <p className="text-gray-600 text-xs">Research crafting skills in <Link to="/progression" className="text-accent-cyan hover:underline">Progression</Link> to unlock blueprints</p>
+            </div>
           )}
         </div>
       </div>
@@ -160,10 +161,27 @@ function CraftingPage({ user }) {
   );
 }
 
+function useCountdown(endTime) {
+  const [remaining, setRemaining] = useState(() => Math.max(0, (endTime || 0) - Date.now()));
+  useEffect(() => {
+    if (!endTime) return;
+    const tick = () => setRemaining(Math.max(0, endTime - Date.now()));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [endTime]);
+  return remaining;
+}
+
 function JobCard({ job, onCancel, onComplete, actionLoading }) {
   const isComplete = job.status === 'completed' || job.is_complete;
   const progress = job.progress || 0;
   const id = job.job_id || job.id;
+
+  const startedAt = new Date(job.started_at || job.created_at || 0).getTime();
+  const duration = (job.crafting_time || job.duration || 0) * 1000; // seconds to ms
+  const endTime = startedAt && duration ? startedAt + duration : 0;
+  const remaining = useCountdown(isComplete ? 0 : endTime);
 
   return (
     <div className="holo-panel p-4 flex items-center gap-4">
@@ -172,7 +190,15 @@ function JobCard({ job, onCancel, onComplete, actionLoading }) {
       </div>
       <div className="flex-1">
         <p className="text-sm font-medium text-white">{job.blueprint_name || job.name || 'Crafting Job'}</p>
-        <p className="text-xs text-gray-500">{job.ship_name || 'Ship'}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-xs text-gray-500">{job.ship_name || 'Ship'}</p>
+          {!isComplete && remaining > 0 && (
+            <span className="text-xs text-yellow-400 font-mono">~{formatDuration(Math.ceil(remaining / 1000))} left</span>
+          )}
+          {!isComplete && remaining === 0 && endTime > 0 && (
+            <span className="text-xs text-gray-500">Processing...</span>
+          )}
+        </div>
         {!isComplete && (
           <div className="progress-bar mt-2">
             <div className="progress-fill" style={{ width: `${progress}%`, background: '#ffc107', boxShadow: '0 0 8px rgba(255,193,7,0.3)' }} />

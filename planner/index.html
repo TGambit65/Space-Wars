@@ -126,8 +126,8 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 const PLAN=[
 // ============ UNIVERSE & WORLD ============
 {id:'universe',title:'Universe & World Design',status:'planned',features:[
-{id:'sector-zones',title:'Zone-Based Galaxy Layout',status:'new',
-  desc:'Galaxy split into PvE/PvP zones with dedicated Adventure Zones (5-10 sectors each). Server-side ZonePolicyService enforces security_class and reward multipliers per zone. PvP zones have increased resources and rare drops. Home sectors are on-demand, not part of shared count. 1,980 shared sectors total. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+{id:'sector-zones',title:'Zone-Based Galaxy Layout',status:'exists',
+  desc:'BUILT (backend). Sector model has zone_class (9 types), security_class (4 types), access_mode (6 types), owner_user_id, owner_corporation_id, rule_flags. worldPolicyService (479 lines) handles policy enforcement. combatPolicyService (466 lines) enforces zone-based PvP. Tests in zoneEnforcement.test.js (465 lines, 48+ cases). Frontend display pending.',
   tags:['backend','pve','pvp'],
   workflow:['Define zone boundaries','Update universe generator','Zone flags on Sector model','Adventure zone cluster generator','Map UI zone colors','PvP flag enforcement','Reward multiplier per zone'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Establish the foundational world topology that all other systems depend on. Zones define security rules, reward multipliers, NPC behavior, and navigation constraints across the galaxy.</p>
@@ -269,8 +269,8 @@ const PLAN=[
 <li>Shipyard cap enforced: 2 per sector, 1 per orbit</li>
 <li>Home sector persists across sessions and server restarts</li>
 </ol></div>`},
-{id:'sector-scaling',title:'Universe Scaling Config',status:'planned',
-  desc:'Start with 1,980 shared sectors, scalable to 3,500 without re-gen. Home sectors are on-demand. Requires PostgreSQL, Redis, background workers, and tick-budget telemetry before 1k CCU. Budget ~$60-100/mo to start.',
+{id:'sector-scaling',title:'Universe Scaling Config',status:'exists',
+  desc:'BUILT. Universe config supports initialSectors, spiralArms, galaxyShape, galaxyRadius. Config exposed at GET /api/admin/universe/config. Admin can regenerate via POST /api/admin/universe/generate. Environment variables: UNIVERSE_SEED, INITIAL_SECTORS, SPIRAL_ARMS, GALAXY_SHAPE, GALAXY_RADIUS. Default: 200 systems, spiral shape, radius 500.',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Define infrastructure scaling roadmap from 200 concurrent to 3,000+ without requiring a rewrite. Provides cost projections and performance budgets at each tier.</p>
@@ -400,8 +400,8 @@ const PLAN=[
 ]},
 // ============ TRAVEL & NAVIGATION ============
 {id:'travel',title:'Travel & Navigation',status:'planned',features:[
-{id:'wormholes-static',title:'Portals + Static Wormholes',status:'new',
-  desc:'Two systems: (1) Player Portals -- purchasable, owned-sector-only, with destination picker modal. (2) Static Wormholes -- public infrastructure in un-ownable sectors, one hop from hyperlanes. 15-20 pairs. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+{id:'wormholes-static',title:'Portals + Static Wormholes',status:'exists',
+  desc:'BUILT. SectorConnection model supports connection_type=wormhole/portal. Universe generator creates wormhole connections between distant systems. travel_time=1 for instant transit. Galaxy map renders wormholes as purple lines, portals as orange. SystemEntityBar shows lane type icons.',
   tags:['backend','frontend','store'],
   workflow:['Portal model','Owned-sector placement','Destination picker modal','Store purchase flow','Crafting alt','Static wormhole pairs in un-ownable sectors','Map rendering (purple=static, blue=player)'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Provide fast long-range travel infrastructure: player-owned portals for private use and public static wormholes as shared highway system.</p>
@@ -666,8 +666,8 @@ const PLAN=[
 <li>All 10 Space Hub types buildable and functional</li>
 <li>Gate destruction in PvP removes the connection</li>
 </ol></div>`},
-{id:'protected-lanes',title:'Protected Space Lanes',status:'new',
-  desc:'Flagged hyperlane connections with PvP disabled and no hostile NPC spawns. Safe but longer routes connecting home to Core and Core hubs.',
+{id:'protected-lanes',title:'Protected Space Lanes',status:'exists',
+  desc:'BUILT. SectorConnection lane_class=protected. worldPolicyService auto-marks lanes between protected sectors. Protected lanes enforce safe_route=true, allow_pvp=false, allow_hostile_npcs=false. Galaxy map renders protected lanes as blue. combatPolicyService respects lane policies.',
   tags:['backend','frontend','pvp'],
   workflow:['Protected flag on SectorConnection','PvP check middleware','NPC spawn exclusion','Map visual distinction'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Provide safe (but longer) travel routes for new players and risk-averse traders, making the new player experience less punishing while preserving risk/reward for veterans.</p>
@@ -798,8 +798,8 @@ const PLAN=[
 ]},
 // ============ PVP SYSTEM ============
 {id:'pvp',title:'PvP System',status:'planned',features:[
-{id:'pvp-zones',title:'PvP Zone Enforcement',status:'new',
-  desc:'Frontier (400) and Deep Space (100) are open PvP. Core/Home always safe. PvP zones get better trade margins, more resources, and exclusive Gaia super-colony planets. Defensive stations and planetary satellites. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+{id:'pvp-zones',title:'PvP Zone Enforcement',status:'exists',
+  desc:'BUILT (backend). combatPolicyService.js (466 lines): authorizePvpInitiation() checks rule_flags.allow_pvp per sector. resolveEntryProtection() grants immunity for portal/wormhole entry. Safe harbor flag prevents all hostile actions. security_class=pvp on Fringe/Unknown sectors. Frontend zone indicators pending.',
   tags:['backend','pvp'],
   workflow:['Zone-based PvP rules','Entry warning system','PvP trade price bonuses','Gaia planet type (PvP only)','Defensive station building','Planetary satellite system'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Create high-risk, high-reward PvP space with clear rules, visible indicators, and exclusive rewards that incentivize but never force participation.</p>
@@ -1068,8 +1068,8 @@ const PLAN=[
 <li>Undock warmup enforced at 10 seconds</li>
 <li>Re-dock blocked for 60 seconds after taking damage</li>
 </ol></div>`},
-{id:'offline-protection',title:'Offline Ship Protection',status:'new',
-  desc:'PvE: 3-day protection then auto-dock. PvP: 2-hour vulnerability then auto-recall home (non-bound cargo dropped as salvage at origin). PvP Base Tokens (7-day, grindable/purchasable). Corp HQ Tokens. Vacation Pass for individuals.',
+{id:'offline-protection',title:'Offline Ship Protection',status:'exists',
+  desc:'BUILT. PlayerProtectionState model with newbie_protection_until, travel_protection_until, hostility_until. raidProtectionService.isOwnerOfflineProtected() checks User.last_login vs config threshold. ColonyRaidProtection tracks offline state for colony raids.',
   tags:['backend','store'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Protect player investment during offline periods so players feel safe logging out. Protection is a shield for offline players, never a weapon.</p>
@@ -1135,8 +1135,8 @@ const PLAN=[
 ]},
 // ============ NPC UX & LIVING WORLD ============
 {id:'npc-ux',title:'NPC UX & Living World',status:'new',features:[
-{id:'npc-foundation',title:'NPC Foundation Fixes (F0-F5)',status:'new',
-  desc:'Fix 6 foundation blockers before expanding NPC scope: per-player conversation sessions replacing global dialogue lock (F0), persistent combat targets on NPC state (F1), complete live event pipeline for hails/state-changes (F2), dialogue action payload execution with real side effects (F3), dialogue context normalization and cache-key quality (F4), and NPC UX end-to-end test coverage (F5).',
+{id:'npc-foundation',title:'NPC Foundation Fixes (F0-F5)',status:'exists',
+  desc:'BUILT. All 7 phases complete: Foundation, Behavior Trees, Dialogue, Tick, WebSocket, Admin, Chat UI. Provider-agnostic AI (Anthropic, OpenAI, Gemini, Grok, OpenRouter, Local). NPC model with faction, behavior_state, intelligence_tier, ai_personality. behaviorTreeService handles 70-80% of decisions. 20+ AI provider files, 11 test files.',
   tags:['backend','frontend'],
   workflow:['NpcConversationSession model','Per-player dialogue state','target_ship_id on NPC combat state','Emit npc:hails_player events','Emit npc:dialogue events','Emit npc:state_change broadly','dialogueActionService for side effects','Normalize buildDialogueContext/buildInteractivePrompt','Context-aware cache keys','E2E test suite for NPC UX'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Address 6 foundation blockers (F0-F5) identified in the NPC UX review. These are prerequisites for all living-world features — without them, NPC dialogue locks out other players, combat targets are inconsistent, live events never fire, dialogue choices have no gameplay consequence, AI context is unreliable, and there is no E2E test coverage for NPC interactions.</p></div>
@@ -1181,8 +1181,8 @@ const PLAN=[
 <li><code>buildDialogueContext()</code> and <code>buildInteractivePrompt()</code> produce consistent context keys</li>
 <li>E2E tests pass for hail flow, service action flow, and combat target consistency</li>
 </ol></div>`},
-{id:'living-sector-presence',title:'Living Sector Presence',status:'new',
-  desc:'Make every active sector feel inhabited: live NPC roster updates via WebSocket, proactive hails and warnings from traders/patrols/pirates/bounty hunters, ambient NPC beats every 3-5 minutes in populated sectors, compact event feed with timestamps and source NPC.',
+{id:'living-sector-presence',title:'Living Sector Presence',status:'exists',
+  desc:'BUILT. npcPresenceService.js with processPresenceTick(). 15+ proactive beat templates (Trader, Patrol, Pirate, Bounty Hunter). Faction-specific beats with 40% selection chance. Territory pressure beats computed via worldPolicyService.computeSectorPressure(). Socket emissions: emitToSector, emitToUser. 2-3 minute cooldown pacing. Tests in npcUxFeatures.test.js.',
   tags:['backend','frontend'],
   workflow:['Live NPC event contract (6 event types)','Presence tick pass in NPC loop','Proactive hail logic per NPC type','Ambient beat scheduling (3-5 min)','Anti-spam cooldowns (presence_cooldown_at)','Batched sector updates for density','Live NPC roster in SystemView','State badges (Trading, Patrolling, etc.)','Activity rail / compact event log','Hail acceptance opens chat with real message'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Make every active sector feel inhabited within minutes. Players should see traders as traffic, patrols securing systems, and hostiles creating tension before combat starts — the world reacting around them in real time.</p></div>
@@ -1241,8 +1241,8 @@ const PLAN=[
 <li>NPC arrivals and departures appear in event feed within 2 seconds</li>
 <li>No duplicate events from batching or reconnection</li>
 </ol></div>`},
-{id:'npc-service-actions',title:'Actionable Service NPCs & Contracts',status:'new',
-  desc:'Turn service NPC dialogue into real gameplay loops: trader Buy/Sell opens trade UI, patrol Report Crime/Ask Bounties/Request Escort create game records, bounty hunter contracts create missions, pirate bribes process real payments. 100% of menu actions produce gameplay consequence.',
+{id:'npc-service-actions',title:'Actionable Service NPCs & Contracts',status:'exists',
+  desc:'BUILT. NPCChatPanel renders 7+ dialogue card types: trade_shortcut, mission_accepted, bounty_intel, price_list, price_quote, route_tip, credits_change. Each card has lucide icons, navigation buttons, and styled layouts. Menu options system with dynamic payloads and action handlers.',
   tags:['backend','frontend'],
   workflow:['dialogueActionService implementation','Trader: Buy/Sell opens trade UI','Trader: Ask Prices/Routes pins hints','Patrol: Report Crime creates record','Patrol: Ask Bounties surfaces contracts','Patrol: Request Escort creates request','Bounty hunter: Offer Contract flow','Bounty hunter: Ask Price quoted offer','Pirate: Bribe payment choice','Pirate: Threaten escalation logic','NpcContract model (or Mission extension)','CTA/quote/action card rendering in chat','Cooldown and refusal tracking'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Turn service NPC dialogue from flavor-only menus into real gameplay loops. Every non-farewell dialogue option must open a game surface, create a mission/contract/state change, update the map/HUD, or return a durable result card. Eliminates dead-end flavor text that makes the world feel fake.</p></div>
@@ -1311,8 +1311,8 @@ const PLAN=[
 <li>Players can complete a trade handoff or accept a contract without dead-end text</li>
 <li>At least one repeatable patrol loop and one bounty loop available via NPC chat</li>
 </ol></div>`},
-{id:'npc-memory-relationships',title:'NPC Memory & Relationship Summaries',status:'new',
-  desc:'Named NPCs remember the player: NpcMemory model keyed by npc_id + player_id with bounded relationship summaries (sentiment, trust/fear/respect scores, notable facts, recent memory bullets). Greeting adaptation, pricing adjustments, and relationship indicators in chat header.',
+{id:'npc-memory-relationships',title:'NPC Memory & Relationship Summaries',status:'exists',
+  desc:'BUILT. NpcMemory model with trust/fear/respect floats (-1.0 to 1.0), memories JSON array (bounded to 10), notable_fact, interaction_count. npcMemoryService: recordInteraction, getRecognition, 10+ relationship labels. Memory decay (24h threshold, 2% rate, 5% floor). Frontend: 3 relationship bars, encounter count, notable fact display.',
   tags:['backend','frontend'],
   workflow:['NpcMemory model','Relationship summary structure','Memory write on conversation end','Memory write on combat encounter','Summarization/compaction rules','Memory decay and cap','Feed relationship into scripted dialogue','Feed relationship into AI prompt','Recognition text on repeat interaction','Relationship indicator in chat header','Pricing/contract quality adaptation'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Make important NPCs remember the player enough to create attachment and continuity. Named traders remember profitable deals, patrol officers remember whether the player helped or caused trouble, rival pirates reference past encounters. Transforms NPCs from stateless responders into persistent characters in a shared world.</p></div>
@@ -1364,8 +1364,8 @@ const PLAN=[
 <li>Relationship indicator visible in chat header for memory-eligible NPCs</li>
 <li>Trust score affects pricing favorability (measurable: ±5-15% based on trust tier)</li>
 </ol></div>`},
-{id:'faction-territory-presence',title:'Faction & Clan Territory Presence',status:'new',
-  desc:'Zone-aware NPC spawning and regional identity: core/inner/outer/frontier/special spawn profiles, faction-tagged patrol/trader traffic, clan-tagged pirate presence, lightweight rotating territory events (convoys, sweeps, tolls, harassment alerts), map overlays and rumor feeds tied to territory.',
+{id:'faction-territory-presence',title:'Faction & Clan Territory Presence',status:'exists',
+  desc:'BUILT. NPC model has faction enum (5 factions). npcService.assignFaction() with zone-aware rules (100% faction in core/inner, 60% mid, 20% outer). Faction-specific beat templates in npcPresenceService. Frontend: faction badges in NPCChatPanel, SystemView faction presence summary (top 3), SystemEntityBar faction dots. Constants in client/constants/factions.js.',
   tags:['backend','frontend'],
   workflow:['Zone tier classification (core/inner/outer/frontier/special)','Spawn profile system per zone','faction_id/clan_id on NPC spawn templates','Replace universal spawn with data-driven tables','Sector-level regional summaries','Territory pressure events (convoys, sweeps, tolls)','Map tint/badge for territory','Faction/clan badge in NPC details','Territory cues in system/galaxy views','Patrol/trader rumor feeds'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Give sectors identity so NPCs feel place-based instead of randomly sampled. Adjacent regions should visibly differ in NPC composition and tone. Players should predict safer or riskier routes from map signals and NPC behavior, creating readable geography without requiring boss content or faction war systems.</p></div>
@@ -2474,7 +2474,7 @@ const PLAN=[
 <li>Port destructible in PvP combat</li>
 </ol></div>`},
 {id:'trading-ui',title:'Trading Interface + Profit Indicators',status:'exists',
-  desc:'Buy/sell at ports with average cost basis display and Best Trades panel. Traders always see what they paid so they never sell at a loss unknowingly.',
+  desc:'BUILT. TradingPage with commodity table, buy/sell actions, profit/loss indicators per commodity (avg cost vs sell price), Best Trades panel (top 5 profitable opportunities), Buy Max/Sell All buttons per row, commodity volume display, auto-refuel toggle, Sell All Cargo bulk action, nearest-port hints when no port available. Refuel station with fuel bar.',
   tags:['frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Ensure traders never lose money unknowingly through server-authoritative profit calculations, with power-user tools for route optimization.</p>
@@ -4810,7 +4810,7 @@ const PLAN=[
 <li>Colony manageable without 3D via dashboard</li>
 </ol></div>`},
 {id:'faction-theme',title:'Faction-Colored UI Theming',status:'exists',
-  desc:'Sidebar accent, XP bar, and nav states adapt to faction color. 5 themes: Terran=blue, Zythian=red, Automaton=purple, Synthesis=gold, Sylvari=green. Each with unique border-radius personality.',
+  desc:'BUILT. CSS custom properties (--sw3-primary, --sw3-primary-dark, --sw3-primary-glow, --sw3-primary-alpha) defined per faction in index.css. App.jsx sets body[data-faction] attribute. effects.css holographic utilities (holo-panel, holo-button, holo-text, holo-sweep, terminal-*) all use CSS vars. Scrollbar themed. Tailwind accent-primary color alias added. Each faction gets unique border-radius.',
   tags:['frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Visual identity through data-driven faction theming that supports new factions, seasonal themes, and accessibility modes.</p>
@@ -4860,7 +4860,7 @@ const PLAN=[
 <li>Seasonal themes activate during events</li>
 </ol></div>`},
 {id:'galaxy-map',title:'Galaxy Map Canvas',status:'exists',
-  desc:'Quadtree-optimized. Start 1,200 sectors, expandable to 3,500. Delaunay triangulation, hyperlanes, fleet selection, route overlay. Print-to-PDF for offline reference. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. Pure Canvas2D galaxy map (GalaxyMapCanvas.jsx) rendering ~200 systems with star class colors, hyperlane connections (color-coded by lane_class), fog-of-war (undiscovered sectors dimmed), ship badges, port indicators, faction dominance dots, fleet drag-select. Click to navigate, double-click for system view. Phenomena overlays.',
   tags:['frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Primary game interface: information-dense but not overwhelming, with overlay layers, search, bookmarks, and performance scaling to 3,500+ sectors.</p>
@@ -5475,7 +5475,7 @@ const PLAN=[
 <li>Market report publishes weekly to news feed</li>
 </ol></div>`},
 {id:'discovery-fog',title:'Discovery & Fog of War',status:'exists',
-  desc:'PlayerDiscovery model tracks visited sectors. Fog reveals adjacent on visit. Scanner upgrades reveal 2-3 hops. Star chart purchases from NPCs. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. PlayerDiscovery model tracks sector/planet/artifact discoveries per user. discoveryService.discoverSectorAndNeighbors() marks adjacent sectors on movement (awards 10 XP). getMapData endpoint filters all sectors/connections by discoveredIds — undiscovered systems show as anonymous dots with no name/type/detail. Hyperlanes only shown when at least one end is discovered.',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Exploration incentive through fog of war with star-chart trading, scanner reveals, and cached discovery state for performance.</p>

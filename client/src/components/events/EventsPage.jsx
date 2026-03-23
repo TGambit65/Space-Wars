@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { events } from '../../services/api';
 import {
   Calendar, Trophy, AlertCircle, RefreshCw, Target,
-  Users, X, Medal, ChevronRight
+  Users, X, Medal, ChevronRight, Coins
 } from 'lucide-react';
+import LoadingScreen from '../common/LoadingScreen';
 
 const EventsPage = ({ user }) => {
   const [activeEvents, setActiveEvents] = useState([]);
@@ -23,7 +24,8 @@ const EventsPage = ({ user }) => {
       setLoading(true);
       setError(null);
       const res = await events.getActive();
-      setActiveEvents(res.data.data?.events || res.data.events || []);
+      const raw = res.data.data;
+      setActiveEvents(Array.isArray(raw) ? raw : raw?.events || []);
     } catch (err) {
       setError('Failed to load community events.');
     } finally {
@@ -59,7 +61,8 @@ const EventsPage = ({ user }) => {
     setLeaderboardLoading(true);
     try {
       const res = await events.getLeaderboard(event.id || event.event_id);
-      setLeaderboard(res.data.data?.leaderboard || res.data.leaderboard || []);
+      const lbRaw = res.data.data;
+      setLeaderboard(Array.isArray(lbRaw) ? lbRaw : lbRaw?.leaderboard || []);
     } catch {
       setLeaderboard([]);
     } finally {
@@ -80,13 +83,7 @@ const EventsPage = ({ user }) => {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-cyan"></div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen variant="events" />;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -199,28 +196,65 @@ const EventsPage = ({ user }) => {
                   </div>
                 )}
 
+                {/* Player contribution */}
+                {(event.my_contribution > 0 || event.my_rank) && (
+                  <div className="flex items-center gap-3 text-xs text-gray-400">
+                    <span className="flex items-center gap-1"><Coins className="w-3 h-3 text-accent-orange" /> Your contribution: <span className="text-accent-cyan font-mono">{(event.my_contribution || 0).toLocaleString()}</span></span>
+                    {event.my_rank && <span>Rank: <span className="text-accent-orange font-mono">#{event.my_rank}</span></span>}
+                  </div>
+                )}
+
                 {/* Contribute */}
                 {!isComplete && (
-                  <div className="flex items-center gap-3 pt-1">
-                    <input
-                      type="number"
-                      value={contributeAmounts[eventId] || ''}
-                      onChange={(e) => setContributeAmounts(prev => ({
-                        ...prev,
-                        [eventId]: e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0),
-                      }))}
-                      placeholder="Amount..."
-                      min="1"
-                      className="w-32 bg-space-900 border border-space-600 text-white rounded px-3 py-1.5 text-sm focus:border-accent-orange outline-none"
-                    />
-                    <button
-                      onClick={() => handleContribute(eventId)}
-                      disabled={contributeLoading[eventId] || !contributeAmounts[eventId] || parseInt(contributeAmounts[eventId]) <= 0}
-                      className="holo-button-orange text-sm disabled:opacity-50"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                      {contributeLoading[eventId] ? 'Contributing...' : 'Contribute'}
-                    </button>
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="number"
+                        value={contributeAmounts[eventId] || ''}
+                        onChange={(e) => setContributeAmounts(prev => ({
+                          ...prev,
+                          [eventId]: e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0),
+                        }))}
+                        placeholder="Amount..."
+                        min="1"
+                        className="w-32 bg-space-900 border border-space-600 text-white rounded px-3 py-1.5 text-sm focus:border-accent-orange outline-none"
+                      />
+                      <button
+                        onClick={() => handleContribute(eventId)}
+                        disabled={contributeLoading[eventId] || !contributeAmounts[eventId] || parseInt(contributeAmounts[eventId]) <= 0}
+                        className="holo-button-orange text-sm disabled:opacity-50"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                        {contributeLoading[eventId] ? 'Contributing...' : 'Contribute'}
+                      </button>
+                    </div>
+                    {/* Quick-select amounts */}
+                    <div className="flex items-center gap-2">
+                      {[
+                        { label: '1%', amt: Math.ceil((event.target_value || 0) * 0.01) },
+                        { label: '5%', amt: Math.ceil((event.target_value || 0) * 0.05) },
+                        { label: '10%', amt: Math.ceil((event.target_value || 0) * 0.10) },
+                      ].filter(s => s.amt > 0).map(s => (
+                        <button
+                          key={s.label}
+                          onClick={() => setContributeAmounts(prev => ({ ...prev, [eventId]: s.amt }))}
+                          className="px-2 py-0.5 text-[10px] rounded border border-space-600 text-gray-400 hover:text-accent-orange hover:border-accent-orange/30 transition-colors"
+                        >
+                          {s.label} ({s.amt.toLocaleString()})
+                        </button>
+                      ))}
+                      {(() => {
+                        const remaining = Math.max(0, (event.target_value || 0) - (event.current_value || 0));
+                        return remaining > 0 ? (
+                          <button
+                            onClick={() => setContributeAmounts(prev => ({ ...prev, [eventId]: remaining }))}
+                            className="px-2 py-0.5 text-[10px] rounded border border-space-600 text-gray-400 hover:text-accent-orange hover:border-accent-orange/30 transition-colors"
+                          >
+                            Remaining ({remaining.toLocaleString()})
+                          </button>
+                        ) : null;
+                      })()}
+                    </div>
                   </div>
                 )}
 

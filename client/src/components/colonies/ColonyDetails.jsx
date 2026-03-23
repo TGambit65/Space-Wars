@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { X, Building2, Users, ArrowUp, Package, Trash2, Clock, Globe, Rocket, Sparkles, Factory, Loader, Zap, Box } from 'lucide-react';
+import { X, Building2, Users, ArrowUp, Package, Trash2, Clock, Globe, Rocket, Sparkles, Factory, Loader, Zap, Box, Battery, Gauge } from 'lucide-react';
+import { buildings as buildingsApi } from '../../services/api';
 import ColonyWonders from './ColonyWonders';
 import ColonyBuildings from './ColonyBuildings';
 
@@ -22,9 +23,34 @@ function ColonyDetails({ colony, ships, onClose, onCollect, onUpgrade, onAbandon
   const [loading, setLoading] = useState({ collect: false, upgrade: false });
   const [activeTab, setActiveTab] = useState('overview');
   const [timeLeft, setTimeLeft] = useState('');
+  const [buildingSummary, setBuildingSummary] = useState(null);
 
   const planet = colony.planet || {};
   const gradient = planetColors[planet.type] || 'from-gray-500 to-gray-700';
+
+  // Fetch building data for overview summary
+  useEffect(() => {
+    if (colony.is_developing) return;
+    buildingsApi.getColonyBuildings(colony.colony_id)
+      .then(res => {
+        const bList = res.data?.data?.buildings || res.data?.buildings || [];
+        const active = bList.filter(b => b.is_active);
+        const powerGen = bList.reduce((s, b) => s + (b.config?.powerGeneration || 0), 0);
+        const powerUse = active.reduce((s, b) => s + (b.config?.powerConsumption || 0), 0);
+        const workforce = active.reduce((s, b) => s + (b.workforce || 0), 0);
+        // Aggregate net production from all active buildings
+        const inputs = {};
+        const outputs = {};
+        active.forEach(b => {
+          const prod = b.config?.production;
+          if (!prod) return;
+          Object.entries(prod.inputs || {}).forEach(([name, qty]) => { inputs[name] = (inputs[name] || 0) + qty; });
+          Object.entries(prod.outputs || {}).forEach(([name, qty]) => { outputs[name] = (outputs[name] || 0) + qty; });
+        });
+        setBuildingSummary({ powerGen, powerUse, workforce, buildingCount: bList.length, inputs, outputs });
+      })
+      .catch(() => {});
+  }, [colony.colony_id, colony.is_developing, activeTab]);
 
   const isDeveloping = colony.is_developing && colony.develops_at;
 
@@ -157,7 +183,82 @@ function ColonyDetails({ colony, ships, onClose, onCollect, onUpgrade, onAbandon
 
             {activeTab === 'overview' && (
               <>
-                {/* Production Overview */}
+                {/* Building Economy Summary */}
+                {buildingSummary && buildingSummary.buildingCount > 0 && (
+                  <div className="px-6 pt-4">
+                    <div className="p-4 rounded-lg bg-space-700/50 space-y-3">
+                      <h3 className="font-semibold text-white flex items-center gap-2">
+                        <Gauge className="w-5 h-5 text-accent-orange" /> Colony Economy
+                      </h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        {/* Power Balance */}
+                        <div className="p-3 rounded-lg" style={{ background: 'rgba(255,204,0,0.04)', border: '1px solid rgba(255,204,0,0.12)' }}>
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Battery className="w-3.5 h-3.5 text-yellow-400" />
+                            <span className="text-xs text-gray-400">Power Balance</span>
+                          </div>
+                          <div className="text-lg font-bold font-mono" style={{ color: buildingSummary.powerGen >= buildingSummary.powerUse ? '#4caf50' : '#f44336' }}>
+                            {buildingSummary.powerGen - buildingSummary.powerUse} kW
+                          </div>
+                          <div className="h-1.5 rounded-full overflow-hidden mt-1.5" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                            <div className="h-full rounded-full transition-all" style={{
+                              width: `${buildingSummary.powerGen > 0 ? Math.min((buildingSummary.powerUse / buildingSummary.powerGen) * 100, 100) : 0}%`,
+                              background: buildingSummary.powerUse <= buildingSummary.powerGen ? '#4caf50' : '#f44336',
+                            }} />
+                          </div>
+                          <div className="text-[10px] text-gray-500 mt-1">{buildingSummary.powerUse} / {buildingSummary.powerGen} kW used</div>
+                        </div>
+                        {/* Workforce Usage */}
+                        <div className="p-3 rounded-lg" style={{ background: 'rgba(59,130,246,0.04)', border: '1px solid rgba(59,130,246,0.12)' }}>
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Users className="w-3.5 h-3.5 text-blue-400" />
+                            <span className="text-xs text-gray-400">Workforce</span>
+                          </div>
+                          <div className="text-lg font-bold font-mono" style={{ color: buildingSummary.workforce <= (colony.population || 0) ? '#4caf50' : '#f44336' }}>
+                            {buildingSummary.workforce} / {colony.population || 0}
+                          </div>
+                          <div className="h-1.5 rounded-full overflow-hidden mt-1.5" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                            <div className="h-full rounded-full transition-all" style={{
+                              width: `${(colony.population || 0) > 0 ? Math.min((buildingSummary.workforce / colony.population) * 100, 100) : 0}%`,
+                              background: buildingSummary.workforce <= (colony.population || 0) ? '#3b82f6' : '#f44336',
+                            }} />
+                          </div>
+                          <div className="text-[10px] text-gray-500 mt-1">{Math.max(0, (colony.population || 0) - buildingSummary.workforce)} available</div>
+                        </div>
+                      </div>
+                      {/* Net Building Production */}
+                      {(Object.keys(buildingSummary.outputs).length > 0 || Object.keys(buildingSummary.inputs).length > 0) && (
+                        <div className="pt-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+                          <div className="text-xs text-gray-400 mb-1.5">Building Production (per tick)</div>
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                            {Object.entries(buildingSummary.outputs).map(([name, qty]) => {
+                              const consumed = buildingSummary.inputs[name] || 0;
+                              const net = qty - consumed;
+                              return (
+                                <span key={name} className="flex items-center gap-1">
+                                  <span className="text-gray-300">{name}:</span>
+                                  <span className="text-green-400">+{qty}</span>
+                                  {consumed > 0 && <span className="text-red-400">-{consumed}</span>}
+                                  <span className="font-mono" style={{ color: net >= 0 ? '#4caf50' : '#f44336' }}>(net {net >= 0 ? '+' : ''}{net})</span>
+                                </span>
+                              );
+                            })}
+                            {Object.entries(buildingSummary.inputs)
+                              .filter(([name]) => !buildingSummary.outputs[name])
+                              .map(([name, qty]) => (
+                                <span key={name} className="flex items-center gap-1">
+                                  <span className="text-gray-300">{name}:</span>
+                                  <span className="text-red-400">-{qty}</span>
+                                </span>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Resource Extraction Overview */}
                 {planet.resources?.length > 0 && (
                   <div className="px-6 pt-4">
                     <div className="p-4 rounded-lg bg-space-700/50 space-y-3">

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { progression } from '../../services/api';
 import { TrendingUp, Zap, Lock, CheckCircle, Clock } from 'lucide-react';
 import { useNotifications } from '../../contexts/NotificationContext';
+import WikiLink from '../common/WikiLink';
 
 function ProgressionPage({ user }) {
   const [data, setData] = useState(null);
@@ -93,7 +94,7 @@ function ProgressionPage({ user }) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Progression</h1>
-          <p className="text-gray-500 text-sm mt-1">Skills, technologies, and advancement</p>
+          <p className="text-gray-500 text-sm mt-1">Skills, technologies, and advancement <WikiLink term="progression" className="text-[11px] ml-2">Guide</WikiLink></p>
         </div>
         <button onClick={handleCheckResearch} className="btn btn-ghost text-sm">
           <Clock className="w-4 h-4 mr-1 inline" /> Check Research

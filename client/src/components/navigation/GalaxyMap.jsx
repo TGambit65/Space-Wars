@@ -63,7 +63,7 @@ const GalaxyMap = ({ user }) => {
     if (!centerOnRef.current || !currentSectorId || !sectorMap) return;
     const sys = sectorMap.get(currentSectorId);
     if (sys) {
-      centerOnRef.current(sys.x_coord, sys.y_coord, 0.6);
+      centerOnRef.current(sys.x_coord, sys.y_coord, 1.5);
     }
   }, [currentSectorId, sectorMap]);
 
@@ -291,20 +291,19 @@ const GalaxyMap = ({ user }) => {
       )}
 
       {/* Current location indicator */}
-      <div className="absolute top-4 left-4 bg-space-900/90 border border-space-700 rounded-lg px-4 py-2 backdrop-blur-sm max-w-xs">
+      <div className="absolute top-4 left-4 bg-space-900/90 border border-space-700 rounded-lg px-3 py-2 backdrop-blur-sm max-w-xs sm:px-4">
         <div className="flex items-center gap-2">
-          <Map className="w-4 h-4 text-accent-cyan" />
-          <span className="text-sm text-gray-400">Location:</span>
-          <span className="text-sm text-accent-cyan font-bold">
+          <Map className="w-4 h-4 text-accent-cyan flex-shrink-0" />
+          <span className="text-xs sm:text-sm text-accent-cyan font-bold truncate">
             {currentShip?.currentSector?.name || sectorMap.get(currentSectorId)?.name || 'Unknown'}
           </span>
-          <button onClick={handleCenterOnShip} className="ml-auto text-accent-cyan hover:text-white transition-colors" title="Center on ship">
+          <button onClick={handleCenterOnShip} className="ml-auto text-accent-cyan hover:text-white transition-colors flex-shrink-0" title="Center on ship">
             <HomeIcon className="w-4 h-4" />
           </button>
         </div>
         {currentShip && (
-          <div className="text-xs text-gray-500 mt-1">
-            Ship: {currentShip.name} | Explored: {mapData?.discovered_systems || 0}/{mapData?.total_systems || 0}
+          <div className="text-[10px] sm:text-xs text-gray-500 mt-0.5">
+            {currentShip.name} | {mapData?.discovered_systems || 0}/{mapData?.total_systems || 0} explored
           </div>
         )}
         {routePath.length > 1 && (
@@ -313,7 +312,7 @@ const GalaxyMap = ({ user }) => {
             <span>Route: {routePath.length - 1} jumps to {sectorMap.get(routePath[routePath.length - 1])?.name || 'destination'}</span>
           </div>
         )}
-        <div className="relative mt-2">
+        <div className="relative mt-1.5">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
           <input
             type="text"
@@ -333,8 +332,15 @@ const GalaxyMap = ({ user }) => {
             ))}
           </div>
         )}
-        <div className="text-xs text-gray-600 mt-0.5">
-          Shift+drag to select ships · Press ? for shortcuts
+        <div className="hidden sm:flex text-xs text-gray-500 mt-1 items-center gap-2 flex-wrap">
+          <span className="flex items-center gap-1">
+            <kbd className="px-1 rounded bg-space-700 text-[10px] text-gray-400 font-mono">Shift</kbd>
+            <span>+ drag to create fleets</span>
+          </span>
+          <span className="text-gray-700">·</span>
+          <span>Right-click to move</span>
+          <span className="text-gray-700">·</span>
+          <span><kbd className="px-1 rounded bg-space-700 text-[10px] text-gray-400 font-mono">?</kbd> shortcuts</span>
         </div>
       </div>
     </div>

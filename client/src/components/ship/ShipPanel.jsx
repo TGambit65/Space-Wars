@@ -3,13 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { ships, trade, planets, auth, fleets as fleetsApi, designer } from '../../services/api';
 import CargoHold from './CargoHold';
 import ArtifactEquipment from './ArtifactEquipment';
-import { Rocket, Shield, Activity, Fuel, Box, Anchor, Zap, Gem, ChevronDown, ChevronRight, Skull, Swords, Users, Trash2, Edit3, MapPin, X, Wrench, Palette, AlertTriangle as AlertWarn, Hammer, Eye } from 'lucide-react';
+import ShipStorefront from './ShipStorefront';
+import { Rocket, Shield, Activity, Fuel, Box, Anchor, Zap, Gem, ChevronDown, ChevronRight, Skull, Swords, Users, Trash2, Edit3, MapPin, X, Wrench, Palette, AlertTriangle as AlertWarn, Hammer, Eye, AlertCircle } from 'lucide-react';
+import LoadingScreen from '../common/LoadingScreen';
 import { getShipIcon } from '../../utils/shipIcons';
 import { useNotifications } from '../../contexts/NotificationContext';
+import useSoundEffects from '../../hooks/useSoundEffects';
 
 const ShipPanel = ({ user }) => {
     const navigate = useNavigate();
     const notify = useNotifications();
+    const { play: sfx } = useSoundEffects();
     const [ship, setShip] = useState(null);
     const [allShips, setAllShips] = useState([]);
     const [activeShipId, setActiveShipId] = useState(null);
@@ -22,7 +26,7 @@ const ShipPanel = ({ user }) => {
     const [expandedFleetId, setExpandedFleetId] = useState(null);
     const [renamingFleetId, setRenamingFleetId] = useState(null);
     const [renameValue, setRenameValue] = useState('');
-    const [damagedComponents, setDamagedComponents] = useState(0);
+    const [damagedComponents, setDamagedComponents] = useState([]);
     const [showCreateFleet, setShowCreateFleet] = useState(false);
     const [newFleetName, setNewFleetName] = useState('');
     const [newFleetShips, setNewFleetShips] = useState([]);
@@ -33,8 +37,8 @@ const ShipPanel = ({ user }) => {
         try {
             const designRes = await designer.getDesign(shipId);
             const components = Object.values(designRes.data.design?.components || {}).flat();
-            setDamagedComponents(components.filter(c => c.condition < 0.7).length);
-        } catch { setDamagedComponents(0); }
+            setDamagedComponents(components.filter(c => c.condition < 0.7));
+        } catch { setDamagedComponents([]); }
     };
 
     const loadFleets = async () => {
@@ -153,7 +157,7 @@ const ShipPanel = ({ user }) => {
         }
     };
 
-    if (loading) return <div className="p-8 text-center text-accent-cyan">Establishing link with ship computer...</div>;
+    if (loading) return <LoadingScreen variant="ship" />;
     if (error) return <div className="p-8 text-center text-accent-red">{error}</div>;
     if (!ship) return <div className="p-8 text-center text-gray-400">No active ship detected.</div>;
 
@@ -432,6 +436,39 @@ const ShipPanel = ({ user }) => {
                         <Activity className="w-5 h-5" /> Systems Integrity
                     </h2>
 
+                    {/* Component Health */}
+                    {damagedComponents.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Component Health</h3>
+                          <button onClick={() => navigate('/repair')} className="text-[10px] text-neon-orange hover:text-white transition-colors underline">Repair All</button>
+                        </div>
+                        {damagedComponents.some(c => c.condition < 0.3) && (
+                          <div className="flex items-center gap-2 p-2 rounded-lg animate-pulse" style={{ background: 'rgba(244,67,54,0.1)', border: '1px solid rgba(244,67,54,0.3)' }}>
+                            <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                            <span className="text-xs text-red-400">Critical: {damagedComponents.filter(c => c.condition < 0.3).length} component(s) near failure</span>
+                          </div>
+                        )}
+                        {damagedComponents.slice(0, 5).map((c, i) => {
+                          const pct = Math.round((c.condition || 0) * 100);
+                          const color = pct < 30 ? '#f44336' : pct < 50 ? '#ff9800' : '#ffc107';
+                          return (
+                            <div key={c.component_id || i} className="flex items-center gap-2">
+                              {pct < 50 && <AlertWarn className="w-3 h-3 shrink-0" style={{ color }} />}
+                              <span className="text-xs text-gray-300 flex-1 truncate">{c.name || c.component_type || 'Component'}</span>
+                              <div className="w-16 h-1.5 bg-space-700 rounded-full overflow-hidden">
+                                <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
+                              </div>
+                              <span className="text-[10px] font-mono w-8 text-right" style={{ color }}>{pct}%</span>
+                            </div>
+                          );
+                        })}
+                        {damagedComponents.length > 5 && (
+                          <p className="text-[10px] text-gray-600">+{damagedComponents.length - 5} more</p>
+                        )}
+                      </div>
+                    )}
+
                     {/* Hull */}
                     <div className="space-y-1">
                         <div className="flex justify-between text-sm">
@@ -507,10 +544,10 @@ const ShipPanel = ({ user }) => {
                     </div>
 
                     {/* Component Condition Warning */}
-                    {damagedComponents > 0 && (
+                    {damagedComponents.length > 0 && (
                         <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: 'rgba(255,102,0,0.08)', border: '1px solid rgba(255,102,0,0.2)' }}>
                             <AlertWarn className="w-4 h-4 text-neon-orange flex-shrink-0" />
-                            <span className="text-sm text-neon-orange">{damagedComponents} component{damagedComponents > 1 ? 's' : ''} need repair</span>
+                            <span className="text-sm text-neon-orange">{damagedComponents.length} component{damagedComponents.length > 1 ? 's' : ''} need repair</span>
                             <button onClick={() => navigate('/repair')} className="ml-auto text-xs text-neon-orange underline hover:text-white transition-colors">Fix Now</button>
                         </div>
                     )}
@@ -530,6 +567,7 @@ const ShipPanel = ({ user }) => {
                                 try {
                                     await planets.scan(sector.sector_id);
                                     notify.success(`Scan complete for ${sector.name}. Check Planets databank.`);
+                                    sfx('scan');
                                 } catch (e) {
                                     console.error("Scan failed", e);
                                     notify.error("Scan failed: " + (e.response?.data?.error || e.message));
@@ -581,6 +619,11 @@ const ShipPanel = ({ user }) => {
                     <Gem className="w-5 h-5" /> Artifacts
                 </h2>
                 <ArtifactEquipment shipId={ship.ship_id} />
+            </div>
+
+            {/* Ship Catalog */}
+            <div className="card p-6">
+                <ShipStorefront />
             </div>
         </div>
     );

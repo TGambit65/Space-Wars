@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { colonies as coloniesApi, ships } from '../../services/api';
-import { Building2, Package, ArrowUp, Trash2, Users, AlertCircle, RefreshCw, Globe, Rocket, Shield, Map, Trophy } from 'lucide-react';
+import { Building2, Package, ArrowUp, Trash2, Users, AlertCircle, RefreshCw, Globe, Rocket, Shield, Map, Trophy, Download, TrendingUp, Swords, Orbit } from 'lucide-react';
 import ColonyCard from './ColonyCard';
 import ColonyDetails from './ColonyDetails';
 
@@ -18,6 +18,8 @@ function ColoniesPage({ user }) {
   const [raids, setRaids] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [collectAllLoading, setCollectAllLoading] = useState(false);
+  const [collectAllShip, setCollectAllShip] = useState('');
 
   const fetchData = async () => {
     try {
@@ -40,6 +42,28 @@ function ColoniesPage({ user }) {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // P5 Item 9: Collect All
+  const handleCollectAll = async () => {
+    if (!collectAllShip || userColonies.length === 0) return;
+    setCollectAllLoading(true);
+    setError('');
+    let collected = 0;
+    let failed = 0;
+    for (const colony of userColonies) {
+      try {
+        await coloniesApi.collect(colony.colony_id, collectAllShip);
+        collected++;
+      } catch {
+        failed++;
+      }
+    }
+    setCollectAllLoading(false);
+    await fetchData();
+    if (failed > 0) {
+      setError(`Collected from ${collected} colonies, ${failed} failed (ship may not be in range)`);
+    }
+  };
 
   const handleCollect = async (colonyId, shipId) => {
     try {
@@ -112,6 +136,20 @@ function ColoniesPage({ user }) {
           <p className="text-gray-400">Manage your planetary colonies and collect resources</p>
         </div>
         <div className="flex items-center gap-2">
+          {/* P5 Item 9: Collect All */}
+          {userColonies.length > 1 && (
+            <div className="flex items-center gap-1">
+              <select value={collectAllShip} onChange={e => setCollectAllShip(e.target.value)}
+                className="bg-space-800 border border-space-600 text-white rounded px-2 py-1.5 text-xs">
+                <option value="">Ship...</option>
+                {userShips.map(s => <option key={s.ship_id} value={s.ship_id}>{s.name}</option>)}
+              </select>
+              <button onClick={handleCollectAll} disabled={!collectAllShip || collectAllLoading}
+                className="btn btn-primary flex items-center gap-1.5 text-xs disabled:opacity-50">
+                <Download className="w-3.5 h-3.5" /> {collectAllLoading ? 'Collecting...' : 'Collect All'}
+              </button>
+            </div>
+          )}
           <button onClick={() => navigate('/colony-leaderboard')} className="btn btn-secondary flex items-center gap-2">
             <Trophy className="w-4 h-4" /> Leaderboard
           </button>
@@ -192,6 +230,18 @@ function ColoniesPage({ user }) {
           <div>
             <p className="stat-value">{userColonies.reduce((sum, c) => sum + (c.population || 0), 0).toLocaleString()}</p>
             <p className="stat-label">Total Population</p>
+            {/* P5 Item 10: Growth projection */}
+            {userColonies.length > 0 && (() => {
+              const totalGrowth = userColonies.reduce((sum, c) => {
+                const growth = (c.population || 0) * ((c.growth_rate || 0.02) * (c.habitability || 50) / 100);
+                return sum + growth;
+              }, 0);
+              return totalGrowth > 0 ? (
+                <p className="text-[10px] text-accent-green flex items-center gap-0.5 mt-0.5">
+                  <TrendingUp className="w-2.5 h-2.5" /> +{Math.round(totalGrowth).toLocaleString()}/tick
+                </p>
+              ) : null;
+            })()}
           </div>
         </div>
         <div className="card flex items-center gap-4">
@@ -213,6 +263,28 @@ function ColoniesPage({ user }) {
           </div>
         </div>
       </div>
+
+      {/* P5 Item 11: Raid alerts with quick-link */}
+      {raids.filter(r => r.raid_damage > 0).length > 0 && (
+        <div className="p-3 rounded-lg flex items-center gap-3" style={{
+          background: 'rgba(244, 67, 54, 0.08)',
+          border: '1px solid rgba(244, 67, 54, 0.25)',
+        }}>
+          <Swords className="w-5 h-5 text-accent-red flex-shrink-0 animate-pulse" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-accent-red">Colony Under Attack!</p>
+            <p className="text-xs text-gray-400">
+              {raids.filter(r => r.raid_damage > 0).map(r => r.colony_name).join(', ')} recently raided
+            </p>
+          </div>
+          <button onClick={() => {
+            const damaged = userColonies.find(c => raids.some(r => r.colony_id === c.colony_id && r.raid_damage > 0));
+            if (damaged) setSelectedColony(damaged);
+          }} className="holo-button-danger text-xs px-3 py-1.5">
+            Respond
+          </button>
+        </div>
+      )}
 
       {raids.length > 0 && (
         <div className="card">
@@ -254,13 +326,22 @@ function ColoniesPage({ user }) {
                 colony={colony}
                 onClick={() => setSelectedColony(colony)}
               />
-              <button
-                onClick={(e) => { e.stopPropagation(); navigate(`/colony/${colony.colony_id}/surface`); }}
-                className="absolute top-2 right-2 bg-space-800/90 border border-accent-cyan/30 rounded px-2 py-1 text-xs text-accent-cyan hover:bg-accent-cyan/10 flex items-center gap-1 transition-colors"
-                title="View Surface"
-              >
-                <Map className="w-3 h-3" /> Surface
-              </button>
+              <div className="absolute top-2 right-2 flex items-center gap-1">
+                <button
+                  onClick={(e) => { e.stopPropagation(); navigate(`/planet/${colony.planet_id || colony.planet?.planet_id}`); }}
+                  className="bg-space-800/90 border border-accent-cyan/30 rounded px-2 py-1 text-xs text-accent-cyan hover:bg-accent-cyan/10 flex items-center gap-1 transition-colors"
+                  title="View Planet Orbit"
+                >
+                  <Orbit className="w-3 h-3" /> Planet
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); navigate(`/colony/${colony.colony_id}/surface`); }}
+                  className="bg-space-800/90 border border-accent-cyan/30 rounded px-2 py-1 text-xs text-accent-cyan hover:bg-accent-cyan/10 flex items-center gap-1 transition-colors"
+                  title="View Surface"
+                >
+                  <Map className="w-3 h-3" /> Surface
+                </button>
+              </div>
             </div>
           ))}
         </div>

@@ -216,3 +216,37 @@
 | P3 | Basic accessibility (ARIA, focus) | Compliance, inclusion | Medium |
 | P3 | Wonder construction UX | Colony endgame depth | Medium |
 | P3 | Faction actionable gameplay | Faction engagement | High |
+| P4 | Separate Buy Max / Sell All buttons per commodity | Removes trading confusion | Low |
+| P4 | Commodity volume in trade table | Cargo planning visibility | Low |
+| P4 | Component condition warnings on Ship Status | Surfaces hidden degradation | Low |
+| P4 | NPC personality traits in chat header | Informs dialogue strategy | Low |
+| P4 | Crafting jobs estimated time remaining | Removes guesswork | Low |
+| P4 | Events contribution guidance (suggest amounts) | Reduces friction | Low |
+| P4 | Player contribution rank on event card | Engagement feedback | Low |
+| P4 | Auto-refuel toggle on docking | Removes repetitive step | Low |
+| P4 | Planet Orbit View discoverability (buttons + breadcrumb) | Hidden feature exposure | Low |
+| P4 | Contextual empty states with nearest-port hints | Guides lost players | Low |
+| P4 | Dialogue API failure graceful UX | Prevents silent confusion | Low |
+| P4 | Thematic loading messages (consistent) | Immersion polish | Low |
+| P4 | Level-up "What's New" popup (unlocks revealed) | Reward celebration | Medium |
+| P4 | Breadcrumb navigation on sub-pages | Back-navigation clarity | Medium |
+| P4 | Session persistence (last page in localStorage) | Reduces re-navigation | Low |
+| P5 | Mini-map widget (collapsible sector neighborhood) | Spatial awareness without page switch | Medium |
+| P5 | System View pre-click action icons (dock/scan/hail) | Discoverability of interactions | Medium |
+| P5 | "Jump to nearest port" quick-action | Reduces navigation steps | Medium |
+| P5 | Visual ship damage indicators (animated bars, screen shake) | Combat immersion | High |
+| P5 | Threat assessment before combat (win probability) | Informed decision-making | Medium |
+| P5 | Ship comparison view in Shipyard (before/after stats) | Component decision support | Medium |
+| P5 | "Buy New Ship" storefront UI | Missing purchase flow | High |
+| P5 | Colony building prerequisites / tech tree visual | Build order planning | High |
+| P5 | Colony "Collect All" for multiple colonies | Multi-colony QoL | Medium |
+| P5 | Colony population growth projections | Planning visibility | Medium |
+| P5 | Colony raid alerts with quick-link | Urgent event response | Medium |
+| P5 | Chat visibility (sidebar tab or persistent bar) | Social feature exposure | Medium |
+| P5 | Corporation dashboard (online status, treasury, activity) | Corp management depth | High |
+| P5 | Faction-wide chat channels | Social faction identity | High |
+| P5 | Leaderboards on Dashboard | Competitive engagement | Medium |
+| P5 | Bulk actions (sell all cargo, dismiss crew, collect all) | Reduces repetition | Medium |
+| P5 | Ambient Dashboard animations (star parallax) | Living universe feel | Medium |
+| P5 | Event/notification feed scrolling ticker | Ambient world activity | Medium |
+| P5 | Page transition animations (warp/fade) | Visual polish | Medium |

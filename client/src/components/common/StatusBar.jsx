@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { sectors } from '../../services/api';
-import { MapPin, Fuel, Shield, Anchor, Navigation } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { sectors, ships as shipsApi } from '../../services/api';
+import { MapPin, Fuel, Shield, Anchor, Navigation, Zap } from 'lucide-react';
 import { useGameSession } from '../../contexts/GameSessionContext';
+import useNearestPort from '../../hooks/useNearestPort';
 
-function StatusBar() {
+function StatusBar({ compact = false }) {
   const { activeShip } = useGameSession();
+  const navigate = useNavigate();
   const [sectorName, setSectorName] = useState(null);
   const [hasPort, setHasPort] = useState(false);
+  const [jumpLoading, setJumpLoading] = useState(false);
 
   useEffect(() => {
     if (!activeShip) {
@@ -51,6 +54,24 @@ function StatusBar() {
     };
   }, [activeShip]);
 
+  // P5 Item 3: Find nearest port in adjacent sectors
+  const currentSectorId = activeShip?.currentSector?.sector_id || activeShip?.current_sector_id || activeShip?.sector_id;
+  const { nearestPort } = useNearestPort(currentSectorId, hasPort);
+
+  const handleJumpToPort = async () => {
+    if (!nearestPort || !activeShip || jumpLoading) return;
+    setJumpLoading(true);
+    try {
+      await shipsApi.move(activeShip.ship_id, nearestPort.sector_id);
+      navigate('/trading');
+    } catch {
+      // Movement may fail if fuel is low — just navigate to map
+      navigate('/map');
+    } finally {
+      setJumpLoading(false);
+    }
+  };
+
   if (!activeShip) return null;
 
   const fuelPct = activeShip.max_fuel > 0 ? (activeShip.fuel / activeShip.max_fuel) * 100 : 0;
@@ -60,9 +81,9 @@ function StatusBar() {
 
   return (
     <div
-      className="flex items-center gap-6 px-4 py-2 text-xs mb-4 rounded-lg"
+      className={`flex items-center gap-6 px-4 py-2 text-xs rounded-lg ${compact ? 'fixed top-2 left-1/2 -translate-x-1/2 z-40 pointer-events-auto' : 'mb-4'}`}
       style={{
-        background: 'rgba(10, 10, 30, 0.6)',
+        background: compact ? 'rgba(10, 10, 30, 0.85)' : 'rgba(10, 10, 30, 0.6)',
         border: '1px solid rgba(0, 255, 255, 0.08)',
         backdropFilter: 'blur(8px)',
       }}
@@ -105,6 +126,17 @@ function StatusBar() {
           <Anchor className="w-3.5 h-3.5" />
           <span>Port Available</span>
         </Link>
+      )}
+
+      {/* P5 Item 3: Jump to nearest port */}
+      {!hasPort && nearestPort && (
+        <button onClick={handleJumpToPort} disabled={jumpLoading}
+          className="flex items-center gap-1.5 text-gray-400 hover:text-neon-cyan transition-colors ml-auto disabled:opacity-50"
+          title={`Jump to ${nearestPort.name} (has port)`}
+        >
+          <Zap className="w-3.5 h-3.5" />
+          <span>{jumpLoading ? 'Jumping...' : `Port → ${nearestPort.name}`}</span>
+        </button>
       )}
     </div>
   );

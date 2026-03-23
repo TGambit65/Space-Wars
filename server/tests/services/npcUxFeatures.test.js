@@ -11,6 +11,7 @@ const npcService = require('../../src/services/npcService');
 const npcPresenceService = require('../../src/services/npcPresenceService');
 const npcMemoryService = require('../../src/services/npcMemoryService');
 const worldPolicyService = require('../../src/services/worldPolicyService');
+const progressionService = require('../../src/services/progressionService');
 const { NPC, NpcMemory, NpcConversationSession } = require('../../src/models');
 
 // Mock socket service for testing emissions
@@ -481,5 +482,49 @@ describe('PRD 4A: computeSectorPressure', () => {
       playerCount: 0
     });
     expect(withPatrols.pressure).toBeLessThan(withoutPatrols.pressure);
+  });
+});
+
+// ── P0 UX: Level-Up Socket Emission ─────────────────────────────
+describe('P0: Level-up socket emission', () => {
+  let socketEmissions;
+
+  beforeEach(() => {
+    socketEmissions = [];
+    // Mock socketService.emitToUser for this test
+    jest.spyOn(require('../../src/services/socketService'), 'emitToUser')
+      .mockImplementation((userId, event, data) => {
+        socketEmissions.push({ userId, event, data });
+      });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('emits player:level_up when XP causes level increase', async () => {
+    const user = await createTestUser({ total_xp: 0, player_level: 1, available_skill_points: 0 });
+
+    // Award enough XP to level up (level 2 typically requires ~1000 XP)
+    const result = await progressionService.awardXP(user.user_id, 2000, 'test');
+
+    expect(result.levels_gained).toBeGreaterThanOrEqual(1);
+    const levelEvent = socketEmissions.find(e => e.event === 'player:level_up');
+    expect(levelEvent).toBeTruthy();
+    expect(levelEvent.userId).toBe(user.user_id);
+    expect(levelEvent.data.new_level).toBe(result.new_level);
+    expect(levelEvent.data.old_level).toBe(1);
+    expect(levelEvent.data.source).toBe('test');
+  });
+
+  test('does NOT emit player:level_up when no level gained', async () => {
+    const user = await createTestUser({ total_xp: 0, player_level: 1, available_skill_points: 0 });
+
+    // Award a tiny amount of XP — not enough to level up
+    const result = await progressionService.awardXP(user.user_id, 5, 'test');
+
+    expect(result.levels_gained).toBe(0);
+    const levelEvent = socketEmissions.find(e => e.event === 'player:level_up');
+    expect(levelEvent).toBeUndefined();
   });
 });

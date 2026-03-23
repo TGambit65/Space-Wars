@@ -8,6 +8,7 @@ const PROVIDERS = [
   { value: 'openai', label: 'OpenAI' },
   { value: 'gemini', label: 'Gemini' },
   { value: 'grok', label: 'Grok' },
+  { value: 'nvidia', label: 'NVIDIA NIM' },
   { value: 'openrouter', label: 'OpenRouter' },
   { value: 'local', label: 'Local Model' },
 ];

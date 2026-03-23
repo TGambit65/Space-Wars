@@ -1,4 +1,4 @@
-import { X, Globe, Anchor, Crosshair, Skull, User, Scan, Flag, Building2, Star, AlertCircle, Orbit, MessageSquare, Navigation, Rocket, Shield, Fuel, Activity, Wrench, Map as MapIcon, Swords } from 'lucide-react';
+import { X, Globe, Anchor, Crosshair, Skull, User, Users, Scan, Flag, Building2, Star, AlertCircle, Orbit, MessageSquare, Navigation, Rocket, Shield, Fuel, Activity, Wrench, Map as MapIcon, Swords } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FACTION_COLORS as FACTION_PANEL_COLORS, FACTION_LABELS as FACTION_PANEL_LABELS } from '../../../constants/factions';
 
@@ -50,6 +50,7 @@ const SystemInfoPanel = ({ selectedType, selectedEntity, onClose, onScanPlanet, 
           {selectedType === 'npc' && <Crosshair className="w-4 h-4 text-red-400" />}
           {selectedType === 'jumpPoint' && <Navigation className="w-4 h-4 text-cyan-400" />}
           {selectedType === 'star' && <Star className="w-4 h-4 text-yellow-400" />}
+          {selectedType === 'player' && <Users className="w-4 h-4 text-purple-400" />}
           {selectedType === 'ship' && <Rocket className="w-4 h-4 text-accent-cyan" />}
           <div>
             <h3 className="text-white font-bold text-sm">
@@ -62,6 +63,7 @@ const SystemInfoPanel = ({ selectedType, selectedEntity, onClose, onScanPlanet, 
               {selectedType === 'npc' && selectedEntity.npc_type}
               {selectedType === 'jumpPoint' && getLaneLabel(selectedEntity)}
               {selectedType === 'star' && selectedEntity.star_class}
+              {selectedType === 'player' && `${String(selectedEntity.ship_type || 'Unknown').replace('_', ' ')} — ${selectedEntity.owner?.username || 'Unknown'}`}
               {selectedType === 'ship' && String(selectedEntity.ship_type || 'Unknown').replace('_', ' ')}
             </div>
           </div>
@@ -291,6 +293,54 @@ const SystemInfoPanel = ({ selectedType, selectedEntity, onClose, onScanPlanet, 
               <Crosshair className="w-3 h-3 inline mr-1" /> Engage
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Player Detail */}
+      {selectedType === 'player' && (
+        <div className="p-3">
+          <div className="flex items-center gap-2 mb-3">
+            <Users className="w-5 h-5 text-purple-400" />
+            <div>
+              <div className="text-white text-sm font-bold">{selectedEntity.owner?.username || 'Unknown Commander'}</div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-gray-400">{String(selectedEntity.ship_type || 'Unknown').replace('_', ' ')}</span>
+                {selectedEntity.owner?.faction && (
+                  <span className="text-[10px] font-medium px-1 rounded" style={{
+                    color: FACTION_PANEL_COLORS[selectedEntity.owner.faction] || '#888',
+                    border: `1px solid ${FACTION_PANEL_COLORS[selectedEntity.owner.faction] || '#888'}40`
+                  }}>
+                    {FACTION_PANEL_LABELS[selectedEntity.owner.faction] || selectedEntity.owner.faction}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+            <div>
+              <span className="text-gray-500">Ship:</span>
+              <span className="ml-1 text-gray-300">{selectedEntity.name}</span>
+            </div>
+            <div>
+              <span className="text-gray-500">Type:</span>
+              <span className="ml-1 text-gray-300">{String(selectedEntity.ship_type || 'Unknown').replace('_', ' ')}</span>
+            </div>
+          </div>
+
+          {selectedEntity.owner?.pvp_enabled && (
+            <button
+              onClick={() => navigate('/combat', { state: { pvpTarget: selectedEntity } })}
+              className="btn btn-danger w-full text-xs py-1.5 flex items-center justify-center gap-1"
+            >
+              <Swords className="w-3 h-3" /> Attack
+            </button>
+          )}
+          {!selectedEntity.owner?.pvp_enabled && (
+            <div className="text-center text-xs text-gray-500 py-2">
+              <Shield className="w-3 h-3 inline mr-1" /> PvP disabled
+            </div>
+          )}
         </div>
       )}
 

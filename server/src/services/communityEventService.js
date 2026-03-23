@@ -1,7 +1,7 @@
 const { CommunityEvent, EventContribution, User, sequelize } = require('../models');
 const { Op } = require('sequelize');
 
-const getActiveEvents = async () => {
+const getActiveEvents = async (userId = null) => {
   const now = new Date();
   const events = await CommunityEvent.findAll({
     where: {
@@ -12,7 +12,33 @@ const getActiveEvents = async () => {
     order: [['ends_at', 'ASC']]
   });
 
-  return events;
+  if (!userId) return events;
+
+  // Enrich each event with the user's contribution and rank
+  const enriched = await Promise.all(events.map(async (event) => {
+    const plain = event.toJSON();
+    const contribution = await EventContribution.findOne({
+      where: { event_id: event.event_id, user_id: userId }
+    });
+    plain.my_contribution = contribution ? Number(contribution.amount) : 0;
+
+    if (contribution && contribution.amount > 0) {
+      // Count how many contributors have a higher amount
+      const higherCount = await EventContribution.count({
+        where: {
+          event_id: event.event_id,
+          amount: { [Op.gt]: contribution.amount }
+        }
+      });
+      plain.my_rank = higherCount + 1;
+    } else {
+      plain.my_rank = null;
+    }
+
+    return plain;
+  }));
+
+  return enriched;
 };
 
 const getAllEvents = async ({ page = 1, limit = 20 } = {}) => {

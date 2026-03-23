@@ -16,6 +16,7 @@ export default {
           400: '#3d3d7e',
         },
         accent: {
+          primary: 'var(--sw3-primary)',
           cyan: '#00d4ff',
           purple: '#8b5cf6',
           green: '#10b981',

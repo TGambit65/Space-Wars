@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { trade, ports, ships, auth } from '../../services/api';
-import { ShoppingCart, Package, DollarSign, TrendingUp, TrendingDown, Anchor, AlertCircle, RefreshCw, Fuel, AlertTriangle, Star } from 'lucide-react';
+import { ShoppingCart, Package, DollarSign, TrendingUp, TrendingDown, Anchor, AlertCircle, RefreshCw, Fuel, AlertTriangle, Star, Boxes, Zap } from 'lucide-react';
+import LoadingScreen from '../common/LoadingScreen';
 import { useNotifications } from '../../contexts/NotificationContext';
+import useSoundEffects from '../../hooks/useSoundEffects';
+import WikiLink from '../common/WikiLink';
+import useNearestPort from '../../hooks/useNearestPort';
 
 const TradingPage = ({ user: initialUser }) => {
     const navigate = useNavigate();
     const notify = useNotifications();
+    const { play: sfx } = useSoundEffects();
     const [userCredits, setUserCredits] = useState(initialUser?.credits || 0);
 
     const [currentShip, setCurrentShip] = useState(null);
@@ -24,6 +29,7 @@ const TradingPage = ({ user: initialUser }) => {
     const [refuelLoading, setRefuelLoading] = useState(false);
     const [avgCosts, setAvgCosts] = useState({});
     const [bestTrades, setBestTrades] = useState([]);
+    const [noPortSectorId, setNoPortSectorId] = useState(null);
 
     useEffect(() => {
         // If user prop changes (e.g. from parent re-fetch), update credits
@@ -62,7 +68,8 @@ const TradingPage = ({ user: initialUser }) => {
                 const localPorts = portsRes.data.data?.ports || [];
 
                 if (!localPorts || localPorts.length === 0) {
-                    setError("No trading port in this sector. Travel to a sector with a Port to trade.");
+                    setNoPortSectorId(currentSector.sector_id);
+                    setError("No trading port in this sector. Open the Sector Map to find nearby ports — they appear as cyan rings around systems.");
                     setLoading(false);
                     return;
                 }
@@ -159,10 +166,12 @@ const TradingPage = ({ user: initialUser }) => {
                 await trade.buy(currentShip.ship_id, currentPort.port_id, commodity.commodity_id, qty);
                 setUserCredits(prev => prev - (commodity.buy_price * qty));
                 notify.success(`Bought ${qty} ${commodity.name} for ${(commodity.buy_price * qty).toLocaleString()} cr`);
+                sfx('trade');
             } else {
                 await trade.sell(currentShip.ship_id, currentPort.port_id, commodity.commodity_id, qty);
                 setUserCredits(prev => prev + (commodity.sell_price * qty));
                 notify.success(`Sold ${qty} ${commodity.name} for ${(commodity.sell_price * qty).toLocaleString()} cr`);
+                sfx('trade');
             }
 
             // Refresh Data to ensure consistency
@@ -229,7 +238,45 @@ const TradingPage = ({ user: initialUser }) => {
         }
     };
 
-    if (loading) return <div className="p-8 text-center text-accent-cyan flex justify-center gap-2"><RefreshCw className="animate-spin" /> Accessing Trade Network...</div>;
+    const { nearestPort, loading: nearestPortLoading } = useNearestPort(noPortSectorId, false);
+    const [jumpingToPort, setJumpingToPort] = useState(false);
+
+    const handleJumpToNearestPort = async () => {
+        if (!nearestPort || !currentShip || jumpingToPort) return;
+        setJumpingToPort(true);
+        try {
+            await ships.move(currentShip.ship_id, nearestPort.sector_id);
+            window.location.reload();
+        } catch {
+            navigate('/map');
+        } finally {
+            setJumpingToPort(false);
+        }
+    };
+
+    const [autoRefuel, setAutoRefuel] = useState(() => localStorage.getItem('sw3k_auto_refuel') === 'true');
+
+    // Auto-refuel on load when at port
+    useEffect(() => {
+        if (!autoRefuel || !currentShip || !currentPort) return;
+        if (currentShip.fuel >= currentShip.max_fuel) return;
+        const needed = currentShip.max_fuel - currentShip.fuel;
+        if (needed <= 0) return;
+        trade.refuel(currentShip.ship_id, currentPort.port_id, needed)
+            .then(async () => {
+                const shipRes = await ships.getById(currentShip.ship_id);
+                setCurrentShip(prev => ({ ...shipRes.data.data.ship, cargo_used: prev.cargo_used }));
+                const profileRes = await auth.getProfile();
+                if (profileRes.data?.data) setUserCredits(profileRes.data.data.credits);
+                notify.success(`Auto-refueled ${needed} units`);
+            })
+            .catch((err) => {
+                const msg = err.response?.data?.error || err.response?.data?.message;
+                if (msg) notify.warning(`Auto-refuel skipped: ${msg}`);
+            });
+    }, [autoRefuel, currentShip?.ship_id, currentPort?.port_id]);
+
+    if (loading) return <LoadingScreen variant="trading" />;
 
     if (error) {
         return (
@@ -239,9 +286,29 @@ const TradingPage = ({ user: initialUser }) => {
                 </div>
                 <h2 className="text-xl text-white font-bold">Trading Unavailable</h2>
                 <p className="text-gray-400 max-w-md">{error}</p>
-                <button onClick={() => navigate('/map')} className="btn btn-primary mt-4">
-                    Go to Starmap
-                </button>
+                {nearestPort && (
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-cyan/5 border border-accent-cyan/20 text-sm">
+                        <Zap className="w-4 h-4 text-accent-cyan shrink-0" />
+                        <span className="text-gray-300">
+                            Nearest port: <span className="text-white font-medium">{nearestPort.name}</span> (1 jump)
+                        </span>
+                        <button
+                            onClick={handleJumpToNearestPort}
+                            disabled={jumpingToPort}
+                            className="btn btn-primary text-xs px-3 py-1 ml-2 disabled:opacity-50"
+                        >
+                            {jumpingToPort ? 'Jumping...' : 'Jump to Port'}
+                        </button>
+                    </div>
+                )}
+                <div className="flex gap-3 mt-4">
+                    <button onClick={() => navigate('/map')} className="btn btn-primary">
+                        Open Sector Map
+                    </button>
+                    <button onClick={() => navigate('/system')} className="btn btn-secondary">
+                        System View
+                    </button>
+                </div>
             </div>
         );
     }
@@ -259,6 +326,49 @@ const TradingPage = ({ user: initialUser }) => {
                         <Anchor className="w-4 h-4" /> Port: <span className="text-white">{currentPort.name}</span>
                         <span className="mx-2 text-space-600">|</span>
                         {currentPort.type.replace('_', ' ')}
+                        <span className="mx-2 text-space-600">|</span>
+                        <WikiLink term="trading" className="text-[11px]">Guide</WikiLink>
+                        {cargo.length > 0 && (
+                            <>
+                                <span className="mx-2 text-space-600">|</span>
+                                <button
+                                    onClick={async () => {
+                                        if (!confirm(`Sell all ${cargo.length} cargo types at this port?`)) return;
+                                        setTradeLoading(true);
+                                        let sold = 0;
+                                        for (const item of cargo) {
+                                            try {
+                                                await trade.sell(currentShip.ship_id, currentPort.port_id, item.commodity_id, item.quantity);
+                                                sold++;
+                                            } catch { /* some may not be sellable here */ }
+                                        }
+                                        const [shipRes, portRes, cargoRes, profileRes] = await Promise.all([
+                                            ships.getById(currentShip.ship_id),
+                                            ports.getById(currentPort.port_id),
+                                            trade.getCargo(currentShip.ship_id),
+                                            auth.getProfile(),
+                                        ]);
+                                        setCurrentShip({ ...shipRes.data.data.ship, cargo_used: cargoRes.data.data?.used_capacity || 0 });
+                                        const portData = portRes.data.data?.port;
+                                        setCurrentPort(portData);
+                                        setCommodities(portData?.commodities || []);
+                                        setCargo(cargoRes.data.data?.items || []);
+                                        if (profileRes.data?.data) setUserCredits(profileRes.data.data.credits);
+                                        setTradeLoading(false);
+                                        if (sold === 0) {
+                                            notify.warning('No cargo could be sold at this port');
+                                        } else {
+                                            notify.success(`Sold ${sold} cargo type${sold !== 1 ? 's' : ''}`);
+                                            sfx('trade');
+                                        }
+                                    }}
+                                    disabled={tradeLoading}
+                                    className="text-xs text-accent-orange hover:text-white transition-colors underline disabled:opacity-50"
+                                >
+                                    Sell All Cargo
+                                </button>
+                            </>
+                        )}
                     </p>
                 </div>
                 <div className="flex gap-4">
@@ -310,6 +420,7 @@ const TradingPage = ({ user: initialUser }) => {
                         <thead className="bg-space-800 text-gray-400 text-xs uppercase font-bold tracking-wider">
                             <tr>
                                 <th className="p-4">Commodity</th>
+                                <th className="p-4 text-right">Vol</th>
                                 <th className="p-4 text-right">Market Supply</th>
                                 <th className="p-4 text-right text-accent-green">Buy Price</th>
                                 <th className="p-4 text-right text-accent-orange">Sell Price</th>
@@ -322,8 +433,9 @@ const TradingPage = ({ user: initialUser }) => {
                             {commodities.map(commodity => {
                                 const qty = tradeQuantities[commodity.commodity_id] || '';
                                 const owned = getOwnedQuantity(commodity.commodity_id);
+                                const vol = commodity.volume || 1;
                                 const canBuy = userCredits >= commodity.buy_price * (parseInt(qty) || 0) &&
-                                    (currentShip.cargo_capacity - currentShip.cargo_used) >= (parseInt(qty) || 0); // Assuming volume 1 for simplicity unless data says otherwise
+                                    (currentShip.cargo_capacity - currentShip.cargo_used) >= (parseInt(qty) || 0) * vol;
                                 const canSell = owned >= (parseInt(qty) || 0);
 
                                 return (
@@ -331,6 +443,9 @@ const TradingPage = ({ user: initialUser }) => {
                                         <td className="p-4">
                                             <div className="font-bold text-white">{commodity.name}</div>
                                             <div className="text-xs text-gray-500">{commodity.category}</div>
+                                        </td>
+                                        <td className="p-4 text-right font-mono text-gray-400 text-xs" title={`${vol} cargo unit${vol > 1 ? 's' : ''} per item`}>
+                                            {vol > 1 ? <span className="flex items-center justify-end gap-1"><Boxes className="w-3 h-3" />{vol}</span> : <span className="text-gray-600">1</span>}
                                         </td>
                                         <td className="p-4 text-right font-mono text-gray-300">
                                             {commodity.quantity.toLocaleString()}
@@ -373,26 +488,29 @@ const TradingPage = ({ user: initialUser }) => {
                                                     className="w-20 bg-space-900 border border-space-600 rounded px-2 py-1 text-white text-right focus:border-accent-cyan outline-none"
                                                     min="0"
                                                 />
-                                                <button
-                                                    onClick={() => {
-                                                        // Calculate Max
-                                                        // For Buy: Min(Affordable, Space)
-                                                        // For Sell: Owned
-                                                        const space = currentShip.cargo_capacity - currentShip.cargo_used;
-                                                        const affordable = Math.floor(userCredits / commodity.buy_price);
-                                                        const maxBuy = Math.min(space, affordable);
-                                                        const maxSell = owned;
-                                                        // Heuristic: If we own some, max sell. If we own 0, max buy.
-                                                        // Or just toggle? Let's default to max buy if 0 owned, max sell if owned > 0?
-                                                        // Better: Max Buy. User can type for sell or we add 2 buttons.
-                                                        // Simple approach: Max Buy capability.
-                                                        handleQuantityChange(commodity.commodity_id, owned > 0 ? maxSell : maxBuy);
-                                                    }}
-                                                    className="px-2 py-1 bg-space-700 hover:bg-space-600 text-xs text-accent-cyan rounded"
-                                                    title="Auto-Set Quantity (Max Buy / Max Sell)"
-                                                >
-                                                    Max
-                                                </button>
+                                                <div className="flex flex-col gap-1">
+                                                    <button
+                                                        onClick={() => {
+                                                            const space = Math.floor((currentShip.cargo_capacity - currentShip.cargo_used) / vol);
+                                                            const affordable = Math.floor(userCredits / commodity.buy_price);
+                                                            const maxBuy = Math.min(space, affordable, commodity.quantity);
+                                                            handleQuantityChange(commodity.commodity_id, maxBuy);
+                                                        }}
+                                                        className="px-2 py-1 bg-space-700 hover:bg-space-600 text-[10px] text-accent-green rounded"
+                                                        title="Set max buy quantity"
+                                                    >
+                                                        Buy Max
+                                                    </button>
+                                                    {owned > 0 && (
+                                                        <button
+                                                            onClick={() => handleQuantityChange(commodity.commodity_id, owned)}
+                                                            className="px-2 py-1 bg-space-700 hover:bg-space-600 text-[10px] text-accent-orange rounded"
+                                                            title="Set quantity to sell all owned"
+                                                        >
+                                                            Sell All
+                                                        </button>
+                                                    )}
+                                                </div>
                                                 <div className="flex flex-col gap-1">
                                                     <button
                                                         onClick={() => executeTrade('buy', commodity)}
@@ -429,9 +547,24 @@ const TradingPage = ({ user: initialUser }) => {
             {/* Refuel Section */}
             {currentShip && currentPort && (
                 <div className="card p-6">
-                    <h2 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
-                        <Fuel className="w-5 h-5 text-accent-orange" /> Refuel Station
-                    </h2>
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                            <Fuel className="w-5 h-5 text-accent-orange" /> Refuel Station
+                        </h2>
+                        <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer select-none">
+                            <input
+                                type="checkbox"
+                                checked={autoRefuel}
+                                onChange={(e) => {
+                                    const next = e.target.checked;
+                                    setAutoRefuel(next);
+                                    localStorage.setItem('sw3k_auto_refuel', String(next));
+                                }}
+                                className="accent-accent-orange"
+                            />
+                            Auto-refuel on dock
+                        </label>
+                    </div>
                     <div className="space-y-3">
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-400">Current Fuel</span>

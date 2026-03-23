@@ -6,6 +6,7 @@ import useVoiceChat from '../../hooks/useVoiceChat';
 import NPCPortrait from './NPCPortrait';
 import VoiceButton from './VoiceButton';
 import { FACTION_COLORS, FACTION_LABELS } from '../../constants/factions';
+import { useNotifications } from '../../contexts/NotificationContext';
 
 const TYPE_BADGE = {
   PIRATE: 'badge-red',
@@ -17,6 +18,7 @@ const TYPE_BADGE = {
 
 const NPCChatPanel = ({ npc, socket, onClose, user }) => {
   const navigate = useNavigate();
+  const notify = useNotifications();
   const [messages, setMessages] = useState([]);
   const [menuOptions, setMenuOptions] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -24,7 +26,6 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
   const [sending, setSending] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState(user?.subscription_tier || 'free');
-  const [error, setError] = useState(null);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -116,7 +117,14 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
           timestamp: Date.now()
         }]);
       } catch (err) {
-        setError(err.response?.data?.message || 'Failed to start dialogue');
+        notify.error(err.response?.data?.message || 'Failed to start dialogue');
+        setMessages([{
+          sender: 'system',
+          text: 'Communications link failed.',
+          timestamp: Date.now(),
+          isError: true,
+          retryAction: () => { initializedRef.current = false; init(); }
+        }]);
       } finally {
         setIsThinking(false);
       }
@@ -307,7 +315,12 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
         }
       }
     } catch (err) {
-      addNPCResponse(err.response?.data?.message || 'The NPC seems distracted...');
+      setMessages(prev => [...prev, {
+        sender: 'system',
+        text: err.response?.data?.message || 'Communication error. The NPC may have moved away.',
+        timestamp: Date.now(),
+        isError: true,
+      }]);
     } finally {
       setSending(false);
       setIsThinking(false);
@@ -333,7 +346,12 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
       const data = res.data.data;
       addNPCResponse(data.response_text, data.response_audio, data.is_ai_generated);
     } catch (err) {
-      addNPCResponse(err.response?.data?.message || 'The NPC doesn\'t respond...');
+      setMessages(prev => [...prev, {
+        sender: 'system',
+        text: err.response?.data?.message || 'Connection lost. Try sending again.',
+        timestamp: Date.now(),
+        isError: true,
+      }]);
     } finally {
       setSending(false);
       setIsThinking(false);
@@ -423,9 +441,16 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
               </span>
             )}
             {npc.ai_personality?.trait_primary && (
-              <span className="text-[10px] text-gray-500 italic truncate">
-                {npc.ai_personality.trait_primary}{npc.ai_personality.trait_secondary ? `, ${npc.ai_personality.trait_secondary}` : ''}
-              </span>
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-space-700 border border-space-600 text-gray-400">
+                  {npc.ai_personality.trait_primary}
+                </span>
+                {npc.ai_personality.trait_secondary && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-space-700 border border-space-600 text-gray-400">
+                    {npc.ai_personality.trait_secondary}
+                  </span>
+                )}
+              </div>
             )}
             {relationshipLabel && (
               <span className={`text-[10px] font-medium ${
@@ -476,13 +501,6 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
               Remembers: {relationship.notable_fact}
             </div>
           )}
-        </div>
-      )}
-
-      {/* Error */}
-      {error && (
-        <div className="px-3 py-2 bg-accent-red/10 border-b border-accent-red/30 text-accent-red text-xs">
-          {error}
         </div>
       )}
 
@@ -562,7 +580,22 @@ const NPCChatPanel = ({ npc, socket, onClose, user }) => {
 
 const MessageBubble = ({ message, npcType, onPlayAudio, playingMsgTs }) => {
   const isNPC = message.sender === 'npc';
+  const isSystem = message.sender === 'system';
   const isThisPlaying = playingMsgTs === message.timestamp;
+
+  if (isSystem) {
+    return (
+      <div className="flex justify-center my-1">
+        <div className="bg-red-900/20 border border-red-700/40 rounded-lg px-3 py-2 text-xs text-red-300 flex items-center gap-2 max-w-[85%]">
+          <AlertTriangle className="w-3 h-3 shrink-0" />
+          <span>{message.text}</span>
+          {message.retryAction && (
+            <button onClick={message.retryAction} className="ml-2 underline text-red-200 hover:text-white shrink-0">Retry</button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   if (isNPC) {
     // Card-only message (no text)

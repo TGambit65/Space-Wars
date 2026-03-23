@@ -1,9 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Home, Globe, Building2, Users, LogOut, Wallet, Rocket, Map, ShoppingCart, Wrench, Hammer, Settings, Crosshair, TrendingUp, Boxes, Target, UsersRound, Bot, BarChart3, Swords, BookOpen, Shield, Mail, Flag, Landmark, Calendar, Palette, ChevronDown, ChevronRight, Keyboard, Menu, X, Eye, Leaf, Trophy } from 'lucide-react';
+import { Home, Globe, Building2, Users, LogOut, Wallet, Rocket, Map, ShoppingCart, Wrench, Hammer, Settings, Crosshair, TrendingUp, Boxes, Target, UsersRound, Bot, BarChart3, Swords, BookOpen, Shield, Mail, Flag, Landmark, Calendar, Palette, ChevronDown, ChevronRight, Keyboard, Menu, X, Eye, Leaf, Trophy, Volume2, VolumeX, Zap } from 'lucide-react';
 import StatusBar from './StatusBar';
 import useKeyboardShortcuts, { SHORTCUTS } from '../../hooks/useKeyboardShortcuts';
 import { useGameSession } from '../../contexts/GameSessionContext';
+import { events as eventsApi } from '../../services/api';
 
 const FACTION_META = {
   terran_alliance: { name: 'Terran Alliance', color: '#3498db', icon: Shield },
@@ -59,6 +60,19 @@ function Layout({ user, onLogout, children, socketConnected }) {
     localStorage.getItem('sw3k_nav_expanded') === 'true'
   );
 
+  const [sfxEnabled, setSfxEnabled] = useState(() => localStorage.getItem('sw3k_sfx_enabled') !== 'false');
+
+  // P5 Item 18: Event ticker
+  const [tickerEvents, setTickerEvents] = useState([]);
+  useEffect(() => {
+    eventsApi.getActive()
+      .then(res => {
+        const raw = res.data.data;
+        setTickerEvents(Array.isArray(raw) ? raw : raw?.events || []);
+      })
+      .catch(() => {});
+  }, []);
+
   // UI Scale
   const [uiScale, setUiScale] = useState(() => {
     const saved = localStorage.getItem('ui-scale');
@@ -86,10 +100,24 @@ function Layout({ user, onLogout, children, socketConnected }) {
 
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
 
+  // Session persistence: save last visited page
+  useEffect(() => {
+    const path = location.pathname;
+    // Don't persist admin, auth, or transient combat paths
+    if (!path.startsWith('/admin') && !path.startsWith('/ground-combat') && path !== '/') {
+      localStorage.setItem('sw3k_last_page', path);
+    }
+  }, [location.pathname]);
+
   const factionMeta = user?.faction ? FACTION_META[user.faction] : null;
 
   return (
     <div className="min-h-screen flex">
+      {/* Skip-to-main for keyboard/screen-reader users */}
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-space-800 focus:text-accent-cyan focus:border focus:border-accent-cyan focus:outline-none">
+        Skip to main content
+      </a>
+
       {/* Mobile hamburger */}
       <button
         onClick={() => setSidebarOpen(true)}
@@ -242,10 +270,17 @@ function Layout({ user, onLogout, children, socketConnected }) {
               </div>
             );
           })()}
+          {/* Disconnection Warning */}
+          {socketConnected === false && (
+            <div className="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-lg text-xs animate-pulse" style={{ background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)' }}>
+              <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
+              <span className="text-red-400">Offline — reconnecting...</span>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {socketConnected !== null && (
-                <span className={`w-2 h-2 rounded-full shrink-0 ${socketConnected ? 'bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.5)]' : 'bg-red-400 shadow-[0_0_6px_rgba(248,113,113,0.5)]'}`} title={socketConnected ? 'Connected' : 'Disconnected'} />
+                <span className={`w-2 h-2 rounded-full shrink-0 ${socketConnected ? 'bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.5)]' : 'bg-red-400 shadow-[0_0_6px_rgba(248,113,113,0.5)] animate-pulse'}`} title={socketConnected ? 'Connected — real-time events active' : 'Disconnected — combat, chat, and NPC hails unavailable'} />
               )}
               <span className="text-sm font-medium text-white">{user?.username}</span>
             </div>
@@ -261,19 +296,56 @@ function Layout({ user, onLogout, children, socketConnected }) {
             <button onClick={() => adjustScale(-0.15)} className="px-1.5 py-0.5 rounded bg-space-800 text-gray-400 hover:text-white transition-colors" title="Decrease UI scale">A-</button>
             <span className="text-gray-500 min-w-[3ch] text-center">{Math.round(uiScale * 100)}%</span>
             <button onClick={() => adjustScale(0.15)} className="px-1.5 py-0.5 rounded bg-space-800 text-gray-400 hover:text-white transition-colors" title="Increase UI scale">A+</button>
+            <span className="mx-1 text-gray-700">|</span>
+            <button
+              onClick={() => {
+                const next = !sfxEnabled;
+                setSfxEnabled(next);
+                localStorage.setItem('sw3k_sfx_enabled', String(next));
+              }}
+              className="px-1.5 py-0.5 rounded bg-space-800 text-gray-400 hover:text-white transition-colors"
+              title={sfxEnabled ? 'Mute sound effects' : 'Enable sound effects'}
+            >
+              {sfxEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+            </button>
           </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main role="main" aria-label="Page content" className={`flex-1 overflow-auto md:ml-0 ${['/map', '/system', '/wiki'].includes(location.pathname) || location.pathname.startsWith('/planet/') || location.pathname.startsWith('/colony/') ? '' : 'p-6 pt-14 md:pt-6'}`}>
-        <div className="animate-fade-in">
-          {!['/map', '/system', '/wiki'].includes(location.pathname) && !location.pathname.startsWith('/planet/') && (
-            <StatusBar />
-          )}
-          {children}
-        </div>
-      </main>
+      {(() => {
+        const isFullscreen = ['/map', '/system', '/wiki'].includes(location.pathname) || location.pathname.startsWith('/planet/') || location.pathname.startsWith('/colony/');
+        return (
+          <main id="main-content" tabIndex="-1" role="main" aria-label="Page content" className={`flex-1 overflow-auto md:ml-0 outline-none ${isFullscreen ? '' : 'p-6 pt-14 md:pt-6'}`}>
+            {/* P5 Item 18: Event ticker bar */}
+            {tickerEvents.length > 0 && !isFullscreen && (
+              <div className="overflow-hidden rounded-lg mb-3 text-xs" style={{
+                background: 'rgba(255, 102, 0, 0.06)',
+                border: '1px solid rgba(255, 102, 0, 0.15)',
+                height: '24px',
+                lineHeight: '24px',
+              }}>
+                <div className="animate-ticker whitespace-nowrap flex items-center gap-8">
+                  {tickerEvents.map(evt => {
+                    const pct = evt.target_value > 0 ? Math.min(100, Math.round((evt.current_value || 0) / evt.target_value * 100)) : 0;
+                    return (
+                      <span key={evt.id || evt.event_id} className="inline-flex items-center gap-1.5">
+                        <Zap className="w-3 h-3 text-accent-orange inline" />
+                        <span className="text-gray-400">{evt.name || evt.title}</span>
+                        <span className="text-accent-orange font-mono">{pct}%</span>
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            <div className="animate-fade-in">
+              <StatusBar compact={isFullscreen} />
+              {children}
+            </div>
+          </main>
+        );
+      })()}
 
       {/* Keyboard Shortcuts Modal */}
       {showShortcuts && (

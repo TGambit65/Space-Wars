@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { factions as factionsApi } from '../../services/api';
-import { Shield, Swords, TrendingUp, Eye, Leaf, Users, Star, Trophy, ArrowRight } from 'lucide-react';
+import { Shield, Swords, TrendingUp, Eye, Leaf, Users, Star, Trophy, ArrowRight, Target, ShoppingCart } from 'lucide-react';
+import { FACTION_COLORS } from '../../constants/factions';
 
 const FACTION_ICONS = {
   terran_alliance: Shield,
@@ -11,12 +12,12 @@ const FACTION_ICONS = {
   sylvari_dominion: Leaf,
 };
 
-const FACTION_COLORS = {
-  terran_alliance: '#3498db',
-  zythian_swarm: '#e74c3c',
-  automaton_collective: '#9b59b6',
-  synthesis_accord: '#d4a017',
-  sylvari_dominion: '#2ecc71',
+const getStandingLabel = (reputation) => {
+  if (reputation >= 500) return { label: 'Allied', color: '#4caf50' };
+  if (reputation >= 200) return { label: 'Friendly', color: '#8bc34a' };
+  if (reputation >= -200) return { label: 'Neutral', color: '#9e9e9e' };
+  if (reputation >= -500) return { label: 'Unfriendly', color: '#ff9800' };
+  return { label: 'Hostile', color: '#f44336' };
 };
 
 const FACTION_TIPS = {
@@ -127,6 +128,7 @@ function FactionPage({ user }) {
           {standings.map(s => {
             const color = FACTION_COLORS[s.faction] || '#888';
             const pct = ((s.reputation + 1000) / 2000) * 100;
+            const standing = getStandingLabel(s.reputation);
             return (
               <div key={s.faction} className="flex items-center gap-4">
                 <div className="w-32 text-sm font-display" style={{ color }}>
@@ -138,7 +140,7 @@ function FactionPage({ user }) {
                   </div>
                 </div>
                 <div className="w-20 text-right">
-                  <span className="text-xs font-display" style={{ color }}>{s.rank}</span>
+                  <span className="text-xs font-bold" style={{ color: standing.color }}>{standing.label}</span>
                 </div>
                 <div className="w-16 text-right text-xs text-gray-500">{s.reputation}</div>
               </div>
@@ -183,23 +185,46 @@ function FactionPage({ user }) {
             <Swords className="w-4 h-4 text-red-400" /> Active Wars
           </h2>
           <div className="space-y-3">
-            {wars.map(war => (
-              <div key={war.war_id} className="p-3 rounded-lg" style={{ background: 'rgba(244,67,54,0.05)', border: '1px solid rgba(244,67,54,0.15)' }}>
-                <div className="flex items-center justify-between">
-                  <span style={{ color: FACTION_COLORS[war.attacker_faction] }}>
-                    {factionList.find(f => f.id === war.attacker_faction)?.name}
-                  </span>
-                  <span className="text-red-400 text-xs font-display">VS</span>
-                  <span style={{ color: FACTION_COLORS[war.defender_faction] }}>
-                    {factionList.find(f => f.id === war.defender_faction)?.name}
-                  </span>
+            {wars.map(war => {
+              const isAttacker = user?.faction === war.attacker_faction;
+              const isDefender = user?.faction === war.defender_faction;
+              const isInvolved = isAttacker || isDefender;
+              const enemyFaction = isAttacker ? war.defender_faction : war.attacker_faction;
+              const enemyName = factionList.find(f => f.id === enemyFaction)?.name || enemyFaction;
+              return (
+                <div key={war.war_id} className="p-3 rounded-lg" style={{ background: 'rgba(244,67,54,0.05)', border: `1px solid ${isInvolved ? 'rgba(244,67,54,0.3)' : 'rgba(244,67,54,0.15)'}` }}>
+                  <div className="flex items-center justify-between">
+                    <span style={{ color: FACTION_COLORS[war.attacker_faction] }}>
+                      {factionList.find(f => f.id === war.attacker_faction)?.name}
+                    </span>
+                    <span className="text-red-400 text-xs font-display">VS</span>
+                    <span style={{ color: FACTION_COLORS[war.defender_faction] }}>
+                      {factionList.find(f => f.id === war.defender_faction)?.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+                    <span>Score: {war.attacker_score}</span>
+                    <span>Score: {war.defender_score}</span>
+                  </div>
+                  {isInvolved && (
+                    <div className="mt-3 pt-2 border-t border-red-900/30">
+                      <p className="text-[10px] text-red-300 uppercase font-display tracking-wider mb-1.5">Contribute to the War Effort</p>
+                      <div className="flex gap-2 flex-wrap">
+                        <Link to="/combat" className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-300 transition-colors px-2 py-1 rounded" style={{ background: 'rgba(244,67,54,0.08)', border: '1px solid rgba(244,67,54,0.15)' }}>
+                          <Target className="w-3 h-3" /> Fight {enemyName} NPCs
+                        </Link>
+                        <Link to="/trading" className="flex items-center gap-1 text-xs text-gray-400 hover:text-green-300 transition-colors px-2 py-1 rounded" style={{ background: 'rgba(76,175,80,0.08)', border: '1px solid rgba(76,175,80,0.15)' }}>
+                          <ShoppingCart className="w-3 h-3" /> Trade with allies
+                        </Link>
+                        <Link to="/missions" className="flex items-center gap-1 text-xs text-gray-400 hover:text-neon-cyan transition-colors px-2 py-1 rounded" style={{ background: 'rgba(0,255,255,0.05)', border: '1px solid rgba(0,255,255,0.15)' }}>
+                          <Star className="w-3 h-3" /> Faction missions
+                        </Link>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-                  <span>Score: {war.attacker_score}</span>
-                  <span>Score: {war.defender_score}</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
