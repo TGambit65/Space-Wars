@@ -31,7 +31,7 @@ const authMiddleware = async (req, res, next) => {
     }
 
     // Verify token
-    const decoded = jwt.verify(token, config.jwt.secret);
+    const decoded = jwt.verify(token, config.jwt.secret, { algorithms: ['HS256'] });
 
     // Find user
     const user = await User.findByPk(decoded.user_id);
@@ -79,7 +79,7 @@ const optionalAuth = async (req, res, next) => {
   try {
     const token = getAuthTokenFromRequest(req);
     if (token) {
-      const decoded = jwt.verify(token, config.jwt.secret);
+      const decoded = jwt.verify(token, config.jwt.secret, { algorithms: ['HS256'] });
       const user = await User.findByPk(decoded.user_id);
 
       if (user) {
@@ -94,7 +94,10 @@ const optionalAuth = async (req, res, next) => {
 
     next();
   } catch (error) {
-    // Silently continue without user
+    // Log token verification failures for security monitoring
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      console.warn('[optionalAuth] Token rejected:', error.message);
+    }
     next();
   }
 };
@@ -119,8 +122,17 @@ const adminMiddleware = (req, res, next) => {
   next();
 };
 
+const validateUUIDParam = (paramName) => (req, res, next) => {
+  const val = req.params[paramName];
+  if (!val || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val)) {
+    return res.status(400).json({ success: false, message: `Invalid ${paramName}` });
+  }
+  next();
+};
+
 module.exports = {
   authMiddleware,
   optionalAuth,
-  adminMiddleware
+  adminMiddleware,
+  validateUUIDParam
 };

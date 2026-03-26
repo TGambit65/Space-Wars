@@ -127,7 +127,7 @@ const PLAN=[
 // ============ UNIVERSE & WORLD ============
 {id:'universe',title:'Universe & World Design',status:'planned',features:[
 {id:'sector-zones',title:'Zone-Based Galaxy Layout',status:'exists',
-  desc:'BUILT (backend). Sector model has zone_class (9 types), security_class (4 types), access_mode (6 types), owner_user_id, owner_corporation_id, rule_flags. worldPolicyService (479 lines) handles policy enforcement. combatPolicyService (466 lines) enforces zone-based PvP. Tests in zoneEnforcement.test.js (465 lines, 48+ cases). Frontend display pending.',
+  desc:'BUILT. Galaxy split into 9 zone classes (core, inner_ring, mid_ring, outer_ring, frontier, deep_space, home, adventure, transit) with ZonePolicyService enforcing security_class and reward multipliers per zone. Difficulty scaling from 0.3x (home) to 2.0x (deep_space). worldPolicyService builds default policies. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
   tags:['backend','pve','pvp'],
   workflow:['Define zone boundaries','Update universe generator','Zone flags on Sector model','Adventure zone cluster generator','Map UI zone colors','PvP flag enforcement','Reward multiplier per zone'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Establish the foundational world topology that all other systems depend on. Zones define security rules, reward multipliers, NPC behavior, and navigation constraints across the galaxy.</p>
@@ -198,7 +198,7 @@ const PLAN=[
 <li>Players receive explicit "are you sure?" confirmation modal with zone name and rules when crossing zone boundaries</li>
 </ol></div>`},
 {id:'home-sectors',title:'Player Home Sectors (Homesteads)',status:'new',
-  desc:'Each player gets a procedurally generated home sector at galaxy rim with resource planets, NPC port, jump points to hubs, and buildable shipyards. Owner + alliance only. One-time Deluxe/Premium Starter Packs (not subscription-tied) for extra sectors. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'Home sectors exist as zone_class: home with 0.3x difficulty, level 1-2 NPCs. is_starting_sector field exists on Sector model but not actively used for player spawning. Needs: player spawn assignment logic, resource planet generation, NPC port, jump points to hubs. Owner + alliance only. One-time Starter Packs (not subscription-tied) for extra sectors.',
   tags:['backend','frontend','store'],
   workflow:['Homestead generator service','Access control middleware','Jump point connections to hubs','Shipyard building type','Shipyard cap per sector/orbit','On-demand loading','Store template purchase flow'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Give every player a persistent, private space they own and customize. Home sectors are the emotional anchor of the game and the monetization backbone via one-time Starter Packs.</p>
@@ -269,7 +269,7 @@ const PLAN=[
 <li>Shipyard cap enforced: 2 per sector, 1 per orbit</li>
 <li>Home sector persists across sessions and server restarts</li>
 </ol></div>`},
-{id:'sector-scaling',title:'Universe Scaling Config',status:'exists',
+{id:'sector-scaling',title:'Universe Scaling Config',status:'planned',
   desc:'BUILT. Universe config supports initialSectors, spiralArms, galaxyShape, galaxyRadius. Config exposed at GET /api/admin/universe/config. Admin can regenerate via POST /api/admin/universe/generate. Environment variables: UNIVERSE_SEED, INITIAL_SECTORS, SPIRAL_ARMS, GALAXY_SHAPE, GALAXY_RADIUS. Default: 200 systems, spiral shape, radius 500.',
   tags:['backend'],
   workflow:[],
@@ -334,7 +334,7 @@ const PLAN=[
 <li>Redis cache reduces DB queries per tick by 60%+ at Growth tier</li>
 </ol></div>`},
 {id:'difficulty-scaling',title:'Zone Difficulty Scaling',status:'new',
-  desc:'NPC levels and hazard intensity scale with distance from Core. Purchasable private Adventure Sectors (PvE, difficulty 1-10). AI-powered NPCs with bounded memory (5 recent + summary), LLM fallback to templates.',
+  desc:'Zone-based difficulty partially implemented: zoneDifficulty config defines NPC stat multipliers (0.3x-2.0x) and level ranges per zone. behaviorTreeService applies difficulty modifier. Missing: purchasable private Adventure Sectors, AI-powered NPCs with bounded memory, dynamic quests per zone. Sprint scope: wire remaining zone-difficulty into NPC spawning and reward logic.',
   tags:['backend','store'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Progressive challenge scaling from Core to Deep Space, plus AI-driven NPC interactions that create emotional connections and unpredictable encounters.</p>
@@ -396,12 +396,53 @@ const PLAN=[
 <li>LLM fallback activates within 500ms when API unavailable</li>
 <li>NpcMemory stays under 4KB per pair with automatic compaction</li>
 <li>Boss NPCs visibly adapt tactics based on player fleet composition</li>
+</ol></div>`},
+{id:'space-phenomena',title:'Space Phenomena & Hazard Presentation',status:'exists',
+  desc:'Sector-level space phenomena with gameplay effects and player-facing presentation. Ion storms, nebulae, asteroid fields, solar flares, and gravity wells influence travel, combat, and mining. Rendered on galaxy map and system views.',
+  tags:['backend','frontend'],
+  workflow:[],
+  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Make sector-level hazards and environmental modifiers a visible and understandable part of navigation and combat planning. The backend already defines 5 phenomena types with gameplay effects, but nothing renders them to players.</p>
+<p><em>[Implementation Status] Implemented MVP — phenomenaService, universeGenerator integration, galaxy map and system view rendering exist.</em></p></div>
+<div class="modal-section"><div class="modal-section-title">Functional Requirements</div><ol>
+<li>Support permanent and temporary sector phenomena with spawn, expiry, and cleanup</li>
+<li>Expose active phenomena effects through sector API payloads</li>
+<li>Apply phenomena modifiers during movement (fuel cost), combat (shield reduction, flee prevention), and mining (bonuses)</li>
+<li>Visualize active phenomena on galaxy map and system views with distinct visual indicators</li>
+<li>Phenomena types: ion_storm (shield reduction), nebula (sensor interference), asteroid_field (mining bonus), solar_flare (energy drain), gravity_well (flee prevention)</li>
+</ol></div>
+<div class="modal-section"><div class="modal-section-title">Data Model</div>
+<table class="detail-table"><tr><th>Model/Column</th><th>Type</th><th>Notes</th></tr>
+<tr><td>Sector.phenomena</td><td>JSON</td><td>Array of active phenomena with type, intensity, duration</td></tr>
+<tr><td>phenomenaService</td><td>Service</td><td>Spawn, expire, query, apply modifiers</td></tr>
+</table></div>
+<div class="modal-section"><div class="modal-section-title">API Surface</div><ul>
+<li>Phenomena data included in <code>GET /api/sectors/:id</code> and <code>GET /api/sectors/map</code> responses</li>
+<li>Phenomena modifiers applied server-side in combat, movement, and mining services</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">UX Specification</div><ul>
+<li>Galaxy map: colored overlays or sector badges per phenomenon type with tooltip descriptions</li>
+<li>System view: visual particle effects or ambient indicators for active phenomena</li>
+<li>Status bar: show active phenomena affecting current sector with effect summary</li>
+<li>Warning on sector entry when hazardous phenomena are active</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Dependencies</div><p>sector-zones (zone-aware spawn rates), galaxy-map (rendering)</p></div>
+<div class="modal-section"><div class="modal-section-title">Risks &amp; Mitigations</div><ul>
+<li><strong>Risk:</strong> Invisible hazards frustrate players. <strong>Mitigation:</strong> Always show phenomena before player enters sector.</li>
+<li><strong>Risk:</strong> Stacking phenomena creates impossible sectors. <strong>Mitigation:</strong> Cap simultaneous phenomena per sector.</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Complexity &amp; Estimate</div><p><strong>Small-Medium -- 2-3 days. Backend exists, primarily frontend rendering and UX polish.</strong></p></div>
+<div class="modal-section"><div class="modal-section-title">Acceptance Criteria</div><ol>
+<li>Active phenomena visible on galaxy map with distinct icons/colors per type</li>
+<li>System view shows ambient visual indicators for phenomena</li>
+<li>Movement/combat/mining services consume phenomena effect definitions</li>
+<li>Phenomena spawn, expire, and clean up correctly</li>
+<li>Sector API responses include active phenomena data</li>
 </ol></div>`}
 ]},
 // ============ TRAVEL & NAVIGATION ============
 {id:'travel',title:'Travel & Navigation',status:'planned',features:[
 {id:'wormholes-static',title:'Portals + Static Wormholes',status:'exists',
-  desc:'BUILT. SectorConnection model supports connection_type=wormhole/portal. Universe generator creates wormhole connections between distant systems. travel_time=1 for instant transit. Galaxy map renders wormholes as purple lines, portals as orange. SystemEntityBar shows lane type icons.',
+  desc:'BUILT. SectorConnection.connection_type includes wormhole with lane_class: wormhole and instant_transit flag. worldPolicyService handles wormhole traversal. Static wormholes work for long-distance travel. Missing: Player Portal destination picker modal, portal ownership mechanics. Sprint scope: add player-owned portals on top of existing wormhole infrastructure.',
   tags:['backend','frontend','store'],
   workflow:['Portal model','Owned-sector placement','Destination picker modal','Store purchase flow','Crafting alt','Static wormhole pairs in un-ownable sectors','Map rendering (purple=static, blue=player)'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Provide fast long-range travel infrastructure: player-owned portals for private use and public static wormholes as shared highway system.</p>
@@ -532,7 +573,7 @@ const PLAN=[
 <li>Admin can create event wormholes via panel</li>
 </ol></div>`},
 {id:'jump-drives',title:'Jump Drive Component',status:'new',
-  desc:'High-tier ship component: 3-5 sector jumps at once, max 60-second cooldown, Tier 4-5. Endgame long-range mobility.',
+  desc:'Config defines JUMP_DRIVE component type with 3 tiers (Prototype, Standard, Experimental). Component can be equipped to ships. Missing: actual jump mechanic — movement is still adjacent-sector-only via isAdjacent() check. Needs: multi-sector jump service, cooldown timer, fuel cost calculation, zone policy validation for jump destinations.',
   tags:['backend'],
   workflow:['New component type','Jump range calc','Cooldown timer (<=60s)','Fuel cost (high)'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Give endgame ships independent long-range mobility without relying on wormholes or gates, creating tactical depth in PvP and strategic movement options.</p>
@@ -594,7 +635,7 @@ const PLAN=[
 <li>Signature visible to other players for 30 seconds</li>
 </ol></div>`},
 {id:'deep-space-gates',title:'Player-Built Gates + Commercial Portals',status:'new',
-  desc:'Three tiers: Personal gates (home-to-owned, instant+cooldown), Corporation gates (tolls, PvP-destructible), Commercial PvE-to-PvP portals with 10 Space Hub types (Casino, Arena, Paint Dock, Racing Circuit, Intelligence Broker, etc.).',
+  desc:'Gate connection_type exists in SectorConnection model and config, treated like wormholes with different lane_class. Missing: gate-specific mechanics (permissions, toll systems, activation, construction, destruction). Three planned tiers: Personal gates (home-to-owned), Corporation gates (tolls, PvP-destructible), Commercial portals with 10 Space Hub types.',
   tags:['backend','pvp','store','frontend'],
   workflow:['Gate model (3 tiers)','Construction ship consumption','Instant travel + cooldown','Corp toll system','PvP destruction','Commercial portal rules engine','First-aggressor tracking + stat penalty','Space Hub buildings','Portal owner advertising UI','PvP warning modal'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Enable player-built fast-travel infrastructure with three trust tiers (personal, corporate, commercial), creating player economy through toll gates and Space Hub destinations.</p>
@@ -667,7 +708,7 @@ const PLAN=[
 <li>Gate destruction in PvP removes the connection</li>
 </ol></div>`},
 {id:'protected-lanes',title:'Protected Space Lanes',status:'exists',
-  desc:'BUILT. SectorConnection lane_class=protected. worldPolicyService auto-marks lanes between protected sectors. Protected lanes enforce safe_route=true, allow_pvp=false, allow_hostile_npcs=false. Galaxy map renders protected lanes as blue. combatPolicyService respects lane policies.',
+  desc:'BUILT. lane_class: protected with access_mode field for access control. combatPolicyService.resolveEntryProtection() grants temporary invulnerability on entry (15s default via travelProtectionDefaultMs). Safe but longer routes connecting home to Core and Core hubs. Sprint scope: hardening/integration, not a rewrite.',
   tags:['backend','frontend','pvp'],
   workflow:['Protected flag on SectorConnection','PvP check middleware','NPC spawn exclusion','Map visual distinction'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Provide safe (but longer) travel routes for new players and risk-averse traders, making the new player experience less punishing while preserving risk/reward for veterans.</p>
@@ -734,8 +775,8 @@ const PLAN=[
   desc:'Currently implemented (BFS, client-side). Click a distant sector to see the shortest path with animated cyan overlay and hop count. Uses BFS on adjacency map.',
   tags:['frontend'],
   workflow:[],
-  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Provide intelligent pathfinding that optimizes for safety, speed, or cost across a galaxy with portals, protected lanes, tolls, and zone policies.</p>
-<p><em>[Implementation Status] Net-new system — requires full implementation.</em></p>
+  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Provide intelligent server-side weighted pathfinding that optimizes for safety, speed, or cost across a galaxy with portals, protected lanes, tolls, and zone policies. Replaces existing client-side BFS (unweighted, fewest-hops only) with Dijkstra-based weighted graph accounting for travel time, hazards, lane types, access restrictions, and tolls.</p>
+<p><em>[Implementation Status] Client-side BFS exists. Server-side weighted pathfinder and trade advisor require full implementation. See <code>docs/prd-route-planner.md</code> for complete algorithm spec, model schemas, API reference, and test patterns.</em></p>
 </div>
 <div class="modal-section"><div class="modal-section-title">Functional Requirements</div><ol>
 <li>Server-side pathfinding API replacing client-only BFS for weighted routes</li>
@@ -799,7 +840,7 @@ const PLAN=[
 // ============ PVP SYSTEM ============
 {id:'pvp',title:'PvP System',status:'planned',features:[
 {id:'pvp-zones',title:'PvP Zone Enforcement',status:'exists',
-  desc:'BUILT (backend). combatPolicyService.js (466 lines): authorizePvpInitiation() checks rule_flags.allow_pvp per sector. resolveEntryProtection() grants immunity for portal/wormhole entry. Safe harbor flag prevents all hostile actions. security_class=pvp on Fringe/Unknown sectors. Frontend zone indicators pending.',
+  desc:'BUILT. Sector.security_class enforces protection levels: protected (core/home), pve (inner/mid ring), contested (outer ring), pvp (frontier/deep space). worldPolicyService.buildDefaultSectorPolicy() drives enforcement. Reward multipliers: Core 1x, Inner 1.15x, Mid 1.25x, Outer 1.4x, Frontier 1.75x, Deep Space 2.1x. Sprint scope: hardening/integration, not a rewrite.',
   tags:['backend','pvp'],
   workflow:['Zone-based PvP rules','Entry warning system','PvP trade price bonuses','Gaia planet type (PvP only)','Defensive station building','Planetary satellite system'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Create high-risk, high-reward PvP space with clear rules, visible indicators, and exclusive rewards that incentivize but never force participation.</p>
@@ -866,9 +907,9 @@ const PLAN=[
 <li>Defensive stations auto-fire on hostile players</li>
 </ol></div>`},
 {id:'pvp-rewards',title:'PvP Zone Reward Multipliers',status:'new',
-  desc:'Zone-specific reward multipliers (Frontier 2.0x, Deep Space 2.5x) driven by ZoneConfig. Exclusive rare crafting materials and ship components only available in PvP space.',
+  desc:'Zone-specific reward multipliers already applied via rule_flags.reward_multiplier: Core 1x → Deep Space 2.1x. Partially implemented in combat/trade reward paths. Missing: exclusive rare crafting materials and ship components only in PvP space, diminishing returns for same-target kills, alt-account detection signals, reward journaling with idempotency keys.',
   tags:['backend','pvp'],
-  workflow:[],
+  workflow:['ZoneConfig reward multiplier lookup per zone_class','Apply multipliers to trade profit, combat loot, mission rewards','PvP-exclusive drop table (rare crafting materials, components)','Diminishing returns: same-target kill tracking per 24h window','Reward journaling with idempotency keys','Alt-account detection signal integration','Tests for multiplier application and diminishing returns'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Incentivize PvP participation with meaningful multipliers and exclusive drops while preventing exploitation through diminishing returns and anti-farming measures.</p>
 <p><em>[Implementation Status] Net-new system — requires full implementation.</em></p>
 </div>
@@ -1008,7 +1049,7 @@ const PLAN=[
 <li>Safe logout works within 30 seconds when not in combat</li>
 </ol></div>`},
 {id:'pvp-harbors',title:'Neutral Safe Harbors in PvP Space',status:'new',
-  desc:'Neutral stations deep in PvP space. Dock safely, repair and refuel. No trading. Forward operating bases for PvP campaigns.',
+  desc:'Partially implemented: safe_harbor flag in sector.rule_flags with entry protection via combatPolicyService. travelProtectionDefaultMs grants invulnerability on entry. Missing: neutral station docking, repair/refuel services without trading, forward operating base mechanics. Current safe harbors are zone-level, not station-level.',
   tags:['backend','pvp'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Provide forward operating bases in PvP space where players can repair, refuel, and catch their breath without risk. Not a safe trading loophole.</p>
@@ -1069,7 +1110,7 @@ const PLAN=[
 <li>Re-dock blocked for 60 seconds after taking damage</li>
 </ol></div>`},
 {id:'offline-protection',title:'Offline Ship Protection',status:'exists',
-  desc:'BUILT. PlayerProtectionState model with newbie_protection_until, travel_protection_until, hostility_until. raidProtectionService.isOwnerOfflineProtected() checks User.last_login vs config threshold. ColonyRaidProtection tracks offline state for colony raids.',
+  desc:'BUILT. raidProtectionService.isOwnerOfflineProtected() checks last_login timestamp with configurable threshold. Raid cooldowns and repeated-attacker throttling via ColonyRaidProtection model. PlayerProtectionState model tracks protection windows. Sprint scope: tune protection thresholds and add auto-dock/auto-recall mechanics.',
   tags:['backend','store'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Protect player investment during offline periods so players feel safe logging out. Protection is a shield for offline players, never a weapon.</p>
@@ -1136,10 +1177,11 @@ const PLAN=[
 // ============ NPC UX & LIVING WORLD ============
 {id:'npc-ux',title:'NPC UX & Living World',status:'new',features:[
 {id:'npc-foundation',title:'NPC Foundation Fixes (F0-F5)',status:'exists',
-  desc:'BUILT. All 7 phases complete: Foundation, Behavior Trees, Dialogue, Tick, WebSocket, Admin, Chat UI. Provider-agnostic AI (Anthropic, OpenAI, Gemini, Grok, OpenRouter, Local). NPC model with faction, behavior_state, intelligence_tier, ai_personality. behaviorTreeService handles 70-80% of decisions. 20+ AI provider files, 11 test files.',
+  desc:'AI NPC foundation exists: 7 phases complete (Foundation, Behavior Trees, Dialogue, Tick, WebSocket, Admin, Chat UI). Provider-agnostic AI (Anthropic, OpenAI, Gemini, Grok, NVIDIA, OpenRouter, Local). However, 6 foundation blockers identified: F0 per-player sessions (NpcConversationSession needed), F1 persistent combat targets, F2 live event pipeline (server doesn\'t emit hails/dialogue events), F3 dialogue action execution (side effects missing), F4 context quality, F5 E2E tests. Core illusion gap: 281 NPCs exist but 271 idle; client expects socket events server never emits.',
   tags:['backend','frontend'],
   workflow:['NpcConversationSession model','Per-player dialogue state','target_ship_id on NPC combat state','Emit npc:hails_player events','Emit npc:dialogue events','Emit npc:state_change broadly','dialogueActionService for side effects','Normalize buildDialogueContext/buildInteractivePrompt','Context-aware cache keys','E2E test suite for NPC UX'],
-  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Address 6 foundation blockers (F0-F5) identified in the NPC UX review. These are prerequisites for all living-world features — without them, NPC dialogue locks out other players, combat targets are inconsistent, live events never fire, dialogue choices have no gameplay consequence, AI context is unreliable, and there is no E2E test coverage for NPC interactions.</p></div>
+  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Address 6 foundation blockers (F0-F5) identified in the NPC UX review (<code>docs/npc-ux-living-world-prds.md</code>). These are prerequisites for all living-world features — without them, NPC dialogue locks out other players, combat targets are inconsistent, live events never fire, dialogue choices have no gameplay consequence, AI context is unreliable, and there is no E2E test coverage for NPC interactions.</p>
+<p><strong>Core problem (illusion gap):</strong> The codebase has solid NPC scaffolding (281 NPCs, behavior trees, dialogue, socket hooks), but the player-facing experience is still mostly static. The client expects live hail/dialogue/state-change events the server never emits. Dialogue actions return flavor text instead of gameplay consequences. NPCs have no memory, no faction identity, and a global dialogue lock inappropriate for MMO. 271 of 281 NPCs are idle.</p></div>
 <div class="modal-section"><div class="modal-section-title">Functional Requirements</div><ol>
 <li><strong>F0 — Per-Player Conversation Sessions:</strong> Replace global <code>NPC.dialogue_state</code> with <code>NpcConversationSession</code> keyed by npc_id + user_id. Remove MMO-visible "busy NPC" behavior for standard service NPCs. Keep temporary exclusivity only for rare encounter NPCs if needed</li>
 <li><strong>F1 — Persistent Combat Targets:</strong> Add <code>target_ship_id</code> and <code>target_user_id</code> to NPC combat state. Combat ticks must use the persisted target, not pick any player ship in sector. UI warnings reference the correct target</li>
@@ -1182,7 +1224,7 @@ const PLAN=[
 <li>E2E tests pass for hail flow, service action flow, and combat target consistency</li>
 </ol></div>`},
 {id:'living-sector-presence',title:'Living Sector Presence',status:'exists',
-  desc:'BUILT. npcPresenceService.js with processPresenceTick(). 15+ proactive beat templates (Trader, Patrol, Pirate, Bounty Hunter). Faction-specific beats with 40% selection chance. Territory pressure beats computed via worldPolicyService.computeSectorPressure(). Socket emissions: emitToSector, emitToUser. 2-3 minute cooldown pacing. Tests in npcUxFeatures.test.js.',
+  desc:'BUILT. npcPresenceService.js generates ambient beats: proactive hails, warnings, offers per NPC type (TRADER, PATROL, PIRATE, BOUNTY_HUNTER, PIRATE_LORD). 3-min hail cooldown, 2-min presence beat cooldown. Delivered via Socket.io to players in sector. Sprint scope: increase beat variety, wire into system view live updates, add ambient NPC beats every 3-5 min in populated sectors.',
   tags:['backend','frontend'],
   workflow:['Live NPC event contract (6 event types)','Presence tick pass in NPC loop','Proactive hail logic per NPC type','Ambient beat scheduling (3-5 min)','Anti-spam cooldowns (presence_cooldown_at)','Batched sector updates for density','Live NPC roster in SystemView','State badges (Trading, Patrolling, etc.)','Activity rail / compact event log','Hail acceptance opens chat with real message'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Make every active sector feel inhabited within minutes. Players should see traders as traffic, patrols securing systems, and hostiles creating tension before combat starts — the world reacting around them in real time.</p></div>
@@ -1242,7 +1284,7 @@ const PLAN=[
 <li>No duplicate events from batching or reconnection</li>
 </ol></div>`},
 {id:'npc-service-actions',title:'Actionable Service NPCs & Contracts',status:'exists',
-  desc:'BUILT. NPCChatPanel renders 7+ dialogue card types: trade_shortcut, mission_accepted, bounty_intel, price_list, price_quote, route_tip, credits_change. Each card has lucide icons, navigation buttons, and styled layouts. Menu options system with dynamic payloads and action handlers.',
+  desc:'BUILT. Dialogue menu options tied to NPC types: TRADER (buy/sell/ask_rumors), PATROL (report_crime/ask_safety), PIRATE (plead/bribe/threaten). Per-player sessions via NpcConversationSession model. AI integration via dialogueService.js. Sprint scope: ensure all menu actions produce gameplay consequences — Buy/Sell opens trade UI, Report Crime creates records, bounty contracts create missions, bribes process payments.',
   tags:['backend','frontend'],
   workflow:['dialogueActionService implementation','Trader: Buy/Sell opens trade UI','Trader: Ask Prices/Routes pins hints','Patrol: Report Crime creates record','Patrol: Ask Bounties surfaces contracts','Patrol: Request Escort creates request','Bounty hunter: Offer Contract flow','Bounty hunter: Ask Price quoted offer','Pirate: Bribe payment choice','Pirate: Threaten escalation logic','NpcContract model (or Mission extension)','CTA/quote/action card rendering in chat','Cooldown and refusal tracking'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Turn service NPC dialogue from flavor-only menus into real gameplay loops. Every non-farewell dialogue option must open a game surface, create a mission/contract/state change, update the map/HUD, or return a durable result card. Eliminates dead-end flavor text that makes the world feel fake.</p></div>
@@ -1312,7 +1354,7 @@ const PLAN=[
 <li>At least one repeatable patrol loop and one bounty loop available via NPC chat</li>
 </ol></div>`},
 {id:'npc-memory-relationships',title:'NPC Memory & Relationship Summaries',status:'exists',
-  desc:'BUILT. NpcMemory model with trust/fear/respect floats (-1.0 to 1.0), memories JSON array (bounded to 10), notable_fact, interaction_count. npcMemoryService: recordInteraction, getRecognition, 10+ relationship labels. Memory decay (24h threshold, 2% rate, 5% floor). Frontend: 3 relationship bars, encounter count, notable fact display.',
+  desc:'BUILT. NpcMemory model stores per-player trust/fear/respect scores (-1 to 1 range). npcMemoryService.recordInteraction() updates scores and stores memory bullets (max 10). Memory decay: DECAY_RATE 0.02, threshold 24 hours. Sprint scope: greeting adaptation based on relationship, pricing adjustments from trust, relationship indicators in chat header.',
   tags:['backend','frontend'],
   workflow:['NpcMemory model','Relationship summary structure','Memory write on conversation end','Memory write on combat encounter','Summarization/compaction rules','Memory decay and cap','Feed relationship into scripted dialogue','Feed relationship into AI prompt','Recognition text on repeat interaction','Relationship indicator in chat header','Pricing/contract quality adaptation'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Make important NPCs remember the player enough to create attachment and continuity. Named traders remember profitable deals, patrol officers remember whether the player helped or caused trouble, rival pirates reference past encounters. Transforms NPCs from stateless responders into persistent characters in a shared world.</p></div>
@@ -1365,7 +1407,7 @@ const PLAN=[
 <li>Trust score affects pricing favorability (measurable: ±5-15% based on trust tier)</li>
 </ol></div>`},
 {id:'faction-territory-presence',title:'Faction & Clan Territory Presence',status:'exists',
-  desc:'BUILT. NPC model has faction enum (5 factions). npcService.assignFaction() with zone-aware rules (100% faction in core/inner, 60% mid, 20% outer). Faction-specific beat templates in npcPresenceService. Frontend: faction badges in NPCChatPanel, SystemView faction presence summary (top 3), SystemEntityBar faction dots. Constants in client/constants/factions.js.',
+  desc:'BUILT. NPCs have faction field (5 factions), sector NPC presence reflects faction with color-coded badges. npcPresenceService has faction-specific dialogue beats. Patrol density high in core, pirates in frontier/deep_space. Sprint scope: clan-tagged pirate presence, rotating territory events (convoys, sweeps, tolls), map overlays tied to territory.',
   tags:['backend','frontend'],
   workflow:['Zone tier classification (core/inner/outer/frontier/special)','Spawn profile system per zone','faction_id/clan_id on NPC spawn templates','Replace universal spawn with data-driven tables','Sector-level regional summaries','Territory pressure events (convoys, sweeps, tolls)','Map tint/badge for territory','Faction/clan badge in NPC details','Territory cues in system/galaxy views','Patrol/trader rumor feeds'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Give sectors identity so NPCs feel place-based instead of randomly sampled. Adjacent regions should visibly differ in NPC composition and tone. Players should predict safer or riskier routes from map signals and NPC behavior, creating readable geography without requiring boss content or faction war systems.</p></div>
@@ -1432,7 +1474,7 @@ const PLAN=[
 // ============ NPC CLANS & RAIDS ============
 {id:'npc-clans',title:'NPC Clans & Dynamic Raids',status:'new',features:[
 {id:'clan-spawning',title:'NPC Clan Territory & Raider Economy',status:'new',
-  desc:'Level-scaled NPC raids. No-raid safe zones in Core PvE. Players can bribe, hire, or destroy raiders. Hire raiders to attack enemies or defend sectors. Raider bases are destructible and respawn elsewhere.',
+  desc:'Not yet implemented. No NPC clan model or clan_id field exists. NPCs spawn individually, not as organized groups. Needs: NPC Clan model (clan hierarchy, size, territory), clan-based spawning logic, raid economics (bribe, hire, destroy raiders). Raider bases should be destructible and respawn elsewhere.',
   tags:['backend','frontend'],
   workflow:['Clan spawn timer','Level-scaled difficulty','No-raid zone flag','Raider bribery','Hire-for-attack mechanic','Hire-for-defense','Raider base destruction + respawn','Distance-from-core scaling','Map visual overlay'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Create NPC clans as economic actors with territory, budgets, and strategic behavior -- making PvE threats feel like living organizations, not random spawns.</p>
@@ -1500,7 +1542,7 @@ const PLAN=[
 <li>Raider bases are destructible and respawn in different locations</li>
 </ol></div>`},
 {id:'clan-raids',title:'Zone-Scaled Raid Frequency',status:'new',
-  desc:'Predictable raid frequency per zone. Inner Ring: rare. Outer Ring: moderate. Frontier: frequent. Players can prepare based on where they settle.',
+  desc:'Not yet implemented. Only player-initiated raids exist (colonyRaidService.js, groundCombatService.js). Generic pirate raids via triggerRaid() exist but no coordinated NPC clan raids. Needs: zone-scaled raid frequency (Inner rare, Outer moderate, Frontier frequent), clan-organized raid parties.',
   tags:['backend','pve'],
   workflow:['Raid targeting logic','Zone-based frequency table','Level scaling algorithm','Colony/outpost damage','Notification system','Predictable cooldown timers'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Provide predictable, zone-scaled raid frequency so players can make informed decisions about where to settle based on known risk levels.</p>
@@ -1562,7 +1604,7 @@ const PLAN=[
 <li>Post-raid summary accurately describes outcome</li>
 </ol></div>`},
 {id:'clan-clearing',title:'Stronghold Clearing + Planet Boss Fights + POIs',status:'new',
-  desc:'Space-based clan clearing (3 sectors, escalating waves). Planet boss fights with permanent raid immunity. Regenerating POIs spread throughout. Adventure areas restricted to Party/Corp+Allies. Party system required.',
+  desc:'Not yet implemented. Requires NPC clan system (clan-spawning) as prerequisite. Needs: multi-sector stronghold clearing chains, planet boss fights with permanent raid immunity, regenerating POIs, party system for group content.',
   tags:['backend','pve'],
   workflow:['Space wave encounter system','Boss NPC generation','Planet boss fight system','Permanent raid immunity per planet','POI regeneration timers','Party system (invite, roles, loot rules)','Adventure area access control (party/corp/allies)','Unique loot table','Achievement trigger'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Provide the primary group PvE content loop: stronghold clearing for loot, planet boss fights for permanent benefits, POIs for recurring exploration, and legendary artifacts for long-term collection goals.</p>
@@ -1629,14 +1671,58 @@ const PLAN=[
 <li>Party system supports invite, roles, loot rules, max 5 members</li>
 <li>Unique legendary artifacts are truly unique (server-wide, 1 owner)</li>
 <li>Server-wide announcement fires on legendary artifact discovery</li>
+</ol></div>`},
+{id:'npc-tactical-sim',title:'AI NPC Tactical Simulation & Tick Orchestration',status:'exists',
+  desc:'BUILT. behaviorTreeService.js provides decision logic, npcActionExecutor executes actions, tickService runs tactical (30s) and combat (15s) ticks. Single-unit simulation works. Socket events broadcast NPC state changes. Admin visibility via /api/admin/ai/stats and /ai/logs. Missing: multi-unit tactical simulations (clan-vs-player), scale testing for large NPC populations.',
+  tags:['backend'],
+  workflow:[],
+  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Track the background NPC AI runtime as its own roadmap feature. NPCs should feel like living actors making tactical decisions, not static spawns waiting for player interaction.</p>
+<p><em>[Implementation Status] Implemented MVP — behaviorTreeService, npcActionExecutor, tickService, socketService batch updates, admin tick-status visibility all exist.</em></p></div>
+<div class="modal-section"><div class="modal-section-title">Functional Requirements</div><ol>
+<li>Run scheduled NPC tactical evaluation through behavior trees first</li>
+<li>Allow AI (LLM) fallback only for ambiguous decisions, bounded and observable</li>
+<li>Expose runtime status and decision visibility to admins</li>
+<li>Publish world-state changes back to clients through socket events</li>
+<li>Process active NPCs on a defined tick cadence (configurable interval)</li>
+<li>NPC decisions include: movement, combat engagement, trading, patrol routes, flee behavior</li>
+</ol></div>
+<div class="modal-section"><div class="modal-section-title">Data Model</div>
+<table class="detail-table"><tr><th>Model/Column</th><th>Type</th><th>Notes</th></tr>
+<tr><td>NPC</td><td>Model</td><td>Existing model with npc_type, aggression_level, hull_points, behavior state</td></tr>
+<tr><td>behaviorTreeService</td><td>Service</td><td>Evaluates behavior tree nodes for NPC decisions</td></tr>
+<tr><td>npcActionExecutor</td><td>Service</td><td>Executes decided actions (move, attack, trade, flee)</td></tr>
+<tr><td>tickService</td><td>Service</td><td>Orchestrates NPC processing batches on interval</td></tr>
+</table></div>
+<div class="modal-section"><div class="modal-section-title">API Surface</div><ul>
+<li><code>GET /api/admin/server/ticks/start</code> and <code>stop</code> -- admin tick control</li>
+<li><code>GET /api/admin/ai/stats</code> -- AI decision statistics</li>
+<li><code>GET /api/admin/ai/logs</code> -- recent AI decision logs</li>
+<li>Socket events: <code>sector_npcs</code>, <code>npc_movement</code>, <code>npc_combat</code></li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">UX Specification</div><ul>
+<li>Admin panel: tick status indicator (running/stopped), NPC count, decisions/minute</li>
+<li>Player-facing: NPC movement and state changes reflected in real-time via socket events</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Dependencies</div><p>npc-types (NPC model), socket (WebSocket infrastructure)</p></div>
+<div class="modal-section"><div class="modal-section-title">Risks &amp; Mitigations</div><ul>
+<li><strong>Risk:</strong> Tick processing too slow for large NPC populations. <strong>Mitigation:</strong> Batch processing, priority queuing for active sectors.</li>
+<li><strong>Risk:</strong> AI fallback cost spirals. <strong>Mitigation:</strong> Rate-limit AI calls per tick, behavior trees handle majority.</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Complexity &amp; Estimate</div><p><strong>Medium -- hardening pass. Core exists; needs scale testing, balance tuning, and production monitoring.</strong></p></div>
+<div class="modal-section"><div class="modal-section-title">Acceptance Criteria</div><ol>
+<li>Active NPCs are processed by a defined tick cadence</li>
+<li>Scripted behavior remains the default path, with AI fallback bounded and observable</li>
+<li>Clients receive consistent sector NPC updates from the socket layer</li>
+<li>Admins can inspect tick health and recent decision activity</li>
+<li>NPC behavior degrades gracefully when AI provider is unavailable</li>
 </ol></div>`}
 ]},
 // ============ ADVENTURE & TEAM CONTENT ============
 {id:'adventure',title:'Adventure & Team Content',status:'new',features:[
 {id:'adventure-sectors',title:'Adventure Sector System',status:'new',
-  desc:'60 sectors reserved for group content. Gated entry (3-5 players, min ship tier, or sector key). Instanced or limited occupancy. Periodic resets.',
+  desc:'Partially implemented: zone_class adventure exists in Sector model with 1.75x difficulty multiplier, level 8-13 NPCs, 1.0 spawn density. sectorInstanceService handles instancing with TTL. Missing: adventure-specific quest logic, gated entry (party size/ship tier/sector key), periodic resets, adventure-only loot tables.',
   tags:['backend','pve'],
-  workflow:[],
+  workflow:['Mark 60 sectors as adventure zone_class in universe generator','Entry gate: party size, ship tier, or sector key validation','Instance creation via sectorInstanceService (limited occupancy)','Periodic reset job: respawn NPCs, reset loot, regenerate hazards','Loot tables: adventure-exclusive drops by difficulty tier','Party requirement enforcement at entry','Completion tracking and rewards','Exit handling: auto-teleport on instance close','Admin controls: manual reset, instance monitoring'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Provide the instancing platform that all group PvE content (derelicts, hives, nebulae, bosses) requires. This is infrastructure, not a content feature.</p>
 <p><em>[Implementation Status] Net-new system — requires full implementation.</em></p>
 </div>
@@ -1704,8 +1790,8 @@ const PLAN=[
 <li>DC reconnect works within 2-minute window</li>
 <li>Instance destroyed on empty or after reset period</li>
 </ol></div>`},
-{id:'derelict-explore',title:'Derelict Capital Ship Exploration',status:'new',
-  desc:'Room-by-room clearing of abandoned ships on a grid (16x16 to 32x32). NPC encounters, environmental hazards, loot. Reuses colony surface grid engine with ship tileset.',
+{id:'derelict-explore',title:'Derelict Capital Ship Exploration',status:'exists',
+  desc:'BUILT. DerelictBoardingView.jsx with Three.js voxel traversal via shared FirstPersonTraversalController. Interior blueprints define room layouts, interaction zones, and exit points. Reuses colony surface voxel engine with ship tileset. Sprint scope: expand room variety, add NPC encounters, environmental hazards, and loot mechanics.',
   tags:['backend','pve','frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Provide atmospheric dungeon-crawl content in space: room-by-room exploration of abandoned capital ships with environmental hazards, loot, and storytelling.</p>
@@ -2017,12 +2103,54 @@ const PLAN=[
 <li>Resources spawn correctly in rush sector</li>
 <li>Leaderboard updates in real-time</li>
 <li>Rush times rotate across timezones fairly</li>
+</ol></div>`},
+{id:'ship-interior-traversal',title:'Ship Interior Traversal',status:'exists',
+  desc:'Players can physically enter and traverse their own ships using the shared first-person controller, interaction model, and HUD contract used by colony surfaces and derelict boarding.',
+  tags:['frontend'],
+  workflow:[],
+  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Let players physically enter and traverse their own ships using the same input and interaction model used by other explorable spaces. Ship interiors create a tangible sense of ownership and open future gameplay loops (crew management, repairs, customization).</p>
+<p><em>[Implementation Status] Implemented MVP — ShipInteriorView, TraversalScene, interiorBlueprints, shared FirstPersonTraversalController with keyboard+gamepad support all exist.</em></p></div>
+<div class="modal-section"><div class="modal-section-title">Functional Requirements</div><ol>
+<li>Ship panel exposes an interior entry point button</li>
+<li><code>/ship/:shipId/interior</code> loads a ship-specific traversal scene</li>
+<li>Traversal uses the shared controller, interaction prompts, and HUD contract</li>
+<li>Runtime supports keyboard, mouse, and gamepad without scene-specific forks</li>
+<li>Interior blueprints define room layouts, interaction zones, and exit points per ship type</li>
+<li>Same traversal controller works across colony, ship-interior, and derelict scenes</li>
+</ol></div>
+<div class="modal-section"><div class="modal-section-title">Data Model</div>
+<table class="detail-table"><tr><th>Model/Column</th><th>Type</th><th>Notes</th></tr>
+<tr><td>interiorBlueprints.js</td><td>Client config</td><td>Room layouts, interaction zones, exits per ship type</td></tr>
+<tr><td>traversalProfiles.js</td><td>Client config</td><td>Movement profiles for colony_surface, ship_interior, derelict_boarding</td></tr>
+</table></div>
+<div class="modal-section"><div class="modal-section-title">API Surface</div><ul>
+<li>No new backend APIs needed — ship data already available via existing ship endpoints</li>
+<li>Interior scenes are purely client-side using existing ship state</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">UX Specification</div><ul>
+<li>Ship panel button: "Enter Interior" launches traversal view</li>
+<li>First-person WASD/gamepad movement with pointer lock</li>
+<li>Interaction prompts on approach (E key / gamepad A)</li>
+<li>Profile-driven HUD hints adapt to scene type</li>
+<li>Clean exit back to ship panel via Escape or exit zone</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Dependencies</div><p>colony-surface (shared traversal engine), ship-types (ship data)</p></div>
+<div class="modal-section"><div class="modal-section-title">Risks &amp; Mitigations</div><ul>
+<li><strong>Risk:</strong> Interior complexity varies wildly by ship type. <strong>Mitigation:</strong> Templated blueprints with shared room types scaled by hull class.</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Complexity &amp; Estimate</div><p><strong>Medium -- 3-5 days. Shared controller exists; primarily blueprint authoring and scene polish.</strong></p></div>
+<div class="modal-section"><div class="modal-section-title">Acceptance Criteria</div><ol>
+<li>Interior scenes load from routed entry points</li>
+<li>Same traversal controller works across colony, ship-interior, and derelict scenes</li>
+<li>Scene-specific exits and interactions are exposed through shared overlay model</li>
+<li>Feature builds cleanly with the rest of the client traversal stack</li>
+<li>Keyboard and gamepad both work in interior scenes</li>
 </ol></div>`}
 ]},
 // ============ STORE & MONETIZATION ============
 {id:'store',title:'Store & Monetization',status:'new',features:[
 {id:'store-philosophy',title:'Store Design Philosophy',status:'new',
-  desc:'Everything purchasable MUST be grindable. Formal entitlement taxonomy (permanent, consumable, cosmetic, convenience) with hard boundaries. One-time Starter Packs for sectors (not subscription-tied). Premium subscription for convenience only. Free players on the SAME map.',
+  desc:'Design-only — no store system exists in codebase. Establishes rules: everything purchasable MUST be grindable. Formal entitlement taxonomy (permanent, consumable, cosmetic, convenience) with hard boundaries. One-time Starter Packs (not subscription-tied). Premium subscription for convenience only. Free players on the SAME map.',
   tags:['store'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Establish the monetization framework as an entitlement taxonomy with hard rules preventing pay-to-win, ensuring player trust and sustainable revenue.</p>
@@ -2088,7 +2216,7 @@ const PLAN=[
 <li>No store item provides combat advantage over non-purchasable items</li>
 </ol></div>`},
 {id:'store-cosmetics',title:'Cosmetic Store Items',status:'new',
-  desc:'Ship skins, engine trails, decals, nameplates, faction packs, station decorations, crew outfits. All visual-only. Earnable via achievements or grind.',
+  desc:'Partially implemented: cosmeticService.js and CosmeticUnlock model exist. Ship customization catalog includes hull colors, engine trails, skins, nameplates. Missing: purchasing mechanism (no store UI, no price catalog, no purchase flow). Cosmetics are unlockable but no store integration.',
   tags:['store','frontend'],
   workflow:['Store UI page','Purchase flow','Unlock system','Grind alternative paths'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Safe revenue stream through visual-only customization with live previews, gifting, and seasonal rotations -- zero gameplay impact.</p>
@@ -2271,7 +2399,7 @@ const PLAN=[
 <li>External Storage Module respects hull size caps</li>
 </ol></div>`},
 {id:'premium-currency',title:'Premium Currency (Star Gems)',status:'new',
-  desc:'Dual currency: Credits (in-game) + Star Gems (premium). Gems buy cosmetic ships, not stat-superior. 3-day flash + 30-day extended sales. Admin-editable specials. Grind rate: weeks not months.',
+  desc:'Partially implemented: User.subscription_tier field exists (free/premium/elite), used to gate voice chat features. No actual premium currency (Star Gems) model, no store to spend in, no conversion rates. Needs: StarGem model, purchase flow, grind-rate balancing, admin-editable specials, 3-day flash + 30-day extended sales.',
   tags:['store','backend'],
   workflow:['Gem model on User','Daily login gem rewards','Achievement gem rewards','Store purchase with gems','Gem-exclusive cosmetic hulls','Event ship sales (3-day flash + 30-day extended)','Admin panel sale management','Grind-rate balancing','Real money purchase integration'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Implement a proper financial ledger for Star Gems that supports real-money transactions with idempotency, fraud detection, refund/reversal, and transparent earn paths.</p>
@@ -2343,7 +2471,7 @@ const PLAN=[
 // ============ ECONOMY & TRADING ============
 {id:'economy',title:'Economy & Trading',status:'exists',features:[
 {id:'dynamic-pricing',title:'Dynamic Supply/Demand Pricing',status:'exists',
-  desc:'30+ commodities, 8 port types, 10-min economy ticks, 7-day price history. New: livestock, exotic plants, food crops for Minecraft-style farming/ranching economy. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. 33 commodities, 8 port types, 10-min economy ticks (600,000ms interval). pricingService.js calculates buy/sell prices based on stock ratio (scarcity drives prices), volatility (0.15-0.6 per commodity), and spreads. Price snapshots recorded every tick for 7-day history. Sprint scope: hardening/integration, not a rewrite.',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Drive a living economy where supply, demand, and player behavior create organic trading opportunities, expanded with agricultural commodities for Minecraft-style farming.</p>
@@ -2411,7 +2539,7 @@ const PLAN=[
 <li>Aggregated snapshots keep tick cost under budget</li>
 </ol></div>`},
 {id:'port-types',title:'8+ Port Types (+ PvP Player Ports)',status:'exists',
-  desc:'Base 8 port types plus PvP sector owners can build destination ports: Casino, Exotic Market, Arena, Bounty Board, Repair Bay. Tied to Commercial Portal system. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. 8 port types: Trading Hub, Mining Outpost, Agricultural Station, Tech Center, Space Station, Fuel Depot, Medical Station, Black Market. Each with unique tax rates (2%-10%), produce/consume commodity lists. Black Market buys/sells all. Sprint scope: add PvP player-buildable ports (Casino, Arena, Bounty Board, etc.) on top of existing infrastructure.',
   tags:['backend','pvp'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Expand the port system with player-built PvP destinations that create a player-driven commerce ecosystem with proper ACLs, revenue tracking, and security.</p>
@@ -2474,7 +2602,7 @@ const PLAN=[
 <li>Port destructible in PvP combat</li>
 </ol></div>`},
 {id:'trading-ui',title:'Trading Interface + Profit Indicators',status:'exists',
-  desc:'BUILT. TradingPage with commodity table, buy/sell actions, profit/loss indicators per commodity (avg cost vs sell price), Best Trades panel (top 5 profitable opportunities), Buy Max/Sell All buttons per row, commodity volume display, auto-refuel toggle, Sell All Cargo bulk action, nearest-port hints when no port available. Refuel station with fuel bar.',
+  desc:'BUILT. TradingPage.jsx with buy/sell interface, commodity browser, price display. Average cost basis tracking via Transaction history. Best Trades panel shows profitable opportunities. Sprint scope: add profit/loss indicators per commodity, separate Buy Max/Sell All buttons, commodity volume display.',
   tags:['frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Ensure traders never lose money unknowingly through server-authoritative profit calculations, with power-user tools for route optimization.</p>
@@ -2532,9 +2660,9 @@ const PLAN=[
 <li>Best Trades panel shows accurate profitable routes</li>
 </ol></div>`},
 {id:'economy-scaling',title:'Dynamic Economy Scaling',status:'new',
-  desc:'Port restock rates scale with regional player count. High-traffic zones restock fast. Remote zones are sparse and expensive, rewarding explorers.',
+  desc:'Not yet implemented. Economy tick exists (10-min interval, restocks ports) but restock rates are static — they do NOT scale with regional player count. Needs: regional player count tracking, population-based restock formula, remote zone scarcity, explorer rewards in low-traffic zones.',
   tags:['backend'],
-  workflow:[],
+  workflow:['Regional player count tracking per zone/sector cluster','Restock rate formula: base_rate * population_factor','Economy tick integration: scale restock per region','Remote zone scarcity: lower base rates, higher prices','Explorer reward: exclusive commodities in low-traffic zones','Admin config: restock scaling parameters in GameSetting','Tests for scaling formula and edge cases'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Keep the economy feeling alive at all player counts through demand-driven port restocking and anti-manipulation safeguards.</p>
 <p><em>[Implementation Status] Net-new system — requires full implementation.</em></p>
 </div>
@@ -2596,7 +2724,7 @@ const PLAN=[
 // ============ COMBAT ============
 {id:'combat',title:'Combat System',status:'exists',features:[
 {id:'turn-combat',title:'Turn-Based Space Combat',status:'exists',
-  desc:'Shields, armor, crits (10%, 2x dmg), flee mechanics. Max 50 rounds. 2% component degradation per round. 70% loot chance. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. combatService.js (498 lines): shields, armor, critical hits (10%, 2x damage), flee mechanics, companion logic. Max 50 rounds, 2% component degradation per round, 70% loot chance. Sprint scope: hardening/integration, not a rewrite.',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Provide the core combat system with deterministic, auditable, and idempotent resolution for both PvE and PvP encounters.</p>
@@ -2662,7 +2790,7 @@ const PLAN=[
 <li>Auto-combat works for trivial encounters</li>
 </ol></div>`},
 {id:'realtime-combat',title:'Real-Time Combat System',status:'exists',
-  desc:'Alternative real-time combat with speed control (1x/2x/4x/Skip). Detailed loot breakdown. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. realtimeCombatService.js (1,050 lines): full PvP combat with CombatInstance model, live turn tracking, PvP cooldowns, zone-based reward multipliers, WebSocket integration. combatPolicyService enforces safe harbors, PvP zones, entry protection. Sprint scope: hardening/integration, not a rewrite.',
   tags:['backend','frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Alternative combat display with speed controls for players who prefer watching action unfold, with security hardening against command spam and replay attacks.</p>
@@ -2726,7 +2854,7 @@ const PLAN=[
 <li>Combat session journal is complete and replayable</li>
 </ol></div>`},
 {id:'ground-combat',title:'Ground Combat',status:'exists',
-  desc:'5 unit types + new Artillery and Air Support. Grid-based with terrain effects, cover, orbital bombardment. Air support requires Landing Pad building.',
+  desc:'BUILT. groundCombatService.js (1,441 lines): 5 unit types (militia, marines, heavy_armor, mech, spec_ops), grid-based with terrain effects, cover bonuses, building defense bonuses. PvE raids via colonyRaidService + player invasions. Missing from PRD vision: Artillery and Air Support unit types. Sprint scope: add missing unit types, tune balance.',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Bring tactical ground warfare to colony surfaces with terrain effects, support units, and voxel integration -- making colonies worth fighting over.</p>
@@ -2790,7 +2918,7 @@ const PLAN=[
 <li>Destructible terrain restores after combat</li>
 </ol></div>`},
 {id:'npc-types',title:'6 NPC Types',status:'exists',
-  desc:'Pirate, Pirate Lord, Trader, System Patrol, Bounty Hunter + Colony Workers. Workers are hireable NPCs that boost colony production. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. 5 NPC types: PIRATE, PIRATE_LORD, TRADER, PATROL, BOUNTY_HUNTER. Each with AI personality traits, behavior trees, intelligence tiers, voice profiles. behaviorTreeService handles tactical decisions. Missing from PRD vision: Colony Workers (hireable NPCs for colony production). Sprint scope: add Colony Worker NPC type.',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Define all NPC archetypes with clear behavioral separation between space-roaming NPCs and colony-attached workers.</p>
@@ -2854,7 +2982,7 @@ const PLAN=[
 // ============ SHIPS ============
 {id:'ships',title:'Ships & Equipment',status:'exists',features:[
 {id:'ship-types',title:'15 Ship Types (incl. Construction Ship)',status:'exists',
-  desc:'14 existing + Construction Ship (consumable, destroyed on project completion). Faction-specific hull configurations: Terran=cargo/trade, Zythian=weapon/armor, Automaton=tech/scanner, Synthesis=scanner/stealth, Sylvari=cargo/colony slots. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. 13 ship types: SCOUT, MERCHANT_CRUISER, FREIGHTER, FIGHTER, CORVETTE, DESTROYER, CARRIER, COLONY_SHIP, INSTA_COLONY_SHIP, BATTLECRUISER, INTERCEPTOR, MINING_BARGE, EXPLORER. Each with hull/shield/fuel/cargo stats and 7 component slot types. Missing: Construction Ship (consumable, destroyed on project completion). Sprint scope: add Construction Ship, faction-specific hull configurations.',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Provide diverse ship roster with faction differentiation and meaningful Construction Ship mechanics that create strategic decisions.</p>
@@ -2914,7 +3042,7 @@ const PLAN=[
 <li>Ship comparison shows accurate stat deltas</li>
 </ol></div>`},
 {id:'components',title:'8+ Component Types, 50+ Components',status:'exists',
-  desc:'6 existing + Research Modules + Artifact Components (Phase Cloak, Gravity Anchor, Chrono Stabilizer, Void Lens). Plus Tractor Beams, Mining Lasers, Comm Arrays, Nebula Shields. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. 40 components across 7 categories: weapons (9), shields (7), engines (6), scanners (5), cargo pods (5), armor (5), jump drives (3). Tiers 1-5 with progressive stat scaling. Missing from PRD vision: Research Modules, Artifact Components (Phase Cloak, Gravity Anchor, Chrono Stabilizer, Void Lens), Tractor Beams, Mining Lasers, Comm Arrays, Nebula Shields. Sprint scope: add missing component types.',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Expand the equipment system with artifact components, research modules, and utility equipment, creating a deep gear treadmill with rarity and provenance.</p>
@@ -2981,7 +3109,7 @@ const PLAN=[
 <li>Degradation and repair work correctly</li>
 </ol></div>`},
 {id:'ship-designer',title:'Ship Designer (Marketing Funnel)',status:'exists',
-  desc:'MAJOR CONVERSION TOOL. Ship designer available to website VISITORS (no account needed). Over-the-top engaging experience that hooks visitors into finishing their build. Discount flagship on signup. Must be robust, hold attention, and guide completion. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'MAJOR CONVERSION TOOL. Ship designer available to website VISITORS (no account needed). Over-the-top engaging experience that hooks visitors into finishing their build. Discount flagship on signup. Must be robust, hold attention, and guide completion. Sprint scope: hardening/integration of existing implementation, not a rewrite. UX gap: needs before/after stat comparison view when browsing components (see claudeplan.md P3).',
   tags:['backend','frontend','store'],
   workflow:['Public ship designer page (no auth)','Guided build flow with hints/suggestions','Component budget system for visitors','Save-to-account on signup','Discount flagship purchase flow','Faction templates with base bonuses'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Top-of-funnel marketing tool: visitors design ships without an account, get hooked, then sign up to build it for real with a discount flagship.</p>
@@ -3043,7 +3171,7 @@ const PLAN=[
 <li>Community gallery displays and ranks builds</li>
 </ol></div>`},
 {id:'ship-customizer',title:'Ship Cosmetic Customizer',status:'exists',
-  desc:'25 hull colors, 15 accent colors, 8 trails, 10 decals, 8 skins, 6 nameplates. Live preview. PvP Paint Docks offer exclusive options. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. cosmeticService.js with CosmeticUnlock model. Ship customization catalog: hull colors, accent colors, engine trails, decals, skins, nameplates. Live preview not yet implemented. Sprint scope: add visual ship preview that updates in real-time, PvP Paint Dock exclusive options.',
   tags:['frontend','store'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Visual self-expression through cosmetic ship customization with entitlement-driven unlocks, zero gameplay impact.</p>
@@ -3103,7 +3231,7 @@ const PLAN=[
 <li>Undo works during session</li>
 </ol></div>`},
 {id:'fleets',title:'Fleet System',status:'exists',
-  desc:'Max 5 fleets, 10 ships each. Shift+drag selection. Instant fleet jump (switch control to any fleet). Attack warning system with instant attention teleport. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. fleetService.js (466 lines): multi-ship fleet management with fleet roles, ownership, ship pooling. Fleet creation, member management, fleet-level bonuses. Movement uses worldPolicyService for traversal checks. Sprint scope: UX improvements — explicit Create Fleet button, prominent fleet controls, attack warning system.',
   tags:['backend','frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Enable multi-ship management with formation presets, waypoint queues, and agent integration -- commanding a small navy.</p>
@@ -3170,7 +3298,7 @@ const PLAN=[
 // ============ COLONIES ============
 {id:'colonies',title:'Colonies & Planets',status:'exists',features:[
 {id:'colonization',title:'Planet Colonization',status:'exists',
-  desc:'14 planet types (existing 10 + Forest, Swamp, Ruins, Radiated Ruins). Colony Ship required. Minecraft-style surfaces MUST visually match planet type (ice planet = ice biome, volcanic = lava biome, etc.). Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. 10 planet types (terrestrial, oceanic, desert, volcanic, arctic, jungle, barren, gas_giant, crystal_world, tomb_world) with size (1-10), gravity, habitability, temperature. Colony Ship required. colonyService.js (459 lines) handles lifecycle, population growth, infrastructure level (0-10). Sprint scope: add 4 missing planet types (Forest, Swamp, Ruins, Radiated Ruins), Minecraft-style biome matching.',
   tags:['backend','frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Expand planet variety with biome-matched surfaces, ensuring the Minecraft-style colony experience visually matches each planet type.</p>
@@ -3234,7 +3362,7 @@ const PLAN=[
 <li>Planet preview shows accurate biome and resources</li>
 </ol></div>`},
 {id:'colony-buildings',title:'Colony Buildings (Blueprint + Freeform)',status:'exists',
-  desc:'Two modes: (1) Blueprint System -- acquire, fill with resources, construct. (2) Freeform -- Minecraft-style custom building. Unified blueprint pipeline for buildings, ships, and components. Empire-wide logistics dashboard for multi-colony management. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. 21 building types: extraction (Surface Mine, Deep Core Drill, Quantum Extractor, Water Pump, Deep Well, Cryo Harvester), power (Solar Array, Geothermal Plant, Fusion Reactor), infrastructure (Habitat Module, Hydroponic Farm, Research Lab, Spaceport, Defense Grid, Entertainment Complex), manufacturing (Refinery, Component Factory, Chemical Plant), defense (Orbital Defense, Shield Generator, Garrison Barracks). colonyBuildingService.js with upgrade chains. Sprint scope: add Blueprint + Freeform building modes, empire-wide logistics dashboard.',
   tags:['backend','frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Unified blueprint pipeline for buildings, ships, and components with both structured blueprints and freeform Minecraft-style construction.</p>
@@ -3306,8 +3434,8 @@ const PLAN=[
   desc:'FLAGSHIP FEATURE. Two systems: 2D PixiJS (functional) + 3D Voxel Engine (Three.js, rendering fixed — greedy mesher winding order + texture atlas flipY corrected). First-person WASD controls with pointer lock. Phased delivery: deterministic terrain first, then camera modes, then blueprint system. Start 64x64, expansion tokens to 128x128 cap. Chunk-based loading.',
   tags:['backend','frontend'],
   workflow:[],
-  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>THE flagship differentiator: Minecraft-style voxel colony surfaces on every planet. No other space MMO has this.</p>
-<p><em>[Implementation Status] Partially implemented — hardening/integration work, not greenfield.</em></p>
+  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>THE flagship differentiator: Minecraft-style voxel colony surfaces on every planet. No other space MMO has this. Transforms colonies from passive income mechanic into active gameplay loop driving daily retention.</p>
+<p><em>[Implementation Status] Partially implemented — 3D voxel engine (Three.js), first-person WASD/gamepad controls, preview mode, chunk streaming, procedural terrain, and gamepad support exist. See <code>docs/planet-surface-prd-v2.md</code> (42KB, 6 adversarial review cycles) for the authoritative detailed spec covering terrain generation, building placement, daily anomaly loop, ground combat, and phased delivery plan.</em></p>
 </div>
 <div class="modal-section"><div class="modal-section-title">Functional Requirements</div><ol>
 <li>2D PixiJS system (fully working) as fallback</li>
@@ -3373,7 +3501,7 @@ const PLAN=[
 <li>Phased test gates: each phase has its own test/stability criteria before next phase begins</li>
 </ol></div>`},
 {id:'wonders',title:'Wonder System (Realm + Planet Limits)',status:'exists',
-  desc:'Buildable + pre-existing wonders. Realm-limited (1 Genesis Device empire-wide) vs planet-limited. Pre-existing wonders found via exploration. Colonization exclusivity in PvE. Insta Colony Ships: home sector only.',
+  desc:'BUILT. wonderService.js (168 lines): 6 wonders with 5-phase construction: ORBITAL_ARRAY (scan_range), TRADE_NEXUS (trade_bonus), DEFENSE_MATRIX (sector_defense), SHIPYARD (ship_discount), RESEARCH_STATION (research_speed), GENESIS_DEVICE (habitability). Realm-limited (1 Genesis Device empire-wide). Sprint scope: add pre-existing discoverable wonders, colonization exclusivity.',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Prestige features that create server-wide fame, requiring massive investment and enforced uniqueness at the database level.</p>
@@ -3492,7 +3620,7 @@ const PLAN=[
 // ============ CREW ============
 {id:'crew',title:'Crew & Species',status:'exists',features:[
 {id:'crew-species',title:'Crew System (Deep RPG Layer)',status:'exists',
-  desc:'13 species, individual skill trees, clothing/equipment/personal artifacts, crafting for crew gear. Ships require crew to operate. Players get attached to their crew -- training, equipping, and specializing them. Security details and troop ships need larger crews. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. 13 crew species: 10 organic (HUMAN, VEXIAN, KRYNN, ZORATH, SYLPHI, GROX, NEXARI, THRELL, CRYSTALLID, VOID_WALKER) + 3 robotic (WORKER_BOT, COMBAT_DROID, SCIENCE_UNIT). crewBonusService.js applies stat multipliers (1.0-1.6x per skill). 4 crew roles: PILOT, ENGINEER, GUNNER, SCIENTIST. Sprint scope: add individual skill trees, clothing/equipment, crew gear crafting.',
   tags:['backend','frontend','store'],
   workflow:['Crew skill system (6-8 skills per crew member)','Crew equipment slots (weapon, armor, tool, accessory)','Crew clothing/cosmetics','Personal artifact system for crew','Crew gear crafting blueprints','Ship crew requirements by hull size','Security detail / troop ship crew scaling','Academy training system','Store: recruit packs, cosmetic crew outfits'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Transform crew from stat modifiers into characters players invest in emotionally, with deep RPG progression, equipment, and the Identity Disk death/recovery system.</p>
@@ -3568,7 +3696,7 @@ const PLAN=[
 <li>Bulk management auto-equips and auto-heals correctly</li>
 </ol></div>`},
 {id:'crew-salary',title:'Crew Economy (Balanced Burden)',status:'exists',
-  desc:'Species-based salary, 24h tick. CRITICAL: must not overburden players. Salary + food + training + upkeep must feel manageable, not like a job. Auto-scaling costs that stay proportional to income. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. crewService.js (242 lines): species-based salary (50-200 credits/shift), maintenance costs for bots, skill-based salary multipliers. Processed in daily tick via tickService. Sprint scope: tune to ensure costs stay proportional to income, add auto-scaling.',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Unified labor-cost ledger that keeps crew costs manageable and proportional to income -- crew management should feel like building a team, not running a payroll department.</p>
@@ -3634,7 +3762,7 @@ const PLAN=[
 // ============ PROGRESSION ============
 {id:'progression',title:'Progression & Research',status:'exists',features:[
 {id:'levels',title:'Player Levels (1-20)',status:'exists',
-  desc:'XP table from 100 to 1M. 8 skills (Combat, Shield, Trade, Nav, Engineering, Leadership, Mining, Scanner). Skill points per level, max skill 10. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'XP table from 100 to 1M. 8 skills (Combat, Shield, Trade, Nav, Engineering, Leadership, Mining, Scanner). Skill points per level, max skill 10. Sprint scope: hardening/integration of existing implementation, not a rewrite. UX gap: no onboarding tutorial for new players (see claudeplan.md P0).',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Progression system with skill-specific advancement and unified level-gating policy that tourist passes, agents, and protections can all reference.</p>
@@ -3695,7 +3823,7 @@ const PLAN=[
 <li>All 8 skills track and advance independently</li>
 </ol></div>`},
 {id:'tech-tree',title:'Tech Research Tree (Expanded)',status:'exists',
-  desc:'Expanded from 7 to 15+ techs covering all new systems: portals, construction ships, crew skills, planetary mining, AI companions, PvP structures, commercial hubs. Branching tree with faction-specific unlocks.',
+  desc:'BUILT. 7 techs with prerequisite chains: ADVANCED_WEAPONS, ADVANCED_SHIELDS, CAPITAL_CLASS_SHIPS (requires both), DEEP_SCANNING, BASIC_CRAFTING, BASIC_AUTOMATION (requires BASIC_CRAFTING), ADVANCED_COLONIES. TechResearch model tracks per-player progress. Sprint scope: expand to 15+ techs covering portals, construction ships, crew skills, planetary mining, AI companions, PvP structures.',
   tags:['backend','frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Create meaningful build diversity through 15+ technologies across 4 branches with faction-specific bonuses and data-driven prerequisite chains.</p>
@@ -3759,7 +3887,7 @@ const PLAN=[
 <li>Tech tree viewable for other players</li>
 </ol></div>`},
 {id:'crafting',title:'Crafting System (5 Blueprint Categories)',status:'exists',
-  desc:'Expanded to 5 categories: Ship Components, Buildings, Ships, Crew Gear (weapons/armor/tools/accessories), and Artifacts (personal + ship). Unified pipeline for all. Special artifact blueprints from rare drops.',
+  desc:'BUILT. craftingService.js (327 lines): blueprint system with crafting job queue, work orders with time tracking. Requires BASIC_CRAFTING tech prerequisite. Sprint scope: expand to 5 categories (Ship Components, Buildings, Ships, Crew Gear, Artifacts), add special artifact blueprints from rare drops.',
   tags:['backend','frontend'],
   workflow:['Unified blueprint model (5 categories)','Resource-filling UI','Crafting queue + timers','Crew gear slot integration','Personal artifact crafting','Ship artifact crafting','Rare blueprint drop tables','Tech tree prerequisites per blueprint tier'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Unified crafting system across 5 categories with idempotent completion, anti-skip abuse, and a quality system that rewards specialization.</p>
@@ -3826,7 +3954,7 @@ const PLAN=[
 <li>Timer execution runs off request path</li>
 </ol></div>`},
 {id:'missions',title:'Mission System',status:'exists',
-  desc:'Expanded mission system covering all skills and levels. Surface missions, space missions, crew missions, trade missions, combat missions, exploration, crafting. Template/instance model with dynamic generation. Must scale from level 1 tutorials to endgame multi-stage epics.',
+  desc:'BUILT. missionService.js (561 lines): dynamic mission generation per port. Mission types: escort, delivery, combat (bounty/patrol). Real-time progress tracking. Sprint scope: expand to cover all skills and levels, add surface missions, crew missions, trade missions, exploration. Template/instance model for scaling from tutorials to endgame epics.',
   tags:['backend','frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Primary engagement driver covering all 8 gameplay categories across all level ranges, with template/instance architecture and agent compatibility.</p>
@@ -3890,7 +4018,7 @@ const PLAN=[
 <li>Multi-stage chains progress through stages correctly</li>
 </ol></div>`},
 {id:'achievements-client',title:'Client Achievement System',status:'exists',
-  desc:'Server-authoritative achievement system (migrating from 12 localStorage prototypes). Criteria evaluation and reward grants on server. Trophy panel on Dashboard.',
+  desc:'BUILT. achievementService.js (194 lines): server-side achievement progress tracking, milestone rewards. 20+ achievements seeded (first_kill, combat_wins_10/50/200, survive_low_hull, etc.). AchievementsPage component with unlock tracking. Sprint scope: migrate remaining 12 localStorage prototypes to server, add event-driven progress from action-audit.',
   tags:['frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Long-tail engagement system with server-authoritative evaluation, cross-device persistence, and progression-unlocked cosmetic rewards.</p>
@@ -4021,12 +4149,62 @@ const PLAN=[
 <li>Governor ticks process autonomous sectors correctly</li>
 <li>Transfer manifest validates and imports exactly once</li>
 <li>Season leaderboards reset on schedule</li>
+</ol></div>`},
+{id:'daily-quests',title:'Daily Quests',status:'exists',
+  desc:'Lightweight repeatable progression loop with daily quest generation, progress tracking, and reward claiming. Gives players daily reasons to return to colony gameplay.',
+  tags:['backend','frontend'],
+  workflow:[],
+  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Add a lightweight repeatable progression loop that gives players daily reasons to return to colony gameplay. Daily quests increase session frequency and engagement with existing colony mechanics.</p>
+<p><em>[Implementation Status] Implemented MVP — DailyQuest model, dailyQuestService, colony surface controller integration, and API endpoints exist.</em></p></div>
+<div class="modal-section"><div class="modal-section-title">Functional Requirements</div><ol>
+<li>Generate a daily quest set per player (colony-related actions)</li>
+<li>Track progress against colony actions (building, harvesting, trading, defending)</li>
+<li>Grant XP and credits on claim</li>
+<li>Render quest panel with progress bars and claim states</li>
+<li>Daily quests generated once per day bucket per player</li>
+<li>Active quests persist until expiration or claim</li>
+<li>Completed quests claimable exactly once</li>
+</ol></div>
+<div class="modal-section"><div class="modal-section-title">Data Model</div>
+<table class="detail-table"><tr><th>Model/Column</th><th>Type</th><th>Notes</th></tr>
+<tr><td>DailyQuest.quest_id</td><td>UUID PK</td><td>Unique quest instance</td></tr>
+<tr><td>DailyQuest.user_id</td><td>UUID FK</td><td>References users</td></tr>
+<tr><td>DailyQuest.quest_type</td><td>STRING</td><td>Type of colony action required</td></tr>
+<tr><td>DailyQuest.target_count</td><td>INTEGER</td><td>Actions needed to complete</td></tr>
+<tr><td>DailyQuest.current_count</td><td>INTEGER</td><td>Actions completed so far</td></tr>
+<tr><td>DailyQuest.reward_xp</td><td>INTEGER</td><td>XP granted on claim</td></tr>
+<tr><td>DailyQuest.reward_credits</td><td>INTEGER</td><td>Credits granted on claim</td></tr>
+<tr><td>DailyQuest.status</td><td>ENUM</td><td>active, completed, claimed, expired</td></tr>
+<tr><td>DailyQuest.expires_at</td><td>DATE</td><td>End of day bucket</td></tr>
+</table></div>
+<div class="modal-section"><div class="modal-section-title">API Surface</div><ul>
+<li><code>GET /api/colonies/:id/quests</code> -- list active daily quests</li>
+<li><code>POST /api/colonies/:id/quests/:questId/claim</code> -- claim completed quest reward</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">UX Specification</div><ul>
+<li>Quest panel on colony surface view showing daily objectives</li>
+<li>Progress bars per quest with clear target/current display</li>
+<li>Claim button appears when quest is complete</li>
+<li>Visual feedback on reward grant (XP + credits animation)</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Dependencies</div><p>colonization (colony model), levels (XP system)</p></div>
+<div class="modal-section"><div class="modal-section-title">Risks &amp; Mitigations</div><ul>
+<li><strong>Risk:</strong> Quests feel like chores. <strong>Mitigation:</strong> Keep quest count low (3-5/day), rewards meaningful relative to effort.</li>
+<li><strong>Risk:</strong> Quest generation favors certain colony types. <strong>Mitigation:</strong> Diversify quest types across all colony actions.</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Complexity &amp; Estimate</div><p><strong>Small -- 1-2 days. MVP exists; needs validation coverage and UX polish.</strong></p></div>
+<div class="modal-section"><div class="modal-section-title">Acceptance Criteria</div><ol>
+<li>Daily quests generated once per day bucket per player</li>
+<li>Active quests persist until expiration or claim</li>
+<li>Completed quests claimable exactly once</li>
+<li>Colony UI shows current progress and reward state</li>
+<li>XP and credits granted correctly on claim</li>
 </ol></div>`}
 ]},
 // ============ SOCIAL ============
 {id:'social',title:'Social & Organizations',status:'exists',features:[
 {id:'corporations',title:'Corporation System + Alliances',status:'exists',
-  desc:'50K creation cost, max 20 members. Alliance system (cap 3-5 allies). Player-adjustable sector access: Corp Only, Corp+Allies, Public, or Locked. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. corporationService.js (501 lines): corp creation (50K cost), membership management, treasury, leaderboard rankings. Alliance system (cap 3-5 allies). Player-adjustable sector access: Corp Only, Corp+Allies, Public, or Locked. Sprint scope: hardening/integration, not a rewrite.',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Social backbone enabling organized group play with role-based access, shared treasury, and territory foundations.</p>
@@ -4094,7 +4272,7 @@ const PLAN=[
 <li>Corp profile and Apply button work for recruitment</li>
 </ol></div>`},
 {id:'messaging',title:'Player Messaging',status:'exists',
-  desc:'In-game mail with reply button and unread count in sidebar.',
+  desc:'BUILT. messagingService.js (137 lines): direct player-to-player messaging with reply, unread count in sidebar. Sprint scope: hardening/integration, not a rewrite.',
   tags:['backend','frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Communication system with safety-first design: moderation, blocking, and rate limiting before features.</p>
@@ -4164,7 +4342,7 @@ const PLAN=[
 <li>Report creates moderation ticket</li>
 </ol></div>`},
 {id:'factions',title:'5 Factions (Expandable)',status:'exists',
-  desc:'5 playable factions: Terran Alliance (trade), Zythian Swarm (combat), Automaton Collective (tech), Synthesis Accord (intelligence/espionage), Sylvari Dominion (exploration/colony). Architecture supports easy addition of new factions — config + art + CSS tokens only, zero code changes.',
+  desc:'BUILT. 5 factions: Terran Alliance (trade), Zythian Swarm (combat), Automaton Collective (tech), Synthesis Accord (intelligence), Sylvari Dominion (exploration). factionService.js (135 lines) with FactionStanding model for rep tracking. Faction CSS theming via body[data-faction] variables. Architecture supports easy addition — config + art + CSS tokens only.',
   tags:['backend','frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Data-driven faction system with 5 playable factions. Adding a new faction requires only a config entry, CSS theme tokens, and art assets — zero code changes. Supports evergreen content expansions, seasonal faction wars, and inter-faction diplomacy.</p>
@@ -4227,7 +4405,7 @@ const PLAN=[
 <li>Registration picker displays all 5 factions with live theme preview</li>
 </ol></div>`},
 {id:'community-events',title:'Community Events',status:'exists',
-  desc:'Server-wide events with contribution system for collective goals.',
+  desc:'BUILT. communityEventService (242 lines): event creation, player contributions toward collective goals, event leaderboards. Admin-only event creation via eventRoutes. Sprint scope: hardening/integration, not a rewrite.',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Admin-driven live game events that keep the world feeling dynamic with scheduled activities, announcements, and limited-time rewards.</p>
@@ -4288,7 +4466,7 @@ const PLAN=[
 <li>Leaderboards update in real-time</li>
 </ol></div>`},
 {id:'alliance-territory',title:'Corporation Territory Claims',status:'new',
-  desc:'CORPORATIONS (not alliances) claim 5-10 public sectors via control structures. Allied corps get shared bonuses in claimed territory. Bonuses: reduced taxes, faster repairs. PvP: contestable.',
+  desc:'Not yet implemented. Sector.owner_corporation_id field exists but no active territory control mechanics. Needs: control structure placement in public sectors, corp territory bonuses, allied corp shared bonuses, PvP contestability. Current access_mode (Corp Only/Corp+Allies/Public/Locked) provides foundation for territory access rules.',
   tags:['backend','pvp'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Endgame social feature enabling corporations to claim and defend public sectors, creating the space empire fantasy.</p>
@@ -4352,12 +4530,152 @@ const PLAN=[
 <li>Allied corps receive 50% bonuses</li>
 <li>Control structure destructible in PvP</li>
 <li>Map updates on claim change</li>
+</ol></div>`},
+{id:'npc-dialogue-voice',title:'Interactive NPC Dialogue, Hails & Voice',status:'exists',
+  desc:'Player-facing NPC conversations with scripted menus, free-text AI fallback, proactive WebSocket hails, and optional voice I/O through provider-backed STT/TTS. Premium voice gating by subscription tier.',
+  tags:['backend','frontend'],
+  workflow:[],
+  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Let players communicate with conversational NPCs through menu choices, free text, and optional voice. Creates social depth and NPC personality that drives engagement beyond mechanical gameplay loops.</p>
+<p><em>[Implementation Status] Implemented MVP — dialogueService, voiceService, NPCChatPanel, NPCHailNotification, useNPCEvents, useVoiceChat, 8 LLM + 3 STT + 5 TTS providers all exist with tests.</em></p></div>
+<div class="modal-section"><div class="modal-section-title">Functional Requirements</div><ol>
+<li>Start, continue, and end NPC conversations through authenticated API routes</li>
+<li>Support menu-driven responses first, with AI fallback for free-text prompts</li>
+<li>Support proactive hail notifications and real-time dialogue pushes through sockets</li>
+<li>Support optional STT/TTS providers with graceful degradation</li>
+<li>Gate premium voice features by user subscription_tier (premium+) without blocking text chat</li>
+<li>response_text always returned; response_audio nullable</li>
+<li>Provider-agnostic: Anthropic, OpenAI, Gemini, Grok, NVIDIA, OpenRouter, Local, None</li>
+</ol></div>
+<div class="modal-section"><div class="modal-section-title">Data Model</div>
+<table class="detail-table"><tr><th>Model/Column</th><th>Type</th><th>Notes</th></tr>
+<tr><td>dialogueService</td><td>Service</td><td>Conversation state, menu options, AI fallback</td></tr>
+<tr><td>voiceService</td><td>Service</td><td>STT/TTS provider routing, audio payload handling</td></tr>
+<tr><td>aiProviderFactory</td><td>Service</td><td>Factory for 8 LLM, 3 STT, 5 TTS providers</td></tr>
+<tr><td>User.subscription_tier</td><td>ENUM</td><td>free/premium/elite -- gates voice features</td></tr>
+</table></div>
+<div class="modal-section"><div class="modal-section-title">API Surface</div><ul>
+<li><code>POST /api/dialogue/start</code> -- begin conversation with NPC</li>
+<li><code>POST /api/dialogue/respond</code> -- send player response (menu choice or free text)</li>
+<li><code>POST /api/dialogue/end</code> -- end conversation</li>
+<li><code>POST /api/dialogue/voice</code> -- voice input (premium+ only)</li>
+<li>Socket events: <code>npc_hail</code>, <code>dialogue_update</code>, <code>npc_activity</code></li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">UX Specification</div><ul>
+<li>NPCChatPanel: renders menu options, free-text input, NPC replies with portrait</li>
+<li>NPCHailNotification: toast-style alert when NPC initiates contact</li>
+<li>VoiceButton: push-to-talk with visual recording indicator (premium+ only)</li>
+<li>Voice unavailable gracefully shows text-only mode with upgrade prompt</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Dependencies</div><p>npc-types (NPC model), socket (WebSocket), ai-agent (provider infrastructure)</p></div>
+<div class="modal-section"><div class="modal-section-title">Risks &amp; Mitigations</div><ul>
+<li><strong>Risk:</strong> AI provider costs spiral with free-text. <strong>Mitigation:</strong> Rate limiting, template fallbacks, cost-per-conversation budgets.</li>
+<li><strong>Risk:</strong> Voice gating frustrates free players. <strong>Mitigation:</strong> Text path always works; voice is additive luxury.</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Complexity &amp; Estimate</div><p><strong>Large -- implemented. Hardening focus: conversation session management, provider failover, UX polish.</strong></p></div>
+<div class="modal-section"><div class="modal-section-title">Acceptance Criteria</div><ol>
+<li>Supported NPC types can hail the player or be hailed from the game UI</li>
+<li>Chat panel renders menu options, free-text messages, and NPC replies</li>
+<li>Voice is optional and never blocks the text path</li>
+<li>Disabled providers or free-tier voice limits fail cleanly with player-visible messaging</li>
+<li>Server-side tests cover the dialogue and voice service contracts</li>
+</ol></div>`},
+{id:'faction-wars',title:'Faction Wars',status:'exists',
+  desc:'Persistent war records between factions with active war queries, combat-based score updates, and faction page presentation. Combat outcomes feed a visible strategic conflict layer.',
+  tags:['backend','frontend'],
+  workflow:[],
+  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Track and surface active wars between factions so combat outcomes feed a visible strategic conflict layer. Faction wars give meaning to PvP combat beyond individual gain.</p>
+<p><em>[Implementation Status] Implemented MVP — FactionWar model, factionWarService, faction controller/routes, realtimeCombatService integration, FactionPage UI all exist.</em></p></div>
+<div class="modal-section"><div class="modal-section-title">Functional Requirements</div><ol>
+<li>Create, list, and resolve active wars between factions</li>
+<li>Expose war state to the faction UI</li>
+<li>Award war score from qualifying combat outcomes</li>
+<li>Persist the winning faction and final scoreline on resolution</li>
+<li>Admin endpoints for declaring and resolving wars</li>
+</ol></div>
+<div class="modal-section"><div class="modal-section-title">Data Model</div>
+<table class="detail-table"><tr><th>Model/Column</th><th>Type</th><th>Notes</th></tr>
+<tr><td>FactionWar.war_id</td><td>UUID PK</td><td>Unique war instance</td></tr>
+<tr><td>FactionWar.faction_a</td><td>STRING</td><td>First faction in conflict</td></tr>
+<tr><td>FactionWar.faction_b</td><td>STRING</td><td>Second faction in conflict</td></tr>
+<tr><td>FactionWar.score_a / score_b</td><td>INTEGER</td><td>Running combat score per faction</td></tr>
+<tr><td>FactionWar.status</td><td>ENUM</td><td>active, resolved</td></tr>
+<tr><td>FactionWar.winner</td><td>STRING</td><td>Winning faction on resolution</td></tr>
+</table></div>
+<div class="modal-section"><div class="modal-section-title">API Surface</div><ul>
+<li><code>GET /api/factions/wars</code> -- all wars</li>
+<li><code>GET /api/factions/wars/active</code> -- currently active wars</li>
+<li><code>POST /api/admin/wars/declare</code> -- admin declares war</li>
+<li><code>POST /api/admin/wars/:id/resolve</code> -- admin resolves war</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">UX Specification</div><ul>
+<li>Faction page renders active war scoreboards with real-time updates</li>
+<li>War status badge on faction sidebar</li>
+<li>Combat result screen shows war score contribution when applicable</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Dependencies</div><p>factions (faction system), realtime-combat (score integration)</p></div>
+<div class="modal-section"><div class="modal-section-title">Risks &amp; Mitigations</div><ul>
+<li><strong>Risk:</strong> Imbalanced factions make wars one-sided. <strong>Mitigation:</strong> Handicap scoring or matchmaking based on faction population.</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Complexity &amp; Estimate</div><p><strong>Small -- implemented. Hardening focus: balance, notifications, war history display.</strong></p></div>
+<div class="modal-section"><div class="modal-section-title">Acceptance Criteria</div><ol>
+<li>Faction APIs return all wars and active wars</li>
+<li>Faction page renders active war scoreboards</li>
+<li>Combat integrations increment war score when a valid faction conflict is present</li>
+<li>Resolved wars preserve result metadata</li>
+</ol></div>`},
+{id:'leaderboards',title:'Leaderboards',status:'new',
+  desc:'Ranked leaderboards for trading volume, combat wins, wealth, corporation metrics, and exploration. 60-second cache, timeframe filters (daily/weekly/all_time), pagination. Pure aggregation over existing data.',
+  tags:['backend','frontend'],
+  workflow:[],
+  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Let players see who the top traders, combatants, wealthiest players, and biggest corporations are. Drives competitive engagement and social aspiration. All data already exists -- this is purely aggregation queries over existing tables.</p></div>
+<div class="modal-section"><div class="modal-section-title">Functional Requirements</div><ol>
+<li>5 leaderboard categories: trading (by total_price sold), combat (by wins), wealth (by credits), corporation (by member count + treasury), explorer (by sectors visited)</li>
+<li>Timeframe filters: daily, weekly, all_time</li>
+<li>Pagination: limit 50 per page, offset-based</li>
+<li>Player rank query: get own rank in any leaderboard</li>
+<li>60-second in-memory cache to prevent repeated heavy aggregation queries</li>
+<li>Faction filter: optionally filter any leaderboard by faction</li>
+</ol></div>
+<div class="modal-section"><div class="modal-section-title">Data Model</div>
+<table class="detail-table"><tr><th>Model/Column</th><th>Type</th><th>Notes</th></tr>
+<tr><td>No new models</td><td>--</td><td>Pure aggregation over User, Transaction, CombatLog, Corporation, PlayerDiscovery</td></tr>
+<tr><td>leaderboardService</td><td>Service</td><td>Aggregation queries + 60s TTL cache</td></tr>
+</table></div>
+<div class="modal-section"><div class="modal-section-title">API Surface</div><ul>
+<li><code>GET /api/leaderboards/trading</code> -- top traders by volume</li>
+<li><code>GET /api/leaderboards/combat</code> -- top fighters by wins</li>
+<li><code>GET /api/leaderboards/wealth</code> -- richest players by credits</li>
+<li><code>GET /api/leaderboards/corporations</code> -- top corps by members + treasury</li>
+<li><code>GET /api/leaderboards/explorers</code> -- most-traveled players</li>
+<li><code>GET /api/leaderboards/:type/rank</code> -- get own rank</li>
+<li>Query params: <code>timeframe</code>, <code>faction</code>, <code>limit</code>, <code>offset</code></li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">UX Specification</div><ul>
+<li>Leaderboard page with tab navigation between categories</li>
+<li>Timeframe toggle (Today / This Week / All Time)</li>
+<li>Player highlight when own row is visible</li>
+<li>"Your Rank" sticky footer showing position even when not on current page</li>
+<li>Faction filter dropdown</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Dependencies</div><p>levels (player stats), corporations (corp data), factions (faction filter)</p></div>
+<div class="modal-section"><div class="modal-section-title">Risks &amp; Mitigations</div><ul>
+<li><strong>Risk:</strong> Heavy aggregation queries slow down DB. <strong>Mitigation:</strong> 60-second TTL cache, indexed columns.</li>
+<li><strong>Risk:</strong> Daily leaderboards show stale data. <strong>Mitigation:</strong> Clear cache on significant events or reduce TTL for daily boards.</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Complexity &amp; Estimate</div><p><strong>Medium -- 3-5 days. Pure aggregation service + API + frontend page. No new models needed.</strong></p></div>
+<div class="modal-section"><div class="modal-section-title">Acceptance Criteria</div><ol>
+<li>All 5 leaderboard categories return correct ranked data</li>
+<li>Timeframe filters return correct date-bounded results</li>
+<li>Pagination works correctly with limit/offset</li>
+<li>Player rank query returns correct position</li>
+<li>Cache prevents repeated heavy queries within 60-second window</li>
+<li>Faction filter correctly narrows results</li>
 </ol></div>`}
 ]},
 // ============ INFRASTRUCTURE ============
 {id:'infrastructure',title:'Infrastructure & Automation',status:'exists',features:[
 {id:'outposts',title:'10+ Outpost Types',status:'exists',
-  desc:'Expanded from 4 to 10+. Original: Trade Relay, Scanner Post, Defense Platform, Fuel Cache. New: Comm Relay, Mining Drone Hub, Repair Station, Nav Beacon, Smuggler Cache, Toll Gate, Research Probe. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. outpostService (159 lines): outpost creation, trading, management. Current types functional. Sprint scope: expand from current to 10+ types (add Comm Relay, Mining Drone Hub, Repair Station, Nav Beacon, Smuggler Cache, Toll Gate, Research Probe).',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Strategic sector control through deployable structures with unified ownership/ACL system shared with home sectors and territory.</p>
@@ -4416,7 +4734,7 @@ const PLAN=[
 <li>Outposts destructible in PvP</li>
 </ol></div>`},
 {id:'automation',title:'Task Automation',status:'exists',
-  desc:'Current: max 3 automated tasks, 1-min interval, 1.5x fuel. Unified action-authority pipeline with budgets, cooldowns, and audit. Foundation for AI agent system. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. automationService.js (322 lines): automated trade routes and mining runs with step-by-step execution. Pause/resume/cancel. Mission system integration. Sprint scope: hardening, add action-authority pipeline with budgets, cooldowns, and audit.',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Foundation automation layer that agents, governors, and player task queues all route through -- one action-authority pipeline with budgets and audit.</p>
@@ -4484,7 +4802,7 @@ const PLAN=[
 <li>AutomationRun records explain every action</li>
 </ol></div>`},
 {id:'ai-agent',title:'AI Agent Companion',status:'exists',
-  desc:'Player-linked AI companion runs as a scoped sub-account (AgentAccount model) with API key auth, ABAC permissions, daily credit budgets, rate limiting, and full action audit logging. Agent game routes proxy existing controllers with permission/budget/rate gates. OpenClaw-compatible SKILL.md and tools.json included. Frontend AgentPage with overview, permissions, settings, and activity log tabs.',
+  desc:'BUILT. agentService.js (317 lines): AgentAccount model with capabilities, balance, action audit logs. Agent API routes at /api/agent-api/ and /api/agents/ with API key auth, ABAC permissions, daily credit budgets, rate limiting. OpenClaw-compatible SKILL.md and tools.json. Frontend AgentPage with overview, permissions, settings, and activity log tabs.',
   tags:['backend','frontend'],
   workflow:['Agent authentication system (agent account linked to player) ✓','Agent API access (same endpoints as players) ✓','Agent ship assignment ✓','Agent behavior configuration UI ✓','Agent activity log/feed ✓','Agent resource limits (prevent abuse) ✓','Rate limiting per agent ✓','Agent permission system (what it can/cannot do) ✓','OpenClaw integration (SKILL.md + tools.json) ✓','Agent marketplace (share/sell agent strategies?)'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>The most ambitious feature: AI companion that plays the game as a real participant using the same API, with scoped permissions, crew management, governor mode, warlord NPCs, and semantic memory.</p>
@@ -4575,7 +4893,7 @@ const PLAN=[
 <li>Agent marketplace listings are signed and validated</li>
 </ol></div>`},
 {id:'artifacts',title:'10 Artifact Types',status:'exists',
-  desc:'Equippable artifacts with functional bonuses: fuel, energy, scan, shields, crew, speed, research, damage, flee chance, efficiency. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. artifactService.js (87 lines): 10 artifact types (Ancient Star Map, Alien Power Core, Precursor Data Crystal, Quantum Stabilizer, Bio-Enhancement Pod, Gravity Manipulator, Temporal Fragment, Void Crystal, Neural Interface, Fusion Catalyst). Rarity scaling 0.02-0.12. Functional bonuses: fuel efficiency, shield capacity, damage, scan range, speed, research speed.',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Collector endgame with provenance tracking, creating a treasure-hunter gameplay loop and secondary market for unique items.</p>
@@ -4642,7 +4960,7 @@ const PLAN=[
 // ============ UI/UX ============
 {id:'ux',title:'UI/UX & Client Features',status:'exists',features:[
 {id:'keyboard',title:'Keyboard Shortcuts',status:'exists',
-  desc:'8 navigation shortcuts (D/S/M/V/T/C/P/I), Esc closes dialogs, ? shows help overlay.',
+  desc:'BUILT. useKeyboardShortcuts.js hook: 8 navigation shortcuts (D=Dashboard, S=Ships, M=Map, V=System, T=Trading, C=Combat, P=Progression, I=Messages). Esc closes dialogs, ? shows help overlay. Skips input fields and pointer-locked views (voxel).',
   tags:['frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Power-user efficiency through rebindable keyboard shortcuts that always call the same validated actions as UI buttons.</p>
@@ -4694,7 +5012,7 @@ const PLAN=[
 <li>Context-sensitive shortcuts activate in correct context</li>
 </ol></div>`},
 {id:'mobile',title:'Mobile Responsive Layout (PWA Priority)',status:'exists',
-  desc:'60% of players expected on mobile. PWA first, native app later. Needs: touch controls, swipe gestures, offline capability, push notifications, pinch zoom on map.',
+  desc:'BUILT. TailwindCSS responsive classes throughout, layout adjusts for mobile. Touch event support exists for map interactions. Missing: comprehensive gesture support (swipe, pinch zoom), PWA manifest, offline capability, push notifications. Sprint scope: add PWA support and gesture controls.',
   tags:['frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Capture 60% of expected player base with a PWA-first mobile experience that feels complete but appropriately gates heavy features.</p>
@@ -4754,7 +5072,7 @@ const PLAN=[
 <li>Agent spectate shows real-time activity with minimal bandwidth</li>
 </ol></div>`},
 {id:'accessibility',title:'Basic Accessibility',status:'exists',
-  desc:'ARIA labels on nav/main/modals. aria-current on active nav items.',
+  desc:'Minimal implementation. Basic semantic HTML structure exists. Missing: comprehensive ARIA labels, alt text for images, screen reader optimization, keyboard-only navigation flow, color contrast verification. Sprint scope: systematic accessibility audit and remediation.',
   tags:['frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Ensure all major game systems have accessible alternatives, expanding the audience and meeting ethical standards.</p>
@@ -4860,7 +5178,7 @@ const PLAN=[
 <li>Seasonal themes activate during events</li>
 </ol></div>`},
 {id:'galaxy-map',title:'Galaxy Map Canvas',status:'exists',
-  desc:'BUILT. Pure Canvas2D galaxy map (GalaxyMapCanvas.jsx) rendering ~200 systems with star class colors, hyperlane connections (color-coded by lane_class), fog-of-war (undiscovered sectors dimmed), ship badges, port indicators, faction dominance dots, fleet drag-select. Click to navigate, double-click for system view. Phenomena overlays.',
+  desc:'BUILT. Pure Canvas2D galaxy map (GalaxyMapCanvas.jsx) rendering ~200 systems with star class colors, hyperlane connections (color-coded by lane_class), fog-of-war (undiscovered sectors dimmed), ship badges, port indicators, faction dominance dots, fleet drag-select. Click to navigate, double-click for system view. Phenomena overlays. UX gaps: persistent mini-map widget and location bar needed for spatial awareness (see claudeplan.md P1). MiniMap.jsx partially exists.',
   tags:['frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Primary game interface: information-dense but not overwhelming, with overlay layers, search, bookmarks, and performance scaling to 3,500+ sectors.</p>
@@ -4925,7 +5243,7 @@ const PLAN=[
 <li>Export produces readable PDF/PNG</li>
 </ol></div>`},
 {id:'wiki',title:'In-Game Wiki (Web-Accessible)',status:'exists',
-  desc:'19 articles. Must be available via web. No article limit. Extensive coverage of every game element with screenshots. SEO-friendly for organic traffic.',
+  desc:'BUILT. 19 articles in docs/wiki/ (01-getting-started through 19-guide-colonization) covering all major game systems. Served at /wiki route. Sprint scope: keep expanding coverage, add screenshots, ensure SEO-friendly for organic traffic.',
   tags:['frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>SEO-driving public knowledge base with automated generation from game data, ensuring documentation never goes stale.</p>
@@ -4985,7 +5303,7 @@ const PLAN=[
 <li>Manual content preserved across rebuilds</li>
 </ol></div>`},
 {id:'notifications',title:'Toast Notification System',status:'exists',
-  desc:'Global NotificationContext with success/info/warning/error types. Auto-dismiss.',
+  desc:'BUILT. NotificationContext with success/info/warning/error types, max 5 visible, auto-dismiss (5s default). NPCHailNotification for NPC alerts. useSoundEffects hook for audio feedback (synthesized via Web Audio API). Missing: comprehensive notification center with history. Sprint scope: add notification history panel.',
   tags:['frontend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Multi-channel notification system with per-category preferences, push support, and server-side deduplication.</p>
@@ -5048,7 +5366,7 @@ const PLAN=[
 <li>Action buttons deep-link to correct game state</li>
 </ol></div>`},
 {id:'socket',title:'WebSocket Connection',status:'exists',
-  desc:'Real-time connection indicator (green/red dot). Socket service for live updates. Sprint scope: hardening/integration of existing implementation, not a rewrite.',
+  desc:'BUILT. socketService.js (526 lines): Socket.io with JWT auth on connection, max 3 sockets/user, chat rate limit (5 msg/10s). Room-based broadcasting (sector, faction, corporation). Events: sector NPCs, combat alerts, level-ups, achievements, NPC hails. Sprint scope: hardening/integration, not a rewrite.',
   tags:['frontend','backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Real-time communication backbone with server-derived room management and auth alignment with HTTP policy.</p>
@@ -5112,9 +5430,9 @@ const PLAN=[
 // ============ SCALING & OPS ============
 {id:'ops',title:'Scaling & Operations',status:'planned',features:[
 {id:'player-spawn',title:'Distributed Player Spawning',status:'new',
-  desc:'New players start in home sector, first jump to 1 of 30-50 Core hubs distributed by faction. Prevents Day 1 congestion.',
+  desc:'Partially implemented: newbieProtectionMs and travelProtectionDefaultMs in anti-cheat config provide spawn protection window. Missing: explicit distributed spawning to 30-50 Core hubs by faction, load-balanced hub selection, Day 1 congestion prevention.',
   tags:['backend'],
-  workflow:[],
+  workflow:['Designate 30-50 Core hub sectors by faction','New player creation assigns home sector at galaxy rim','First jump routes to faction-appropriate Core hub','Load balancing: distribute across hubs by current population','Spawn protection: newbie immunity window on first entry','Tutorial integration: first-jump triggers onboarding flow','Tests for spawn distribution and faction routing'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Ensure new players have an excellent first 15 minutes through distributed spawning, guided onboarding, and an NPC-driven tutorial.</p>
 <p><em>[Implementation Status] Net-new system — requires full implementation.</em></p>
 </div>
@@ -5171,9 +5489,9 @@ const PLAN=[
 <li>Hub population stays balanced across faction hubs</li>
 </ol></div>`},
 {id:'sector-instance',title:'Sector Instance Limits',status:'new',
-  desc:'Cap 15-25 players per shared sector (revised down from 30-50). Each player in a sector costs ~2-5MB RAM + WebSocket + tick processing. Queue if cap hit. Home sectors: 1 instance per owner.',
+  desc:'BUILT. sectorInstanceService.js (209 lines): sector instance assignment with TTL, capacity enforcement. SectorInstanceAssignment model tracks user → sector → instance mappings. Ship movement assigns/releases instances. Missing: queue UX when capacity hit, configurable caps per zone type.',
   tags:['backend'],
-  workflow:[],
+  workflow:['SectorInstanceAssignment model (user_id, sector_id, instance_id, TTL)','sectorInstanceService: assign, release, capacity check','Wire ship movement to assign/release instances','Sticky assignment reuse for repeated entries','Capacity denial with audit records','Home sector: 1 instance per owner, no sharing','Queue/denial UX when capacity hit','Integration tests for capacity, placement, and movement'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Manage sector population with group-aware instancing that never splits parties, fleets, or corp members unexpectedly.</p>
 <p><em>[Implementation Status] Net-new system — requires full implementation.</em></p>
 </div>
@@ -5239,9 +5557,9 @@ const PLAN=[
 <li>Handoff prevents duplicate events</li>
 </ol></div>`},
 {id:'action-audit',title:'Action Audit & Abuse Detection',status:'new',
-  desc:'Append-only server-side audit/event ledger for player, agent, automation, PvP, economy, and moderation actions. Time-partitioned with 90-day hot retention. Required for anti-cheat, refunds, disputes, and GM tooling.',
+  desc:'BUILT. actionAuditService.js with ActionAuditLog model: logs allow/deny decisions for movement, PvP, trade, portal use. Admin query at /api/admin/action-audit with summaries. Anti-cheat foundation (AC-007) verified. Missing: time-partitioned retention (90-day hot), anomaly detection, comprehensive abuse flagging.',
   tags:['backend'],
-  workflow:[],
+  workflow:['ActionAuditLog model (append-only, time-partitioned)','actionAuditService: log allow/deny decisions for movement, PvP, trade, portal use','Integrate audit hooks into combatService, shipService, tradeService','Admin query endpoint: /api/admin/action-audit with filters','Anomaly detection: flag suspicious patterns (rapid trades, multi-tab abuse)','90-day hot retention with periodic cleanup','Admin UI: audit log viewer with search/filter','Integration tests for audit record creation and retrieval'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Append-only audit ledger that every other system depends on: anti-cheat, disputes, replays, economy analytics, agent accountability.</p>
 <p><em>[Implementation Status] Net-new system — requires full implementation.</em></p>
 </div>
@@ -5300,9 +5618,9 @@ const PLAN=[
 <li>90-day archival runs automatically</li>
 </ol></div>`},
 {id:'job-queue',title:'Asynchronous Job Queue & Scheduler',status:'new',
-  desc:'Vendor-portable queue interface for agents, governors, construction, wormhole timers, raids, notifications, and economy recomputes. Keeps long-running work out of request handlers and hot tick loops.',
+  desc:'BUILT. jobQueueService.js (366 lines): Job model with status tracking (pending, processing, completed, failed, dead). Retry logic with exponential backoff. Admin endpoints for job management. Missing: scheduled/deferred execution (run_at), dead-letter handling, integration with game systems (economy ticks, crafting completion, wormhole timers).',
   tags:['backend'],
-  workflow:[],
+  workflow:['Job model (type, status, payload, scheduled_for, attempts, max_attempts, result)','jobQueueService: enqueue, process, retry with exponential backoff, cleanup','Handler registry: register typed handlers, dispatch by job.type','Polling loop: configurable interval, claim+process+complete/fail cycle','Admin API: /api/admin/jobs (list, stats, cleanup, retry)','Scheduled jobs: run_at support for deferred execution','Dead letter: mark failed jobs as dead after max_attempts','Integration test: enqueue, process, retry, dead-letter cycle','Wire into tickService as optional processor'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Durable background execution system keeping long-running work out of request handlers and tick loops, enabling reliable agents, governors, timers, and notifications.</p>
 <p><em>[Implementation Status] Net-new system — requires full implementation.</em></p>
 </div>
@@ -5359,9 +5677,9 @@ const PLAN=[
 <li>PostgreSQL implementation passes all tests</li>
 </ol></div>`},
 {id:'live-ops-observability',title:'Live Ops Observability & Feature Flags',status:'new',
-  desc:'Operational control plane for metrics, tracing, kill switches, staged rollouts, and feature flags across PvP, economy, agents, raids, and voxel systems.',
+  desc:'Partially implemented: gameSettingsService.js (348 lines) provides in-memory cache for 70+ settings. Admin endpoints expose AI stats, NPC population, tick status, server runtime logs. runtimeMonitor.js tracks startup/shutdown/fault events. Missing: feature flags, kill switches, staged rollouts, structured metrics collection, alert rules.',
   tags:['backend'],
-  workflow:[],
+  workflow:['Feature flag model in GameSetting (key, enabled, rollout_pct, kill_switch)','featureFlagService: check, toggle, staged rollout by user cohort','Kill switch: instant disable for any feature system','Metrics collection: request latency, tick duration, queue depth, active users','Admin dashboard: system health, feature flag toggles, metric graphs','Structured logging: request tracing with correlation IDs','Alert rules: threshold-based alerts for key metrics','Runtime event log integration (runtimeMonitor.js)'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Operational control plane for safe rollouts with metrics, feature flags, kill switches, and tracing across all game systems.</p>
 <p><em>[Implementation Status] Net-new system — requires full implementation.</em></p>
 </div>
@@ -5416,9 +5734,9 @@ const PLAN=[
 <li>All flag/kill-switch changes audited</li>
 </ol></div>`},
 {id:'econ-sinks',title:'Economic Credit Sinks',status:'new',
-  desc:'Wormhole fees, gate construction, PvP insurance, adventure entry costs, wonder construction, homestead expansion. Prevent inflation.',
+  desc:'Minimal implementation. Port taxes exist (2-10% per port type). Colony building/upgrade costs and crew salaries act as natural sinks. Missing: explicit sink mechanisms for wormhole fees, gate construction, PvP insurance, adventure entry costs, wonder construction, homestead expansion. No inflation monitoring dashboard.',
   tags:['backend'],
-  workflow:[],
+  workflow:['Wormhole/portal usage fees (per-jump credit cost)','Gate construction costs (corporation treasury drain)','PvP insurance premiums (opt-in cargo/ship protection)','Adventure entry fees (credit cost per instance entry)','Wonder construction costs (massive credit sinks)','Homestead expansion fees (per-sector purchase cost)','Economy monitoring: track credit inflow/outflow ratios','Admin dashboard: inflation indicators and sink effectiveness'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Prevent inflation through distributed credit sinks across all player tiers, monitored by AI-driven weekly economy analysis.</p>
 <p><em>[Implementation Status] Net-new system — requires full implementation.</em></p>
 </div>
@@ -5475,7 +5793,7 @@ const PLAN=[
 <li>Market report publishes weekly to news feed</li>
 </ol></div>`},
 {id:'discovery-fog',title:'Discovery & Fog of War',status:'exists',
-  desc:'BUILT. PlayerDiscovery model tracks sector/planet/artifact discoveries per user. discoveryService.discoverSectorAndNeighbors() marks adjacent sectors on movement (awards 10 XP). getMapData endpoint filters all sectors/connections by discoveredIds — undiscovered systems show as anonymous dots with no name/type/detail. Hyperlanes only shown when at least one end is discovered.',
+  desc:'BUILT. discoveryService.js (87 lines): PlayerDiscovery model tracks visited sectors per player. Fog reveals on visit. Client applies fog-of-war dimming on galaxy map for undiscovered sectors. Sprint scope: add scanner upgrade reveal (2-3 hops), star chart purchases from NPCs.',
   tags:['backend'],
   workflow:[],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Exploration incentive through fog of war with star-chart trading, scanner reveals, and cached discovery state for performance.</p>
@@ -5542,7 +5860,7 @@ const PLAN=[
 <li>Charts tradeable between players</li>
 </ol></div>`},
 {id:'anti-cheat-system',title:'Unified Anti-Cheat & Anti-Exploit Architecture',status:'new',
-  desc:'Centralized anti-cheat infrastructure consolidating device fingerprinting, alt-account detection, rate limiting, bot detection, trade-route abuse prevention, account-bound enforcement, combat idempotency, and reward journaling into one authoritative service layer.',
+  desc:'Foundation implemented via anti-cheat program (AC-001 through AC-010, all verified): combatPolicyService, combatCommandGuard, actionAuditService, PlayerProtectionState, SectorInstanceAssignment, TransferLedger, ColonyRaidProtection, economyAbuseService. Missing from unified architecture: device fingerprinting, bot detection, centralized anti-cheat service layer consolidating all checks.',
   tags:['backend'],
   workflow:['Device fingerprint service','Alt-account detection pipeline','Centralized rate-limit service','Bot detection engine','Trade-route margin degradation','Account-bound material enforcement','Combat replay verification','Reward idempotency journaling'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Consolidate scattered anti-cheat provisions from 56+ features into a single, authoritative anti-cheat service layer. Provides device fingerprinting (from pvp-rewards), trade-route abuse detection (from dynamic-pricing), bot detection, rate limiting, and reward integrity guarantees that all game systems can depend on.</p></div>
@@ -5610,7 +5928,7 @@ const PLAN=[
   desc:'Comprehensive GM and moderation dashboard providing player reporting, appeal/dispute workflows, penalty escalation, chat moderation, live spectate, bulk ban tools, and full audit trail integration.',
   tags:['backend','frontend'],
   workflow:['Player report system','Appeal/dispute workflow','GM dashboard','Chat moderation filters','Penalty escalation engine','Live spectate mode','Bulk action tools'],
-  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Provide game masters with a unified toolset for handling player reports, investigating violations, issuing penalties, moderating chat, and managing appeals. Consolidates moderation needs scattered across pvp-choke (appeal workflow), messaging (chat moderation), and community-events (player behavior) into one system.</p></div>
+  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Provide game masters with a unified toolset for handling player reports, investigating violations, issuing penalties, moderating chat, and managing appeals. Consolidates moderation needs scattered across pvp-choke (appeal workflow), messaging (chat moderation), and community-events (player behavior) into one system. See <code>docs/admin-suite-prd.md</code> for the broader admin suite vision including RBAC, player support recovery toolkit, and grant/rollback ledger.</p></div>
 <div class="modal-section"><div class="modal-section-title">Functional Requirements</div><ol>
 <li>Player Report System: in-game report button on player profiles, death screens, and chat; report categories: griefing, botting, exploiting, harassment, RMT; evidence attachment: combat log links, chat log references, screenshots</li>
 <li>Appeal/Dispute Workflow: player submits appeal from account settings; GM reviews evidence, player history, anti-cheat signals; resolution options: dismiss, reduce penalty, overturn; notification to both reporter and reported player</li>
@@ -5671,7 +5989,7 @@ const PLAN=[
 <li>Bulk action processes 100+ players without timeout</li>
 </ol></div>`},
 {id:'server-achievements',title:'Server-Authoritative Achievement System',status:'new',
-  desc:'Server-side achievement state management replacing localStorage, with tamper-resistant unlock validation, event-driven progress tracking from action-audit, cross-device sync, and anti-fraud enforcement where the client is display-only.',
+  desc:'Partially implemented: achievementService.js exists with 20+ seeded achievements, server-side progress tracking, and milestone rewards. Missing: full migration from 12 localStorage prototypes, event-driven progress from action-audit, cross-device sync, anti-fraud enforcement.',
   tags:['backend'],
   workflow:['Achievement data model','Server-side unlock validation','Event ingestion from action-audit','Progress tracking service','Cross-device sync API','Client migration from localStorage'],
   details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Migrate achievements from client-side localStorage to a server-authoritative system where all unlock conditions are validated server-side, progress is tracked via action-audit events, and the client is display-only. Prevents achievement tampering and enables cross-device sync, leaderboards, and achievement-gated content.</p></div>
@@ -5786,6 +6104,116 @@ const PLAN=[
 <li>Resolution notifications delivered within 1 minute of GM action</li>
 <li>Report history shows accurate status for all submitted reports</li>
 <li>Rate limiting prevents more than 5 reports per hour per player</li>
+</ol></div>`},
+{id:'admin-control-plane',title:'Admin Control Plane & Game Settings',status:'exists',
+  desc:'Secure in-game admin control plane for universe setup, AI configuration, NPC operations, tick visibility, and account-tier management. Persistent GameSetting model with in-memory cache, protected admin APIs, and multi-tab admin UI.',
+  tags:['backend','frontend'],
+  workflow:[],
+  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Give admins a secure in-game control plane for universe setup, AI configuration, NPC operations, tick visibility, and account-tier management. Replace ad-hoc scripts (revive_ships.js, fix_thoder.js) with audited, permissioned workflows.</p>
+<p><em>[Implementation Status] Implemented MVP — GameSetting model, gameSettingsService (in-memory cache), adminRoutes, adminController, gameSettingsController, AdminPage with Universe/AI Config/NPCs/Users tabs all exist.</em></p></div>
+<div class="modal-section"><div class="modal-section-title">Functional Requirements</div><ol>
+<li>Persist runtime settings in the database via GameSetting model (70+ defaults)</li>
+<li>Expose protected APIs for reading and updating settings</li>
+<li>Provide admin visibility into AI config, NPC population, tick status, and user tiers</li>
+<li>Allow controlled admin actions: NPC respawn, user-tier changes, universe regeneration</li>
+<li>Secret settings masked on read and handled safely in the UI</li>
+<li>Settings survive restart and are available through a single service layer with in-memory cache</li>
+<li>Admin bypass in world access rules (worldPolicyService)</li>
+</ol></div>
+<div class="modal-section"><div class="modal-section-title">Data Model</div>
+<table class="detail-table"><tr><th>Model/Column</th><th>Type</th><th>Notes</th></tr>
+<tr><td>GameSetting.key</td><td>STRING PK</td><td>Setting identifier</td></tr>
+<tr><td>GameSetting.value</td><td>TEXT</td><td>JSON-serialized setting value</td></tr>
+<tr><td>GameSetting.category</td><td>STRING</td><td>Grouping for UI display</td></tr>
+<tr><td>GameSetting.is_secret</td><td>BOOLEAN</td><td>Mask in API responses</td></tr>
+<tr><td>User.is_admin</td><td>BOOLEAN</td><td>Single admin flag (current scope)</td></tr>
+</table></div>
+<div class="modal-section"><div class="modal-section-title">API Surface</div><ul>
+<li><code>GET /api/admin/settings</code> -- all settings (secrets masked)</li>
+<li><code>PUT /api/admin/settings</code> -- update settings</li>
+<li><code>POST /api/admin/universe/generate</code> -- regenerate universe</li>
+<li><code>GET /api/admin/universe/config</code> -- universe configuration</li>
+<li><code>GET /api/admin/ai/test</code> -- test AI provider connection</li>
+<li><code>GET /api/admin/ai/stats</code> -- AI decision statistics</li>
+<li><code>GET /api/admin/npcs/stats</code> -- NPC population stats</li>
+<li><code>POST /api/admin/npcs/respawn</code> -- force NPC respawn</li>
+<li><code>GET /api/admin/server/status</code> -- server and tick status</li>
+<li><code>GET /api/admin/users</code> -- user search and management</li>
+<li><code>PUT /api/admin/users/tier</code> -- change subscription tier</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">UX Specification</div><ul>
+<li>Admin page at /admin with tab navigation: Universe, AI Config, NPCs, Users</li>
+<li>Settings editor with category grouping and secret field masking</li>
+<li>Universe tab: generation controls, sector stats</li>
+<li>AI tab: provider configuration, connection testing, decision stats</li>
+<li>NPCs tab: population overview, respawn controls</li>
+<li>Users tab: search, tier management, basic account info</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Dependencies</div><p>None -- foundational admin infrastructure</p></div>
+<div class="modal-section"><div class="modal-section-title">Risks &amp; Mitigations</div><ul>
+<li><strong>Risk:</strong> Single is_admin flag is too coarse for multi-staff teams. <strong>Mitigation:</strong> RBAC planned in server-owner-tooling feature.</li>
+<li><strong>Risk:</strong> Settings cache drift. <strong>Mitigation:</strong> Cache invalidation on write, startup cache warming.</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Complexity &amp; Estimate</div><p><strong>Medium -- implemented. Hardening focus: RBAC prep, audit logging for admin actions, UI polish.</strong></p></div>
+<div class="modal-section"><div class="modal-section-title">Acceptance Criteria</div><ol>
+<li>Admin-only routes exist for settings, AI status, NPC operations, tick status, and user management</li>
+<li>Settings survive restart and are available through a single service layer</li>
+<li>Client exposes working admin page with Universe, AI Config, NPCs, and Users tabs</li>
+<li>Secret settings are masked on read and handled safely in the UI</li>
+<li>Non-admin users cannot access admin endpoints (401/403)</li>
+</ol></div>`},
+{id:'server-owner-tooling',title:'Server-Owner Difficulty & Support Tooling',status:'new',
+  desc:'Expand admin MVP into full server-owner operations suite with difficulty sliders (XP, fuel, market volatility), player support tools (rescue, teleport, resurrect, ban), content management, and dynamic RBAC replacing the single is_admin flag.',
+  tags:['backend','frontend'],
+  workflow:[],
+  details:`<div class="modal-section"><div class="modal-section-title">Purpose</div><p>Expand the current admin MVP into a complete server-owner operations suite with difficulty tuning, player-support tooling, and dynamic role/permission management. The repo contains manual scripts (revive_ships.js, fix_thoder.js, move_colony_ship.js) that prove support workflows are needed in the actual game surface.</p></div>
+<div class="modal-section"><div class="modal-section-title">Functional Requirements</div><ol>
+<li>Dynamic RBAC: replace single is_admin boolean with role-based permissions (owner, admin, moderator, support), scoped per-action</li>
+<li>Difficulty sliders: XP rate, fuel cost, upkeep, research speed, market volatility, NPC aggression -- all driven by GameSetting</li>
+<li>Player support tools: ship resurrection, active ship repair, forced movement/unstick, credit adjustment, combat state reset</li>
+<li>Moderation basics: warn, mute, temp-ban, permanent ban with case notes and appeal tracking</li>
+<li>Grant/rollback pipeline: typed grants (credits, items, ships) with full audit trail and rollback capability</li>
+<li>All admin actions audited via actionAuditService</li>
+<li>Settings changes propagate through runtime services without restart</li>
+</ol></div>
+<div class="modal-section"><div class="modal-section-title">Data Model</div>
+<table class="detail-table"><tr><th>Model/Column</th><th>Type</th><th>Notes</th></tr>
+<tr><td>AdminRole</td><td>New Model</td><td>role_id, name, permissions JSON, created_by</td></tr>
+<tr><td>UserRole</td><td>New Model</td><td>user_id FK, role_id FK, granted_by, expires_at</td></tr>
+<tr><td>AdminGrant</td><td>New Model</td><td>grant_id, target_user_id, grant_type, amount, granted_by, rolled_back</td></tr>
+<tr><td>ModerationCase</td><td>New Model</td><td>case_id, target_user_id, action_type, reason, duration, moderator_id</td></tr>
+</table></div>
+<div class="modal-section"><div class="modal-section-title">API Surface</div><ul>
+<li><code>GET/PUT /api/admin/difficulty</code> -- view/update difficulty matrix</li>
+<li><code>POST /api/admin/users/:id/revive-ship</code> -- resurrect player ship</li>
+<li><code>POST /api/admin/users/:id/repair-ship</code> -- repair ship</li>
+<li><code>POST /api/admin/users/:id/move-ship</code> -- forced movement</li>
+<li><code>POST /api/admin/users/:id/credits</code> -- credit adjustment</li>
+<li><code>POST /api/admin/grants</code> -- typed grant with audit</li>
+<li><code>POST /api/admin/grants/:id/rollback</code> -- rollback grant</li>
+<li><code>CRUD /api/admin/roles</code> -- role management</li>
+<li><code>POST /api/admin/moderation/warn|mute|ban</code> -- moderation actions</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">UX Specification</div><ul>
+<li>Difficulty tab: slider matrix with live preview of effect on gameplay rates</li>
+<li>Support tab: player lookup with quick-action buttons (revive, repair, move, credit adjust)</li>
+<li>Moderation tab: case management with history and appeal status</li>
+<li>Grants tab: grant log with rollback buttons and audit trail</li>
+<li>Roles tab: role definition editor with permission checkboxes</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Dependencies</div><p>admin-control-plane (existing MVP), action-audit (audit infrastructure)</p></div>
+<div class="modal-section"><div class="modal-section-title">Risks &amp; Mitigations</div><ul>
+<li><strong>Risk:</strong> Permission escalation through role manipulation. <strong>Mitigation:</strong> Only owner role can create/modify roles; self-modification blocked.</li>
+<li><strong>Risk:</strong> Difficulty changes create economic imbalance. <strong>Mitigation:</strong> Safe defaults, rate-of-change limits, admin warnings on extreme settings.</li>
+</ul></div>
+<div class="modal-section"><div class="modal-section-title">Complexity &amp; Estimate</div><p><strong>Large -- 2-3 weeks. New RBAC system, multiple support workflows, difficulty matrix, moderation pipeline.</strong></p></div>
+<div class="modal-section"><div class="modal-section-title">Acceptance Criteria</div><ol>
+<li>Admins can view and update the full difficulty matrix from the UI</li>
+<li>Support actions are authenticated, audited, and visible in admin logs</li>
+<li>Settings changes propagate through runtime services without restart</li>
+<li>RBAC replaces single is_admin flag with scoped permissions</li>
+<li>Grant rollback correctly reverses the original grant</li>
+<li>Moderation cases have full history and appeal tracking</li>
 </ol></div>`}
 ]}
 ];
@@ -5794,11 +6222,11 @@ const PLAN=[
 let _commentsCache = {};
 function getAuthor(){return localStorage.getItem('sw3k_plan_author')||''}
 function saveAuthor(a){localStorage.setItem('sw3k_plan_author',a)}
-async function fetchComments(){try{const r=await fetch('/api/comments');_commentsCache=await r.json()}catch{_commentsCache={}}}
+async function fetchComments(){try{const r=await fetch('/api/comments',{credentials:'include'});if(!r.ok)throw new Error(r.status);_commentsCache=await r.json()}catch{_commentsCache={};console.warn('[planner] Comments API unavailable — run `node planner/server.js` to enable comments')}}
 function getFeatureComments(fid){return _commentsCache[fid]||[]}
 function getTotalComments(){return Object.values(_commentsCache).reduce((s,a)=>s+a.length,0)}
-async function addComment(fid,text){const author=getAuthor()||'Anonymous';await fetch('/api/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({featureId:fid,author,text})});await fetchComments()}
-async function deleteComment(fid,idx){await fetch('/api/comments',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({featureId:fid,index:idx})});await fetchComments()}
+async function addComment(fid,text){const author=getAuthor()||'Anonymous';try{const r=await fetch('/api/comments',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({featureId:fid,author,text})});if(!r.ok)throw new Error(r.status);await fetchComments()}catch(e){alert('Cannot save comment — planner server not running.\nRun: node planner/server.js')}}
+async function deleteComment(fid,idx){try{const r=await fetch('/api/comments',{method:'DELETE',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({featureId:fid,index:idx})});if(!r.ok)throw new Error(r.status);await fetchComments()}catch(e){alert('Cannot delete comment — planner server not running.\nRun: node planner/server.js')}}
 
 // ===== RENDER HELPERS =====
 function statusBadge(s){
@@ -5813,7 +6241,7 @@ function statusDot(s){
 }
 function tagHTML(t){const cls=t==='pve'?'tag-pve':t==='pvp'?'tag-pvp':t==='store'?'tag-store':t==='backend'?'tag-backend':t==='frontend'?'tag-frontend':'';return`<span class="tag ${cls}">${t}</span>`}
 function timeAgo(ts){const d=Date.now()-ts;if(d<60000)return'just now';if(d<3600000)return Math.floor(d/60000)+'m ago';if(d<86400000)return Math.floor(d/3600000)+'h ago';return Math.floor(d/86400000)+'d ago'}
-function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 
 function renderCommentsHTML(fid,context){
   const comments=getFeatureComments(fid);const count=comments.length;

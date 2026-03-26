@@ -21,32 +21,12 @@ const processEconomyTick = async () => {
       WHERE production_rate != 0 OR consumption_rate != 0
     `);
   } else {
-    // ── SQLite: row-by-row inside a transaction ──
-    const transaction = await sequelize.transaction();
-    try {
-      const portCommodities = await PortCommodity.findAll({
-        where: {
-          [Op.or]: [
-            { production_rate: { [Op.ne]: 0 } },
-            { consumption_rate: { [Op.ne]: 0 } }
-          ]
-        },
-        transaction
-      });
-
-      for (const pc of portCommodities) {
-        const delta = (pc.production_rate || 0) - (pc.consumption_rate || 0);
-        if (delta !== 0) {
-          const newQuantity = Math.max(0, Math.min(pc.max_quantity, pc.quantity + delta));
-          await pc.update({ quantity: newQuantity }, { transaction });
-        }
-      }
-
-      await transaction.commit();
-    } catch (err) {
-      await transaction.rollback();
-      throw err;
-    }
+    // ── SQLite: single batch UPDATE (avoids row-by-row lock contention) ──
+    await sequelize.query(`
+      UPDATE port_commodities
+      SET quantity = MIN(max_quantity, MAX(0, quantity + production_rate - consumption_rate))
+      WHERE production_rate != 0 OR consumption_rate != 0
+    `);
   }
 
   // Record price snapshots (outside transaction for perf)
@@ -119,7 +99,8 @@ const getPriceTrends = async (commodityId, limit = 10) => {
       commodity_id: commodityId,
       recorded_at: { [Op.gte]: since }
     },
-    order: [['recorded_at', 'ASC']]
+    order: [['recorded_at', 'ASC']],
+    limit: limit || 10
   });
 
   if (records.length === 0) return { trend: 'stable', avgBuy: 0, avgSell: 0, dataPoints: 0 };
@@ -164,6 +145,35 @@ const getMarketOverview = async (portId) => {
     include: [{ model: Commodity, as: 'commodity' }]
   });
 
+  // Batch-fetch all price trends for this port's commodities (avoids N+1)
+  const commodityIds = portCommodities.map(pc => pc.commodity.commodity_id);
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const allHistory = commodityIds.length > 0 ? await PriceHistory.findAll({
+    where: { commodity_id: { [Op.in]: commodityIds }, recorded_at: { [Op.gte]: since } },
+    order: [['commodity_id', 'ASC'], ['recorded_at', 'ASC']],
+    limit: commodityIds.length * 10
+  }) : [];
+
+  // Group by commodity_id and compute trends in-memory
+  const historyMap = new Map();
+  for (const rec of allHistory) {
+    if (!historyMap.has(rec.commodity_id)) historyMap.set(rec.commodity_id, []);
+    historyMap.get(rec.commodity_id).push(rec);
+  }
+
+  const computeTrend = (records) => {
+    if (!records || records.length === 0) return 'stable';
+    const mid = Math.floor(records.length / 2);
+    if (mid === 0) return 'stable';
+    const firstAvg = records.slice(0, mid).reduce((s, r) => s + r.sell_price, 0) / mid;
+    const secondAvg = records.slice(mid).reduce((s, r) => s + r.sell_price, 0) / (records.length - mid);
+    if (firstAvg === 0) return 'stable';
+    const changePct = (secondAvg - firstAvg) / firstAvg;
+    if (changePct > 0.05) return 'rising';
+    if (changePct < -0.05) return 'falling';
+    return 'stable';
+  };
+
   const overview = [];
   for (const pc of portCommodities) {
     const commodity = pc.commodity;
@@ -174,8 +184,7 @@ const getMarketOverview = async (portId) => {
       commodity.base_price, pc.quantity, pc.max_quantity, commodity.volatility, pc.sell_price_modifier
     );
 
-    // Get 24h trend for this commodity at this port
-    const trend = await getPriceTrends(commodity.commodity_id, 10);
+    const trend = computeTrend(historyMap.get(commodity.commodity_id));
 
     overview.push({
       commodity_id: commodity.commodity_id,
@@ -187,7 +196,7 @@ const getMarketOverview = async (portId) => {
       max_quantity: pc.max_quantity,
       can_buy: pc.can_buy,
       can_sell: pc.can_sell,
-      trend: trend.trend
+      trend
     });
   }
 

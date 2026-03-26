@@ -1,15 +1,25 @@
 const config = require('../config');
-const { Sector, SectorConnection, Planet, Port, NPC, Crew, Ship, ShipCargo, ShipComponent, CombatLog, Transaction: TxModel, User, Colony, Fleet, ActionAuditLog, Job } = require('../models');
+const { sequelize, Sector, SectorConnection, Planet, Port, NPC, Crew, Ship, ShipCargo, ShipComponent, CombatLog, Transaction: TxModel, User, Colony, Fleet, ActionAuditLog, Job } = require('../models');
 const { Op, fn, col } = require('sequelize');
 const universeGenerator = require('../services/universeGenerator');
 const actionAuditService = require('../services/actionAuditService');
 const jobQueueService = require('../services/jobQueueService');
+
+let universeGenerationInProgress = false;
 
 /**
  * POST /api/admin/universe/generate
  * Wipe and regenerate universe with given parameters.
  */
 const generateUniverse = async (req, res, next) => {
+  if (universeGenerationInProgress) {
+    return res.status(409).json({
+      success: false,
+      message: 'Universe generation is already in progress'
+    });
+  }
+
+  universeGenerationInProgress = true;
   try {
     const { num_systems, seed, galaxy_shape } = req.body;
 
@@ -52,6 +62,8 @@ const generateUniverse = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  } finally {
+    universeGenerationInProgress = false;
   }
 };
 
@@ -198,7 +210,8 @@ const getUserDetail = async (req, res, next) => {
 const adjustCredits = async (req, res, next) => {
   try {
     const { amount, reason } = req.body;
-    if (amount === undefined || amount === 0) {
+    const parsedAmount = parseInt(amount);
+    if (isNaN(parsedAmount) || parsedAmount === 0) {
       return res.status(400).json({ success: false, message: 'Amount is required and cannot be 0' });
     }
 
@@ -206,10 +219,17 @@ const adjustCredits = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-
     const before = user.credits || 0;
-    const newCredits = Math.max(0, before + amount);
-    await user.update({ credits: newCredits });
+
+    // Atomic credit update — prevent race conditions
+    await User.update(
+      { credits: sequelize.literal(`CASE WHEN credits + ${parsedAmount} < 0 THEN 0 ELSE credits + ${parsedAmount} END`) },
+      { where: { user_id: req.params.id } }
+    );
+
+    // Re-read for audit log
+    await user.reload();
+    const after = user.credits;
 
     await actionAuditService.record({
       userId: req.userId,
@@ -218,10 +238,10 @@ const adjustCredits = async (req, res, next) => {
       scopeId: req.params.id,
       status: 'allow',
       reason: reason || 'Admin credit adjustment',
-      metadata: { target_user: user.username, amount, before, after: newCredits }
+      metadata: { target_user: user.username, amount: parsedAmount, before, after }
     });
 
-    res.json({ success: true, data: { before, after: newCredits, username: user.username } });
+    res.json({ success: true, data: { before, after, username: user.username } });
   } catch (error) {
     next(error);
   }

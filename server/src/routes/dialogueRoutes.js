@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, validateUUIDParam } = require('../middleware/auth');
 const dialogueController = require('../controllers/dialogueController');
 
 const router = express.Router();
@@ -23,12 +23,12 @@ const upload = multer({
 });
 
 // All dialogue routes require authentication
-router.post('/:npcId/start', authMiddleware, dialogueController.startDialogue);
-router.post('/:npcId/option', authMiddleware, dialogueController.selectOption);
-router.post('/:npcId/message', authMiddleware, dialogueController.sendMessage);
-router.post('/:npcId/voice', authMiddleware, upload.single('audio'), dialogueController.sendVoice);
-router.post('/:npcId/end', authMiddleware, dialogueController.endDialogue);
-router.get('/:npcId/state', authMiddleware, dialogueController.getConversationState);
+router.post('/:npcId/start', authMiddleware, validateUUIDParam('npcId'), dialogueController.startDialogue);
+router.post('/:npcId/option', authMiddleware, validateUUIDParam('npcId'), dialogueController.selectOption);
+router.post('/:npcId/message', authMiddleware, validateUUIDParam('npcId'), dialogueController.sendMessage);
+router.post('/:npcId/voice', authMiddleware, validateUUIDParam('npcId'), upload.single('audio'), dialogueController.sendVoice);
+router.post('/:npcId/end', authMiddleware, validateUUIDParam('npcId'), dialogueController.endDialogue);
+router.get('/:npcId/state', authMiddleware, validateUUIDParam('npcId'), dialogueController.getConversationState);
 
 // Handle multer errors (file too large, invalid format) with JSON response
 router.use((err, req, res, next) => {

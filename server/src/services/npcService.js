@@ -119,6 +119,13 @@ const spawnNPC = async (sectorId, npcType = null, transaction = null) => {
     throw Object.assign(new Error('Sector not found'), { statusCode: 404 });
   }
 
+  // Enforce per-sector NPC population cap
+  const MAX_NPCS_PER_SECTOR = 50;
+  const existingCount = await NPC.count({ where: { current_sector_id: sectorId, is_alive: true }, transaction });
+  if (existingCount >= MAX_NPCS_PER_SECTOR) {
+    throw Object.assign(new Error(`Sector at NPC capacity (${MAX_NPCS_PER_SECTOR})`), { statusCode: 429 });
+  }
+
   const sectorPolicy = getSectorPolicy(sector);
   const zoneDifficulty = getZoneDifficultyForSector(sector);
 

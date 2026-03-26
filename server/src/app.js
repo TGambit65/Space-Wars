@@ -23,7 +23,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+      scriptSrc: ["'self'", "https://cdn.jsdelivr.net"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "blob:"],
@@ -62,7 +62,7 @@ const generalLimiter = rateLimit({
     const token = getAuthTokenFromRequest(req);
     if (token) {
       try {
-        const decoded = jwt.verify(token, config.jwt.secret);
+        const decoded = jwt.verify(token, config.jwt.secret, { algorithms: ['HS256'] });
         return `user:${decoded.user_id}`;
       } catch {
         // Invalid token — fall through to IP-based limiting

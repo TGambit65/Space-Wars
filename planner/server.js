@@ -1,67 +1,14 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
-
 const app = express();
 const PORT = process.env.PLANNER_PORT || 4000;
 const COMMENTS_FILE = path.join(__dirname, 'comments.json');
-const AUTH_USER = process.env.PLANNER_USER || 'planner';
-const AUTH_PASS = process.env.PLANNER_PASS || crypto.randomBytes(18).toString('base64url');
-
-if (!process.env.PLANNER_USER || !process.env.PLANNER_PASS) {
-  console.warn('[planner] PLANNER_USER / PLANNER_PASS not fully configured. Generated local-only credentials:');
-  console.warn(`[planner] username=${AUTH_USER} password=${AUTH_PASS}`);
-}
-
 app.use(express.json());
 app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-store');
   next();
 });
-
-function timingSafeMatch(actual, expected) {
-  const actualBuffer = Buffer.from(actual || '');
-  const expectedBuffer = Buffer.from(expected || '');
-  if (actualBuffer.length !== expectedBuffer.length) return false;
-  return crypto.timingSafeEqual(actualBuffer, expectedBuffer);
-}
-
-function parseBasicAuth(headerValue) {
-  if (!headerValue || !headerValue.startsWith('Basic ')) return null;
-
-  try {
-    const decoded = Buffer.from(headerValue.slice(6), 'base64').toString('utf8');
-    const colon = decoded.indexOf(':');
-    if (colon < 0) return null;
-    return {
-      user: decoded.substring(0, colon),
-      pass: decoded.substring(colon + 1)
-    };
-  } catch {
-    return null;
-  }
-}
-
-function checkAuth(req, res, next) {
-  const credentials = parseBasicAuth(req.headers.authorization);
-  if (!credentials) {
-    res.setHeader('WWW-Authenticate', 'Basic realm="Space Wars Planner"');
-    return res.status(401).send('Authentication required');
-  }
-
-  if (
-    timingSafeMatch(credentials.user, AUTH_USER) &&
-    timingSafeMatch(credentials.pass, AUTH_PASS)
-  ) {
-    return next();
-  }
-
-  res.setHeader('WWW-Authenticate', 'Basic realm="Space Wars Planner"');
-  res.status(401).send('Invalid credentials');
-}
-
-app.use(checkAuth);
 app.use(express.static(__dirname));
 
 function readComments() {

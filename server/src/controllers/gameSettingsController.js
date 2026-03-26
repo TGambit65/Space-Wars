@@ -34,6 +34,16 @@ const updateSettings = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Missing settings object' });
     }
 
+    // Only allow updates to keys that already exist in the database/cache
+    const existingKeys = await gameSettingsService.getAllSettings();
+    const unknownKeys = Object.keys(settings).filter(k => !(k in existingKeys));
+    if (unknownKeys.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Unknown setting keys: ${unknownKeys.join(', ')}`
+      });
+    }
+
     await gameSettingsService.setSettings(settings);
     res.json({ success: true, message: 'Settings updated' });
   } catch (err) {
@@ -230,9 +240,10 @@ const getUserList = async (req, res, next) => {
 
     const where = {};
     if (search) {
+      const sanitized = String(search).replace(/[%_\\]/g, '\\$&');
       where[Op.or] = [
-        { username: { [Op.like]: `%${search}%` } },
-        { email: { [Op.like]: `%${search}%` } }
+        { username: { [Op.like]: `%${sanitized}%` } },
+        { email: { [Op.like]: `%${sanitized}%` } }
       ];
     }
     if (tier && ['free', 'premium', 'elite'].includes(tier)) {

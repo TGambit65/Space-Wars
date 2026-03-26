@@ -120,16 +120,13 @@ const forceEconomyTick = async (req, res, next) => {
  */
 const resetPortStocks = async (req, res, next) => {
   try {
-    const portCommodities = await PortCommodity.findAll();
-    let updated = 0;
+    const { sequelize } = require('../models');
+    const result = await sequelize.query(
+      'UPDATE "port_commodities" SET quantity = CAST(max_quantity / 2 AS INTEGER)'
+    );
+    const updated = Array.isArray(result) ? (result[1] || 0) : 0;
 
-    for (const pc of portCommodities) {
-      const resetQty = Math.floor(pc.max_quantity / 2);
-      await pc.update({ quantity: resetQty });
-      updated++;
-    }
-
-    res.json({ success: true, message: `Reset ${updated} port commodity stocks`, data: { updated } });
+    res.json({ success: true, message: `Reset port commodity stocks`, data: { updated } });
   } catch (error) {
     next(error);
   }

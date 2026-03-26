@@ -156,7 +156,8 @@ AgentAccount.prototype.generateApiKey = function () {
  */
 AgentAccount.prototype.verifyApiKey = function (key) {
   const hash = crypto.createHash('sha256').update(key).digest('hex');
-  return hash === this.api_key_hash;
+  if (hash.length !== this.api_key_hash.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(this.api_key_hash));
 };
 
 /**

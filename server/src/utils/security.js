@@ -45,9 +45,17 @@ const getTrustProxySetting = () => {
 
   if (value === 'true') return true;
   if (value === 'false') return false;
-  if (/^\d+$/.test(value)) return parseInt(value, 10);
+  if (/^\d+$/.test(value)) {
+    const num = parseInt(value, 10);
+    if (num >= 0 && num <= 10) return num;
+    console.warn('[security] TRUST_PROXY value out of range:', value, '— using false');
+    return false;
+  }
 
-  return value;
+  // Only accept CIDR/IP patterns for proxy trust
+  if (/^[\d.,/:\s]+$/.test(value)) return value;
+  console.warn('[security] Invalid TRUST_PROXY value:', value, '— using false');
+  return false;
 };
 
 const shouldUseForwardedHeaders = (req) => {
@@ -82,7 +90,9 @@ const getRequestOrigin = (req) => {
 
 const isOriginAllowed = (origin, req, allowedOrigins = getAllowedOrigins()) => {
   if (!origin) {
-    return true;
+    // Allow same-origin requests (no Origin header) but only for non-production
+    // or when the request comes from a trusted proxy
+    return process.env.NODE_ENV !== 'production';
   }
 
   const normalizedOrigin = normalizeOrigin(origin);

@@ -14,10 +14,15 @@ const MAX_SOCKETS_PER_USER = 3;
 const userSockets = new Map(); // userId -> Set<socketId>
 const CHAT_RATE_LIMIT = 5; // max messages
 const CHAT_RATE_WINDOW = 10000; // per 10 seconds
-const chatCounters = new Map(); // socketId -> { count, resetAt }
-const ACCESS_CACHE_MS = 5000;
+const chatCounters = new Map(); // userId -> { count, resetAt }
+const ACCESS_CACHE_MS = 1000;
 const ROOM_ID_PATTERN = /^[0-9a-f-]{16,}$/i;
 const allowedOrigins = getAllowedOrigins();
+
+const checkTokenFreshness = (socket) => {
+  if (!socket.tokenExp) return true;
+  return Date.now() / 1000 < socket.tokenExp;
+};
 
 const normalizeRoomId = (value) => {
   if (typeof value !== 'string') return null;
@@ -44,12 +49,18 @@ const normalizeChatText = (value) => {
   return trimmed.substring(0, 500);
 };
 
+const escapeHtml = (str) => {
+  if (typeof str !== 'string') return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+};
+
 const throttleChat = (socket) => {
   const now = Date.now();
-  let counter = chatCounters.get(socket.id);
+  const key = socket.userId || socket.id;
+  let counter = chatCounters.get(key);
   if (!counter || now >= counter.resetAt) {
     counter = { count: 0, resetAt: now + CHAT_RATE_WINDOW };
-    chatCounters.set(socket.id, counter);
+    chatCounters.set(key, counter);
   }
 
   counter.count += 1;
@@ -60,6 +71,14 @@ const throttleChat = (socket) => {
 
   return true;
 };
+
+// Clean up expired chat counters every 30 seconds
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, counter] of chatCounters) {
+    if (now >= counter.resetAt + CHAT_RATE_WINDOW) chatCounters.delete(key);
+  }
+}, 30000);
 
 const emitAccessDenied = (socket, channel, message) => {
   socket.emit('room_access_denied', { channel, message });
@@ -169,6 +188,34 @@ const initialize = (httpServer) => {
     maxHttpBufferSize: 5e6 // 5MB for audio binary frames
   });
 
+  // Connection rate limiting by IP
+  const connectionAttempts = new Map();
+  const CONN_RATE_LIMIT = 20;
+  const CONN_RATE_WINDOW = 60000;
+
+  io.use((socket, next) => {
+    const ip = socket.handshake.address;
+    const now = Date.now();
+    let attempts = connectionAttempts.get(ip) || [];
+    attempts = attempts.filter(t => now - t < CONN_RATE_WINDOW);
+    if (attempts.length >= CONN_RATE_LIMIT) {
+      return next(new Error('Too many connection attempts'));
+    }
+    attempts.push(now);
+    connectionAttempts.set(ip, attempts);
+    next();
+  });
+
+  // Periodic cleanup of expired connection attempts
+  setInterval(() => {
+    const now = Date.now();
+    for (const [ip, attempts] of connectionAttempts) {
+      const filtered = attempts.filter(t => now - t < CONN_RATE_WINDOW);
+      if (filtered.length === 0) connectionAttempts.delete(ip);
+      else connectionAttempts.set(ip, filtered);
+    }
+  }, 60000);
+
   // ── JWT Auth Middleware ──────────────────────────────────────
   io.use(async (socket, next) => {
     const token = socket.handshake.auth.token || getCookieToken(socket.handshake.headers.cookie);
@@ -177,7 +224,7 @@ const initialize = (httpServer) => {
     }
 
     try {
-      const decoded = jwt.verify(token, config.jwt.secret);
+      const decoded = jwt.verify(token, config.jwt.secret, { algorithms: ['HS256'] });
       const user = await User.findByPk(decoded.user_id, {
         attributes: ['user_id', 'username']
       });
@@ -187,6 +234,7 @@ const initialize = (httpServer) => {
       }
 
       socket.userId = user.user_id;
+      socket.tokenExp = decoded.exp;
       socket.user = {
         user_id: user.user_id,
         username: user.username
@@ -292,8 +340,9 @@ const initialize = (httpServer) => {
     // Sector chat message
     socket.on('chat_message', async (payload = {}) => {
       const { text } = payload;
-      const messageText = normalizeChatText(text);
+      const messageText = escapeHtml(normalizeChatText(text));
       if (!messageText || !throttleChat(socket)) return;
+      if (!checkTokenFreshness(socket)) { socket.emit('error', { message: 'Session expired' }); socket.disconnect(true); return; }
 
       try {
         const sectorId = socket.currentSectorId || await joinAuthorizedSector(socket, null, { forceRefresh: true });
@@ -321,8 +370,9 @@ const initialize = (httpServer) => {
     // Corporation chat
     socket.on('corp_chat', async (payload = {}) => {
       const { text } = payload;
-      const messageText = normalizeChatText(text);
+      const messageText = escapeHtml(normalizeChatText(text));
       if (!messageText || !throttleChat(socket)) return;
+      if (!checkTokenFreshness(socket)) { socket.emit('error', { message: 'Session expired' }); socket.disconnect(true); return; }
 
       try {
         const access = await getSocketAccess(socket, { forceRefresh: true });
@@ -350,8 +400,9 @@ const initialize = (httpServer) => {
     // Faction chat
     socket.on('faction_chat', async (payload = {}) => {
       const { text } = payload;
-      const messageText = normalizeChatText(text);
+      const messageText = escapeHtml(normalizeChatText(text));
       if (!messageText || !throttleChat(socket)) return;
+      if (!checkTokenFreshness(socket)) { socket.emit('error', { message: 'Session expired' }); socket.disconnect(true); return; }
 
       try {
         const access = await getSocketAccess(socket, { forceRefresh: true });

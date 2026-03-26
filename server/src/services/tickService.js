@@ -214,6 +214,26 @@ const processCombatTick = async () => {
 
     if (engagingNPCs.length === 0) return;
 
+    // Batch-fetch all relevant ships to avoid N+1 queries in the NPC loop
+    const combatSectorIds = [...new Set(engagingNPCs.map(n => n.current_sector_id).filter(Boolean))];
+    const combatTargetShipIds = engagingNPCs.map(n => n.target_ship_id).filter(Boolean);
+
+    const [batchTargetShips, batchSectorShips] = await Promise.all([
+      combatTargetShipIds.length > 0
+        ? Ship.findAll({ where: { ship_id: { [Op.in]: combatTargetShipIds }, is_active: true } })
+        : [],
+      combatSectorIds.length > 0
+        ? Ship.findAll({ where: { current_sector_id: { [Op.in]: combatSectorIds }, is_active: true } })
+        : []
+    ]);
+
+    const targetShipMap = new Map(batchTargetShips.map(s => [s.ship_id, s]));
+    const sectorShipMap = new Map();
+    for (const ship of batchSectorShips) {
+      if (!sectorShipMap.has(ship.current_sector_id)) sectorShipMap.set(ship.current_sector_id, []);
+      sectorShipMap.get(ship.current_sector_id).push(ship);
+    }
+
     for (const npc of engagingNPCs) {
       try {
         // Zone enforcement: disengage hostile NPCs in safe zones
@@ -231,24 +251,17 @@ const processCombatTick = async () => {
           continue;
         }
 
-        // Use persisted target if available, otherwise find weakest ship
+        // Use pre-fetched ship data instead of per-NPC queries
         let playerShip = null;
         if (npc.target_ship_id) {
-          playerShip = await Ship.findOne({
-            where: {
-              ship_id: npc.target_ship_id,
-              current_sector_id: npc.current_sector_id,
-              is_active: true
-            }
-          });
+          const candidate = targetShipMap.get(npc.target_ship_id);
+          if (candidate && candidate.current_sector_id === npc.current_sector_id) {
+            playerShip = candidate;
+          }
         }
         if (!playerShip) {
-          playerShip = await Ship.findOne({
-            where: {
-              current_sector_id: npc.current_sector_id,
-              is_active: true
-            }
-          });
+          const candidates = sectorShipMap.get(npc.current_sector_id) || [];
+          playerShip = candidates[0] || null;
         }
 
         if (!playerShip) {
