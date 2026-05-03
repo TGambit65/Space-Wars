@@ -19,6 +19,7 @@ import { clearToken, getToken, setToken } from './services/session';
 import { ships as shipsApi } from './services/api';
 import { playSfx } from './hooks/useSoundEffects';
 import LevelUpModal from './components/common/LevelUpModal';
+import DuelRequestListener from './components/combat/DuelRequestListener';
 
 /** Renders MiniMap using activeShip from GameSessionContext */
 function MiniMapWidget({ onNavigate }) {
@@ -121,6 +122,9 @@ const ShipInteriorView = lazy(() => import('./components/ships/ShipInterior2DVie
 const DerelictBoardingView = lazy(() => import('./components/ships/ShipInterior2DView'));
 const AgentPage = lazy(() => import('./components/agent/AgentPage'));
 const AchievementsPage = lazy(() => import('./components/common/AchievementsPage'));
+const BountyBoard = lazy(() => import('./components/combat/BountyBoard'));
+const ArenaLobby = lazy(() => import('./components/combat/ArenaLobby'));
+const SpectatorView = lazy(() => import('./components/combat/SpectatorView'));
 
 import LoadingScreen from './components/common/LoadingScreen';
 
@@ -264,6 +268,9 @@ function App() {
         <Route path="/events" element={<EventsPage user={user} />} />
         <Route path="/agent" element={<AgentPage user={user} />} />
         <Route path="/achievements" element={<AchievementsPage />} />
+        <Route path="/bounties" element={<BountyBoard />} />
+        <Route path="/arena" element={<ArenaLobby socket={socket} />} />
+        <Route path="/spectate" element={<SpectatorView socket={socket} />} />
         {user.is_admin && <Route path="/admin" element={<AdminPage user={user} />} />}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -314,6 +321,7 @@ function App() {
         onClose={() => setChatOpen(false)}
       />
 
+      <DuelRequestListener socket={socket} />
       <CombatAlertListener combatAlert={combatAlert} clearCombatAlert={clearCombatAlert} />
       <LevelUpListener socket={socket} onLevelUp={handleLevelUp} />
       <AchievementListener socket={socket} />

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { combat, ships, npcs } from '../../services/api';
 import CombatHUD from './CombatHUD';
 import { Crosshair, AlertTriangle, Skull, Trophy, Zap, Activity, Clock, TrendingUp } from 'lucide-react';
@@ -81,7 +81,9 @@ const EncounterWarningBanner = ({ warning, onCancel, onEngageNow, onCountermeasu
 const CombatPage = ({ user, socket }) => {
     const location = useLocation();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const notify = useNotifications();
+    const urlCombatId = searchParams.get('combatId');
     const [ship, setShip] = useState(null);
     const [targetNpc, setTargetNpc] = useState(location.state?.npc || null);
     const [pvpTarget, setPvpTarget] = useState(location.state?.pvpTarget || null);
@@ -154,6 +156,21 @@ const CombatPage = ({ user, socket }) => {
         // target swaps happen through findRandomTarget / clear actions.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // ─── URL-driven binding (arena/duel matches link us here with ?combatId=) ──
+    useEffect(() => {
+        if (!socket || !urlCombatId) return;
+        if (combatId === urlCombatId) return;
+        pendingCombatIdRef.current = urlCombatId;
+        setCombatId(urlCombatId);
+        setIsBattling(true);
+        // Request a snapshot — the spectate_join handler emits one and is
+        // permissive for participants on any combat type.
+        socket.emit('combat:spectate_join', { combat_id: urlCombatId });
+        return () => {
+            socket.emit('combat:spectate_leave', { combat_id: urlCombatId });
+        };
+    }, [socket, urlCombatId, combatId]);
 
     // ─── Single combat:event Channel ────────────────────────────
     useEffect(() => {

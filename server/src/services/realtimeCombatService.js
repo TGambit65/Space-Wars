@@ -1,7 +1,7 @@
-const { Ship, NPC, CombatInstance, CombatLog, User, Sector, PvpCooldown, sequelize } = require('../models');
+const { Ship, NPC, CombatInstance, CombatLog, User, Sector, PvpCooldown, BountyContract, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const config = require('../config');
-const { emitToSector, emitToUser } = require('./socketService');
+const { emitToSector, emitToUser, emitToCombatRoom } = require('./socketService');
 const worldPolicyService = require('./worldPolicyService');
 const shipInteriorService = require('./shipInteriorService');
 
@@ -90,7 +90,14 @@ const emitCombatEvent = (combatState, type, payload = {}) => {
     type,
     ...payload
   };
-  emitToSector(combatState.sectorId, 'combat:event', evt);
+  // Sector room for open-world combats; arena/duel matches set sectorEmit=false
+  if (combatState.sectorEmit !== false) {
+    emitToSector(combatState.sectorId, 'combat:event', evt);
+  }
+  // Combat-specific room (spectators)
+  if (typeof emitToCombatRoom === 'function') {
+    emitToCombatRoom(combatState.combatId, 'combat:event', evt);
+  }
   for (const ship of combatState.ships.values()) {
     if (!ship.isNPC && ship.ownerId) {
       emitToUser(ship.ownerId, 'combat:event', evt);
@@ -265,7 +272,8 @@ const processTick = (combatState) => {
   for (const ship of ships.values()) {
     if (!ship.alive) continue;
     anyAlive = true;
-    remainingSides.add(ship.ownerId || `npc_${ship.shipId}`);
+    // Group by teamId when present (arena 2v2), else by ownerId, else lone NPC.
+    remainingSides.add(ship.teamId || ship.ownerId || `npc_${ship.shipId}`);
   }
 
   if (anyAlive && remainingSides.size <= 1) {
@@ -300,6 +308,8 @@ const processNPCAI = (combatState, npcShip, profile) => {
   for (const ship of combatState.ships.values()) {
     if (!ship.alive || ship.shipId === npcShip.shipId) continue;
     if (ship.ownerId && ship.ownerId === npcShip.ownerId) continue;
+    // Same-team allies (arena 2v2) never targeted
+    if (npcShip.teamId && ship.teamId && ship.teamId === npcShip.teamId) continue;
     const dx = ship.position.x - npcShip.position.x;
     const dy = ship.position.y - npcShip.position.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
@@ -337,7 +347,8 @@ const processNPCAI = (combatState, npcShip, profile) => {
 };
 
 // ─── Initiate ─────────────────────────────────────────────────────
-const initiateCombat = async (sectorId, ships, combatType = 'PVE') => {
+const initiateCombat = async (sectorId, ships, combatType = 'PVE', options = {}) => {
+  const { sectorEmit = true, matchId = null } = options;
   const participantIds = ships.map(s => s.shipId);
   const instance = await CombatInstance.create({
     sector_id: sectorId,
@@ -357,6 +368,7 @@ const initiateCombat = async (sectorId, ships, combatType = 'PVE') => {
     shipMap.set(s.shipId, {
       shipId: s.shipId,
       ownerId: s.ownerId || null,
+      teamId: s.teamId || null,
       isNPC: !!s.isNPC,
       npcType: s.npcType || null,
       tier: s.tier || null,
@@ -402,7 +414,9 @@ const initiateCombat = async (sectorId, ships, combatType = 'PVE') => {
     seq: 0,
     tickCount: 0,
     pendingUntil,
-    pendingExpired: !pendingUntil
+    pendingExpired: !pendingUntil,
+    sectorEmit,
+    matchId
   };
 
   activeCombats.set(combatId, combatState);
@@ -449,7 +463,14 @@ const initiateCombat = async (sectorId, ships, combatType = 'PVE') => {
   return combatId;
 };
 
-const initiatePlayerCombat = async (attackerShipId, defenderShipId, requesterUserId = null) => {
+const initiatePlayerCombat = async (attackerShipId, defenderShipId, requesterUserId = null, options = {}) => {
+  const {
+    bypassPolicy = false,
+    bypassSameSector = false,
+    combatType = 'PVP',
+    sectorEmit = true,
+    matchId = null
+  } = options;
   const attacker = await Ship.findOne({ where: { ship_id: attackerShipId, is_active: true } });
   if (!attacker) throw Object.assign(new Error('Attacker ship not found'), { statusCode: 404 });
   if (requesterUserId && attacker.owner_user_id !== requesterUserId) {
@@ -457,13 +478,15 @@ const initiatePlayerCombat = async (attackerShipId, defenderShipId, requesterUse
   }
   const defender = await Ship.findOne({ where: { ship_id: defenderShipId, is_active: true } });
   if (!defender) throw Object.assign(new Error('Defender ship not found'), { statusCode: 404 });
-  if (attacker.current_sector_id !== defender.current_sector_id) {
+  if (!bypassSameSector && attacker.current_sector_id !== defender.current_sector_id) {
     throw Object.assign(new Error('Ships are not in the same sector'), { statusCode: 400 });
   }
   if (attacker.in_combat || defender.in_combat) {
     throw Object.assign(new Error('One or both ships are already in combat'), { statusCode: 400 });
   }
-  await assertCombatAllowedInSector(attacker.current_sector_id, { requirePvp: true });
+  if (!bypassPolicy) {
+    await assertCombatAllowedInSector(attacker.current_sector_id, { requirePvp: true });
+  }
 
   try {
     await attacker.update({ in_combat: true });
@@ -489,7 +512,27 @@ const initiatePlayerCombat = async (attackerShipId, defenderShipId, requesterUse
     }
   });
 
-  return initiateCombat(attacker.current_sector_id, [buildShip(attacker), buildShip(defender)], 'PVP');
+  return initiateCombat(
+    attacker.current_sector_id,
+    [buildShip(attacker), buildShip(defender)],
+    combatType,
+    { sectorEmit, matchId }
+  );
+};
+
+/**
+ * Arena/Duel helper: initiates PvP combat bypassing consent rules. Both ships must be free
+ * (not currently in combat). Used by the Arena queue and mutual duel acceptance flows.
+ */
+const initiateConsensualPvp = async (attackerShipId, defenderShipId, options = {}) => {
+  return initiatePlayerCombat(attackerShipId, defenderShipId, null, {
+    bypassPolicy: true,
+    // Default true (arena uses this); duels override to false to keep same-sector enforcement.
+    bypassSameSector: options.bypassSameSector !== undefined ? options.bypassSameSector : true,
+    combatType: options.combatType || 'PVP_DUEL',
+    sectorEmit: options.sectorEmit !== undefined ? options.sectorEmit : false,
+    matchId: options.matchId || null
+  });
 };
 
 const initiateNPCCombat = async (shipId, npcId, requesterUserId = null) => {
@@ -835,10 +878,22 @@ const resolveCombat = async (combatId) => {
 
   let winnerOwnerId = null;
   let winnerType = 'draw';
+  let winnerTeamId = null;
   if (survivors.length > 0) {
     winnerOwnerId = survivors[0].ownerId;
+    winnerTeamId = survivors[0].teamId || null;
     winnerType = survivors[0].isNPC ? 'npc' : 'player';
   }
+  // Compute per-player winners/losers for team-aware ELO.
+  const allPlayers = Array.from(ships.values()).filter(s => !s.isNPC && s.ownerId);
+  const winnerUserIds = winnerTeamId
+    ? Array.from(new Set(allPlayers.filter(s => s.teamId === winnerTeamId).map(s => s.ownerId)))
+    : (winnerOwnerId && winnerType === 'player' ? [winnerOwnerId] : []);
+  const loserUserIds = Array.from(new Set(
+    allPlayers
+      .filter(s => !winnerUserIds.includes(s.ownerId))
+      .map(s => s.ownerId)
+  ));
 
   const t = await sequelize.transaction();
   try {
@@ -889,6 +944,41 @@ const resolveCombat = async (combatId) => {
           } catch (err) { console.error(`[RealtimeCombat] NPC loot fetch failed ${ship.shipId}:`, err); }
         }
       }
+      // Bounty Board: credit kills against accepted contracts of matching NPC type
+      try {
+        const killedNpcTypes = [];
+        for (const ship of destroyed) {
+          if (ship.isNPC && ship.npcType) killedNpcTypes.push(ship.npcType);
+        }
+        if (killedNpcTypes.length > 0) {
+          const acceptedContracts = await BountyContract.findAll({
+            where: {
+              accepted_by_user_id: winnerOwnerId,
+              status: 'accepted',
+              target_npc_type: { [Op.in]: killedNpcTypes }
+            },
+            transaction: t,
+            lock: t.LOCK.UPDATE
+          });
+          for (const contract of acceptedContracts) {
+            const matched = killedNpcTypes.filter(t => t === contract.target_npc_type).length;
+            if (matched <= 0) continue;
+            const newKills = contract.kills_recorded + matched;
+            if (newKills >= contract.kill_count) {
+              await contract.update({
+                kills_recorded: contract.kill_count,
+                status: 'completed',
+                completed_at: new Date()
+              }, { transaction: t });
+              creditsLooted += contract.reward_credits;
+              experienceGained += contract.reward_xp;
+            } else {
+              await contract.update({ kills_recorded: newKills }, { transaction: t });
+            }
+          }
+        }
+      } catch (e) { console.error('[RealtimeCombat] Bounty contract update failed:', e); }
+
       if (creditsLooted > 0 || experienceGained > 0) {
         try {
           const user = await User.findByPk(winnerOwnerId, { transaction: t, lock: t.LOCK.UPDATE });
@@ -947,6 +1037,9 @@ const resolveCombat = async (combatId) => {
     const result = {
       winnerType,
       winnerOwnerId,
+      winnerTeamId,
+      winners: winnerUserIds,
+      losers: loserUserIds,
       survivors: survivors.map(s => ({ shipId: s.shipId, isNPC: s.isNPC, hull: Math.floor(s.stats.hull) })),
       destroyed: destroyed.map(s => ({ shipId: s.shipId, isNPC: s.isNPC })),
       escaped: escaped.map(s => ({ shipId: s.shipId, isNPC: s.isNPC })),
@@ -1027,6 +1120,18 @@ const resolveCombat = async (combatId) => {
         derelictManifests
       }
     });
+
+    // Notify PvP service so arena/duel matches can update ELO and notify queues.
+    if (combatState.matchId) {
+      try {
+        const pvpService = require('./pvpService');
+        pvpService.handleCombatResolved(combatState.matchId, {
+          combatId: combatState.combatId,
+          combatType: combatState.combatType,
+          result
+        });
+      } catch (e) { console.error('[RealtimeCombat] pvpService.handleCombatResolved failed:', e); }
+    }
   } catch (err) {
     try { await t.rollback(); } catch (e) { console.error('[RealtimeCombat] Rollback failed:', e); }
     console.error(`[RealtimeCombat] Resolve failed for ${combatId}:`, err);
@@ -1135,12 +1240,34 @@ const buildDerelictManifest = (npcShip) => {
   }
 };
 
+const listSpectatableCombats = () => {
+  const out = [];
+  for (const state of activeCombats.values()) {
+    if (state.combatType === 'PVP_ARENA' || state.combatType === 'PVP_DUEL') {
+      const playerNames = [];
+      for (const ship of state.ships.values()) {
+        if (!ship.isNPC) playerNames.push(ship.name || 'Unknown');
+      }
+      out.push({
+        combatId: state.combatId,
+        combatType: state.combatType,
+        startedAt: state.startedAt,
+        matchId: state.matchId || null,
+        players: playerNames,
+        shipCount: state.ships.size
+      });
+    }
+  }
+  return out;
+};
+
 module.exports = {
   startCombatTick,
   stopCombatTick,
   processTick,
   initiateCombat,
   initiatePlayerCombat,
+  initiateConsensualPvp,
   initiateNPCCombat,
   handleCommand,
   resolveCombat,
@@ -1149,5 +1276,6 @@ module.exports = {
   notifyPlayerReconnect,
   sendSnapshotToUser,
   getActiveCombatInSector,
-  getCombatState
+  getCombatState,
+  listSpectatableCombats
 };

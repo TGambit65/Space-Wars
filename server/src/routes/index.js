@@ -7,6 +7,7 @@ const tradeRoutes = require('./trade');
 // Phase 3: Ship Designer & Combat
 const shipDesignerRoutes = require('./shipDesignerRoutes');
 const combatRoutes = require('./combatRoutes');
+const pvpRoutes = require('./pvpRoutes');
 const npcRoutes = require('./npcRoutes');
 // Phase 4: Planets, Colonization & Crew
 const planetRoutes = require('./planetRoutes');
@@ -92,6 +93,7 @@ router.use('/trade', tradeRoutes);
 // Phase 3: Ship Designer & Combat
 router.use('/designer', shipDesignerRoutes);
 router.use('/combat', combatRoutes);
+router.use('/pvp', pvpRoutes);
 router.use('/npcs', npcRoutes);
 // Phase 4: Planets, Colonization & Crew
 router.use('/planets', planetRoutes);

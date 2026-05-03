@@ -67,6 +67,8 @@ const Achievement = require('./Achievement');
 const PlayerAchievement = require('./PlayerAchievement');
 // PvP Cooldowns (anti-grief)
 const PvpCooldown = require('./PvpCooldown');
+// Bounty Board contracts (graded PvE)
+const BountyContract = require('./BountyContract');
 // AI Agent System
 const AgentAccount = require('./AgentAccount');
 const AgentActionLog = require('./AgentActionLog');
@@ -436,6 +438,10 @@ PvpCooldown.belongsTo(User, { foreignKey: 'attacker_user_id', as: 'attacker' });
 User.hasMany(PvpCooldown, { foreignKey: 'victim_user_id', as: 'incomingPvpCooldowns' });
 PvpCooldown.belongsTo(User, { foreignKey: 'victim_user_id', as: 'victim' });
 
+// ============== Bounty Board ==============
+User.hasMany(BountyContract, { foreignKey: 'accepted_by_user_id', as: 'bountyContracts' });
+BountyContract.belongsTo(User, { foreignKey: 'accepted_by_user_id', as: 'hunter' });
+
 module.exports = {
   sequelize,
   User,
@@ -517,6 +523,8 @@ module.exports = {
   PlayerAchievement,
   // PvP Cooldowns
   PvpCooldown,
+  // Bounty Board
+  BountyContract,
   // AI Agent System
   AgentAccount,
   AgentActionLog

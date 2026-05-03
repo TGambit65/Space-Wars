@@ -405,6 +405,25 @@ export const achievements = {
   getStats: () => api.get('/achievements/stats'),
 };
 
+// PvP: Bounty Board, Arena queue, Duels, Spectator
+export const pvp = {
+  // Bounty board
+  listBounties: () => api.get('/pvp/bounties'),
+  acceptBounty: (contractId) => api.post(`/pvp/bounties/${contractId}/accept`),
+  abandonBounty: (contractId) => api.post(`/pvp/bounties/${contractId}/abandon`),
+  // Arena
+  arenaStatus: () => api.get('/pvp/arena/status'),
+  arenaJoin: (shipId, bracket = '1v1') => api.post('/pvp/arena/join', { ship_id: shipId, bracket }),
+  arenaLeave: () => api.post('/pvp/arena/leave'),
+  // Duels
+  duelChallenge: (challengerShipId, defenderShipId) =>
+    api.post('/pvp/duels/challenge', { challenger_ship_id: challengerShipId, defender_ship_id: defenderShipId }),
+  duelRespond: (requestId, accept) => api.post(`/pvp/duels/${requestId}/respond`, { accept }),
+  duelIncoming: () => api.get('/pvp/duels/incoming'),
+  // Spectator
+  listSpectatable: () => api.get('/pvp/spectatable'),
+};
+
 // AI Agent
 export const agents = {
   get: () => api.get('/agents'),

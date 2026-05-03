@@ -489,6 +489,51 @@ const initialize = (httpServer) => {
       }
     });
 
+    // Spectator: join a combat room (read-only) for arena/duel matches.
+    socket.on('combat:spectate_join', async (payload = {}) => {
+      try {
+        const realtimeCombatService = require('./realtimeCombatService');
+        const combatId = typeof payload?.combat_id === 'string' ? payload.combat_id.trim() : null;
+        if (!combatId) {
+          socket.emit('combat:error', { message: 'combat_id required' });
+          return;
+        }
+        const state = realtimeCombatService.getCombatState(combatId);
+        if (!state) {
+          socket.emit('combat:error', { message: 'Combat not found' });
+          return;
+        }
+        const isParticipant = Array.isArray(state.ships)
+          && state.ships.some(s => !s.isNPC && s.ownerId === socket.userId);
+        const isSpectatable = state.combatType === 'PVP_ARENA' || state.combatType === 'PVP_DUEL';
+        if (!isParticipant && !isSpectatable) {
+          socket.emit('combat:error', { message: 'This combat is not spectatable' });
+          return;
+        }
+        // Participants already receive events via their per-user room; joining the
+        // combat room would double-deliver. Only true spectators join the room.
+        if (!isParticipant) {
+          socket.join(`combat:${combatId}`);
+        }
+        socket.emit('combat:event', {
+          v: 1,
+          ts: Date.now(),
+          combatId,
+          type: 'snapshot',
+          snapshot: state
+        });
+      } catch (e) {
+        socket.emit('combat:error', { message: 'Spectator join failed' });
+      }
+    });
+
+    socket.on('combat:spectate_leave', (payload = {}) => {
+      try {
+        const combatId = typeof payload?.combat_id === 'string' ? payload.combat_id.trim() : null;
+        if (combatId) socket.leave(`combat:${combatId}`);
+      } catch { /* noop */ }
+    });
+
     socket.on('disconnect', () => {
       // Clean up per-user socket tracking
       const socks = userSockets.get(socket.userId);
@@ -549,6 +594,18 @@ const batchEmitToSector = (sectorId, updates) => {
   io.to(`sector:${sectorId}`).emit('npc:batch_update', updates);
 };
 
+/**
+ * Emit an event to a combat-specific room (used by spectators of arena/duel matches).
+ * Players already receive combat events via their per-user room.
+ * @param {string} combatId
+ * @param {string} event
+ * @param {Object} data
+ */
+const emitToCombatRoom = (combatId, event, data) => {
+  if (!io || !combatId) return;
+  io.to(`combat:${combatId}`).emit(event, data);
+};
+
 // ─── Query Helpers ───────────────────────────────────────────────
 
 /**
@@ -583,6 +640,7 @@ module.exports = {
   getIO,
   emitToSector,
   emitToUser,
+  emitToCombatRoom,
   batchEmitToSector,
   getConnectedCount,
   getUsersInSector

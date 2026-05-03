@@ -310,6 +310,18 @@ const SystemView = ({ user, onHailNPC, activityFeed = [], sectorNPCs = [] }) => 
                         {FACTION_LABELS[info.faction] || ''}
                       </span>
                     )}
+                    {currentShip && info.ships?.[0] && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            const { pvp } = await import('../../services/api');
+                            await pvp.duelChallenge(currentShip.ship_id, info.ships[0].ship_id);
+                          } catch (e) { console.error('[Duel] challenge failed', e); }
+                        }}
+                        className="px-1.5 py-0.5 text-[10px] rounded bg-red-900/40 hover:bg-red-700/60 text-red-200 border border-red-800"
+                        title="Challenge to a consensual duel"
+                      >Duel</button>
+                    )}
                   </div>
                 </div>
               ))}
