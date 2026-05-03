@@ -135,6 +135,40 @@ const startServer = async () => {
 
     await ensureSprintWorldSchema();
 
+    // ============== One-time wipe of legacy 3D-voxel surface data ==============
+    // The 3D voxel + dual-surface system was removed in favor of a clean 2D engine.
+    // We drop the voxel_blocks table and clear stale custom_blocks/colony_buildings
+    // grid placements once per database (tracked by a marker row in game_settings).
+    try {
+      const { GameSetting } = require('./models');
+      const wipeKey = 'surface_v2_wipe_done';
+      const existing = await GameSetting.findOne({ where: { key: wipeKey } });
+      if (!existing) {
+        console.log('Wiping legacy 3D voxel data and resetting surface placements...');
+        // voxel_blocks drop is outside the transaction (DDL in SQLite auto-commits anyway)
+        // and is idempotent via IF EXISTS.
+        await sequelize.query('DROP TABLE IF EXISTS voxel_blocks');
+        await sequelize.transaction(async (t) => {
+          await sequelize.query('DELETE FROM custom_blocks', { transaction: t });
+          await sequelize.query('UPDATE colony_buildings SET grid_x = NULL, grid_y = NULL', { transaction: t });
+          await sequelize.query('DELETE FROM surface_anomalies', { transaction: t });
+          await sequelize.query('UPDATE colonies SET surface_initialized = 0', { transaction: t });
+          await GameSetting.create({
+            category: 'general',
+            key: wipeKey,
+            value: '1',
+            value_type: 'number',
+            description: 'Surface v2 (clean-slate 2D) wipe marker',
+          }, { transaction: t });
+        });
+        console.log('✓ Legacy surface data wiped — colonies will re-initialize on next visit.');
+      }
+    } catch (wipeError) {
+      // Loud failure: do NOT swallow — log full stack so we don't silently leave
+      // the database in a half-wiped state without the marker row.
+      console.error('Surface v2 wipe FAILED:', wipeError);
+    }
+
     // Check if universe needs to be generated
     if (sectorCount === 0) {
       console.log('No sectors found. Generating full universe with economy...');

@@ -99,8 +99,7 @@ const CombatHistory = lazy(() => import('./components/combat/CombatHistory'));
 const RepairPage = lazy(() => import('./components/ship/RepairPage'));
 const PlanetsPage = lazy(() => import('./components/planets/PlanetsPage'));
 const ColoniesPage = lazy(() => import('./components/colonies/ColoniesPage'));
-const ColonySurface = lazy(() => import('./components/colonies/ColonySurface'));
-const VoxelSurface = lazy(() => import('./components/colonies/VoxelSurface'));
+const ColonySurface = lazy(() => import('./components/colonies/PlanetSurfaceView'));
 const ColonyLeaderboard = lazy(() => import('./components/colonies/ColonyLeaderboard'));
 const GroundCombatView = lazy(() => import('./components/colonies/GroundCombatView'));
 const CrewPage = lazy(() => import('./components/crew/CrewPage'));
@@ -118,8 +117,8 @@ const MessagingPage = lazy(() => import('./components/messaging/MessagingPage'))
 const ShipCustomizer = lazy(() => import('./components/ship/ShipCustomizer'));
 const OutpostsPage = lazy(() => import('./components/outposts/OutpostsPage'));
 const EventsPage = lazy(() => import('./components/events/EventsPage'));
-const ShipInteriorView = lazy(() => import('./components/traversal/ShipInteriorView'));
-const DerelictBoardingView = lazy(() => import('./components/traversal/DerelictBoardingView'));
+const ShipInteriorView = lazy(() => import('./components/ships/ShipInterior2DView'));
+const DerelictBoardingView = lazy(() => import('./components/ships/ShipInterior2DView'));
 const AgentPage = lazy(() => import('./components/agent/AgentPage'));
 const AchievementsPage = lazy(() => import('./components/common/AchievementsPage'));
 
@@ -237,7 +236,7 @@ function App() {
         <Route path="/system" element={<SystemView user={user} onHailNPC={handleHailNPC} activityFeed={activityFeed} sectorNPCs={sectorNPCs} />} />
         <Route path="/ships" element={<ShipPanel user={user} />} />
         <Route path="/ship/:shipId/interior" element={<ShipInteriorView user={user} />} />
-        <Route path="/ship/:shipId/derelict" element={<DerelictBoardingView user={user} />} />
+        <Route path="/ship/:shipId/derelict" element={<DerelictBoardingView user={user} mode="derelict" />} />
         <Route path="/designer" element={<ShipDesigner user={user} />} />
         <Route path="/trading" element={<TradingPage user={user} />} />
         <Route path="/combat" element={<CombatPage user={user} socket={socket} />} />
@@ -247,7 +246,6 @@ function App() {
         <Route path="/colonies" element={<ColoniesPage user={user} />} />
         <Route path="/colony/:colonyId/surface" element={<ColonySurface user={user} />} />
         <Route path="/colony/:colonyId/surface/public" element={<ColonySurface user={user} readOnly />} />
-        <Route path="/colony/:colonyId/voxel" element={<VoxelSurface user={user} />} />
         <Route path="/colony-leaderboard" element={<ColonyLeaderboard user={user} />} />
         <Route path="/ground-combat/:instanceId" element={<GroundCombatView user={user} />} />
         <Route path="/crew" element={<CrewPage user={user} />} />

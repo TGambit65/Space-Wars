@@ -3,7 +3,6 @@ const router = express.Router();
 const colonyController = require('../controllers/colonyController');
 const colonySurfaceController = require('../controllers/colonySurfaceController');
 const customBlockController = require('../controllers/customBlockController');
-const voxelController = require('../controllers/voxelController');
 const { authMiddleware, optionalAuth } = require('../middleware/auth');
 
 // Public endpoints (no auth required)
@@ -65,10 +64,6 @@ router.post('/:colonyId/blocks', customBlockController.placeBlock);
 router.delete('/:colonyId/blocks', customBlockController.removeBlock);
 
 // ============== Voxel Block Endpoints ==============
-router.get('/:colonyId/voxels/chunk', voxelController.getChunkModifications);
-router.post('/:colonyId/voxels', voxelController.placeBlock);
-router.delete('/:colonyId/voxels', voxelController.removeBlock);
-router.post('/:colonyId/voxels/bulk', voxelController.bulkOperation);
 
 module.exports = router;
 

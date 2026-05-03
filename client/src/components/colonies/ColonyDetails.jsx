@@ -115,11 +115,11 @@ function ColonyDetails({ colony, ships, onClose, onCollect, onUpgrade, onAbandon
             </div>
             <div className="flex items-center gap-2">
               <Link
-                to={`/colony/${colony.colony_id}/voxel`}
+                to={`/colony/${colony.colony_id}/surface`}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/20 hover:bg-accent-cyan/20 transition-colors"
                 onClick={onClose}
               >
-                <Box className="w-4 h-4" /> 3D View
+                <Box className="w-4 h-4" /> Surface View
               </Link>
               <button onClick={onClose} className="text-gray-400 hover:text-white p-1">
                 <X className="w-6 h-6" />

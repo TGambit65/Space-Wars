@@ -1,6 +1,7 @@
 const express = require('express');
 const { body, param } = require('express-validator');
 const shipController = require('../controllers/shipController');
+const shipInteriorController = require('../controllers/shipInteriorController');
 const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
@@ -32,6 +33,7 @@ router.get('/:shipId/crew-effectiveness', shipIdValidation, shipController.getCr
 router.post('/:shipId/move', moveValidation, shipController.moveShip);
 router.post('/:shipId/jump', moveValidation, shipController.jumpDrive);
 router.post('/:shipId/activate', shipIdValidation, shipController.activateShip);
+router.get('/:shipId/interior', shipIdValidation, shipInteriorController.getInterior);
 
 module.exports = router;
 

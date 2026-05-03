@@ -102,10 +102,7 @@ export const colonies = {
   getDailyQuests: () => api.get('/colonies/daily-quests'),
   claimDailyQuest: (questId) => api.post(`/colonies/daily-quests/${questId}/claim`),
   // Voxel 3D endpoints
-  getVoxelChunk: (colonyId, cx, cz) => api.get(`/colonies/${colonyId}/voxels/chunk?cx=${cx}&cz=${cz}`),
-  placeVoxel: (colonyId, data) => api.post(`/colonies/${colonyId}/voxels`, data),
-  removeVoxel: (colonyId, data) => api.delete(`/colonies/${colonyId}/voxels`, { data }),
-  bulkVoxelOp: (colonyId, ops) => api.post(`/colonies/${colonyId}/voxels/bulk`, { operations: ops }),
+  getShipInterior: (shipId, mode) => api.get(`/ships/${shipId}/interior${mode ? `?mode=${mode}` : ''}`),
 };
 
 // Ground Combat

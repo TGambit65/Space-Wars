@@ -22,3 +22,12 @@ A multiplayer space trading/combat game.
   - Build: `cd client && npm install && npm run build && cd ../server && npm install`
   - Run: `cd server && node src/index.js`
 - The Express server serves the built React app from `/play` and the static site from `/`.
+
+## 2D Surface & Ship Interior System (clean-slate v2)
+The old 3D voxel surface + dual-rendering planet view and 3D ship interiors were removed. They have been replaced by **two separate 2D systems** sharing a small `engine2d` primitives library:
+
+- `client/src/engine2d/` — `Camera2D`, `InputController` (WASD), `Avatar`, `TileGridRenderer`, `Pathing` (passability/collision/nearest-interactable), `WeatherOverlay`, `DayNightOverlay`.
+- `client/src/components/colonies/PlanetSurfaceView.jsx` — top-down 2D planet surface (terrain + deposits + anomalies + buildings + custom blocks + avatar + weather + day/night).
+- `client/src/components/ships/ShipInterior2DView.jsx` — multi-deck 2D ship interior. Decks, layout and interactables come from the server via `GET /api/ships/:shipId/interior?mode=normal|derelict`. Same component handles owned ships and derelict boarding.
+- Server: `server/src/services/shipInteriorService.js` returns authored deck templates per hull class (small/medium/large). `server/src/controllers/shipInteriorController.js` is wired at `server/src/routes/ship.js`.
+- The startup wipe in `server/src/index.js` runs once per database (tracked by a `surface_v2_wipe_done` row in `game_settings`): drops `voxel_blocks`, clears `custom_blocks` + `surface_anomalies`, nulls `colony_buildings.grid_x/y`, and resets `colonies.surface_initialized`.

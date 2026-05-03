@@ -58,7 +58,6 @@ const GroundCombatInstance = require('./GroundCombatInstance');
 // Daily Quests
 const DailyQuest = require('./DailyQuest');
 // Voxel Blocks
-const VoxelBlock = require('./VoxelBlock');
 // NPC Conversation Sessions
 const NpcConversationSession = require('./NpcConversationSession');
 // NPC Memory (per-player relationship)
@@ -384,10 +383,6 @@ User.hasMany(DailyQuest, { foreignKey: 'user_id', as: 'dailyQuests' });
 DailyQuest.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
 // ============== Voxel Blocks ==============
-Colony.hasMany(VoxelBlock, { foreignKey: 'colony_id', as: 'voxelBlocks' });
-VoxelBlock.belongsTo(Colony, { foreignKey: 'colony_id' });
-User.hasMany(VoxelBlock, { foreignKey: 'placed_by', as: 'placedVoxels' });
-VoxelBlock.belongsTo(User, { foreignKey: 'placed_by', as: 'placer' });
 
 // ============== NPC Conversation Sessions ==============
 NPC.hasMany(NpcConversationSession, { foreignKey: 'npc_id', as: 'conversationSessions' });
@@ -508,7 +503,6 @@ module.exports = {
   // Daily Quests
   DailyQuest,
   // Voxel Blocks
-  VoxelBlock,
   PlayerProtectionState,
   ActionAuditLog,
   SectorInstanceAssignment,
