@@ -34,6 +34,8 @@ router.post('/:shipId/move', moveValidation, shipController.moveShip);
 router.post('/:shipId/jump', moveValidation, shipController.jumpDrive);
 router.post('/:shipId/activate', shipIdValidation, shipController.activateShip);
 router.get('/:shipId/interior', shipIdValidation, shipInteriorController.getInterior);
+router.post('/:shipId/loot', shipIdValidation, shipInteriorController.lootCrate);
+router.get('/:shipId/onboard-crew', shipIdValidation, shipInteriorController.getOnBoardCrew);
 
 module.exports = router;
 

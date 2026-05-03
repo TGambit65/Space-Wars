@@ -22,6 +22,8 @@
  *   W  weapons console
  *   R  reactor core (impassable, interactable)
  *   L  loot crate (derelict only, interactable)
+ *   F  fire hazard (derelict only, damages player over time)
+ *   V  vacuum breach (derelict only, pulls player toward nearest airlock)
  */
 
 const HULL_CLASS = {
@@ -198,6 +200,27 @@ const TILE_META = {
   'W': { kind: 'weapons', passable: false, interactable: true, color: '#ff7676', label: 'Weapons Control', action: 'open_combat' },
   'R': { kind: 'reactor', passable: false, interactable: true, color: '#ffae34', label: 'Reactor Core', action: 'open_status' },
   'L': { kind: 'loot', passable: true, interactable: true, color: '#ffd166', label: 'Loot Crate', action: 'loot_crate' },
+  'F': { kind: 'fire', passable: true, hazard: 'fire', color: '#ff4422', label: 'Fire' },
+  'V': { kind: 'breach', passable: true, hazard: 'breach', color: '#1a2a55', label: 'Hull Breach' },
+};
+
+// Per-hull-class loot tables. Weight controls how often each entry is rolled.
+const LOOT_TABLES = {
+  small: [
+    { type: 'credits', weight: 5, min: 25, max: 120 },
+    { type: 'commodity', weight: 4, min: 1, max: 4 },
+    { type: 'component', weight: 1, tierMin: 1, tierMax: 1 },
+  ],
+  medium: [
+    { type: 'credits', weight: 4, min: 80, max: 400 },
+    { type: 'commodity', weight: 4, min: 2, max: 8 },
+    { type: 'component', weight: 2, tierMin: 1, tierMax: 2 },
+  ],
+  large: [
+    { type: 'credits', weight: 3, min: 250, max: 1200 },
+    { type: 'commodity', weight: 4, min: 4, max: 14 },
+    { type: 'component', weight: 3, tierMin: 1, tierMax: 3 },
+  ],
 };
 
 function getHullClass(shipType) {
@@ -257,6 +280,24 @@ function buildInterior(ship, { mode = 'normal' } = {}) {
         const y = Math.floor(rand() * deck.height);
         if (deck.tiles[y][x] === '#') deck.tiles[y][x] = 'w';
       }
+      // Sprinkle fire hazards on floor tiles
+      const fires = Math.floor(rand() * 4) + 2;
+      for (let i = 0; i < fires; i++) {
+        for (let attempt = 0; attempt < 20; attempt++) {
+          const x = Math.floor(rand() * deck.width);
+          const y = Math.floor(rand() * deck.height);
+          if (deck.tiles[y][x] === '.') { deck.tiles[y][x] = 'F'; break; }
+        }
+      }
+      // Sprinkle vacuum breaches on floor tiles
+      const breaches = Math.floor(rand() * 3) + 1;
+      for (let i = 0; i < breaches; i++) {
+        for (let attempt = 0; attempt < 20; attempt++) {
+          const x = Math.floor(rand() * deck.width);
+          const y = Math.floor(rand() * deck.height);
+          if (deck.tiles[y][x] === '.') { deck.tiles[y][x] = 'V'; break; }
+        }
+      }
     }
   }
 
@@ -279,8 +320,50 @@ function hashString(str) {
   return h;
 }
 
+/**
+ * Deterministically roll a loot result for a single crate at (deckId, x, y) on
+ * a derelict ship. The seed is derived from ship_id + deck + coords so the
+ * same crate always rolls the same loot — this lets the server reject double
+ * looting without a persistent table (the in-memory looted set is a separate
+ * concern in the controller).
+ *
+ * Returns an object describing what to award; controller is responsible for
+ * actually applying it (DB updates).
+ */
+function rollCrateLoot(ship, deckId, x, y) {
+  const hullClass = getHullClass(ship.ship_type);
+  const table = LOOT_TABLES[hullClass] || LOOT_TABLES.small;
+  const seed = hashString(`${ship.ship_id || 'ship'}:${deckId}:${x}:${y}`);
+  let s = seed | 0;
+  const rand = () => {
+    s = (s * 1664525 + 1013904223) | 0;
+    return ((s >>> 0) % 1000000) / 1000000;
+  };
+
+  const totalWeight = table.reduce((sum, e) => sum + e.weight, 0);
+  let pick = rand() * totalWeight;
+  let entry = table[0];
+  for (const e of table) {
+    pick -= e.weight;
+    if (pick <= 0) { entry = e; break; }
+  }
+
+  if (entry.type === 'credits') {
+    const amount = entry.min + Math.floor(rand() * (entry.max - entry.min + 1));
+    return { type: 'credits', amount };
+  }
+  if (entry.type === 'commodity') {
+    const quantity = entry.min + Math.floor(rand() * (entry.max - entry.min + 1));
+    return { type: 'commodity', quantity, _selector: rand() };
+  }
+  // component
+  const tier = entry.tierMin + Math.floor(rand() * (entry.tierMax - entry.tierMin + 1));
+  return { type: 'component', tier, _selector: rand() };
+}
+
 module.exports = {
   buildInterior,
   getHullClass,
+  rollCrateLoot,
   TILE_META,
 };

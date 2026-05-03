@@ -103,6 +103,8 @@ export const colonies = {
   claimDailyQuest: (questId) => api.post(`/colonies/daily-quests/${questId}/claim`),
   // Voxel 3D endpoints
   getShipInterior: (shipId, mode) => api.get(`/ships/${shipId}/interior${mode ? `?mode=${mode}` : ''}`),
+  lootShipCrate: (shipId, deckId, x, y) => api.post(`/ships/${shipId}/loot`, { deckId, x, y }),
+  getShipOnBoardCrew: (shipId) => api.get(`/ships/${shipId}/onboard-crew`),
 };
 
 // Ground Combat
