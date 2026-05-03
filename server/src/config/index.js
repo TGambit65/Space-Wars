@@ -503,6 +503,9 @@ module.exports = {
   // Combat configuration
   combat: {
     maxRoundsPerBattle: 50,
+    // Damage formula: dmg = atk * (1 - def / (def + defenseScalingConstant)).
+    // A constant of 100 means a defender with rating == 100 mitigates 50% of incoming damage.
+    defenseScalingConstant: 100,
     fleeChanceBase: 0.3,
     fleeChancePerSpeedDiff: 0.05,
     criticalHitChance: 0.10,

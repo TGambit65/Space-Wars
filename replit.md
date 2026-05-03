@@ -13,6 +13,12 @@ A multiplayer space trading/combat game.
 - **Start application** workflow: `cd client && npm run dev -- --host 0.0.0.0 --port 5000` — Vite dev server on port 5000 (webview). Proxies `/api` and `/socket.io` to `http://localhost:3000`.
 - `client/vite.config.js` sets `allowedHosts: true` and HMR over `wss:443` so the iframe proxy works.
 
+## Testing
+- `cd server && npm test` runs the full Jest suite (55 test files, ~900 tests, 100% passing).
+- Test environment uses **in-memory SQLite** (`NODE_ENV=test` branch in `server/src/config/database.js`) — tests never touch `server/data/spacewars.sqlite` or contend with the running Backend workflow for the file lock.
+- Setup file: `server/tests/setup.js` runs one global `sequelize.sync({ force: true })`. Test helpers live in `server/tests/helpers/`.
+- Long full runs may exceed bash's 120s timeout; running `npx jest --maxWorkers=2 --silent` in 2-3 grouped batches works around it.
+
 ## Environment
 - `server/.env` sets `PORT=3000` and `NODE_ENV=development`.
 - For production (PostgreSQL): set `JWT_SECRET`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, and either `DB_DIALECT=postgres` or `NODE_ENV=production`.
