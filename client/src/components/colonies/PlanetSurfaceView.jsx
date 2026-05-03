@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Application, Container, Graphics, Text } from 'pixi.js';
-import { ArrowLeft, Sun, Cloud, Loader, Sparkles, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Sun, Cloud, Loader, Sparkles, AlertTriangle, Undo2 } from 'lucide-react';
 import { Camera2D } from '../../engine2d/Camera';
 import { InputController } from '../../engine2d/InputController';
 import { Avatar } from '../../engine2d/Avatar';
@@ -12,6 +12,9 @@ import {
 } from '../../engine2d/Pathing';
 import { colonies as coloniesApi, buildings as buildingsApi } from '../../services/api';
 import SurfaceToolbar from './SurfaceToolbar';
+
+const UNDO_WINDOW_MS = 10_000;
+const RIGHT_CLICK_DRAG_THRESHOLD = 5; // px
 
 function useFlash() {
   const [msg, setMsg] = useState(null);
@@ -84,10 +87,30 @@ export default function PlanetSurfaceView({ user, readOnly = false }) {
   const [hour, setHour] = useState(12);
   const [error, setError] = useState(null);
   const [tool, setTool] = useState({ kind: 'none' }); // {kind:'building'|'block'|'remove'|'none', payload}
+  const [lastPlaced, setLastPlaced] = useState(null); // { kind: 'building'|'block', id, ts }
+  const [, setUndoTick] = useState(0);
   const selectedToolRef = useRef(selectedTool);
   const toolRef = useRef(tool);
+  const surfaceRef = useRef(surface);
   useEffect(() => { selectedToolRef.current = selectedTool; }, [selectedTool]);
   useEffect(() => { toolRef.current = tool; }, [tool]);
+  useEffect(() => { surfaceRef.current = surface; }, [surface]);
+
+  // Re-render every second while an undo entry is active so the button hides on expiry
+  useEffect(() => {
+    if (!lastPlaced) return undefined;
+    const id = setInterval(() => {
+      if (Date.now() - lastPlaced.ts > UNDO_WINDOW_MS) {
+        setLastPlaced(null);
+      } else {
+        setUndoTick((t) => t + 1);
+      }
+    }, 500);
+    return () => clearInterval(id);
+  }, [lastPlaced]);
+
+  const undoRemainingMs = lastPlaced ? Math.max(0, UNDO_WINDOW_MS - (Date.now() - lastPlaced.ts)) : 0;
+  const canUndo = !!lastPlaced && undoRemainingMs > 0;
 
   const fetchSurface = useCallback(() => (
     readOnly ? coloniesApi.getPublicSurface(colonyId) : coloniesApi.getSurface(colonyId)
@@ -198,14 +221,26 @@ export default function PlanetSurfaceView({ user, readOnly = false }) {
         setHoveredTile({ x: gx, y: gy });
       };
       const onDown = (e) => {
-        if (e.button === 2) { stateRef.current.dragging = { x: e.clientX, y: e.clientY }; }
+        if (e.button === 2) {
+          stateRef.current.dragging = { x: e.clientX, y: e.clientY };
+          // Independent ref read by the right-click delete handler. Not cleared
+          // on mouseup so handler ordering can't lose the value.
+          stateRef.current.rightDrag = { moved: 0 };
+        }
       };
       const onUp = () => { stateRef.current.dragging = null; };
       const onDrag = (e) => {
         const d = stateRef.current.dragging;
         if (!d) return;
-        camera.pan(e.clientX - d.x, e.clientY - d.y);
-        stateRef.current.dragging = { x: e.clientX, y: e.clientY };
+        const dx = e.clientX - d.x;
+        const dy = e.clientY - d.y;
+        const rd = stateRef.current.rightDrag;
+        if (rd) rd.moved += Math.abs(dx) + Math.abs(dy);
+        if (!rd || rd.moved > RIGHT_CLICK_DRAG_THRESHOLD) {
+          camera.pan(dx, dy);
+        }
+        d.x = e.clientX;
+        d.y = e.clientY;
       };
       const onContext = (e) => e.preventDefault();
       app.canvas.addEventListener('wheel', onWheel, { passive: false });
@@ -387,60 +422,181 @@ export default function PlanetSurfaceView({ user, readOnly = false }) {
     }
   }, [surface]);
 
-  // Tile click → place building/block, remove block, or move building
+  // Helper: find a placed building whose footprint covers (gx, gy)
+  const findBuildingAt = useCallback((gx, gy) => {
+    const surf = surfaceRef.current;
+    if (!surf) return null;
+    return (surf.buildings || []).find((bb) => {
+      if (bb.grid_x == null || bb.grid_y == null) return false;
+      const fp = bb.footprint || surf.buildingFootprints?.[bb.building_type] || { w: 1, h: 1 };
+      return gx >= bb.grid_x && gx < bb.grid_x + fp.w
+          && gy >= bb.grid_y && gy < bb.grid_y + fp.h;
+    }) || null;
+  }, []);
+
+  const findBlockAt = useCallback((gx, gy) => {
+    const surf = surfaceRef.current;
+    if (!surf) return null;
+    return (surf.customBlocks || []).find((b) => b.grid_x === gx && b.grid_y === gy) || null;
+  }, []);
+
+  // Tile click → place building/block, remove block, or move/pick-up building
   useEffect(() => {
     const s = stateRef.current;
     if (!s.app || readOnly) return;
+    const tileFromEvent = (e) => {
+      const rect = s.app.canvas.getBoundingClientRect();
+      const wp = s.camera.screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+      return { gx: Math.floor(wp.x / TILE_SIZE), gy: Math.floor(wp.y / TILE_SIZE) };
+    };
+
     const onClick = async (e) => {
       if (e.button !== 0) return;
-      const rect = s.app.canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-      const wp = s.camera.screenToWorld(mx, my);
-      const gx = Math.floor(wp.x / TILE_SIZE);
-      const gy = Math.floor(wp.y / TILE_SIZE);
+      const { gx, gy } = tileFromEvent(e);
       const sel = selectedToolRef.current;
       const t = toolRef.current;
       try {
         if (t.kind === 'remove') {
-          // Remove a custom block at this tile if present
-          const blk = (surface?.customBlocks || []).find((b) => b.grid_x === gx && b.grid_y === gy);
+          const blk = findBlockAt(gx, gy);
+          const bld = findBuildingAt(gx, gy);
           if (blk) {
             await coloniesApi.removeBlock(colonyId, blk.block_id);
             toast.success('Block removed');
             await reload();
+          } else if (bld) {
+            if (window.confirm(`Demolish ${bld.config?.name || bld.building_type}? This cannot be undone.`)) {
+              await buildingsApi.demolish(bld.building_id);
+              toast.success('Building demolished');
+              setLastPlaced((lp) => (lp && lp.kind === 'building' && lp.id === bld.building_id ? null : lp));
+              await reload();
+            }
           } else {
             toast.info('Nothing here to remove');
           }
           return;
         }
         if (t.kind === 'block' && t.payload) {
-          await coloniesApi.placeBlock(colonyId, { block_type: t.payload, grid_x: gx, grid_y: gy });
+          const res = await coloniesApi.placeBlock(colonyId, { block_type: t.payload, grid_x: gx, grid_y: gy });
+          const blockId = res?.data?.data?.block_id || res?.data?.data?.block?.block_id;
           toast.success(`${t.payload} placed`);
+          if (blockId) setLastPlaced({ kind: 'block', id: blockId, ts: Date.now() });
           await reload();
           return;
         }
         if (sel?.building_id) {
-          await coloniesApi.moveBuilding(colonyId, sel.building_id, gx, gy);
+          const res = await coloniesApi.moveBuilding(colonyId, sel.building_id, gx, gy);
+          const bid = res?.data?.data?.building?.building_id || sel.building_id;
           toast.success('Building placed');
+          setLastPlaced({ kind: 'building', id: bid, ts: Date.now() });
           await reload();
           setSelectedTool(null);
           return;
         }
         if (sel?.key) {
-          await coloniesApi.placeBuilding(colonyId, sel.key, gx, gy);
+          const res = await coloniesApi.placeBuilding(colonyId, sel.key, gx, gy);
+          const bid = res?.data?.data?.building_id;
           toast.success(`${sel.name} placed`);
+          if (bid) setLastPlaced({ kind: 'building', id: bid, ts: Date.now() });
           await reload();
           setSelectedTool(null);
           return;
         }
+        // No tool active: clicking a placed building picks it up so it can be moved
+        const bld = findBuildingAt(gx, gy);
+        if (bld) {
+          const fp = bld.footprint || surfaceRef.current?.buildingFootprints?.[bld.building_type] || { w: 1, h: 1 };
+          setSelectedTool({
+            building_id: bld.building_id,
+            building_type: bld.building_type,
+            footprint: fp,
+            name: bld.config?.name || bld.building_type,
+          });
+          toast.info('Click a tile to relocate, or press Esc to cancel');
+        }
       } catch (err) {
-        toast.error(err.response?.data?.message || 'Placement failed');
+        toast.error(err.response?.data?.message || 'Action failed');
       }
     };
+
+    const onAuxUp = async (e) => {
+      // Right-click (no drag) → remove. Read movement from a dedicated ref so
+      // the global pan-mouseup handler can't race-clear it.
+      if (e.button !== 2) return;
+      const rd = s.rightDrag;
+      s.rightDrag = null;
+      const moved = rd ? rd.moved : 0;
+      if (moved > RIGHT_CLICK_DRAG_THRESHOLD) return;
+      const { gx, gy } = tileFromEvent(e);
+      try {
+        const blk = findBlockAt(gx, gy);
+        const bld = findBuildingAt(gx, gy);
+        if (blk) {
+          await coloniesApi.removeBlock(colonyId, blk.block_id);
+          toast.success('Block removed');
+          await reload();
+        } else if (bld) {
+          if (window.confirm(`Demolish ${bld.config?.name || bld.building_type}? This cannot be undone.`)) {
+            await buildingsApi.demolish(bld.building_id);
+            toast.success('Building demolished');
+            setLastPlaced((lp) => (lp && lp.kind === 'building' && lp.id === bld.building_id ? null : lp));
+            await reload();
+          }
+        } else {
+          toast.info('Nothing here to remove');
+        }
+      } catch (err) {
+        toast.error(err.response?.data?.message || 'Remove failed');
+      }
+    };
+
     s.app.canvas.addEventListener('click', onClick);
-    return () => { s.app.canvas.removeEventListener('click', onClick); };
-  }, [colonyId, reload, readOnly, toast, surface]);
+    s.app.canvas.addEventListener('mouseup', onAuxUp);
+    return () => {
+      s.app.canvas.removeEventListener('click', onClick);
+      s.app.canvas.removeEventListener('mouseup', onAuxUp);
+    };
+  }, [colonyId, reload, readOnly, toast, findBuildingAt, findBlockAt]);
+
+  // Undo handler — works for buildings (server endpoint) and blocks (remove).
+  const undoLast = useCallback(async () => {
+    if (!lastPlaced) return;
+    if (Date.now() - lastPlaced.ts > UNDO_WINDOW_MS) {
+      setLastPlaced(null);
+      toast.info('Undo window expired');
+      return;
+    }
+    try {
+      if (lastPlaced.kind === 'building') {
+        await coloniesApi.undoPlacement(colonyId, lastPlaced.id);
+        toast.success('Placement undone');
+      } else {
+        await coloniesApi.removeBlock(colonyId, lastPlaced.id);
+        toast.success('Block removed');
+      }
+      setLastPlaced(null);
+      await reload();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Undo failed');
+    }
+  }, [lastPlaced, colonyId, reload, toast]);
+
+  // Keyboard: Ctrl/Cmd+Z → undo, Esc → clear active tool
+  useEffect(() => {
+    const onKey = (e) => {
+      if (readOnly) return;
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        undoLast();
+        return;
+      }
+      if (e.key === 'Escape') {
+        setSelectedTool(null);
+        setTool({ kind: 'none' });
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [undoLast, readOnly]);
 
   // Footprint / block ghost preview that follows the hovered tile
   useEffect(() => {
@@ -470,8 +626,14 @@ export default function PlanetSurfaceView({ user, readOnly = false }) {
       }
     }
     if (tool.kind === 'remove') {
-      const has = (surface.customBlocks || []).some((b) => b.grid_x === hoveredTile.x && b.grid_y === hoveredTile.y);
-      valid = has;
+      const hasBlock = (surface.customBlocks || []).some((b) => b.grid_x === hoveredTile.x && b.grid_y === hoveredTile.y);
+      const hasBuilding = (surface.buildings || []).some((bb) => {
+        if (bb.grid_x == null || bb.grid_y == null) return false;
+        const bfp = bb.footprint || surface.buildingFootprints?.[bb.building_type] || { w: 1, h: 1 };
+        return hoveredTile.x >= bb.grid_x && hoveredTile.x < bb.grid_x + bfp.w
+            && hoveredTile.y >= bb.grid_y && hoveredTile.y < bb.grid_y + bfp.h;
+      });
+      valid = hasBlock || hasBuilding;
     }
     const g = new Graphics();
     g.rect(hoveredTile.x * TILE_SIZE, hoveredTile.y * TILE_SIZE, fp.w * TILE_SIZE, fp.h * TILE_SIZE);
@@ -642,8 +804,25 @@ export default function PlanetSurfaceView({ user, readOnly = false }) {
         )}
 
         <div className="absolute bottom-2 right-2 text-[10px] text-gray-500 bg-space-900/70 px-2 py-1 rounded">
-          WASD to move • Right-drag to pan • Wheel to zoom • E to interact
+          WASD move • Right-drag pan • Wheel zoom • Right-click delete • Ctrl+Z undo • Esc cancel • E interact
         </div>
+
+        {!readOnly && canUndo && (
+          <button
+            onClick={undoLast}
+            className="absolute top-12 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3 py-1.5 rounded bg-amber-900/90 border border-amber-500 text-amber-100 text-xs hover:bg-amber-800/90 z-30"
+            title="Undo last placement (Ctrl+Z)"
+          >
+            <Undo2 className="w-3 h-3" />
+            Undo {lastPlaced.kind} ({Math.ceil(undoRemainingMs / 1000)}s)
+          </button>
+        )}
+
+        {!readOnly && selectedTool?.building_id && (
+          <div className="absolute top-12 left-2 bg-space-900/95 border border-accent-orange/50 rounded px-2 py-1 text-[10px] text-accent-orange z-10">
+            Moving: {selectedTool.name || selectedTool.building_type} — click a tile (Esc cancel)
+          </div>
+        )}
 
         {hoveredTile && (
           <div className="absolute top-12 right-2 bg-space-900/85 border border-space-700 rounded px-2 py-1 text-[10px] text-gray-300 max-w-xs text-right">
