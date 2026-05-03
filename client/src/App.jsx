@@ -241,6 +241,7 @@ function App() {
         <Route path="/ships" element={<ShipPanel user={user} />} />
         <Route path="/ship/:shipId/interior" element={<ShipInteriorView user={user} />} />
         <Route path="/ship/:shipId/derelict" element={<DerelictBoardingView user={user} mode="derelict" />} />
+        <Route path="/derelict/:shipId" element={<DerelictBoardingView user={user} mode="derelict" />} />
         <Route path="/designer" element={<ShipDesigner user={user} />} />
         <Route path="/trading" element={<TradingPage user={user} />} />
         <Route path="/combat" element={<CombatPage user={user} socket={socket} />} />

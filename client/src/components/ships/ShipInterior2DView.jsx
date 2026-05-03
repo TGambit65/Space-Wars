@@ -56,14 +56,20 @@ export default function ShipInterior2DView({ user, mode: propMode }) {
   const [dead, setDead] = useState(false);
   const deadRef = useRef(false);
 
-  const isDerelict = propMode === 'derelict' || (typeof window !== 'undefined' && window.location.pathname.includes('/derelict'));
+  const isManifestDerelict = typeof shipId === 'string' && shipId.startsWith('derelict_');
+  const isDerelict = isManifestDerelict || propMode === 'derelict' || (typeof window !== 'undefined' && window.location.pathname.includes('/derelict'));
   const mode = isDerelict ? 'derelict' : 'normal';
 
-  // Load interior
+  // Load interior — dispatch to the derelict-manifest endpoint for synthetic
+  // post-combat wreck IDs (`derelict_<npcId>`), or the regular ship-interior
+  // endpoint for real Ship rows.
   useEffect(() => {
     let alive = true;
     setLoading(true);
-    coloniesApi.getShipInterior(shipId, mode)
+    const loader = isManifestDerelict
+      ? coloniesApi.getDerelictInterior(shipId)
+      : coloniesApi.getShipInterior(shipId, mode);
+    loader
       .then((res) => {
         if (!alive) return;
         setInterior(res.data?.data || res.data);
@@ -75,7 +81,7 @@ export default function ShipInterior2DView({ user, mode: propMode }) {
         setLoading(false);
       });
     return () => { alive = false; };
-  }, [shipId, mode]);
+  }, [shipId, mode, isManifestDerelict]);
 
   // Load on-board crew (only for owned ships in normal mode)
   useEffect(() => {
@@ -482,10 +488,14 @@ export default function ShipInterior2DView({ user, mode: propMode }) {
       case 'loot_crate': {
         const deck = interior.decks[deckIndex];
         try {
-          const res = await coloniesApi.lootShipCrate(shipId, deck.id, it.x, it.y);
+          const res = isManifestDerelict
+            ? await coloniesApi.lootDerelictCrate(shipId, deck.id, it.x, it.y)
+            : await coloniesApi.lootShipCrate(shipId, deck.id, it.x, it.y);
           const award = res.data?.data?.award;
           // Re-fetch the interior so the looted crate disappears server-side too.
-          const refreshed = await coloniesApi.getShipInterior(shipId, mode);
+          const refreshed = isManifestDerelict
+            ? await coloniesApi.getDerelictInterior(shipId)
+            : await coloniesApi.getShipInterior(shipId, mode);
           setInterior(refreshed.data?.data || refreshed.data);
           if (award) {
             toast.success(`Looted: ${award.label}`);
@@ -500,7 +510,7 @@ export default function ShipInterior2DView({ user, mode: propMode }) {
       default:
         toast.info(it.label || 'Interacted');
     }
-  }, [deckIndex, interior, navigate, toast, shipId, mode]);
+  }, [deckIndex, interior, navigate, toast, shipId, mode, isManifestDerelict]);
 
   useEffect(() => {
     const onKey = (e) => {

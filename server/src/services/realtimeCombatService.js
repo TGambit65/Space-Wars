@@ -4,6 +4,7 @@ const config = require('../config');
 const { emitToSector, emitToUser, emitToCombatRoom } = require('./socketService');
 const worldPolicyService = require('./worldPolicyService');
 const shipInteriorService = require('./shipInteriorService');
+const derelictManifestService = require('./derelictManifestService');
 
 // ─── Tunables ─────────────────────────────────────────────────────
 const COMBAT_EVENT_VERSION = 1;
@@ -1192,7 +1193,11 @@ const resolveCombat = async (combatId) => {
         shipType: ship.shipType,
         sectorId
       });
-      if (manifest) derelictManifests.push(manifest);
+      if (manifest) {
+        derelictManifests.push(manifest);
+        try { derelictManifestService.register(manifest); }
+        catch (e) { console.error('[RealtimeCombat] derelict manifest register failed:', e.message); }
+      }
     }
 
     emitCombatEvent(combatState, 'resolved', {

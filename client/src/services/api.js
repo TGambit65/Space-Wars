@@ -105,6 +105,8 @@ export const colonies = {
   getShipInterior: (shipId, mode) => api.get(`/ships/${shipId}/interior${mode ? `?mode=${mode}` : ''}`),
   lootShipCrate: (shipId, deckId, x, y) => api.post(`/ships/${shipId}/loot`, { deckId, x, y }),
   getShipOnBoardCrew: (shipId) => api.get(`/ships/${shipId}/onboard-crew`),
+  getDerelictInterior: (derelictId) => api.get(`/derelicts/${derelictId}/interior`),
+  lootDerelictCrate: (derelictId, deckId, x, y) => api.post(`/derelicts/${derelictId}/loot`, { deckId, x, y }),
 };
 
 // Ground Combat

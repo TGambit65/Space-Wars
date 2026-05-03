@@ -646,17 +646,22 @@ const CombatPage = ({ user, socket }) => {
                                                 Derelict Wrecks Boardable
                                             </div>
                                             {loot.derelictManifests.map((m) => (
-                                                <div key={m.derelict_id} className="text-xs text-gray-300 flex justify-between gap-2">
+                                                <button
+                                                    key={m.derelict_id}
+                                                    onClick={() => navigate(`/derelict/${m.derelict_id}`)}
+                                                    className="w-full text-xs text-left text-gray-300 flex justify-between items-center gap-2 px-2 py-1.5 rounded hover:bg-accent-orange/10 transition-colors border border-transparent hover:border-accent-orange/40"
+                                                >
                                                     <span>
                                                         {m.ship_type} <span className="text-gray-500">({m.hull_class})</span>
                                                     </span>
-                                                    <span className="font-mono text-accent-orange">
+                                                    <span className="font-mono text-accent-orange flex items-center gap-1">
                                                         {m.crates.length} crate{m.crates.length === 1 ? '' : 's'}
+                                                        <span className="text-[10px]">→ Board</span>
                                                     </span>
-                                                </div>
+                                                </button>
                                             ))}
                                             <div className="text-[10px] text-gray-500 italic">
-                                                Walk the wreck via the Ship Interior view to recover loot.
+                                                Click a wreck to walk its decks and recover loot.
                                             </div>
                                         </div>
                                     )}

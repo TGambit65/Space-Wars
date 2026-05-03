@@ -47,6 +47,8 @@ const agentGameRoutes = require('./agentGameRoutes');
 const achievementRoutes = require('./achievementRoutes');
 // Admin
 const adminRoutes = require('./adminRoutes');
+// Derelict NPC wreck boarding (post-combat manifests)
+const derelictRoutes = require('./derelictRoutes');
 const { sequelize } = require('../config/database');
 const config = require('../config');
 
@@ -133,6 +135,8 @@ router.use('/agent-api', agentGameRoutes);
 router.use('/achievements', achievementRoutes);
 // Admin
 router.use('/admin', adminRoutes);
+// Derelict NPC wreck boarding
+router.use('/derelicts', derelictRoutes);
 
 module.exports = router;
 

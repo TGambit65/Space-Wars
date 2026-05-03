@@ -41,3 +41,23 @@ Single ruleset for both PvE and PvP — the legacy auto-resolve `combat.attack` 
 - Server checkpoints state to DB every 50 ticks (~5 s). On boot, `realtimeCombatService.recoverActiveCombats()` (called from `server/src/index.js` before tick startup) rebuilds any `status='active'` combats from `state` and resumes them with disconnected players in autopilot.
 - `socketService.js` calls `notifyPlayerDisconnect(userId)` when a user's last socket drops and `notifyPlayerReconnect(userId)` on first reconnect; on disconnect the player's ships are flipped to `aiControlled=true` with a 60 s grace timer, then driven by the `AUTOPILOT` AI profile in `processNPCAI`. NPC tier (`npc.intelligence_tier`) is forwarded into combat state for client display.
 - Client: `client/src/components/combat/CombatPage.jsx` listens to `combat:event` only (with seq de-dup), shows an autopilot badge when the server flags it, and surfaces the pre-engagement `warning` event to the targeted player. `client/src/hooks/useNPCEvents.js` was migrated off the removed `combat:ended` event to `combat:event` (filtered on terminal types). `combat.attack` and `combat.flee` were removed from `client/src/services/api.js`.
+
+## Combat Shakedown — Derelict Manifest Boarding (Task #8)
+The `buildDerelictManifest` produced by `realtimeCombatService.resolveCombat()` for every destroyed NPC is now persisted in-memory and reachable via a dedicated boarding flow:
+
+- `server/src/services/derelictManifestService.js` — TTL'd registry (30 min) keyed by the synthetic `derelict_<npcId>` id. Tracks per-user looted crates so re-entry shows remaining crates.
+- `server/src/services/lootAwardService.js` — shared crate-roll → award (credits / commodity / component) used by both the live-ship loot path and the new derelict-manifest path. The original `shipInteriorController.lootCrate` logic is the source of truth.
+- `server/src/controllers/derelictController.js` + `server/src/routes/derelictRoutes.js` — `GET /api/derelicts/:derelictId/interior` and `POST /api/derelicts/:derelictId/loot`. Mounted in `server/src/routes/index.js` at `/api/derelicts`.
+- `client/src/components/combat/CombatPage.jsx` — each entry in the post-combat **Derelict Wrecks Boardable** panel is now a button that navigates to `/derelict/:derelictId`.
+- `client/src/App.jsx` — new `/derelict/:shipId` route reuses `ShipInterior2DView`.
+- `client/src/components/ships/ShipInterior2DView.jsx` — when `shipId.startsWith('derelict_')` it dispatches to the new derelict endpoints; the regular `/ships/:id/interior` path is unchanged for owned ships and persisted derelicts.
+
+### Manual smoke-test plan (combat → board loop)
+1. Log in, fly into a sector with hostile NPCs, attack one to start PvE combat.
+2. During the 5 s warning window, optionally test **disengage** (combat dissolves cleanly) or **engage_now** (skip warning).
+3. Drive the tactical map: click an enemy to lock target, click empty space to set a waypoint, right-click to clear; verify the PixiJS `TacticalMap` reflects the server snapshot.
+4. Destroy the NPC. The post-combat panel should show **Derelict Wrecks Boardable** with one entry per killed NPC.
+5. Click a wreck — you land on `/derelict/derelict_<npcId>` and see the 2D ship-interior boarding view with the manifest's decks + remaining loot crates.
+6. Walk over a crate, press **E**, and confirm a credits / commodity / component award appears and that crate disappears on re-fetch.
+7. Open Bounty Board (`/bounties`), Arena Lobby (`/arena`), and Spectator View (`/spectate`) from the sidebar; queue/duel and verify spectators receive `combat:event` snapshots.
+8. Restart the backend mid-combat; on reconnect, verify `recoverActiveCombats` resumes the fight with the player flagged autopilot until they reconnect.
