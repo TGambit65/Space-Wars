@@ -1185,13 +1185,17 @@ const resolveCombat = async (combatId) => {
     // old placeholder loot blob with a real authored manifest the existing
     // 2D ship-interior boarding view can render directly.
     const derelictManifests = [];
+    const participantUserIds = Array.from(new Set(
+      playerShips.map(s => s.ownerId).filter(Boolean)
+    ));
     for (const ship of destroyed) {
       if (!ship.isNPC) continue;
       const manifest = buildDerelictManifest({
         shipId: ship.shipId,
         name: ship.name,
         shipType: ship.shipType,
-        sectorId
+        sectorId,
+        participantUserIds
       });
       if (manifest) {
         derelictManifests.push(manifest);
@@ -1325,6 +1329,7 @@ const buildDerelictManifest = (npcShip) => {
       ship_type: synthShip.ship_type,
       hull_class: interior.hull_class,
       sector_id: npcShip.sectorId || null,
+      participant_user_ids: Array.isArray(npcShip.participantUserIds) ? npcShip.participantUserIds.slice() : [],
       decks: interior.decks.map((d) => ({
         id: d.id, name: d.name, width: d.width, height: d.height,
         tiles: d.tiles.map((row) => row.join(''))

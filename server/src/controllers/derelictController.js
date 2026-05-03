@@ -12,6 +12,15 @@ const lootAwardService = require('../services/lootAwardService');
 async function getInterior(req, res) {
   try {
     const { derelictId } = req.params;
+    if (!(await derelictManifestService.getManifest(derelictId))) {
+      return res.status(404).json({ success: false, message: 'Derelict not found or expired' });
+    }
+    if (!(await derelictManifestService.isAuthorizedToBoard(derelictId, req.userId))) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only ships that fought the wreck or are in its sector can board it'
+      });
+    }
     const interior = await derelictManifestService.buildInteriorForUser(derelictId, req.userId);
     if (!interior) {
       return res.status(404).json({ success: false, message: 'Derelict not found or expired' });
@@ -33,6 +42,13 @@ async function lootCrate(req, res) {
     const manifest = await derelictManifestService.getManifest(derelictId);
     if (!manifest) {
       return res.status(404).json({ success: false, message: 'Derelict not found or expired' });
+    }
+
+    if (!(await derelictManifestService.isAuthorizedToBoard(derelictId, req.userId))) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only ships that fought the wreck or are in its sector can board it'
+      });
     }
 
     const crate = derelictManifestService.findCrate(manifest, deckId, x, y);

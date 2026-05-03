@@ -122,6 +122,34 @@ const releaseClaim = async (derelictId, userId, deckId, x, y) => {
   });
 };
 
+/**
+ * Returns true if `userId` participated in the combat that produced this
+ * wreck, OR if their active ship is currently in the same sector as the
+ * wreck. Mirrors the design intent ("you killed it, you loot it") while
+ * still allowing nearby allies who joined late to board.
+ */
+const isAuthorizedToBoard = async (derelictId, userId) => {
+  const row = await getRow(derelictId);
+  if (!row) return false;
+  const m = row.manifest;
+  if (Array.isArray(m.participant_user_ids) && m.participant_user_ids.includes(userId)) {
+    return true;
+  }
+  if (m.sector_id) {
+    try {
+      const { Ship } = require('../models');
+      const ship = await Ship.findOne({
+        where: { owner_user_id: userId, current_sector_id: m.sector_id },
+        attributes: ['ship_id']
+      });
+      if (ship) return true;
+    } catch (e) {
+      console.error('[derelictManifestService] sector check failed:', e.message);
+    }
+  }
+  return false;
+};
+
 const findCrate = (manifest, deckId, x, y) => {
   if (!manifest) return null;
   return manifest.crates.find(c => c.deckId === deckId && c.x === x && c.y === y) || null;
@@ -180,6 +208,7 @@ module.exports = {
   claim,
   releaseClaim,
   findCrate,
+  isAuthorizedToBoard,
   _cleanupExpired: cleanupExpired,
   _size: async () => DerelictManifest.count()
 };
