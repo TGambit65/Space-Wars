@@ -107,9 +107,14 @@ const CombatPage = ({ user, socket }) => {
 
         const onEvent = (evt) => {
             if (!evt || typeof evt !== 'object') return;
-            // Out-of-order guard within a single combat
-            if (combatId && evt.combatId === combatId && evt.seq) {
+            // Out-of-order guard within a single combat. Snapshot/recovered events
+            // are authoritative full-state and must always apply on reconnect, so
+            // they bypass the seq guard (and reset the local high-water mark).
+            const isAuthoritativeSnapshot = evt.type === 'snapshot' || evt.type === 'recovered' || evt.type === 'started';
+            if (combatId && evt.combatId === combatId && evt.seq && !isAuthoritativeSnapshot) {
                 if (evt.seq <= lastSeqRef.current) return;
+                lastSeqRef.current = evt.seq;
+            } else if (isAuthoritativeSnapshot && evt.seq) {
                 lastSeqRef.current = evt.seq;
             }
 
@@ -191,6 +196,7 @@ const CombatPage = ({ user, socket }) => {
                         setLoot(evt.loot || null);
                         setIsBattling(false);
                         setCombatId(null);
+                        setRealtimeState(null);
                         if (result === 'victory') notify.success(`Victory! Looted ${(evt.loot?.credits || 0).toLocaleString()} credits`);
                         else if (result === 'defeat') notify.error('Defeated in combat');
                         else if (result === 'fled') notify.warning('Escaped from combat');
