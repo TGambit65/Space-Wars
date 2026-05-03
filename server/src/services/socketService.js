@@ -6,6 +6,7 @@ const { getAllowedOrigins, isOriginAllowed } = require('../utils/security');
 const { getCookieToken } = require('../utils/authCookie');
 const actionAuditService = require('./actionAuditService');
 const { evaluateCombatCommand, clearCombatCommandSocketState } = require('./combatCommandGuard');
+const realtimeCombatService = require('./realtimeCombatService');
 
 // ─── Module State ────────────────────────────────────────────────
 
@@ -253,7 +254,11 @@ const initialize = (httpServer) => {
       userSockets.set(userId, new Set());
     }
     const sockets = userSockets.get(userId);
+    const wasOffline = sockets.size === 0;
     sockets.add(socket.id);
+    if (wasOffline) {
+      try { realtimeCombatService.notifyPlayerReconnect(userId); } catch (e) { console.error('[SocketService] notifyPlayerReconnect failed:', e); }
+    }
 
     // If over limit, disconnect the oldest socket
     if (sockets.size > MAX_SOCKETS_PER_USER) {
@@ -487,9 +492,16 @@ const initialize = (httpServer) => {
     socket.on('disconnect', () => {
       // Clean up per-user socket tracking
       const socks = userSockets.get(socket.userId);
+      let lastSocketGone = false;
       if (socks) {
         socks.delete(socket.id);
-        if (socks.size === 0) userSockets.delete(socket.userId);
+        if (socks.size === 0) {
+          userSockets.delete(socket.userId);
+          lastSocketGone = true;
+        }
+      }
+      if (lastSocketGone) {
+        try { realtimeCombatService.notifyPlayerDisconnect(socket.userId); } catch (e) { console.error('[SocketService] notifyPlayerDisconnect failed:', e); }
       }
       chatCounters.delete(socket.id);
       clearCombatCommandSocketState(socket.id);

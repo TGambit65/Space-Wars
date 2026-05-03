@@ -3,41 +3,8 @@ const realtimeCombatService = require('../services/realtimeCombatService');
 const combatPolicyService = require('../services/combatPolicyService');
 
 /**
- * Attack an NPC
- */
-const attackNPC = async (req, res, next) => {
-  try {
-    const userId = req.user.user_id;
-    const { shipId } = req.params;
-    const { npc_id } = req.body;
-
-    if (!npc_id) {
-      return res.status(400).json({ success: false, error: 'npc_id required' });
-    }
-
-    const result = await combatService.attackNPC(userId, shipId, npc_id);
-    res.json(result);
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * Attempt to flee from combat
- */
-const flee = async (req, res, next) => {
-  try {
-    const userId = req.user.user_id;
-    const { shipId } = req.params;
-    const result = await combatService.fleeFromCombat(userId, shipId);
-    res.json(result);
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * Get combat history
+ * Get combat history (read-only — auto-resolve and instant flee endpoints removed in v2;
+ * all live engagements now go through the realtime combat service).
  */
 const getCombatHistory = async (req, res, next) => {
   try {
@@ -50,9 +17,6 @@ const getCombatHistory = async (req, res, next) => {
   }
 };
 
-/**
- * Get specific combat log details
- */
 const getCombatLog = async (req, res, next) => {
   try {
     const userId = req.user.user_id;
@@ -69,21 +33,11 @@ const getCombatLog = async (req, res, next) => {
       ]
     });
 
-    if (!log) {
-      return res.status(404).json({ success: false, error: 'Combat log not found' });
-    }
+    if (!log) return res.status(404).json({ success: false, error: 'Combat log not found' });
 
-    // Verify ownership - user must own either the attacker or defender ship
-    // For PVE logs, only attacker_ship_id is set (defender is NPC)
-    // For PVP logs, both attacker and defender ships could be player ships
-    const isOwner = (log.attackerShip && log.attackerShip.owner_user_id === userId) ||
-                    (log.defenderShip && log.defenderShip.owner_user_id === userId);
-
-    // If neither ship is owned by the user, deny access
-    // Note: For PVE (player vs NPC), attackerShip should always be set for player attacks
-    if (!isOwner) {
-      return res.status(403).json({ success: false, error: 'Access denied to this combat log' });
-    }
+    const isOwner = (log.attackerShip && log.attackerShip.owner_user_id === userId)
+      || (log.defenderShip && log.defenderShip.owner_user_id === userId);
+    if (!isOwner) return res.status(403).json({ success: false, error: 'Access denied to this combat log' });
 
     res.json({ success: true, combat_log: log });
   } catch (error) {
@@ -91,25 +45,19 @@ const getCombatLog = async (req, res, next) => {
   }
 };
 
-/**
- * Initiate real-time combat against an NPC
- */
-const initiateRealtimeCombatNPC = async (req, res, next) => {
+const initiateRealtimeCombatNPC = async (req, res) => {
   try {
     const { shipId } = req.params;
     const { npcId } = req.body;
     if (!npcId) return res.status(400).json({ success: false, message: 'npcId is required' });
-    const combatId = await realtimeCombatService.initiateNPCCombat(shipId, npcId);
+    const combatId = await realtimeCombatService.initiateNPCCombat(shipId, npcId, req.userId);
     res.json({ success: true, data: { combat_id: combatId } });
   } catch (error) {
     res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
 };
 
-/**
- * Initiate real-time PvP combat against another player
- */
-const initiateRealtimeCombatPVP = async (req, res, next) => {
+const initiateRealtimeCombatPVP = async (req, res) => {
   try {
     const { shipId } = req.params;
     const { defenderShipId } = req.body;
@@ -122,21 +70,24 @@ const initiateRealtimeCombatPVP = async (req, res, next) => {
       req
     });
 
-    const combatId = await realtimeCombatService.initiatePlayerCombat(shipId, defenderShipId);
+    const combatId = await realtimeCombatService.initiatePlayerCombat(shipId, defenderShipId, req.userId);
     res.json({ success: true, data: { combat_id: combatId } });
   } catch (error) {
     res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
 };
 
-/**
- * Get current state of a real-time combat instance
- */
-const getRealtimeCombatState = async (req, res, next) => {
+const getRealtimeCombatState = async (req, res) => {
   try {
     const { combatId } = req.params;
     const state = realtimeCombatService.getCombatState(combatId);
     if (!state) return res.status(404).json({ success: false, message: 'No active combat found' });
+    // Participant-only access — spectator mode is not yet implemented.
+    const isParticipant = Array.isArray(state.ships)
+      && state.ships.some(s => !s.isNPC && s.ownerId && s.ownerId === req.userId);
+    if (!isParticipant) {
+      return res.status(403).json({ success: false, message: 'You are not a participant in this combat' });
+    }
     res.json({ success: true, data: state });
   } catch (error) {
     res.status(error.statusCode || 500).json({ success: false, message: error.message });
@@ -144,8 +95,6 @@ const getRealtimeCombatState = async (req, res, next) => {
 };
 
 module.exports = {
-  attackNPC,
-  flee,
   getCombatHistory,
   getCombatLog,
   initiateRealtimeCombatNPC,

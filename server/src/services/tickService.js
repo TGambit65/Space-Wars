@@ -2,7 +2,6 @@ const gameSettingsService = require('./gameSettingsService');
 const npcService = require('./npcService');
 const behaviorTreeService = require('./behaviorTreeService');
 const npcActionExecutor = require('./npcActionExecutor');
-const combatService = require('./combatService');
 const dialogueCacheService = require('./dialogueCacheService');
 const economyTickService = require('./economyTickService');
 const automationService = require('./automationService');
@@ -19,18 +18,15 @@ const config = require('../config');
 // ─── Module State ────────────────────────────────────────────────
 
 let tacticalInterval = null;
-let combatInterval = null;
 let maintenanceInterval = null;
 let economyInterval = null;
 let automationInterval = null;
 let presenceInterval = null;
 let processingTactical = false;
-let processingCombat = false;
 let socketService = null;
 
 const stats = {
   tacticalTicks: 0,
-  combatTicks: 0,
   maintenanceTicks: 0,
   presenceTicks: 0,
   avgTacticalMs: 0,
@@ -55,17 +51,15 @@ const startTicks = (io = null) => {
   socketService = io;
 
   const tickRate = Math.max(5, Number(gameSettingsService.getSetting('npc.tick_rate_seconds', 30)) || 30);
-  const combatTickRate = Math.max(5, Number(gameSettingsService.getSetting('npc.combat_tick_rate_seconds', 15)) || 15);
 
   tacticalInterval = setInterval(processTacticalTick, tickRate * 1000);
-  combatInterval = setInterval(processCombatTick, combatTickRate * 1000);
   maintenanceInterval = setInterval(processMaintenanceTick, 5 * 60 * 1000);
   economyInterval = setInterval(processEconomyTick, config.economy.economyTickIntervalMs);
   automationInterval = setInterval(processAutomationTick, config.automation.executionIntervalMs);
   presenceInterval = setInterval(processPresenceTick, 60 * 1000); // Every 60 seconds
 
   stats.startedAt = Date.now();
-  console.log(`[TickService] Game tick system started (tactical: ${tickRate}s, combat: ${combatTickRate}s, maintenance: 300s, economy: ${config.economy.economyTickIntervalMs / 1000}s, automation: ${config.automation.executionIntervalMs / 1000}s, presence: 60s)`);
+  console.log(`[TickService] Game tick system started (tactical: ${tickRate}s, maintenance: 300s, economy: ${config.economy.economyTickIntervalMs / 1000}s, automation: ${config.automation.executionIntervalMs / 1000}s, presence: 60s) -- combat handled by realtimeCombatService (10 Hz)`);
 };
 
 /**
@@ -73,14 +67,12 @@ const startTicks = (io = null) => {
  */
 const stopTicks = () => {
   if (tacticalInterval) clearInterval(tacticalInterval);
-  if (combatInterval) clearInterval(combatInterval);
   if (maintenanceInterval) clearInterval(maintenanceInterval);
   if (economyInterval) clearInterval(economyInterval);
   if (automationInterval) clearInterval(automationInterval);
   if (presenceInterval) clearInterval(presenceInterval);
 
   tacticalInterval = null;
-  combatInterval = null;
   maintenanceInterval = null;
   economyInterval = null;
   automationInterval = null;
@@ -104,7 +96,6 @@ const getStatus = () => ({
   running: isRunning(),
   startedAt: stats.startedAt,
   tacticalTicks: stats.tacticalTicks,
-  combatTicks: stats.combatTicks,
   maintenanceTicks: stats.maintenanceTicks,
   presenceTicks: stats.presenceTicks,
   avgTacticalMs: Math.round(stats.avgTacticalMs),
@@ -188,225 +179,6 @@ const processTacticalTick = async () => {
     stats.lastTacticalAt = Date.now();
     // Running average: new_avg = old_avg + (value - old_avg) / count
     stats.avgTacticalMs += (duration - stats.avgTacticalMs) / stats.tacticalTicks;
-  }
-};
-
-// ─── Combat Tick ─────────────────────────────────────────────────
-
-/**
- * Process one combat tick: advance ongoing NPC-vs-player combats.
- * Finds NPCs in 'engaging' state and executes combat rounds.
- */
-const processCombatTick = async () => {
-  if (processingCombat) return;
-  processingCombat = true;
-
-  try {
-    // Find all NPCs currently engaging in combat
-    const engagingNPCs = await NPC.findAll({
-      where: { behavior_state: 'engaging', is_alive: true },
-      include: [{
-        model: Sector,
-        as: 'currentSector',
-        attributes: ['sector_id', 'name', 'zone_class', 'security_class', 'access_mode', 'rule_flags']
-      }]
-    });
-
-    if (engagingNPCs.length === 0) return;
-
-    // Batch-fetch all relevant ships to avoid N+1 queries in the NPC loop
-    const combatSectorIds = [...new Set(engagingNPCs.map(n => n.current_sector_id).filter(Boolean))];
-    const combatTargetShipIds = engagingNPCs.map(n => n.target_ship_id).filter(Boolean);
-
-    const [batchTargetShips, batchSectorShips] = await Promise.all([
-      combatTargetShipIds.length > 0
-        ? Ship.findAll({ where: { ship_id: { [Op.in]: combatTargetShipIds }, is_active: true } })
-        : [],
-      combatSectorIds.length > 0
-        ? Ship.findAll({ where: { current_sector_id: { [Op.in]: combatSectorIds }, is_active: true } })
-        : []
-    ]);
-
-    const targetShipMap = new Map(batchTargetShips.map(s => [s.ship_id, s]));
-    const sectorShipMap = new Map();
-    for (const ship of batchSectorShips) {
-      if (!sectorShipMap.has(ship.current_sector_id)) sectorShipMap.set(ship.current_sector_id, []);
-      sectorShipMap.get(ship.current_sector_id).push(ship);
-    }
-
-    for (const npc of engagingNPCs) {
-      try {
-        // Zone enforcement: disengage hostile NPCs in safe zones
-        const sectorPolicy = worldPolicyService.buildDefaultSectorPolicy(npc.currentSector || {});
-        const hostileNpcsAllowed = sectorPolicy.rule_flags?.allow_hostile_npcs !== false
-          && !sectorPolicy.rule_flags?.safe_harbor;
-
-        if (!hostileNpcsAllowed) {
-          await npc.update({
-            behavior_state: 'idle',
-            target_ship_id: null,
-            target_user_id: null,
-            last_action_at: new Date()
-          });
-          continue;
-        }
-
-        // Use pre-fetched ship data instead of per-NPC queries
-        let playerShip = null;
-        if (npc.target_ship_id) {
-          const candidate = targetShipMap.get(npc.target_ship_id);
-          if (candidate && candidate.current_sector_id === npc.current_sector_id) {
-            playerShip = candidate;
-          }
-        }
-        if (!playerShip) {
-          const candidates = sectorShipMap.get(npc.current_sector_id) || [];
-          playerShip = candidates[0] || null;
-        }
-
-        if (!playerShip) {
-          // No player in sector — disengage and clear target
-          await npc.update({ behavior_state: 'idle', target_ship_id: null, target_user_id: null, last_action_at: new Date() });
-
-          if (socketService) {
-            socketService.emitToSector(npc.current_sector_id, 'npc:state_change', {
-              npc_id: npc.npc_id,
-              old_state: 'engaging',
-              new_state: 'idle'
-            });
-          }
-          continue;
-        }
-
-        // Build combat states
-        const npcState = {
-          hull_points: npc.hull_points,
-          shield_points: npc.shield_points,
-          attack_power: npc.attack_power,
-          defense_rating: npc.defense_rating,
-          speed: npc.speed,
-          scanner_range: npc.scanner_range || 1,
-          energy: 100,
-          energy_per_round: 0
-        };
-        const playerState = {
-          hull_points: playerShip.hull_points,
-          shield_points: playerShip.shield_points,
-          attack_power: playerShip.attack_power,
-          defense_rating: playerShip.defense_rating,
-          speed: playerShip.speed,
-          scanner_range: playerShip.scanner_range || 1,
-          energy: playerShip.energy || playerShip.max_energy || 100,
-          energy_per_round: Math.floor((playerShip.max_energy || 100) * 0.02)
-        };
-
-        // Execute one combat round (NPC attacks, player counters)
-        const round = combatService.executeCombatRound(npcState, playerState, 1);
-
-        // Apply damage to NPC
-        await npc.update({
-          hull_points: npcState.hull_points,
-          shield_points: npcState.shield_points,
-          last_action_at: new Date()
-        });
-
-        // Apply damage to player ship
-        await playerShip.update({
-          hull_points: playerState.hull_points,
-          shield_points: playerState.shield_points
-        });
-
-        // Emit combat round event to player
-        if (socketService && playerShip.owner_user_id) {
-          socketService.emitToUser(playerShip.owner_user_id, 'combat:round', {
-            npc_id: npc.npc_id,
-            npc_name: npc.name,
-            round: round
-          });
-        }
-
-        // Check if NPC destroyed
-        if (round.attacker_destroyed || npcState.hull_points <= 0) {
-          const rewardMultiplier = Number(sectorPolicy.rule_flags?.reward_multiplier || 1);
-          const creditsLooted = Math.round((npc.credits_carried || 0) * rewardMultiplier);
-          const experienceGained = Math.round((npc.experience_value || 0) * rewardMultiplier);
-
-          await npc.update({
-            is_alive: false,
-            hull_points: 0,
-            shield_points: 0,
-            behavior_state: 'idle',
-            target_ship_id: null,
-            target_user_id: null,
-            respawn_at: new Date(Date.now() + 5 * 60 * 1000)
-          });
-
-          // Reward player
-          if (creditsLooted > 0 || experienceGained > 0) {
-            const user = await User.findByPk(playerShip.owner_user_id);
-            if (user) {
-              if (creditsLooted > 0) {
-                await user.update({ credits: (user.credits || 0) + creditsLooted });
-              }
-              if (experienceGained > 0) {
-                try {
-                  const progressionService = require('./progressionService');
-                  await progressionService.awardXP(playerShip.owner_user_id, experienceGained, 'combat');
-                } catch (e) {
-                  // XP failure should not block combat rewards
-                }
-              }
-            }
-          }
-
-          if (socketService) {
-            socketService.emitToSector(npc.current_sector_id, 'npc:destroyed', {
-              npc_id: npc.npc_id,
-              name: npc.name,
-              destroyed_by: playerShip.name || 'player'
-            });
-            if (playerShip.owner_user_id) {
-              socketService.emitToUser(playerShip.owner_user_id, 'combat:ended', {
-                winner: 'player',
-                npc_id: npc.npc_id,
-                npc_name: npc.name,
-                rewards: { credits: creditsLooted, experience: experienceGained }
-              });
-            }
-          }
-          continue;
-        }
-
-        // Check if player destroyed
-        if (round.defender_destroyed || playerState.hull_points <= 0) {
-          await playerShip.update({
-            hull_points: 0,
-            shield_points: 0,
-            is_active: false
-          });
-
-          // NPC disengages after winning, clear target
-          await npc.update({ behavior_state: 'idle', target_ship_id: null, target_user_id: null });
-
-          if (socketService && playerShip.owner_user_id) {
-            socketService.emitToUser(playerShip.owner_user_id, 'combat:ended', {
-              winner: 'npc',
-              npc_id: npc.npc_id,
-              npc_name: npc.name,
-              rewards: null
-            });
-          }
-        }
-
-      } catch (err) {
-        console.error(`[TickService] Combat tick error for NPC ${npc.name}:`, err.message);
-      }
-    }
-  } catch (err) {
-    console.error('[TickService] Combat tick error:', err.message);
-  } finally {
-    processingCombat = false;
-    stats.combatTicks++;
   }
 };
 

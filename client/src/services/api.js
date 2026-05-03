@@ -142,8 +142,6 @@ export const ports = {
 
 // Combat
 export const combat = {
-  attack: (shipId, npcId) => api.post(`/combat/attack/${shipId}`, { npc_id: npcId }),
-  flee: (shipId) => api.post(`/combat/flee/${shipId}`),
   getHistory: () => api.get('/combat/history'),
   getLog: (logId) => api.get(`/combat/log/${logId}`),
   realtimeAttackNPC: (shipId, npcId) => api.post(`/combat/realtime/attack-npc/${shipId}`, { npcId }),

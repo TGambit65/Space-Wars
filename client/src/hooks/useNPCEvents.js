@@ -53,8 +53,11 @@ const useNPCEvents = (socket) => {
       setCombatAlert(data);
     };
 
-    const onCombatEnded = () => {
-      setCombatAlert(null);
+    const onCombatEvent = (data) => {
+      // Single versioned channel -- only react to terminal types here.
+      if (data && (data.type === 'resolved' || data.type === 'destroyed' || data.type === 'escaped')) {
+        setCombatAlert(null);
+      }
     };
 
     // New presence events — add to activity feed
@@ -100,7 +103,7 @@ const useNPCEvents = (socket) => {
     socket.on('npc:state_change', onStateChange);
     socket.on('npc:hails_player', onHailsPlayer);
     socket.on('npc:attacks_player', onAttacksPlayer);
-    socket.on('combat:ended', onCombatEnded);
+    socket.on('combat:event', onCombatEvent);
     socket.on('npc:batch_update', onBatchUpdate);
     socket.on('npc:combat_warning', onCombatWarning);
     socket.on('npc:service_offer', onServiceOffer);
@@ -112,7 +115,7 @@ const useNPCEvents = (socket) => {
       socket.off('npc:state_change', onStateChange);
       socket.off('npc:hails_player', onHailsPlayer);
       socket.off('npc:attacks_player', onAttacksPlayer);
-      socket.off('combat:ended', onCombatEnded);
+      socket.off('combat:event', onCombatEvent);
       socket.off('npc:batch_update', onBatchUpdate);
       socket.off('npc:combat_warning', onCombatWarning);
       socket.off('npc:service_offer', onServiceOffer);

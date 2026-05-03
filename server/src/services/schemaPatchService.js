@@ -157,6 +157,38 @@ const ensureNewTables = async () => {
   await AgentActionLog.sync();
 };
 
+const patchCombatInstanceSchema = async () => {
+  const tableName = 'combat_instances';
+  let tableDefinition;
+  try {
+    tableDefinition = await sequelize.getQueryInterface().describeTable(tableName);
+  } catch {
+    return false; // table not yet created (sync will handle)
+  }
+  let changed = false;
+
+  changed = await ensureColumn(tableName, tableDefinition, 'state', {
+    type: DataTypes.JSON,
+    allowNull: true
+  }) || changed;
+  changed = await ensureColumn(tableName, tableDefinition, 'tick_seq', {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  }) || changed;
+  changed = await ensureColumn(tableName, tableDefinition, 'last_tick_at', {
+    type: DataTypes.DATE,
+    allowNull: true
+  }) || changed;
+  changed = await ensureColumn(tableName, tableDefinition, 'combat_type', {
+    type: DataTypes.STRING(10),
+    allowNull: false,
+    defaultValue: 'PVE'
+  }) || changed;
+
+  return changed;
+};
+
 const ensureSprintWorldSchema = async () => {
   const sectorSchemaChanged = await patchSectorSchema();
   const connectionSchemaChanged = await patchConnectionSchema();
@@ -170,6 +202,7 @@ const ensureSprintWorldSchema = async () => {
   }
 
   await ensureNewTables();
+  await patchCombatInstanceSchema();
 };
 
 module.exports = {

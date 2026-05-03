@@ -8,6 +8,7 @@ const { generateUniverse, generateFullUniverse, seedCommodities } = require('./s
 const gameSettingsService = require('./services/gameSettingsService');
 const socketService = require('./services/socketService');
 const { ensureSprintWorldSchema } = require('./services/schemaPatchService');
+const realtimeCombatService = require('./services/realtimeCombatService');
 const tickService = require('./services/tickService');
 const achievementService = require('./services/achievementService');
 const { Sector, Commodity, Port } = require('./models');
@@ -187,6 +188,14 @@ const startServer = async () => {
       } else {
         console.log(`✓ Economy exists with ${commodityCount} commodities and ${portCount} ports`);
       }
+    }
+
+    // Recover any active real-time combats from a previous boot crash
+    try {
+      const recovered = await realtimeCombatService.recoverActiveCombats();
+      if (recovered > 0) console.log(`[Boot] Resumed ${recovered} active combat instance(s)`);
+    } catch (recoveryErr) {
+      console.error('[Boot] Combat recovery failed:', recoveryErr);
     }
 
     // Seed achievement catalog
