@@ -13,7 +13,11 @@ const ARENA_SIZE = 400;
 const ARENA_HALF = ARENA_SIZE / 2;
 const WEAPON_RANGE = 200;
 const ESCAPE_RADIUS = 200;
-const VELOCITY_DAMPING = 0.95;
+const VELOCITY_DAMPING = 0.985;
+const BASE_TURN_RATE = 1.6;     // rad/s at neutral engine power
+const BASE_ACCEL = 70;          // units/s^2 at neutral engine power
+const BASE_MAX_SPEED = 80;      // units/s at neutral engine power
+const WAYPOINT_ARRIVE_DIST = 8;
 const WEAPON_COOLDOWN_SECONDS = 1.0;
 const SHIELD_RECHARGE_RATE = 0.5;
 const PERSIST_EVERY_TICKS = 50;       // checkpoint state every 5 s
@@ -187,10 +191,64 @@ const processTick = (combatState) => {
     if (!ship.alive) continue;
 
     // Movement (allowed during pending so positions feel live)
+
+    // ── Waypoint follow (auto-aim and thrust) ──
+    if (ship.waypoint) {
+      const wdx = ship.waypoint.x - ship.position.x;
+      const wdy = ship.waypoint.y - ship.position.y;
+      const wdist = Math.sqrt(wdx * wdx + wdy * wdy);
+      if (wdist < WAYPOINT_ARRIVE_DIST) {
+        ship.waypoint = null;
+        ship.thrustActive = false;
+      } else {
+        ship.desiredHeading = Math.atan2(wdy, wdx);
+        ship.thrustActive = true;
+      }
+    }
+
+    // ── Turn toward desired heading at limited turn rate ──
+    if (typeof ship.desiredHeading === 'number') {
+      let dh = ship.desiredHeading - ship.heading;
+      while (dh > Math.PI) dh -= Math.PI * 2;
+      while (dh < -Math.PI) dh += Math.PI * 2;
+      const enginePow = 0.5 + ship.powerAllocation.engines;
+      const maxTurn = BASE_TURN_RATE * enginePow * DT;
+      if (Math.abs(dh) <= maxTurn) ship.heading = ship.desiredHeading;
+      else ship.heading += Math.sign(dh) * maxTurn;
+      // Normalize heading
+      if (ship.heading > Math.PI) ship.heading -= Math.PI * 2;
+      if (ship.heading < -Math.PI) ship.heading += Math.PI * 2;
+    }
+
+    // Per-ship speed scaling: stats.speed defaults to 10, so this becomes
+    // a 1.0x multiplier at baseline. Faster hulls accelerate and cap higher.
+    const shipSpeedScale = Math.max(0.3, (ship.stats?.speed || 10) / 10);
+
+    // ── Forward thrust (momentum) ──
+    if (ship.thrustActive) {
+      const enginePow = 0.5 + ship.powerAllocation.engines;
+      const accel = BASE_ACCEL * enginePow * shipSpeedScale;
+      ship.velocity.vx += Math.cos(ship.heading) * accel * DT;
+      ship.velocity.vy += Math.sin(ship.heading) * accel * DT;
+    }
+
+    // ── Integrate position ──
     ship.position.x += ship.velocity.vx * DT;
     ship.position.y += ship.velocity.vy * DT;
+
+    // Speed cap (scaled by engine power and per-ship speed stat)
+    const speed = Math.sqrt(ship.velocity.vx * ship.velocity.vx + ship.velocity.vy * ship.velocity.vy);
+    const maxSpeed = BASE_MAX_SPEED * (0.5 + ship.powerAllocation.engines) * shipSpeedScale;
+    if (speed > maxSpeed) {
+      const scale = maxSpeed / speed;
+      ship.velocity.vx *= scale;
+      ship.velocity.vy *= scale;
+    }
+
+    // Light damping so ships eventually coast to a stop when not thrusting
     ship.velocity.vx *= VELOCITY_DAMPING;
     ship.velocity.vy *= VELOCITY_DAMPING;
+
     ship.position.x = Math.max(-ARENA_HALF, Math.min(ARENA_HALF, ship.position.x));
     ship.position.y = Math.max(-ARENA_HALF, Math.min(ARENA_HALF, ship.position.y));
 
@@ -323,24 +381,19 @@ const processNPCAI = (combatState, npcShip, profile) => {
   if (profile.behavior === 'flee') {
     const dx = npcShip.position.x - nearestEnemy.position.x;
     const dy = npcShip.position.y - nearestEnemy.position.y;
-    const angle = Math.atan2(dy, dx);
-    npcShip.heading = angle;
-    const thrust = npcShip.stats.speed * npcShip.powerAllocation.engines;
-    npcShip.velocity.vx += Math.cos(angle) * thrust * DT;
-    npcShip.velocity.vy += Math.sin(angle) * thrust * DT;
+    npcShip.desiredHeading = Math.atan2(dy, dx);
+    npcShip.thrustActive = true;
+    npcShip.waypoint = null;
     npcShip.disengaging = true;
     npcShip.targetShipId = nearestEnemy.shipId;
     npcShip.targetSystem = 'shields';
   } else {
     const dx = nearestEnemy.position.x - npcShip.position.x;
     const dy = nearestEnemy.position.y - npcShip.position.y;
-    const angle = Math.atan2(dy, dx);
-    npcShip.heading = angle;
-    if (nearestDist > WEAPON_RANGE * 0.7) {
-      const thrust = npcShip.stats.speed * npcShip.powerAllocation.engines;
-      npcShip.velocity.vx += Math.cos(angle) * thrust * DT;
-      npcShip.velocity.vy += Math.sin(angle) * thrust * DT;
-    }
+    npcShip.desiredHeading = Math.atan2(dy, dx);
+    npcShip.waypoint = null;
+    // Close to ideal weapon range, then orbit/coast
+    npcShip.thrustActive = nearestDist > WEAPON_RANGE * 0.7;
     npcShip.targetShipId = nearestEnemy.shipId;
     npcShip.targetSystem = 'hull';
   }
@@ -377,6 +430,9 @@ const initiateCombat = async (sectorId, ships, combatType = 'PVE', options = {})
       position: { x, y },
       velocity: { vx: 0, vy: 0 },
       heading: angle + Math.PI,
+      desiredHeading: angle + Math.PI,
+      waypoint: null,
+      thrustActive: false,
       powerAllocation: { weapons: 0.4, shields: 0.3, engines: 0.3 },
       targetSystem: 'hull',
       targetShipId: null,
@@ -597,14 +653,30 @@ const handleCommand = (combatId, shipId, command) => {
   switch (command.type) {
     case 'set_heading': {
       const heading = parseFloat(command.heading);
-      if (!isNaN(heading)) ship.heading = heading;
+      if (!isNaN(heading)) ship.desiredHeading = heading;
       break;
     }
     case 'set_thrust': {
+      // Latched thrust: 0 stops, >0 enables forward thrust at engine power
       const thrust = Math.max(0, Math.min(1, parseFloat(command.thrust) || 0));
-      const thrustForce = ship.stats.speed * ship.powerAllocation.engines * thrust;
-      ship.velocity.vx += Math.cos(ship.heading) * thrustForce * DT;
-      ship.velocity.vy += Math.sin(ship.heading) * thrustForce * DT;
+      ship.thrustActive = thrust > 0.05;
+      break;
+    }
+    case 'set_waypoint': {
+      const x = parseFloat(command.x);
+      const y = parseFloat(command.y);
+      if (isNaN(x) || isNaN(y)) break;
+      ship.waypoint = {
+        x: Math.max(-ARENA_HALF, Math.min(ARENA_HALF, x)),
+        y: Math.max(-ARENA_HALF, Math.min(ARENA_HALF, y))
+      };
+      ship.disengaging = false;
+      break;
+    }
+    case 'clear_waypoint':
+    case 'stop': {
+      ship.waypoint = null;
+      ship.thrustActive = false;
       break;
     }
     case 'set_power':
@@ -649,11 +721,17 @@ const handleCommand = (combatId, shipId, command) => {
         break;
       }
       ship.disengaging = true;
+      // Set a waypoint just past the escape radius in the outward direction so
+      // the new turn-rate / momentum integrator can carry the ship out.
       const angle = Math.atan2(ship.position.y, ship.position.x);
-      ship.heading = angle;
-      const escapeThrust = ship.stats.speed * ship.powerAllocation.engines;
-      ship.velocity.vx += Math.cos(angle) * escapeThrust * DT;
-      ship.velocity.vy += Math.sin(angle) * escapeThrust * DT;
+      const tx = Math.cos(angle) * (ESCAPE_RADIUS + 50);
+      const ty = Math.sin(angle) * (ESCAPE_RADIUS + 50);
+      ship.waypoint = {
+        x: Math.max(-ARENA_HALF, Math.min(ARENA_HALF, tx)),
+        y: Math.max(-ARENA_HALF, Math.min(ARENA_HALF, ty))
+      };
+      ship.desiredHeading = angle;
+      ship.thrustActive = true;
       break;
     }
     case 'engage_now': {
@@ -734,6 +812,9 @@ const serializeShipsForPersist = (ships) => {
       position: { ...ship.position },
       velocity: { ...ship.velocity },
       heading: ship.heading,
+      desiredHeading: ship.desiredHeading,
+      waypoint: ship.waypoint ? { ...ship.waypoint } : null,
+      thrustActive: !!ship.thrustActive,
       powerAllocation: { ...ship.powerAllocation },
       targetShipId: ship.targetShipId,
       targetSystem: ship.targetSystem,
@@ -788,6 +869,9 @@ const recoverActiveCombats = async () => {
         for (const s of row.state.ships) {
           shipMap.set(s.shipId, {
             ...s,
+            desiredHeading: typeof s.desiredHeading === 'number' ? s.desiredHeading : s.heading,
+            waypoint: s.waypoint || null,
+            thrustActive: !!s.thrustActive,
             // Disconnected players come back as autopilot until they reconnect
             aiControlled: !s.isNPC ? true : !!s.aiControlled,
             autopilotUntil: !s.isNPC ? Date.now() + RECONNECT_GRACE_MS : null
@@ -1169,6 +1253,9 @@ const serializeCombatState = (combatState) => {
       position: { ...ship.position },
       velocity: { ...ship.velocity },
       heading: ship.heading,
+      desiredHeading: ship.desiredHeading,
+      waypoint: ship.waypoint ? { ...ship.waypoint } : null,
+      thrustActive: !!ship.thrustActive,
       powerAllocation: { ...ship.powerAllocation },
       targetShipId: ship.targetShipId,
       targetSystem: ship.targetSystem,
@@ -1193,6 +1280,12 @@ const serializeCombatState = (combatState) => {
     tickCount: combatState.tickCount,
     pendingUntil: combatState.pendingUntil || null,
     pendingExpired: !!combatState.pendingExpired,
+    arena: {
+      size: ARENA_SIZE,
+      half: ARENA_HALF,
+      weaponRange: WEAPON_RANGE,
+      escapeRadius: ESCAPE_RADIUS
+    },
     ships: shipList
   };
 };

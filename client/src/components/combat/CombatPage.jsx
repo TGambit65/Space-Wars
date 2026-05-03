@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { combat, ships, npcs } from '../../services/api';
 import CombatHUD from './CombatHUD';
+import TacticalMap from './TacticalMap';
 import { Crosshair, AlertTriangle, Skull, Trophy, Zap, Activity, Clock, TrendingUp } from 'lucide-react';
 import { useNotifications } from '../../contexts/NotificationContext';
 import WikiLink from '../common/WikiLink';
@@ -465,10 +466,26 @@ const CombatPage = ({ user, socket }) => {
             )}
 
             {isLive ? (
-                <div className="flex-1 flex flex-col space-y-4 relative">
+                <div className="flex-1 flex flex-col space-y-4 relative pb-56">
+                    {/* Tactical Map: top-down PixiJS view of the arena */}
+                    <div className="holo-panel p-2 flex-1 min-h-[320px] relative">
+                        <div className="absolute top-3 left-4 z-10 flex items-center gap-2 pointer-events-none">
+                            <Zap className="w-4 h-4 text-neon-cyan" />
+                            <span className="text-xs uppercase tracking-widest text-neon-cyan font-bold">Tactical Display</span>
+                            <span className="text-[10px] text-gray-500 ml-2">Click enemy → target · Click empty → move · Right-click → stop</span>
+                        </div>
+                        <div className="w-full h-full">
+                            <TacticalMap
+                                snapshot={realtimeState}
+                                ownShipId={activeShipId}
+                                onCommand={handleCombatCommand}
+                            />
+                        </div>
+                    </div>
+
                     <div className="holo-panel p-4">
-                        <h2 className="text-lg font-bold text-neon-cyan mb-3 flex items-center gap-2">
-                            <Zap className="w-5 h-5" /> Real-Time Combat
+                        <h2 className="text-xs uppercase tracking-widest text-neon-cyan mb-2 flex items-center gap-2 font-bold">
+                            <Activity className="w-4 h-4" /> Combatants
                         </h2>
                         <div className="grid grid-cols-2 gap-4">
                             {realtimeState.ships?.map(s => (
