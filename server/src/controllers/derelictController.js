@@ -1,7 +1,7 @@
 /**
  * derelictController — boarding endpoints for post-combat NPC wrecks
  * registered in derelictManifestService. Mirrors shipInteriorController
- * but reads from the in-memory manifest registry instead of the Ship
+ * but reads from the derelict-manifest registry instead of the Ship
  * table since destroyed NPCs are never persisted as Ships.
  */
 
@@ -12,7 +12,7 @@ const lootAwardService = require('../services/lootAwardService');
 async function getInterior(req, res) {
   try {
     const { derelictId } = req.params;
-    const interior = derelictManifestService.buildInteriorForUser(derelictId, req.userId);
+    const interior = await derelictManifestService.buildInteriorForUser(derelictId, req.userId);
     if (!interior) {
       return res.status(404).json({ success: false, message: 'Derelict not found or expired' });
     }
@@ -30,7 +30,7 @@ async function lootCrate(req, res) {
       return res.status(400).json({ success: false, message: 'deckId, x, y required' });
     }
 
-    const manifest = derelictManifestService.getManifest(derelictId);
+    const manifest = await derelictManifestService.getManifest(derelictId);
     if (!manifest) {
       return res.status(404).json({ success: false, message: 'Derelict not found or expired' });
     }
@@ -42,7 +42,7 @@ async function lootCrate(req, res) {
 
     // Atomic claim BEFORE awarding so two concurrent requests for the same
     // crate cannot both pass the duplicate check and double-award.
-    if (!derelictManifestService.claim(derelictId, req.userId, deckId, x, y)) {
+    if (!(await derelictManifestService.claim(derelictId, req.userId, deckId, x, y))) {
       return res.status(400).json({ success: false, message: 'Crate already looted' });
     }
 
@@ -56,11 +56,11 @@ async function lootCrate(req, res) {
     try {
       result = await lootAwardService.awardRollToUser(req.userId, roll);
     } catch (e) {
-      derelictManifestService.releaseClaim(derelictId, req.userId, deckId, x, y);
+      await derelictManifestService.releaseClaim(derelictId, req.userId, deckId, x, y);
       throw e;
     }
     if (result.error) {
-      derelictManifestService.releaseClaim(derelictId, req.userId, deckId, x, y);
+      await derelictManifestService.releaseClaim(derelictId, req.userId, deckId, x, y);
       return res.status(result.error.statusCode).json({ success: false, message: result.error.message });
     }
 

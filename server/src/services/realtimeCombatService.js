@@ -1195,7 +1195,7 @@ const resolveCombat = async (combatId) => {
       });
       if (manifest) {
         derelictManifests.push(manifest);
-        try { derelictManifestService.register(manifest); }
+        try { await derelictManifestService.register(manifest); }
         catch (e) { console.error('[RealtimeCombat] derelict manifest register failed:', e.message); }
       }
     }

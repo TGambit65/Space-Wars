@@ -45,6 +45,7 @@ const FactionStanding = require('./FactionStanding');
 const FactionWar = require('./FactionWar');
 // Real-time Combat
 const CombatInstance = require('./CombatInstance');
+const DerelictManifest = require('./DerelictManifest');
 // Messaging
 const Message = require('./Message');
 // Visual Customization
@@ -490,6 +491,7 @@ module.exports = {
   FactionWar,
   // Real-time Combat
   CombatInstance,
+  DerelictManifest,
   // Messaging
   Message,
   // Cosmetics

@@ -1,67 +1,79 @@
 /**
- * derelictManifestService — in-memory registry of post-combat NPC wreck
+ * derelictManifestService — persistent registry of post-combat NPC wreck
  * manifests. realtimeCombatService.resolveCombat() builds a manifest for
  * every destroyed NPC ship and registers it here; the boarding view
  * (ShipInterior2DView via /api/derelicts/:id/...) consumes it.
  *
- * Manifests are keyed by their synthetic `derelict_<npcId>` id and expire
- * after MANIFEST_TTL_MS to keep the map bounded. Per-user looted-crate
- * sets live alongside the manifest so re-entering a wreck shows which
- * crates have already been claimed by *this* player.
+ * Manifests are stored in the `derelict_manifests` table keyed by their
+ * synthetic `derelict_<npcId>` id and expire after MANIFEST_TTL_MS so
+ * they survive backend restarts for the full TTL window. Per-user
+ * looted-crate sets are stored in the `looted` JSON column so re-entering
+ * a wreck shows which crates have already been claimed by *this* player.
  */
+
+const { DerelictManifest, sequelize } = require('../models');
+const { Op } = require('sequelize');
 
 const MANIFEST_TTL_MS = 30 * 60 * 1000; // 30 minutes
 const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 
-const registry = new Map(); // derelictId -> { manifest, expiresAt, looted: Map<userId, Set<lootKey>> }
+const isExpired = (row) => !row || new Date(row.expires_at).getTime() < Date.now();
 
-const register = (manifest) => {
+const register = async (manifest) => {
   if (!manifest || !manifest.derelict_id) return null;
-  registry.set(manifest.derelict_id, {
+  const expiresAt = new Date(Date.now() + MANIFEST_TTL_MS);
+  await DerelictManifest.upsert({
+    derelict_id: manifest.derelict_id,
     manifest,
-    expiresAt: Date.now() + MANIFEST_TTL_MS,
-    looted: new Map()
+    looted: {},
+    expires_at: expiresAt,
+    created_at: new Date()
   });
   return manifest.derelict_id;
 };
 
-const get = (derelictId) => {
-  const entry = registry.get(derelictId);
-  if (!entry) return null;
-  if (entry.expiresAt < Date.now()) {
-    registry.delete(derelictId);
+const getRow = async (derelictId) => {
+  const row = await DerelictManifest.findByPk(derelictId);
+  if (!row) return null;
+  if (isExpired(row)) {
+    try { await row.destroy(); } catch (_) { /* ignore */ }
     return null;
   }
-  return entry;
+  return row;
 };
 
-const getManifest = (derelictId) => {
-  const entry = get(derelictId);
-  return entry ? entry.manifest : null;
+const getManifest = async (derelictId) => {
+  const row = await getRow(derelictId);
+  return row ? row.manifest : null;
 };
 
-const getLootedSetForUser = (derelictId, userId) => {
-  const entry = get(derelictId);
-  if (!entry) return null;
-  let set = entry.looted.get(userId);
-  if (!set) {
-    set = new Set();
-    entry.looted.set(userId, set);
-  }
-  return set;
+const getLootedSetForUser = (row, userId) => {
+  const looted = row.looted || {};
+  return new Set(looted[userId] || []);
 };
 
-const isLooted = (derelictId, userId, deckId, x, y) => {
-  const set = getLootedSetForUser(derelictId, userId);
-  if (!set) return false;
-  return set.has(`${deckId}:${x}:${y}`);
+const isLooted = async (derelictId, userId, deckId, x, y) => {
+  const row = await getRow(derelictId);
+  if (!row) return false;
+  return getLootedSetForUser(row, userId).has(`${deckId}:${x}:${y}`);
 };
 
-const markLooted = (derelictId, userId, deckId, x, y) => {
-  const set = getLootedSetForUser(derelictId, userId);
-  if (!set) return false;
-  set.add(`${deckId}:${x}:${y}`);
-  return true;
+const markLooted = async (derelictId, userId, deckId, x, y) => {
+  return sequelize.transaction(async (t) => {
+    const row = await DerelictManifest.findByPk(derelictId, {
+      transaction: t,
+      lock: t.LOCK.UPDATE
+    });
+    if (!row || isExpired(row)) return false;
+    const looted = { ...(row.looted || {}) };
+    const set = new Set(looted[userId] || []);
+    set.add(`${deckId}:${x}:${y}`);
+    looted[userId] = Array.from(set);
+    row.looted = looted;
+    row.changed('looted', true);
+    await row.save({ transaction: t });
+    return true;
+  });
 };
 
 /**
@@ -70,21 +82,44 @@ const markLooted = (derelictId, userId, deckId, x, y) => {
  * only on `true`, and may call `releaseClaim` to roll back if the award
  * itself fails so the player can retry.
  */
-const claim = (derelictId, userId, deckId, x, y) => {
-  const set = getLootedSetForUser(derelictId, userId);
-  if (!set) return false;
-  const key = `${deckId}:${x}:${y}`;
-  if (set.has(key)) return false;
-  set.add(key);
-  return true;
+const claim = async (derelictId, userId, deckId, x, y) => {
+  return sequelize.transaction(async (t) => {
+    const row = await DerelictManifest.findByPk(derelictId, {
+      transaction: t,
+      lock: t.LOCK.UPDATE
+    });
+    if (!row || isExpired(row)) return false;
+    const looted = { ...(row.looted || {}) };
+    const set = new Set(looted[userId] || []);
+    const key = `${deckId}:${x}:${y}`;
+    if (set.has(key)) return false;
+    set.add(key);
+    looted[userId] = Array.from(set);
+    row.looted = looted;
+    row.changed('looted', true);
+    await row.save({ transaction: t });
+    return true;
+  });
 };
 
-const releaseClaim = (derelictId, userId, deckId, x, y) => {
-  const entry = registry.get(derelictId);
-  if (!entry) return;
-  const set = entry.looted.get(userId);
-  if (!set) return;
-  set.delete(`${deckId}:${x}:${y}`);
+const releaseClaim = async (derelictId, userId, deckId, x, y) => {
+  return sequelize.transaction(async (t) => {
+    const row = await DerelictManifest.findByPk(derelictId, {
+      transaction: t,
+      lock: t.LOCK.UPDATE
+    });
+    if (!row) return;
+    const looted = { ...(row.looted || {}) };
+    const arr = looted[userId];
+    if (!Array.isArray(arr)) return;
+    const key = `${deckId}:${x}:${y}`;
+    const next = arr.filter(k => k !== key);
+    if (next.length === arr.length) return;
+    looted[userId] = next;
+    row.looted = looted;
+    row.changed('looted', true);
+    await row.save({ transaction: t });
+  });
 };
 
 const findCrate = (manifest, deckId, x, y) => {
@@ -96,11 +131,11 @@ const findCrate = (manifest, deckId, x, y) => {
  * Returns a renderable interior payload (decks/tile_meta/hull_class) with
  * already-looted L tiles for the requesting user converted to floor.
  */
-const buildInteriorForUser = (derelictId, userId) => {
-  const entry = get(derelictId);
-  if (!entry) return null;
-  const m = entry.manifest;
-  const looted = getLootedSetForUser(derelictId, userId) || new Set();
+const buildInteriorForUser = async (derelictId, userId) => {
+  const row = await getRow(derelictId);
+  if (!row) return null;
+  const m = row.manifest;
+  const looted = getLootedSetForUser(row, userId);
 
   const decks = m.decks.map(d => {
     const tiles = d.tiles.map(rowStr => rowStr.split(''));
@@ -125,13 +160,16 @@ const buildInteriorForUser = (derelictId, userId) => {
   };
 };
 
-// Periodic cleanup to evict expired manifests.
-setInterval(() => {
-  const now = Date.now();
-  for (const [id, entry] of registry) {
-    if (entry.expiresAt < now) registry.delete(id);
+// Periodic cleanup to evict expired manifests from the table.
+const cleanupExpired = async () => {
+  try {
+    await DerelictManifest.destroy({ where: { expires_at: { [Op.lt]: new Date() } } });
+  } catch (err) {
+    console.error('[derelictManifestService] cleanup failed:', err.message);
   }
-}, CLEANUP_INTERVAL_MS).unref?.();
+};
+
+setInterval(cleanupExpired, CLEANUP_INTERVAL_MS).unref?.();
 
 module.exports = {
   register,
@@ -142,5 +180,6 @@ module.exports = {
   claim,
   releaseClaim,
   findCrate,
-  _size: () => registry.size
+  _cleanupExpired: cleanupExpired,
+  _size: async () => DerelictManifest.count()
 };
