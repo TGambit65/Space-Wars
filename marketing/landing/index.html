@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Space Wars 3000 — Multiplayer Space Trading &amp; Combat MMO</title>
+<meta name="description" content="Real-time multiplayer space trading and combat game. Explore 1,200 sectors, fight PvP duels and bounty contracts, and board the wrecks you leave behind. Free, browser-based, no install." />
+
+<!-- Open Graph / social -->
+<meta property="og:title" content="Space Wars 3000" />
+<meta property="og:description" content="Explore. Trade. Conquer. A browser-based multiplayer space MMO with walkable wrecks." />
+<meta property="og:image" content="../social/og_card_background.png" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="icon" href="../brand/logo_icon_mark.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --sw-navy:        #0A0E1F;
+    --sw-charcoal:    #141B33;
+    --sw-cyan:        #5BE3FF;
+    --sw-teal:        #1FBFD8;
+    --sw-orange:      #FFA94D;
+    --sw-bone:        #F2F5FA;
+    --sw-grey:        #7A8499;
+    --sw-cta:         linear-gradient(90deg, #1FBFD8 0%, #5BE3FF 100%);
+    --sw-font-display:'Orbitron', system-ui, sans-serif;
+    --sw-font-body:   'Inter', system-ui, sans-serif;
+    --sw-font-mono:   'JetBrains Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background: var(--sw-navy); color: var(--sw-bone); font-family: var(--sw-font-body); -webkit-font-smoothing: antialiased; }
+  a { color: var(--sw-cyan); text-decoration: none; }
+  a:hover { color: var(--sw-bone); }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+  /* Nav */
+  nav.top {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(10,14,31,0.78); backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(91,227,255,0.12);
+  }
+  nav.top .container { display:flex; align-items:center; justify-content:space-between; padding-top:14px; padding-bottom:14px; }
+  nav.top .brand { display:flex; align-items:center; gap:12px; font-family: var(--sw-font-display); font-weight: 900; letter-spacing: 0.08em; font-size: 18px; }
+  nav.top .brand img { width: 34px; height: 34px; border-radius: 50%; }
+  nav.top .links { display:flex; gap: 28px; font-size: 14px; }
+  nav.top .links a { color: var(--sw-grey); }
+  nav.top .links a:hover { color: var(--sw-cyan); }
+  .btn {
+    display: inline-flex; align-items:center; justify-content:center; gap: 8px;
+    padding: 12px 22px; border-radius: 8px; font-weight: 700; font-family: var(--sw-font-display);
+    letter-spacing: 0.06em; text-transform: uppercase; font-size: 13px;
+    border: 1px solid transparent; cursor: pointer; transition: transform 200ms cubic-bezier(.2,.8,.2,1), box-shadow 200ms;
+  }
+  .btn-primary { background: var(--sw-cta); color: var(--sw-navy); box-shadow: 0 0 0 0 rgba(91,227,255,0.4); }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 30px -8px rgba(91,227,255,0.6); color: var(--sw-navy); }
+  .btn-ghost { background: transparent; color: var(--sw-bone); border-color: rgba(91,227,255,0.4); }
+  .btn-ghost:hover { background: rgba(91,227,255,0.08); }
+
+  /* Hero */
+  .hero {
+    position: relative; padding: 120px 0 100px; overflow: hidden;
+  }
+  .hero::before {
+    content:""; position:absolute; inset:0;
+    background: url('../social/key_art_hero.png') center/cover no-repeat;
+    opacity: 0.55; z-index: 0;
+  }
+  .hero::after {
+    content:""; position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(10,14,31,0.4) 0%, rgba(10,14,31,0.85) 65%, var(--sw-navy) 100%);
+    z-index: 1;
+  }
+  .hero .container { position: relative; z-index: 2; }
+  .eyebrow { display:inline-block; font-family: var(--sw-font-mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--sw-cyan); padding: 6px 12px; border: 1px solid rgba(91,227,255,0.4); border-radius: 999px; }
+  h1.hero-title {
+    font-family: var(--sw-font-display); font-weight: 900;
+    font-size: clamp(40px, 7vw, 88px); line-height: 1.02;
+    margin: 22px 0 16px; letter-spacing: 0.02em;
+    text-shadow: 0 0 30px rgba(91,227,255,0.25);
+  }
+  .hero-tag { font-size: clamp(16px, 1.6vw, 20px); color: var(--sw-grey); max-width: 620px; line-height: 1.5; margin-bottom: 36px; }
+  .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
+
+  /* Stat strip */
+  .stats { background: var(--sw-charcoal); border-top:1px solid rgba(91,227,255,0.1); border-bottom:1px solid rgba(91,227,255,0.1); padding: 28px 0; }
+  .stats .container { display:grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align:center; }
+  .stat .num { font-family: var(--sw-font-display); font-weight: 900; font-size: clamp(28px, 3vw, 40px); color: var(--sw-cyan); }
+  .stat .lbl { font-family: var(--sw-font-mono); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sw-grey); margin-top:6px; }
+  @media (max-width: 700px) { .stats .container { grid-template-columns: repeat(2, 1fr); } }
+
+  /* Sections */
+  section.block { padding: 90px 0; }
+  h2.section-title { font-family: var(--sw-font-display); font-weight: 900; font-size: clamp(28px, 3.4vw, 44px); margin: 0 0 12px; letter-spacing: 0.02em; }
+  p.section-sub { color: var(--sw-grey); font-size: 17px; max-width: 680px; margin: 0 0 48px; line-height: 1.55; }
+
+  /* Features grid */
+  .features { display:grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  @media (max-width: 900px) { .features { grid-template-columns: 1fr; } }
+  .feature { background: var(--sw-charcoal); border: 1px solid rgba(91,227,255,0.1); border-radius: 14px; padding: 28px 24px; transition: border-color 240ms, transform 240ms; }
+  .feature:hover { border-color: rgba(91,227,255,0.4); transform: translateY(-3px); }
+  .feature .ic { width: 44px; height:44px; border-radius:10px; background: rgba(91,227,255,0.1); display:grid; place-items:center; color: var(--sw-cyan); font-family: var(--sw-font-mono); font-size: 18px; margin-bottom: 18px; }
+  .feature h3 { font-family: var(--sw-font-display); font-size: 18px; margin: 0 0 10px; letter-spacing: 0.04em; }
+  .feature p { color: var(--sw-grey); margin: 0; line-height: 1.55; font-size: 15px; }
+
+  /* Differentiator (walkable wrecks) */
+  .differ { display:grid; grid-template-columns: 1.1fr 1fr; gap: 56px; align-items:center; }
+  @media (max-width: 900px) { .differ { grid-template-columns: 1fr; } }
+  .differ .art { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid rgba(91,227,255,0.18); box-shadow: 0 30px 80px -30px rgba(91,227,255,0.25); }
+  .differ .art img { width:100%; display:block; }
+  .badge { position:absolute; top:16px; left:16px; background: rgba(255,169,77,0.18); color: var(--sw-orange); border: 1px solid rgba(255,169,77,0.5); padding: 6px 12px; border-radius: 999px; font-family: var(--sw-font-mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; }
+
+  /* Trailer */
+  .trailer-wrap { position:relative; border-radius: 16px; overflow: hidden; border: 1px solid rgba(91,227,255,0.2); box-shadow: 0 30px 80px -30px rgba(91,227,255,0.3); background: black; }
+  .trailer-wrap video { display:block; width:100%; height:auto; }
+
+  /* CTA banner */
+  .cta-banner { background: linear-gradient(120deg, #0A0E1F 0%, #142046 100%); border:1px solid rgba(91,227,255,0.25); border-radius: 18px; padding: 56px 48px; text-align:center; position: relative; overflow:hidden; }
+  .cta-banner::before { content:""; position:absolute; inset:-2px; background: radial-gradient(circle at 20% 0%, rgba(91,227,255,0.18), transparent 60%), radial-gradient(circle at 80% 100%, rgba(255,169,77,0.12), transparent 60%); pointer-events:none; }
+  .cta-banner h2 { position:relative; }
+  .cta-banner p { position:relative; color: var(--sw-grey); margin: 12px auto 28px; max-width: 540px; }
+  .cta-banner .btn { position:relative; }
+
+  /* Footer */
+  footer { padding: 40px 0 60px; border-top: 1px solid rgba(91,227,255,0.1); margin-top: 60px; }
+  footer .container { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:18px; color: var(--sw-grey); font-size: 13px; }
+  footer .brand { display:flex; align-items:center; gap: 10px; font-family: var(--sw-font-display); letter-spacing: 0.08em; font-weight: 700; font-size: 14px; color: var(--sw-bone); }
+  footer .brand img { width: 26px; height:26px; border-radius:50%; }
+
+  /* Press strip */
+  .presskit { display:flex; justify-content:space-between; gap: 20px; flex-wrap: wrap; }
+  .presskit a { font-family: var(--sw-font-mono); font-size: 13px; color: var(--sw-grey); }
+  .presskit a:hover { color: var(--sw-cyan); }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="container">
+    <div class="brand">
+      <img src="../brand/logo_icon_mark.png" alt="" />
+      <span>SPACE WARS 3000</span>
+    </div>
+    <div class="links">
+      <a href="#features">Features</a>
+      <a href="#wrecks">Wrecks</a>
+      <a href="#trailer">Trailer</a>
+      <a href="#presskit">Press</a>
+    </div>
+    <a class="btn btn-primary" href="/play">Play Now</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <span class="eyebrow">// Live in Browser · Free to Play</span>
+    <h1 class="hero-title">Explore.<br/>Trade.<br/>Conquer.</h1>
+    <p class="hero-tag">A real-time multiplayer space trading and combat game. 1,200 sectors. One galactic economy. Every wreck you leave behind is a story someone else can loot.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="/play">▶ Launch the Game</a>
+      <a class="btn btn-ghost" href="#trailer">Watch the Trailer</a>
+    </div>
+  </div>
+</header>
+
+<section class="stats">
+  <div class="container">
+    <div class="stat"><div class="num">1,200</div><div class="lbl">Sectors</div></div>
+    <div class="stat"><div class="num">800+</div><div class="lbl">Trade Ports</div></div>
+    <div class="stat"><div class="num">10 Hz</div><div class="lbl">Combat Tick</div></div>
+    <div class="stat"><div class="num">∞</div><div class="lbl">Wrecks to Loot</div></div>
+  </div>
+</section>
+
+<section class="block" id="features">
+  <div class="container">
+    <h2 class="section-title">A galaxy that plays however you want.</h2>
+    <p class="section-sub">One game, six career paths. Trade, fight, scavenge, build — or all four in the same evening.</p>
+    <div class="features">
+      <div class="feature"><div class="ic">◎</div><h3>Real-time Tactical Combat</h3><p>A unified 10 Hz engine drives PvE, PvP duels, arena matches, and bounty contracts under one ruleset. No twitch-only walls.</p></div>
+      <div class="feature"><div class="ic">⌬</div><h3>Walkable Derelict Wrecks</h3><p>Every NPC kill leaves a fully explorable ship interior. Board it on foot, walk the decks, and scavenge what's left before someone else arrives.</p></div>
+      <div class="feature"><div class="ic">≋</div><h3>Living Economy</h3><p>33 commodities flow through 800+ ports across 1,200 sectors. Supply and demand actually move prices. Buy low, sell high, get rich.</p></div>
+      <div class="feature"><div class="ic">⚒</div><h3>Ship Designer</h3><p>Mix hulls, weapons, shields, scanners, and utility components to build a vessel that matches your playstyle — from light interceptor to capital trader.</p></div>
+      <div class="feature"><div class="ic">⌖</div><h3>Bounty Board &amp; Arena</h3><p>Put a price on a rival's head, queue for ranked duels, or watch live battles unfold from the spectator deck.</p></div>
+      <div class="feature"><div class="ic">⟳</div><h3>Reconnect-Safe</h3><p>A dropped session won't end your fight. Your ship goes on autopilot until you're back at the helm.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="wrecks" style="background: var(--sw-charcoal);">
+  <div class="container">
+    <div class="differ">
+      <div class="art">
+        <span class="badge">// Walkable Wrecks</span>
+        <img src="../social/square_post_cockpit.png" alt="Cockpit interior of a Space Wars 3000 starship" />
+      </div>
+      <div>
+        <h2 class="section-title">Kill it. Board it. Loot it.</h2>
+        <p style="color: var(--sw-grey); font-size: 17px; line-height: 1.6;">Most space games end an encounter when the explosion fades. We don't. Every NPC ship you destroy in Space Wars 3000 leaves a real, walkable derelict in space.</p>
+        <p style="color: var(--sw-grey); font-size: 17px; line-height: 1.6;">Dock with the wreck, step into a 2D ship interior on foot, and recover credits, cargo, and components from its decks. The first captain to arrive wins the spoils — so the action never really stops.</p>
+        <ul style="color: var(--sw-bone); padding-left: 20px; line-height: 1.9; font-size: 15px;">
+          <li>Manifests are persisted, so a server restart won't wipe your loot.</li>
+          <li>Only combat participants and ships in the same sector can board — no remote scavenging.</li>
+          <li>Atomic loot claiming: no double-awards, no ghost crates.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="trailer">
+  <div class="container">
+    <h2 class="section-title">Eight seconds of warp.</h2>
+    <p class="section-sub">A first look at the universe. Sound on.</p>
+    <div class="trailer-wrap">
+      <video controls poster="../social/key_art_hero.png" preload="metadata">
+        <source src="../trailer/teaser.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="container">
+    <div class="cta-banner">
+      <h2 class="section-title" style="margin-bottom: 8px;">The galaxy is open.</h2>
+      <p>Free to play. Runs in your browser. No install. First 100 captains who log in today get a starter loadout.</p>
+      <a class="btn btn-primary" href="/play">▶ Play Space Wars 3000</a>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="presskit" style="padding-top: 0;">
+  <div class="container">
+    <h2 class="section-title">Press &amp; partners.</h2>
+    <p class="section-sub">Everything you need to write about Space Wars 3000 — fact sheet, logos, key art, screenshots, and the full launch copy pack.</p>
+    <div class="presskit">
+      <a href="../press_kit/press_kit.md">→ Press kit (Markdown)</a>
+      <a href="../brand/brand_guide.md">→ Brand guide</a>
+      <a href="../brand/logo_full_lockup.png">→ Logo (full lockup)</a>
+      <a href="../brand/logo_icon_mark.png">→ Logo (icon mark)</a>
+      <a href="../brand/logo_mono_white.png">→ Logo (mono white)</a>
+      <a href="../social/key_art_hero.png">→ Key art</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="brand">
+      <img src="../brand/logo_icon_mark.png" alt="" />
+      <span>SPACE WARS 3000</span>
+    </div>
+    <div>© 2026 · Built on Replit · <a href="../press_kit/press_kit.md">Press</a> · <a href="/play">Play</a></div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,121 @@
+uploads = []
+
+[[generated]]
+id = "0xHr4I0meejirjLnJOQN4"
+uri = "file://marketing/brand/logo_full_lockup.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "kA4-NKPQ7Vp2sb8oHjVYw"
+uri = "file://marketing/brand/logo_icon_mark.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "SRlLXDg_mxoe0GU23n-hG"
+uri = "file://marketing/brand/logo_mono_white.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "byyqyH3fCIFWqt96irCQP"
+uri = "file://marketing/social/key_art_hero.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "d3zVuLeMcxcvLtGKB5oxm"
+uri = "file://marketing/social/og_card_background.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "-K5Ee73MHJh_CNXwVoaBD"
+uri = "file://marketing/social/square_post_cockpit.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "kCFSiIlHvfBVc6cGgfrYD"
+uri = "file://marketing/social/discord_banner.png"
+type = "image"
+title = "generated_image"
+
+[[outputs]]
+id = "ENngL1MFRmhLfhmM2bMCy"
+uri = "file://marketing/README.md"
+type = "text"
+title = "Marketing Pack — Index & Usage Guide"
+
+[[outputs]]
+id = "29lR55U1PmrrZ7sNyMUDw"
+uri = "file://marketing/brand/brand_guide.md"
+type = "text"
+title = "Brand Guide — Palette, Type, Voice"
+
+[[outputs]]
+id = "4LHSGYK9uixowUpakvt7L"
+uri = "file://marketing/brand/logo_full_lockup.png"
+type = "image"
+title = "Logo — Full Lockup"
+
+[[outputs]]
+id = "XEIPPwJJtbPvmimeEif71"
+uri = "file://marketing/brand/logo_icon_mark.png"
+type = "image"
+title = "Logo — Icon Mark (square)"
+
+[[outputs]]
+id = "1AzJd8clHDtr2EHp8AooF"
+uri = "file://marketing/brand/logo_mono_white.png"
+type = "image"
+title = "Logo — Mono White"
+
+[[outputs]]
+id = "feYd3CJeK6lfHvNatCT_a"
+uri = "file://marketing/social/key_art_hero.png"
+type = "image"
+title = "Key Art — Hero (16:9)"
+
+[[outputs]]
+id = "OYO2ATQdXYc5Z5V1GtdnM"
+uri = "file://marketing/social/og_card_background.png"
+type = "image"
+title = "Open Graph / Twitter Card Background"
+
+[[outputs]]
+id = "2H26izaQP2zuum2ZEeVw8"
+uri = "file://marketing/social/discord_banner.png"
+type = "image"
+title = "Discord Server Banner"
+
+[[outputs]]
+id = "LMLxPd9Qkk4xGtPARliWt"
+uri = "file://marketing/social/square_post_cockpit.png"
+type = "image"
+title = "Square Social Post — Cockpit"
+
+[[outputs]]
+id = "yfvF8ggSTEuf6nFlgBu4M"
+uri = "file://marketing/screenshots/01_login.jpg"
+type = "image"
+title = "In-App Screenshot — Login"
+
+[[outputs]]
+id = "x8U3vamYRkscoLWqKdxVI"
+uri = "file://marketing/trailer/teaser.mp4"
+type = "video"
+title = "Cinematic Teaser Trailer (8s, 16:9)"
+
+[[outputs]]
+id = "bFc_n5yZ5RFS-JU1BC8Rq"
+uri = "file://marketing/press_kit/press_kit.md"
+type = "text"
+title = "Press Kit — Fact Sheet & Description"
+
+[[outputs]]
+id = "Kd1DIDgSGZcQFdmS0zbAy"
+uri = "file://marketing/copy/launch_announcements.md"
+type = "text"
+title = "Launch Copy Pack — Email · Discord · Twitter · PH · HN"
