@@ -7,6 +7,69 @@ import { useNotifications } from '../../contexts/NotificationContext';
 import WikiLink from '../common/WikiLink';
 
 /**
+ * Pre-encounter warning banner with a live 5-second reaction countdown
+ * and react-now controls. Mounted only while a `warning` event is active.
+ */
+const EncounterWarningBanner = ({ warning, onCancel, onEngageNow, onCountermeasure }) => {
+    const [now, setNow] = useState(Date.now());
+    useEffect(() => {
+        if (!warning?.pendingUntil) return undefined;
+        const id = setInterval(() => setNow(Date.now()), 100);
+        return () => clearInterval(id);
+    }, [warning?.pendingUntil]);
+    const remaining = warning?.pendingUntil
+        ? Math.max(0, warning.pendingUntil - now)
+        : null;
+    const seconds = remaining !== null ? (remaining / 1000).toFixed(1) : null;
+    const expired = remaining !== null && remaining <= 0;
+    return (
+        <div className="mb-4 p-3 rounded border border-accent-red/40 bg-accent-red/10 flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-accent-red animate-pulse" />
+            <div className="flex-1 text-sm">
+                <div className="font-bold text-accent-red flex items-center gap-3">
+                    <span>Hostile engagement imminent!</span>
+                    {seconds !== null && !expired && (
+                        <span className="font-mono text-accent-orange text-xs">
+                            React in {seconds}s
+                        </span>
+                    )}
+                </div>
+                <div className="text-gray-300 text-xs mt-1">
+                    {warning.hostiles.map((h, i) => (
+                        <span key={h.shipId}>
+                            {i > 0 && ', '}
+                            {h.name || h.npcType}{h.tier ? ` [${h.tier}]` : ''}
+                        </span>
+                    ))}
+                </div>
+            </div>
+            {!expired && (
+                <div className="flex gap-2">
+                    <button
+                        onClick={onCancel}
+                        className="px-3 py-1 rounded text-xs bg-accent-orange/20 border border-accent-orange/50 text-accent-orange hover:bg-accent-orange/30"
+                    >
+                        Flee
+                    </button>
+                    <button
+                        onClick={onCountermeasure}
+                        className="px-3 py-1 rounded text-xs bg-accent-cyan/20 border border-accent-cyan/50 text-accent-cyan hover:bg-accent-cyan/30"
+                    >
+                        Countermeasure
+                    </button>
+                    <button
+                        onClick={onEngageNow}
+                        className="px-3 py-1 rounded text-xs bg-accent-red/20 border border-accent-red/50 text-accent-red hover:bg-accent-red/30"
+                    >
+                        Engage now
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
+
+/**
  * CombatPage — single source of truth client for ship-to-ship combat.
  *
  * All combat state arrives over the unified `combat:event` channel
@@ -120,9 +183,38 @@ const CombatPage = ({ user, socket }) => {
 
             switch (evt.type) {
                 case 'warning':
-                    // Pre-engagement warning sent to the targeted user only
-                    setEncounterWarning({ hostiles: evt.hostiles || [], at: Date.now() });
-                    setTimeout(() => setEncounterWarning(null), 8000);
+                    // Pre-engagement warning sent to the targeted user only.
+                    // pendingUntil arrives as an absolute server timestamp so
+                    // the client can render a real reaction countdown.
+                    setEncounterWarning({
+                        hostiles: evt.hostiles || [],
+                        at: Date.now(),
+                        pendingUntil: evt.pendingUntil || null,
+                        graceMs: evt.graceMs || 5000
+                    });
+                    if (evt.pendingUntil) {
+                        const remaining = Math.max(0, evt.pendingUntil - Date.now());
+                        setTimeout(() => setEncounterWarning(null), remaining + 500);
+                    } else {
+                        setTimeout(() => setEncounterWarning(null), 8000);
+                    }
+                    break;
+                case 'engaged':
+                    // Server signalled the warning window has expired and
+                    // weapons are now hot.
+                    setEncounterWarning(null);
+                    break;
+                case 'cancelled':
+                    // Player fled during the warning window — clean up locally.
+                    setEncounterWarning(null);
+                    setCombatId(null);
+                    setRealtimeState(null);
+                    setIsBattling(false);
+                    setBattleResult('fled');
+                    notify.warning('Disengaged before the fight began');
+                    break;
+                case 'countermeasure':
+                    notify.info('Countermeasures deployed');
                     break;
                 case 'started':
                 case 'snapshot':
@@ -347,20 +439,12 @@ const CombatPage = ({ user, socket }) => {
             </header>
 
             {encounterWarning && (
-                <div className="mb-4 p-3 rounded border border-accent-red/40 bg-accent-red/10 flex items-center gap-3">
-                    <AlertTriangle className="w-5 h-5 text-accent-red" />
-                    <div className="flex-1 text-sm">
-                        <div className="font-bold text-accent-red">Hostile engagement!</div>
-                        <div className="text-gray-300 text-xs">
-                            {encounterWarning.hostiles.map((h, i) => (
-                                <span key={h.shipId}>
-                                    {i > 0 && ', '}
-                                    {h.name || h.npcType}{h.tier ? ` [${h.tier}]` : ''}
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-                </div>
+                <EncounterWarningBanner
+                    warning={encounterWarning}
+                    onCancel={() => handleCombatCommand({ type: 'disengage' })}
+                    onEngageNow={() => handleCombatCommand({ type: 'engage_now' })}
+                    onCountermeasure={() => handleCombatCommand({ type: 'countermeasure' })}
+                />
             )}
 
             {isLive ? (
@@ -522,6 +606,26 @@ const CombatPage = ({ user, socket }) => {
                                             </div>
                                         )}
                                     </div>
+                                    {Array.isArray(loot?.derelictManifests) && loot.derelictManifests.length > 0 && (
+                                        <div className="p-3 rounded-lg text-left space-y-2" style={{ background: 'rgba(255,209,102,0.06)', border: '1px solid rgba(255,209,102,0.2)' }}>
+                                            <div className="text-xs uppercase tracking-wide text-accent-orange font-bold">
+                                                Derelict Wrecks Boardable
+                                            </div>
+                                            {loot.derelictManifests.map((m) => (
+                                                <div key={m.derelict_id} className="text-xs text-gray-300 flex justify-between gap-2">
+                                                    <span>
+                                                        {m.ship_type} <span className="text-gray-500">({m.hull_class})</span>
+                                                    </span>
+                                                    <span className="font-mono text-accent-orange">
+                                                        {m.crates.length} crate{m.crates.length === 1 ? '' : 's'}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                            <div className="text-[10px] text-gray-500 italic">
+                                                Walk the wreck via the Ship Interior view to recover loot.
+                                            </div>
+                                        </div>
+                                    )}
                                     <div className="flex gap-2">
                                         <button onClick={() => navigate('/map')} className="btn btn-primary flex-1">Return to Sector</button>
                                         <button onClick={() => navigate('/repair')} className="btn btn-secondary flex-1 border-accent-orange text-accent-orange">Repair Ship</button>

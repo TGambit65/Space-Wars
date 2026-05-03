@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const config = require('../config');
 const { emitToSector, emitToUser } = require('./socketService');
 const worldPolicyService = require('./worldPolicyService');
+const shipInteriorService = require('./shipInteriorService');
 
 // ─── Tunables ─────────────────────────────────────────────────────
 const COMBAT_EVENT_VERSION = 1;
@@ -18,6 +19,7 @@ const SHIELD_RECHARGE_RATE = 0.5;
 const PERSIST_EVERY_TICKS = 50;       // checkpoint state every 5 s
 const RECONNECT_GRACE_MS = 60_000;    // autopilot for 60 s after disconnect
 const SNAPSHOT_EVERY_TICKS = 5;       // delta state snapshot rate (~ 2 Hz over wire)
+const PVE_WARNING_GRACE_MS = 5_000;   // 5 s pre-encounter warning window for PvE
 
 const NPC_AI_PROFILES = {
   PIRATE:        { weapons: 0.6, shields: 0.2, engines: 0.2, behavior: 'aggressive' },
@@ -164,10 +166,20 @@ const processTick = (combatState) => {
   const { ships } = combatState;
   const now = Date.now();
 
+  // ── Pre-encounter warning grace: no weapons fire, no destruction, no end ──
+  // The combat instance exists (so it is recoverable & visible to clients) but
+  // damage is suppressed until the player has had 5 s to react.
+  const pending = !!(combatState.pendingUntil && now < combatState.pendingUntil);
+  if (combatState.pendingUntil && !pending && !combatState.pendingExpired) {
+    combatState.pendingExpired = true;
+    combatState.pendingUntil = null;
+    emitCombatEvent(combatState, 'engaged', { sectorId: combatState.sectorId });
+  }
+
   for (const ship of ships.values()) {
     if (!ship.alive) continue;
 
-    // Movement
+    // Movement (allowed during pending so positions feel live)
     ship.position.x += ship.velocity.vx * DT;
     ship.position.y += ship.velocity.vy * DT;
     ship.velocity.vx *= VELOCITY_DAMPING;
@@ -175,8 +187,8 @@ const processTick = (combatState) => {
     ship.position.x = Math.max(-ARENA_HALF, Math.min(ARENA_HALF, ship.position.x));
     ship.position.y = Math.max(-ARENA_HALF, Math.min(ARENA_HALF, ship.position.y));
 
-    // Weapon fire
-    if (ship.targetShipId && ship.weaponCooldown <= 0) {
+    // Weapon fire — gated entirely while pending
+    if (!pending && ship.targetShipId && ship.weaponCooldown <= 0) {
       const target = ships.get(ship.targetShipId);
       if (target && target.alive) {
         const dx = target.position.x - ship.position.x;
@@ -208,13 +220,14 @@ const processTick = (combatState) => {
 
     if (ship.weaponCooldown > 0) ship.weaponCooldown = Math.max(0, ship.weaponCooldown - DT);
 
-    // Destruction
-    if (ship.stats.hull <= 0) {
+    // Destruction (cannot occur while pending since damage was gated)
+    if (!pending && ship.stats.hull <= 0) {
       ship.alive = false;
       emitCombatEvent(combatState, 'destroyed', { shipId: ship.shipId, isNPC: ship.isNPC });
     }
 
-    // Disengage check
+    // Disengage check — players are allowed to slip away during the warning
+    // window too, otherwise "flee before the fight starts" wouldn't work.
     if (ship.disengaging && ship.alive) {
       const distFromCenter = Math.sqrt(ship.position.x * ship.position.x + ship.position.y * ship.position.y);
       if (distFromCenter > ESCAPE_RADIUS) {
@@ -225,7 +238,7 @@ const processTick = (combatState) => {
     }
   }
 
-  // ── AI: drive NPCs and any disconnected/autopilot player ships ──
+  // ── AI: NPCs hold fire during pending but still position themselves ──
   for (const ship of ships.values()) {
     if (!ship.alive) continue;
     if (ship.isNPC) {
@@ -243,13 +256,19 @@ const processTick = (combatState) => {
   }
 
   // ── Combat end check ──
+  // While pending we still allow resolution if every player escaped (e.g. they
+  // hit "flee" during the warning and slipped past the escape radius). But we
+  // don't auto-resolve from "no remaining sides" because no real damage has
+  // landed yet — that case will only happen via explicit cancellation.
   const remainingSides = new Set();
+  let anyAlive = false;
   for (const ship of ships.values()) {
     if (!ship.alive) continue;
+    anyAlive = true;
     remainingSides.add(ship.ownerId || `npc_${ship.shipId}`);
   }
 
-  if (remainingSides.size <= 1) {
+  if (anyAlive && remainingSides.size <= 1) {
     resolveCombat(combatState.combatId).catch(err => {
       console.error(`[RealtimeCombat] Resolve failed for ${combatState.combatId}:`, err);
     });
@@ -342,6 +361,7 @@ const initiateCombat = async (sectorId, ships, combatType = 'PVE') => {
       npcType: s.npcType || null,
       tier: s.tier || null,
       name: s.name || null,
+      shipType: s.shipType || null,
       position: { x, y },
       velocity: { vx: 0, vy: 0 },
       heading: angle + Math.PI,
@@ -368,6 +388,11 @@ const initiateCombat = async (sectorId, ships, combatType = 'PVE') => {
     });
   });
 
+  // PvE encounters open with a 5 s warning window during which damage is
+  // suppressed; players can flee, engage immediately, or deploy countermeasures.
+  // PvP combats remain instant — both sides opted in.
+  const pendingUntil = combatType === 'PVE' ? Date.now() + PVE_WARNING_GRACE_MS : null;
+
   const combatState = {
     combatId,
     sectorId,
@@ -375,37 +400,45 @@ const initiateCombat = async (sectorId, ships, combatType = 'PVE') => {
     startedAt: new Date(),
     ships: shipMap,
     seq: 0,
-    tickCount: 0
+    tickCount: 0,
+    pendingUntil,
+    pendingExpired: !pendingUntil
   };
 
   activeCombats.set(combatId, combatState);
   startCombatTick();
 
-  // Send PvE encounter warning so the targeted player sees the engagement before it locks them in
-  for (const ship of shipMap.values()) {
-    if (!ship.isNPC && ship.ownerId) {
-      const tieredHostiles = Array.from(shipMap.values())
-        .filter(s => s.isNPC)
-        .map(s => ({ shipId: s.shipId, npcType: s.npcType, tier: s.tier, name: s.name }));
-      if (tieredHostiles.length > 0) {
-        emitToUser(ship.ownerId, 'combat:event', {
-          v: COMBAT_EVENT_VERSION,
-          seq: 0,
-          ts: Date.now(),
-          combatId,
-          type: 'warning',
-          hostiles: tieredHostiles
-        });
-      }
-    }
-  }
-
-  // Initial snapshot
+  // Initial snapshot — clients adopt this and bind to the combatId.
   emitCombatEvent(combatState, 'started', {
     sectorId,
     participants: participantIds,
+    pendingUntil,
     snapshot: serializeCombatState(combatState)
   });
+
+  // PvE warning so the targeted player sees the engagement and a real
+  // 5 s reaction window before any damage can land.
+  if (pendingUntil) {
+    const tieredHostiles = Array.from(shipMap.values())
+      .filter(s => s.isNPC)
+      .map(s => ({ shipId: s.shipId, npcType: s.npcType, tier: s.tier, name: s.name }));
+    if (tieredHostiles.length > 0) {
+      for (const ship of shipMap.values()) {
+        if (!ship.isNPC && ship.ownerId) {
+          emitToUser(ship.ownerId, 'combat:event', {
+            v: COMBAT_EVENT_VERSION,
+            seq: 0,
+            ts: Date.now(),
+            combatId,
+            type: 'warning',
+            hostiles: tieredHostiles,
+            pendingUntil,
+            graceMs: PVE_WARNING_GRACE_MS
+          });
+        }
+      }
+    }
+  }
 
   // Persist initial state immediately so a crash before the first periodic checkpoint
   // does not leave participant ships permanently stuck with in_combat=true.
@@ -492,6 +525,7 @@ const initiateNPCCombat = async (shipId, npcId, requesterUserId = null) => {
     {
       shipId: npc.npc_id, ownerId: null, isNPC: true,
       npcType: npc.npc_type, tier: npc.intelligence_tier || 'standard', name: npc.name,
+      shipType: npc.ship_type,
       stats: {
         maxHull: npc.max_hull_points, hull: npc.hull_points,
         maxShields: npc.max_shield_points, shields: npc.shield_points,
@@ -562,6 +596,15 @@ const handleCommand = (combatId, shipId, command) => {
       break;
     }
     case 'disengage': {
+      // If we're still in the warning window the player chose "flee" before
+      // the fight started — tear the combat down cleanly so they aren't
+      // locked in or punished.
+      if (combatState.pendingUntil && Date.now() < combatState.pendingUntil) {
+        cancelPendingCombat(combatState, ship.ownerId).catch(err => {
+          console.error(`[RealtimeCombat] Cancel-pending failed for ${combatState.combatId}:`, err);
+        });
+        break;
+      }
       ship.disengaging = true;
       const angle = Math.atan2(ship.position.y, ship.position.x);
       ship.heading = angle;
@@ -570,9 +613,67 @@ const handleCommand = (combatId, shipId, command) => {
       ship.velocity.vy += Math.sin(angle) * escapeThrust * DT;
       break;
     }
+    case 'engage_now': {
+      // Player chose to skip the warning window and start firing immediately.
+      if (combatState.pendingUntil && Date.now() < combatState.pendingUntil) {
+        combatState.pendingUntil = Date.now();
+      }
+      break;
+    }
+    case 'countermeasure': {
+      // Lightweight countermeasure: full shield top-up + brief weapons-cooldown
+      // reset on hostiles. Only valid during the warning window so players are
+      // rewarded for reacting quickly.
+      if (!combatState.pendingUntil || Date.now() >= combatState.pendingUntil) break;
+      ship.stats.shields = ship.stats.maxShields;
+      for (const other of combatState.ships.values()) {
+        if (other.isNPC && other.alive) other.weaponCooldown = Math.max(other.weaponCooldown, 1.5);
+      }
+      emitCombatEvent(combatState, 'countermeasure', { shipId: ship.shipId });
+      break;
+    }
     default:
       break;
   }
+};
+
+// ─── Pending-window cancellation ──────────────────────────────────
+// Called when a player chooses "flee" during the 5 s warning window. The
+// combat instance is marked cancelled, every participant ship has in_combat
+// cleared, and listeners get a `cancelled` event so the UI can dismiss.
+const cancelPendingCombat = async (combatState, ownerId = null) => {
+  if (!activeCombats.has(combatState.combatId)) return;
+  activeCombats.delete(combatState.combatId);
+  if (activeCombats.size === 0) stopCombatTick();
+
+  const playerShipIds = [];
+  for (const ship of combatState.ships.values()) {
+    if (!ship.isNPC) playerShipIds.push(ship.shipId);
+  }
+
+  try {
+    if (playerShipIds.length > 0) {
+      await Ship.update({ in_combat: false }, { where: { ship_id: { [Op.in]: playerShipIds } } });
+    }
+  } catch (err) {
+    console.error(`[RealtimeCombat] Failed to clear in_combat on cancel ${combatState.combatId}:`, err);
+  }
+
+  try {
+    await CombatInstance.update({
+      status: 'resolved',
+      result: { winnerType: 'cancelled', cancelledBy: ownerId || null, reason: 'fled_warning' },
+      ended_at: new Date(),
+      state: null
+    }, { where: { combat_id: combatState.combatId } });
+  } catch (err) {
+    console.error(`[RealtimeCombat] Failed to mark cancelled instance ${combatState.combatId}:`, err);
+  }
+
+  emitCombatEvent(combatState, 'cancelled', {
+    reason: 'fled_warning',
+    cancelledBy: ownerId || null
+  });
 };
 
 // ─── Persistence (write-through cache) ────────────────────────────
@@ -586,6 +687,7 @@ const serializeShipsForPersist = (ships) => {
       npcType: ship.npcType,
       tier: ship.tier,
       name: ship.name,
+      shipType: ship.shipType || null,
       position: { ...ship.position },
       velocity: { ...ship.velocity },
       heading: ship.heading,
@@ -606,7 +708,13 @@ const serializeShipsForPersist = (ships) => {
 
 const persistSnapshot = async (combatState) => {
   await CombatInstance.update({
-    state: { ships: serializeShipsForPersist(combatState.ships), sectorId: combatState.sectorId, combatType: combatState.combatType },
+    state: {
+      ships: serializeShipsForPersist(combatState.ships),
+      sectorId: combatState.sectorId,
+      combatType: combatState.combatType,
+      pendingUntil: combatState.pendingUntil || null,
+      pendingExpired: !!combatState.pendingExpired
+    },
     tick_seq: combatState.seq,
     last_tick_at: new Date()
   }, { where: { combat_id: combatState.combatId } });
@@ -642,6 +750,7 @@ const recoverActiveCombats = async () => {
             autopilotUntil: !s.isNPC ? Date.now() + RECONNECT_GRACE_MS : null
           });
         }
+        const persistedPendingUntil = row.state && row.state.pendingUntil ? Number(row.state.pendingUntil) : null;
         const combatState = {
           combatId: row.combat_id,
           sectorId: row.sector_id,
@@ -649,7 +758,11 @@ const recoverActiveCombats = async () => {
           startedAt: row.started_at,
           ships: shipMap,
           seq: row.tick_seq || 0,
-          tickCount: 0
+          tickCount: 0,
+          // If the warning window survived a restart and is still in the
+          // future we honor it; otherwise the encounter is fully engaged.
+          pendingUntil: persistedPendingUntil && persistedPendingUntil > Date.now() ? persistedPendingUntil : null,
+          pendingExpired: !(persistedPendingUntil && persistedPendingUntil > Date.now())
         };
         activeCombats.set(row.combat_id, combatState);
         recovered += 1;
@@ -890,9 +1003,29 @@ const resolveCombat = async (combatId) => {
 
     await t.commit();
 
+    // Derelict loot manifests for every destroyed NPC ship — replaces the
+    // old placeholder loot blob with a real authored manifest the existing
+    // 2D ship-interior boarding view can render directly.
+    const derelictManifests = [];
+    for (const ship of destroyed) {
+      if (!ship.isNPC) continue;
+      const manifest = buildDerelictManifest({
+        shipId: ship.shipId,
+        name: ship.name,
+        shipType: ship.shipType,
+        sectorId
+      });
+      if (manifest) derelictManifests.push(manifest);
+    }
+
     emitCombatEvent(combatState, 'resolved', {
       result,
-      loot: { credits: creditsLooted, xp: experienceGained, rewardMultiplier }
+      loot: {
+        credits: creditsLooted,
+        xp: experienceGained,
+        rewardMultiplier,
+        derelictManifests
+      }
     });
   } catch (err) {
     try { await t.rollback(); } catch (e) { console.error('[RealtimeCombat] Rollback failed:', e); }
@@ -953,8 +1086,53 @@ const serializeCombatState = (combatState) => {
     startedAt: combatState.startedAt,
     seq: combatState.seq,
     tickCount: combatState.tickCount,
+    pendingUntil: combatState.pendingUntil || null,
+    pendingExpired: !!combatState.pendingExpired,
     ships: shipList
   };
+};
+
+// ─── Derelict Loot Manifest ───────────────────────────────────────
+// Builds the structured manifest the 2D ship-interior boarding view consumes
+// for a destroyed NPC: a deterministic hull-class layout plus pre-rolled
+// crate contents (so the client can show "what's on this wreck" before the
+// player actually walks in and triggers the existing /loot endpoint).
+const buildDerelictManifest = (npcShip) => {
+  try {
+    const synthShip = {
+      ship_id: `derelict_${npcShip.shipId}`,
+      name: npcShip.name || 'Derelict',
+      ship_type: npcShip.shipType || 'Fighter'
+    };
+    const interior = shipInteriorService.buildInterior(synthShip, { mode: 'derelict' });
+    const crates = [];
+    for (const deck of interior.decks) {
+      for (let y = 0; y < deck.height; y++) {
+        for (let x = 0; x < deck.width; x++) {
+          if (deck.tiles[y][x] === 'L') {
+            const roll = shipInteriorService.rollCrateLoot(synthShip, deck.id, x, y);
+            crates.push({ deckId: deck.id, x, y, roll });
+          }
+        }
+      }
+    }
+    return {
+      derelict_id: synthShip.ship_id,
+      source_npc_id: npcShip.shipId,
+      ship_type: synthShip.ship_type,
+      hull_class: interior.hull_class,
+      sector_id: npcShip.sectorId || null,
+      decks: interior.decks.map((d) => ({
+        id: d.id, name: d.name, width: d.width, height: d.height,
+        tiles: d.tiles.map((row) => row.join(''))
+      })),
+      tile_meta: interior.tile_meta,
+      crates
+    };
+  } catch (err) {
+    console.error('[RealtimeCombat] buildDerelictManifest failed:', err.message);
+    return null;
+  }
 };
 
 module.exports = {
