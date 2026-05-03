@@ -120,6 +120,9 @@ async function getSurface(colonyId, userId) {
     blockTypes: config.customBlocks.blockTypes,
     blockCap: getBlockCap(colony),
     buildingFootprints: config.colonySurface.buildingFootprints,
+    adjacencyBonuses: config.colonySurface.adjacencyBonuses,
+    weather: config.colonySurface.weatherEffects[planet.type] || { type: "none", intensity: 0, color: "#ffffff" },
+    timeOfDay: ((Date.now() / 1000 / 240) % 1) * 24,
     planet_type: planet.type,
     planet_size: planet.size,
     colony: {

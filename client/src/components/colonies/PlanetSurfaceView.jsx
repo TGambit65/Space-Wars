@@ -83,6 +83,11 @@ export default function PlanetSurfaceView({ user, readOnly = false }) {
   const [hoveredInteractable, setHoveredInteractable] = useState(null);
   const [hour, setHour] = useState(12);
   const [error, setError] = useState(null);
+  const [tool, setTool] = useState({ kind: 'none' }); // {kind:'building'|'block'|'remove'|'none', payload}
+  const selectedToolRef = useRef(selectedTool);
+  const toolRef = useRef(tool);
+  useEffect(() => { selectedToolRef.current = selectedTool; }, [selectedTool]);
+  useEffect(() => { toolRef.current = tool; }, [tool]);
 
   const fetchSurface = useCallback(() => (
     readOnly ? coloniesApi.getPublicSurface(colonyId) : coloniesApi.getSurface(colonyId)
@@ -372,12 +377,17 @@ export default function PlanetSurfaceView({ user, readOnly = false }) {
       s._avatarPlaced = true;
     }
 
-    // Weather
-    const profile = WEATHER_BY_PLANET[surface.planet_type] || { type: 'none', intensity: 0, color: '#ffffff' };
+    // Weather — prefer server payload, fallback to client constant
+    const profile = surface.weather || WEATHER_BY_PLANET[surface.planet_type] || { type: 'none', intensity: 0, color: '#ffffff' };
     s.weather.setWeather(profile.type, profile.intensity, profile.color);
+
+    // Server-driven day/night: align overlay clock to server time so all clients agree
+    if (typeof surface.timeOfDay === 'number') {
+      s.dayNight.t0 = performance.now() - (surface.timeOfDay / 24) * s.dayNight.cycleMs;
+    }
   }, [surface]);
 
-  // Tile click → place building/block or claim anomaly via E
+  // Tile click → place building/block, remove block, or move building
   useEffect(() => {
     const s = stateRef.current;
     if (!s.app || readOnly) return;
@@ -389,24 +399,101 @@ export default function PlanetSurfaceView({ user, readOnly = false }) {
       const wp = s.camera.screenToWorld(mx, my);
       const gx = Math.floor(wp.x / TILE_SIZE);
       const gy = Math.floor(wp.y / TILE_SIZE);
-      if (!selectedTool) return;
+      const sel = selectedToolRef.current;
+      const t = toolRef.current;
       try {
-        if (selectedTool.building_id) {
-          await coloniesApi.moveBuilding(colonyId, selectedTool.building_id, gx, gy);
-          toast.success('Building placed');
-        } else if (selectedTool.key) {
-          await coloniesApi.placeBuilding(colonyId, selectedTool.key, gx, gy);
-          toast.success(`${selectedTool.name} placed`);
+        if (t.kind === 'remove') {
+          // Remove a custom block at this tile if present
+          const blk = (surface?.customBlocks || []).find((b) => b.grid_x === gx && b.grid_y === gy);
+          if (blk) {
+            await coloniesApi.removeBlock(colonyId, blk.block_id);
+            toast.success('Block removed');
+            await reload();
+          } else {
+            toast.info('Nothing here to remove');
+          }
+          return;
         }
-        await reload();
-        setSelectedTool(null);
+        if (t.kind === 'block' && t.payload) {
+          await coloniesApi.placeBlock(colonyId, { block_type: t.payload, grid_x: gx, grid_y: gy });
+          toast.success(`${t.payload} placed`);
+          await reload();
+          return;
+        }
+        if (sel?.building_id) {
+          await coloniesApi.moveBuilding(colonyId, sel.building_id, gx, gy);
+          toast.success('Building placed');
+          await reload();
+          setSelectedTool(null);
+          return;
+        }
+        if (sel?.key) {
+          await coloniesApi.placeBuilding(colonyId, sel.key, gx, gy);
+          toast.success(`${sel.name} placed`);
+          await reload();
+          setSelectedTool(null);
+          return;
+        }
       } catch (err) {
         toast.error(err.response?.data?.message || 'Placement failed');
       }
     };
     s.app.canvas.addEventListener('click', onClick);
     return () => { s.app.canvas.removeEventListener('click', onClick); };
-  }, [selectedTool, colonyId, reload, readOnly, toast]);
+  }, [colonyId, reload, readOnly, toast, surface]);
+
+  // Footprint / block ghost preview that follows the hovered tile
+  useEffect(() => {
+    const s = stateRef.current;
+    if (!s.ghostLayer) return;
+    s.ghostLayer.removeChildren();
+    if (!hoveredTile || readOnly || !surface) return;
+    let fp = null;
+    let valid = true;
+    if (selectedTool?.key) {
+      fp = surface.buildingFootprints?.[selectedTool.key] || { w: selectedTool.footprintW || 1, h: selectedTool.footprintH || 1 };
+    } else if (selectedTool?.building_id) {
+      fp = selectedTool.footprint || { w: 1, h: 1 };
+    } else if (tool.kind === 'block') {
+      fp = { w: 1, h: 1 };
+    } else if (tool.kind === 'remove') {
+      fp = { w: 1, h: 1 };
+    }
+    if (!fp) return;
+    if (s.passability) {
+      for (let dy = 0; dy < fp.h; dy++) {
+        for (let dx = 0; dx < fp.w; dx++) {
+          if (!isPassable(s.passability, s.gridW, s.gridH, hoveredTile.x + dx, hoveredTile.y + dy)) {
+            valid = false;
+          }
+        }
+      }
+    }
+    if (tool.kind === 'remove') {
+      const has = (surface.customBlocks || []).some((b) => b.grid_x === hoveredTile.x && b.grid_y === hoveredTile.y);
+      valid = has;
+    }
+    const g = new Graphics();
+    g.rect(hoveredTile.x * TILE_SIZE, hoveredTile.y * TILE_SIZE, fp.w * TILE_SIZE, fp.h * TILE_SIZE);
+    g.fill({ color: valid ? 0x44ff88 : 0xff4444, alpha: 0.28 });
+    g.stroke({ width: 2, color: valid ? 0x44ff88 : 0xff4444, alpha: 0.85 });
+    s.ghostLayer.addChild(g);
+  }, [hoveredTile, selectedTool, tool, surface, readOnly]);
+
+  // Compute adjacency bonus hint for whatever's at the hovered tile
+  const adjacencyHint = (() => {
+    if (!hoveredTile || !surface?.adjacencyBonuses) return null;
+    const b = (surface.buildings || []).find((bb) => {
+      const fp = bb.footprint || surface.buildingFootprints?.[bb.building_type] || { w: 1, h: 1 };
+      return hoveredTile.x >= bb.grid_x && hoveredTile.x < bb.grid_x + fp.w
+          && hoveredTile.y >= bb.grid_y && hoveredTile.y < bb.grid_y + fp.h;
+    });
+    if (!b) return null;
+    const rules = surface.adjacencyBonuses[b.building_type];
+    if (!rules) return null;
+    const parts = Object.entries(rules).map(([k, v]) => `${k}: ×${v}`).join(' • ');
+    return `${b.config?.name || b.building_type} bonuses → ${parts}`;
+  })();
 
   // E key — claim anomaly
   useEffect(() => {
@@ -501,15 +588,43 @@ export default function PlanetSurfaceView({ user, readOnly = false }) {
         )}
 
         {!readOnly && surface && !surface.needs_initialization && buildingsCatalog && (
-          <SurfaceToolbar
-            buildings={buildingsCatalog}
-            unplaced={surface.unplaced || []}
-            selectedTool={selectedTool}
-            onSelectTool={setSelectedTool}
-            onSelectUnplaced={setSelectedTool}
-            onRepairAll={repairAll}
-            damagedCount={damagedCount}
-          />
+          <>
+            <SurfaceToolbar
+              buildings={buildingsCatalog}
+              unplaced={surface.unplaced || []}
+              selectedTool={selectedTool}
+              onSelectTool={(t) => { setSelectedTool(t); setTool({ kind: 'none' }); }}
+              onSelectUnplaced={(t) => { setSelectedTool(t); setTool({ kind: 'none' }); }}
+              onRepairAll={repairAll}
+              damagedCount={damagedCount}
+            />
+            {/* Block palette — bottom-left */}
+            <div className="absolute left-2 bottom-2 bg-space-900/95 border border-space-700 rounded-lg p-2 z-10 max-w-[14rem]">
+              <h3 className="text-xs font-bold text-gray-300 mb-1">Blocks ({(surface.customBlocks || []).length}/{surface.blockCap || '∞'})</h3>
+              <div className="grid grid-cols-3 gap-1">
+                {Object.entries(surface.blockTypes || {}).map(([key, meta]) => (
+                  <button
+                    key={key}
+                    onClick={() => { setTool({ kind: 'block', payload: key }); setSelectedTool(null); }}
+                    title={`${key} — ${meta.cost}cr • ${meta.hp}hp`}
+                    className={`px-1 py-1 text-[10px] rounded border ${
+                      tool.kind === 'block' && tool.payload === key
+                        ? 'bg-accent-cyan/20 border-accent-cyan text-accent-cyan'
+                        : 'bg-space-800 border-space-600 text-gray-400 hover:text-white'
+                    }`}
+                  >{key}</button>
+                ))}
+              </div>
+              <button
+                onClick={() => { setTool(tool.kind === 'remove' ? { kind: 'none' } : { kind: 'remove' }); setSelectedTool(null); }}
+                className={`mt-1 w-full px-2 py-1 text-[10px] rounded border ${
+                  tool.kind === 'remove'
+                    ? 'bg-red-900/40 border-red-500 text-red-200'
+                    : 'bg-space-800 border-space-600 text-gray-400 hover:text-white'
+                }`}
+              >Remove tool</button>
+            </div>
+          </>
         )}
 
         {hoveredInteractable && (
@@ -531,11 +646,14 @@ export default function PlanetSurfaceView({ user, readOnly = false }) {
         </div>
 
         {hoveredTile && (
-          <div className="absolute top-12 right-2 bg-space-900/85 border border-space-700 rounded px-2 py-1 text-[10px] text-gray-300">
-            ({hoveredTile.x}, {hoveredTile.y})
-            {surface?.terrain?.[hoveredTile.y]?.[hoveredTile.x] && (
-              <span className="ml-1 text-gray-400">{TERRAIN_META[surface.terrain[hoveredTile.y][hoveredTile.x]]?.label}</span>
-            )}
+          <div className="absolute top-12 right-2 bg-space-900/85 border border-space-700 rounded px-2 py-1 text-[10px] text-gray-300 max-w-xs text-right">
+            <div>
+              ({hoveredTile.x}, {hoveredTile.y})
+              {surface?.terrain?.[hoveredTile.y]?.[hoveredTile.x] && (
+                <span className="ml-1 text-gray-400">{TERRAIN_META[surface.terrain[hoveredTile.y][hoveredTile.x]]?.label}</span>
+              )}
+            </div>
+            {adjacencyHint && <div className="text-accent-cyan mt-0.5">{adjacencyHint}</div>}
           </div>
         )}
       </div>
